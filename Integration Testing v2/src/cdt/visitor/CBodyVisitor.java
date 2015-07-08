@@ -26,6 +26,7 @@ import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.visitor.BodyFunctionVisitor;
+import core.visitor.BodyFunctionVisitor.ForwardStatement;
 
 /**
  * Bộ duyệt các câu lệnh trong thân hàm của ngôn ngữ C
@@ -39,51 +40,21 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 	private boolean mSubCondition;
 	
 	@Override
-	public Statement[] parseBody(Object body, boolean subConditon) {
+	public Statement[] parseBody(Object body, boolean subCondition) {
 		BEGIN = FlagStatement.newBeginFlag();
 		END = FlagStatement.newEndFlag();
-		mSubCondition = subConditon;
+		mSubCondition = subCondition;
 		
 		visitBlock((IASTCompoundStatement) body, BEGIN, END, null, null);
+		
 		stmList.clear();
-
-		linkStatement(BEGIN);
+		linkStatement(BEGIN, stmList);
 		return stmList.toArray(new Statement[stmList.size()]);
 	}
 	
 	/**
-	 * Bỏ qua các nút chuyển tiếp và nối các câu lệnh lại với nhau
-	 * @param root câu lệnh đang duyệt để nối 2 nhánh
-	 */
-	private void linkStatement(Statement root){
-		if (root == null || root.isVisited())
-			return;
-		root.setVisit(true);
-		stmList.add(root);
-		
-		Statement stmTrue = root.getTrue();
-		while (stmTrue instanceof ForwardStatement//)
-				|| stmTrue instanceof ScopeStatement)
-			stmTrue = stmTrue.getTrue();
-		root.setTrue(stmTrue);
-		
-		Statement stmFalse = root.getFalse();
-		while (stmFalse instanceof ForwardStatement//)
-				|| stmFalse instanceof ScopeStatement)
-			stmFalse = stmFalse.getTrue();
-		root.setFalse(stmFalse);
-
-		linkStatement(stmTrue);
-		linkStatement(stmFalse);
-	}
-	
-	/**
 	 * Duyệt qua một khối câu lệnh {} và tạo liên kết
-	 * @param block nút AST tại khối câu lệnh
-	 * @param begin câu lệnh cần được thiết đặt 2 nhánh tới câu lệnh đầu tiên trong khối
-	 * @param end câu lệnh mà các câu lệnh cuối cùng trong khối sẽ được kết thúc
-	 * @param _break câu lệnh break sẽ đi tiếp tới câu lệnh này
-	 * @param _continue câu lệnh continue sẽ đi tiếp tới câu lệnh này
+	 * @see #visitStatement(IASTStatement, Statement, Statement, Statement, Statement)
 	 */
 	private void visitBlock(IASTCompoundStatement block, Statement begin, Statement end, 
 			Statement _break, Statement _continue){
@@ -111,12 +82,41 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 	}
 	
 	/**
-	 * Duyệt qua một câu lệnh thông thường và tạo liên kết
-	 * @param block nút AST chứa (các) câu lệnh cần liên kết
-	 * @param begin câu lệnh cần được thiết đặt 2 nhánh tới câu lệnh đầu tiên trong khối
-	 * @param end câu lệnh mà các câu lệnh cuối cùng trong khối sẽ được kết thúc
-	 * @param _break câu lệnh break sẽ đi tiếp tới câu lệnh này
-	 * @param _continue câu lệnh continue sẽ đi tiếp tới câu lệnh này
+	 * Đi qua một câu lệnh tổng quát.<br/>
+	 * @param stm nút câu lệnh trong cây AST
+	 * @param begin sau khi đã duyệt xong, câu lệnh này cần được chỉ 2 nhánh tới
+	 * câu lệnh đầu tiên ở bên trong khối
+	 * @param end các câu lệnh cuối cùng trong khối phải được kết thức tại đây
+	 * @param _break câu lệnh BREAK trong khối này (nếu có) cần được kết thúc tại đây
+	 * @param _continue câu lệnh CONTINUE trong khối này (nếu có) 
+	 * cần được kết thúc tại đây
+	 * @example
+	 * <pre>
+	 * {
+	 * 		int i = 0;
+	 *  	if (i < 10)
+	 *   		break;
+	 *  
+	 *  	if (i < 11)
+	 *   		continue;
+	 *  
+	 *  	if (i == 12)
+	 *  		i = 1;
+	 *  	else
+	 *  		i = 2;
+	 * }
+	 * </pre>
+	 * Sau khi duyệt qua câu lệnh khối này ({}), các điều kiện sau phải được thỏa mản:
+	 * <ul>
+	 * 	<li>Câu lệnh [begin] phải trỏ tới câu lệnh [int i = 0;] (*)</li>
+	 * 	<li>Các câu lệnh [i = 1] và [i = 2] phải trỏ tới câu lệnh [end]
+	 * 	<li>Câu lệnh [i < 10] phải trở tới câu lệnh [break]
+	 * 	<li>Câu lệnh [i < 11] phải trỏ tới câu lệnh [continue]
+	 * </ul>
+	 * <b>Chú ý</b>: "trở tới" ở trên có nghĩa là cả 2 nhánh true/false đều được đặt
+	 * liên kết tới. Hơn nữa, trỏ tới có thể là gián tiếp, nghĩa là nó trở tới và
+	 * đi qua vài câu lệnh chuyển tiếp ({@link ForwardStatement} - nếu sử dụng), sau đó
+	 * mới tới nơi đich 
 	 */
 	private void visitStatement(IASTStatement stm, Statement begin, Statement end, 
 			Statement _break, Statement _continue){
@@ -131,17 +131,11 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 			
 			visitCondition(astCond, begin, afterTrue, afterFalse);
 			
-			//Duyệt nhánh đúng nếu nhánh này không rỗng
-			if (notNull(astThen)){
-				visitStatement(astThen, afterTrue, end, _break, _continue);
-			} else
-				afterTrue.setBranch(end);
+			//Duyệt nhánh đúng
+			visitStatement(astThen, afterTrue, end, _break, _continue);
 			
-			//Duyệt nhánh sai nếu nhánh này không rỗng
-			if (notNull(astElse)){
-				visitStatement(astElse, afterFalse, end, _break, _continue);
-			} else
-				afterFalse.setBranch(end);
+			//Duyệt nhánh sai
+			visitStatement(astElse, afterFalse, end, _break, _continue);
 		}
 		
 		else if (!notNull(stm)){
@@ -189,48 +183,6 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 				stmIter.setBranch(bfCond);
 			} else
 				_continue.setBranch(bfCond);
-			
-			/*Statement trace = scopeIn, afterIter = null;
-			_break = scopeOut;
-			_continue = new ForwardStatement();
-			
-			if (notNull(astInit)){
-				Statement fw = new ForwardStatement();
-				visitStatement(astInit, trace, fw, _break, _continue);
-				_continue.setBranch(afterIter = trace = fw);
-			}
-			
-			if (notNull(astCond)){
-				Statement fw = new ForwardStatement();
-				Statement beforeCond = new ForwardStatement();
-				
-				_continue.setBranch(afterIter = beforeCond);
-				trace.setBranch(beforeCond);
-				visitCondition(astCond, beforeCond, fw, _break);
-				trace = fw;
-			}
-			
-			if (notNull(astBody)){
-				//Không có khởi tạo cũng không có điều kiện, tạo nút ảo
-				//giữa scopeIn và body
-				if (afterIter == null){
-					Statement fw = new ForwardStatement();
-					
-					trace.setBranch(fw);
-					_continue.setBranch(afterIter = trace = fw);
-				}
-				visitStatement(astBody, trace, _continue, _break, _continue);
-			}
-			
-			if (afterIter == null)
-				throw new RuntimeException("This FOR statement is infinity: "
-						+ stmFor.getRawSignature());
-			
-			if (notNull(astIter)){
-				Statement stmIter = new CStatement(astIter);
-				stmIter.setBranch(afterIter);
-				_continue.setBranch(stmIter);
-			} */
 		}
 		
 		else if (stm instanceof IASTWhileStatement){
@@ -380,7 +332,7 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 	 * Duyệt qua một biểu thức điều kiện và tách các điều kiện con ra
 	 * @param cond nút điều kiện
 	 * @param begin begin câu lệnh cần được thiết đặt 2 nhánh tới câu lệnh đầu tiên
-	 * trong khối
+	 * trong điều kiện
 	 * @param endTrue câu lệnh mà nhánh đúng sẽ chỉ tới
 	 * @param endFalse câu lệnh mà nhánh sai sẽ chỉ tới
 	 */
@@ -479,13 +431,4 @@ class CStatement extends Statement{
 		setRoot(EpUtils.parseNode(node));
 	}
 	
-}
-
-/**
- * Câu lệnh trung gian, dùng để chuyển tiếp các câu lệnh khác
- */
-class ForwardStatement extends Statement{
-	public ForwardStatement() {
-		super(null);
-	}
 }

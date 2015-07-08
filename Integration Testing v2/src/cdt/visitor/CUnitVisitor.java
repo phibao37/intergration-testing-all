@@ -58,7 +58,7 @@ public class CUnitVisitor implements UnitVisitor {
 	private ArrayList<Variable> mVariables = new ArrayList<>();
 	
 	@Override
-	public UnitVisitor parseSource(String source, File file, Object... args) {
+	public UnitVisitor parseSource(String source, final File file, Object... args) {
 		mFunctions.clear();
 		mVariables.clear();
 		

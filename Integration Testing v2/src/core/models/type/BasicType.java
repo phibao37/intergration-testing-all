@@ -25,7 +25,7 @@ public class BasicType extends Type {
 	
 	@Override
 	public Expression getDefaultValue() {
-		return new IDExpression(mDefault.toString());
+		return new IDExpression(String.valueOf(mDefault));
 	}
 	
 	/**
@@ -67,6 +67,11 @@ public class BasicType extends Type {
 	 * Kiểu dữ liệu nhị phân Java
 	 */
 	public static final BasicType BOOLEAN = new BasicType("boolean", false);
+	
+	/**
+	 * Kiểu dữ liệu void (dùng cho trả về của hàm)
+	 */
+	public static final BasicType VOID = new BasicType("void", null);
 
 }
 

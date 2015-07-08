@@ -21,11 +21,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 
+import jdt.JMainProcess;
+
 public class GUIBeta {
 
 	private JFrame frame;
 	private StatementCanvas canvas;
-	private JFileChooser fileChooser;
+	private JFileChooser fileChooser_C;
+	private JFileChooser fileChooser_J;
 
 	/**
 	 * Launch the application.
@@ -50,14 +53,33 @@ public class GUIBeta {
 		initialize();
 	}
 	
-	/** Mở hộp thoại để chọn tập tin */
+	/** Mở hộp thoại để chọn tập tin C */
 	private void openCFiles() {
-		int status = fileChooser.showDialog(frame, "Open C File(s)");
+		int status = fileChooser_C.showDialog(frame, "Open C File(s)");
 
 		if (status == JFileChooser.APPROVE_OPTION) {
 			try {
 				CMainProcess main = new CMainProcess();
-				main.setWorkingFiles(fileChooser.getSelectedFiles(), false);
+				main.setWorkingFiles(fileChooser_C.getSelectedFiles(), false);
+				main.run();
+				ArrayList<Function> fnList = main.getFunctions();
+				
+				if (fnList.size() > 0)
+					canvas.setFunction(fnList.get(0));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/** Mở hộp thoại để chọn tập tin Java */
+	private void openJFiles() {
+		int status = fileChooser_J.showDialog(frame, "Open Java File(s)");
+
+		if (status == JFileChooser.APPROVE_OPTION) {
+			try {
+				JMainProcess main = new JMainProcess();
+				main.setWorkingFiles(fileChooser_J.getSelectedFiles(), false);
 				main.run();
 				ArrayList<Function> fnList = main.getFunctions();
 				
@@ -77,7 +99,7 @@ public class GUIBeta {
 		frame.setBounds(100, 100, 640, 451);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		JButton btnOpen = new JButton("Open");
+		JButton btnOpen = new JButton("Open C");
 		btnOpen.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				openCFiles();
@@ -85,6 +107,13 @@ public class GUIBeta {
 		});
 		
 		JScrollPane scrollPane = new JScrollPane();
+		
+		JButton btnOpenJava = new JButton("Open Java");
+		btnOpenJava.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openJFiles();
+			}
+		});
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -92,14 +121,19 @@ public class GUIBeta {
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 604, Short.MAX_VALUE)
-						.addComponent(btnOpen))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(btnOpen)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(btnOpenJava)))
 					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(btnOpen)
+					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
+						.addComponent(btnOpen)
+						.addComponent(btnOpenJava))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 361, Short.MAX_VALUE)
 					.addContainerGap())
@@ -111,13 +145,20 @@ public class GUIBeta {
 		scrollPane.setViewportView(canvas);
 		frame.getContentPane().setLayout(groupLayout);
 		
-		fileChooser = new JFileChooser();
+		fileChooser_C = new JFileChooser();
 		FileNameExtensionFilter cFilter = new FileNameExtensionFilter(
 				"C File (*.c; *.cpp)", new String[] { "C", "CPP" });
-		fileChooser.setMultiSelectionEnabled(true);
-		// fileChooser.setFileHidingEnabled(false);
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		fileChooser.setFileFilter(cFilter);
+		fileChooser_C.setMultiSelectionEnabled(true);
+		fileChooser_C.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooser_C.setFileFilter(cFilter);
+		
+		fileChooser_J = new JFileChooser();
+		FileNameExtensionFilter jFilter = new FileNameExtensionFilter(
+				"Java File (*.java)", new String[] { "JAVA" });
+		fileChooser_J.setMultiSelectionEnabled(true);
+		fileChooser_J.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooser_J.setFileFilter(jFilter);
+		
 		Setting.loadSetting();
 	}
 }

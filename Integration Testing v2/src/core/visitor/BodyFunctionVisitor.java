@@ -1,5 +1,7 @@
 package core.visitor;
 
+import java.util.List;
+
 import core.models.Statement;
 import core.models.statement.ScopeStatement;
 
@@ -24,4 +26,50 @@ public interface BodyFunctionVisitor {
 	 * Thông thường, nó sẽ phải là "câu lệnh" mở khối thân hàm { - {@link ScopeStatement}
 	 */
 	public Statement[] parseBody(Object body, boolean subCondition);
+	
+	
+	 /**
+	  * Câu lệnh trung gian, không mang dữ liệu.<br/>
+	  * Nếu dùng phương pháp nút trung gian để liên kết các câu lệnh với nhau, có thể
+	  * sử dụng loại câu lệnh này
+	  * @see BodyFunctionVisitor#linkStatement(Statement, List)
+	 */
+	public static class ForwardStatement extends Statement{
+		
+		/**
+		 * Tạo một câu lệnh trung gian mới
+		 */
+		public ForwardStatement() {
+			super(null);
+		}
+	}
+	
+	/**
+	 * Bỏ qua các nút chuyển tiếp và nối các câu lệnh lại với nhau
+	 * @param root câu lệnh đang cần duyệt để nối 2 nhánh của nó tới 2 câu lệnh
+	 * không trung gian
+	 * @param stmList danh sách rỗng dùng để lấy tập các câu lệnh sau khi toàn bộ việc
+	 * ghép nối đã hoàn tất
+	 */
+	public default void linkStatement(Statement root, List<Statement> stmList){
+		if (root == null || root.isVisited())
+			return;
+		root.setVisit(true);
+		stmList.add(root);
+		
+		Statement stmTrue = root.getTrue();
+		while (stmTrue instanceof ForwardStatement//)
+				|| stmTrue instanceof ScopeStatement)
+			stmTrue = stmTrue.getTrue();
+		root.setTrue(stmTrue);
+		
+		Statement stmFalse = root.getFalse();
+		while (stmFalse instanceof ForwardStatement//)
+				|| stmFalse instanceof ScopeStatement)
+			stmFalse = stmFalse.getTrue();
+		root.setFalse(stmFalse);
+
+		linkStatement(stmTrue, stmList);
+		linkStatement(stmFalse, stmList);
+	}
 }
