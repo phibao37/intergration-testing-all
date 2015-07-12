@@ -1,6 +1,7 @@
 package core.solver;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import core.models.Expression;
@@ -230,6 +231,12 @@ public class Z3Solver implements Solver {
 			else if (op.equals(BinaryExpression.LOGIC_OR))
 				return String.format("(or %s %s)", op1, op2);
 			
+			//Chuyển % sang mod
+			else if (op.equals(BinaryExpression.MOD))
+				return String.format("(rem %s %s)", op1, op2);
+			
+			//TODO chuyển / sang div nếu kiểu của 2 vế đều là int!!!!!!!!!!!! 
+			
 			//Các dấu bình thường như +, -, >, <, ... để nguyên
 			else 
 				return String.format("(%s %s %s)",op, op1, op2);
@@ -268,14 +275,25 @@ public class Z3Solver implements Solver {
 		return ex.getContent();
 	}
 	
+	private static HashMap<String, String> smtMap = new HashMap<>();
+	
+	static{
+		smtMap.put("int", "Int");
+		smtMap.put("long", "Int");
+		smtMap.put("float", "Real");
+		smtMap.put("double", "Real");
+	}
+	
 	/**
 	 * Chuyển từ kiểu trong ngôn ngữ sang kiểu của Z3
 	 */
 	public static String toSmt2(Type t){
 		String content = t.getContent();
 		
-		//Đổi chữ cái đàu tiên sang chữ hoa, TODO xem danh sách kiểu của z3
-		return Character.toUpperCase(content.charAt(0)) + content.substring(1);
+		if (smtMap.containsKey(content))
+			return smtMap.get(content);
+		
+		return content;
 	}
 	
 	@Override
