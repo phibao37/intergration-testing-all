@@ -29,26 +29,37 @@ public abstract class ExpressionGroup extends Expression {
 	protected abstract String generateContent();
 	
 	/**
+	 * Thông báo rằng nội dung hiển thị đã bị thay đổi do có sự chỉnh sửa các phần tử
+	 */
+	protected final void notifyContentChanged(){
+		mContent = null;
+	}
+	
+	/**
 	 * Thay thế một biểu thức con bằng một biểu thức khác tại cùng vị trí
-	 * @param find biểu thức cần thay thế, dạng {@link String} hoặc {@link Expression}
+	 * @param find biểu thức cần thay thế. Một biểu thức được gọi là khớp để thay thế
+	 * nếu 2 biểu thức này đều là một (phép so sánh ==) hoặc có cùng chung một nguồn 
+	 * (xem {@link #equalsSource(Expression)})
 	 * @param replace biểu thức sẽ được thay thế tại vị trí tương ứng
 	 * @return 
 	 * <i>true</i>: thay thế thành công<br/>
 	 * <i>false</i>: biểu thức cần thay thế không được tìm thấy
+	 * @throws NullPointerException biểu thức tìm kiểm bằng null
 	 */
-	public boolean replace(Object find, Expression replace) {
+	public boolean replace(Expression find, Expression replace) {
 		boolean replaced = false;
 		
 		for (int i = 0; i < g.length; i++){
 			Expression item = g[i];
 			
-			if (item instanceof ExpressionGroup){
-				replaced = ((ExpressionGroup) item).replace(find, replace);
-			}
-			else if (item.equals(find)){
+			if (find.equalsSource(item)){
 				g[i] = replace;
 				replaced = true;
 			}
+			else if (item instanceof ExpressionGroup){
+				replaced = ((ExpressionGroup) item).replace(find, replace);
+			}
+			
 			if (replaced)
 				break;
 		}
@@ -66,8 +77,11 @@ public abstract class ExpressionGroup extends Expression {
 	public ExpressionGroup clone(){
 		ExpressionGroup clone = (ExpressionGroup) super.clone();
 		
-		for (int i = 0; i < g.length; i++)
+		clone.g = new Expression[g.length];
+		for (int i = 0; i < g.length; i++){
+			if (g[i] != null)
 			clone.g[i] = g[i].clone();
+		}
 		return clone;
 	}
 }

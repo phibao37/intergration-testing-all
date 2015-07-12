@@ -100,7 +100,6 @@ public class JUnitVisitor implements UnitVisitor {
 
 	@Override
 	public ArrayList<Variable> getGlobalVariableList() {
-		// TODO Lam sau
 		return new ArrayList<Variable>();
 	}
 	

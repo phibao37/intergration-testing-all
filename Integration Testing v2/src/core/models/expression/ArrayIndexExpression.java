@@ -2,6 +2,7 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một biểu thức truy cập phần tử mảng, bao gồm tên của biến mảng, 
@@ -17,6 +18,7 @@ import core.models.ExpressionGroup;
 public class ArrayIndexExpression extends ExpressionGroup implements NamedAttribute {
 	
 	private String mName;
+	private boolean mDeclare;
 	
 	/**
 	 * Tạo một biểu thức truy cập mảng từ tên mảng và danh sách chỉ số
@@ -54,5 +56,25 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	 */
 	public Expression[] getIndexes(){
 		return g;
+	}
+	
+	/**
+	 * Thiết đặt đây là một biểu thức khai báo mảng: int a[1][] = ...
+	 */
+	public ArrayIndexExpression setDeclare(){
+		mDeclare = true;
+		return this;
+	}
+	
+	/**
+	 * Kiểm tra đây là biểu thức trong khai báo
+	 */
+	public boolean isDeclare(){
+		return mDeclare;
+	}
+
+	@Override
+	protected int handle(ExpressionVisitor visitor) {
+		return visitor.visit(this);
 	}
 }

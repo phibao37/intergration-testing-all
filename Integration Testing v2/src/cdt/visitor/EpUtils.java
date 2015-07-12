@@ -1,23 +1,40 @@
 package cdt.visitor;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTArrayDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTArrayModifier;
+import org.eclipse.cdt.core.dom.ast.IASTArraySubscriptExpression;
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
+import org.eclipse.cdt.core.dom.ast.IASTInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTInitializerClause;
 import org.eclipse.cdt.core.dom.ast.IASTInitializerList;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
+import cdt.models.CType;
 import core.models.Expression;
+import core.models.Type;
 import core.models.expression.ArrayExpression;
+import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
+import core.models.expression.DeclareExpression;
+import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
 import core.models.expression.NameExpression;
 import core.models.expression.ReturnExpression;
@@ -31,21 +48,8 @@ import core.models.expression.UnaryExpression;
 public class EpUtils {
 	
 	public static void main(String[] args){
-		int a = 5;
-		switch (a){
-		case 0:
-			System.out.println("Case 0");
-		case 4:
-		default:
-		case 5:
-			System.out.println("Case default");
-		case 2:
-			System.out.println("Case 2");
-			break;
-		case 3:
-			System.out.println("Case 3");
+		System.out.println(EpUtils.getExpression("test(maaa)"));
 		
-		}
 	}
 	
 	/**
@@ -90,6 +94,72 @@ public class EpUtils {
 				return new UnaryExpression(opStr, child);
 		}
 		
+		if (node instanceof IASTArraySubscriptExpression){
+			ArrayList<IASTInitializerClause> listIndexes = new ArrayList<>();
+			
+			while (node instanceof IASTArraySubscriptExpression){
+				IASTArraySubscriptExpression sub = (IASTArraySubscriptExpression) node;
+				listIndexes.add(sub.getArgument());
+				node = sub.getArrayExpression();
+			}
+			
+			Collections.reverse(listIndexes);
+			Expression[] indexes = new Expression[listIndexes.size()];
+			
+			for (int i = 0; i < indexes.length; i++)
+				indexes[i] = parseNode(listIndexes.get(i));
+			
+			return new ArrayIndexExpression(node.getRawSignature(), indexes);
+		}
+		
+		if (node instanceof IASTFunctionCallExpression){
+			IASTFunctionCallExpression call = (IASTFunctionCallExpression) node;
+			IASTInitializerClause[] args = call.getArguments();
+			Expression[] argEps = new Expression[args.length];
+			
+			for (int i = 0; i < args.length; i++)
+				argEps[i] = parseNode(args[i]);
+			return new FunctionCallExpression(
+					call.getFunctionNameExpression().getRawSignature(), argEps);
+		}
+		
+		if (node instanceof IASTDeclarationStatement){
+			IASTSimpleDeclaration declare = (IASTSimpleDeclaration) 
+					((IASTDeclarationStatement) node).getDeclaration();
+			Type type = CType.parse(declare.getDeclSpecifier().getRawSignature());
+			IASTDeclarator[] drs = declare.getDeclarators();
+			Expression[] decEps = new Expression[drs.length];
+			
+			for (int i = 0; i < drs.length; i++){
+				IASTDeclarator dr = drs[i];
+				String name = dr.getName().getRawSignature();
+				IASTInitializer init = dr.getInitializer();
+				
+				if (dr instanceof IASTArrayDeclarator){
+					IASTArrayModifier[] mdfs = ((IASTArrayDeclarator) dr)
+							.getArrayModifiers();
+					Expression[] indexes = new Expression[mdfs.length];
+					
+					for (int j = 0; j < mdfs.length; j++)
+						indexes[j] = parseNode(mdfs[j].getConstantExpression());
+					decEps[i] = new ArrayIndexExpression(name, indexes).setDeclare();
+				} else {
+					decEps[i] = new NameExpression(name);
+				}
+				
+				if (init instanceof IASTEqualsInitializer){
+					Expression right = parseNode(((IASTEqualsInitializer) init)
+							.getInitializerClause());
+					decEps[i] = new BinaryExpression(
+							decEps[i], 
+							BinaryExpression.ASSIGN, 
+							right);
+				} 
+			}
+			return new DeclareExpression(type, decEps);
+		}
+	
+		
 		//Đang thăm 1 danh sách khởi tạo {1, 2, a, b+c}
 		if (node instanceof IASTInitializerList){
 			IASTInitializerClause[] clauses = ((IASTInitializerList) node).getClauses();
@@ -121,6 +191,7 @@ public class EpUtils {
 			return parseNode(((IASTExpressionStatement) node).getExpression());
 		}
 		
+		if (node != null)
 		System.out.printf("Un-support: %s - %s\n",node.getRawSignature(), 
 				node.getClass().getSimpleName());
 		return null;
@@ -129,11 +200,13 @@ public class EpUtils {
 	static class SimpleVisitor extends ASTVisitor{
 		{
 			shouldVisitExpressions = true;
+			
 		}
 		
 		IASTExpression mExpression;
 		
 		public IASTExpression getExpression(String source){
+			mExpression = null;
 			if (!source.endsWith(";"))
 				source += ";";
 			source = String.format("void main(){%s}", source);

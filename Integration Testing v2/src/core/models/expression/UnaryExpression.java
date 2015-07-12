@@ -1,7 +1,9 @@
 package core.models.expression;
 
+import core.Utils;
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.visitor.ExpressionVisitor;
 /**
  * Biểu thức một bên, bao gồm một phép toán và một biểu thức con ở bên trái hoặc
  * bên phải phép toán
@@ -16,6 +18,23 @@ import core.models.ExpressionGroup;
  *
  */
 public class UnaryExpression extends ExpressionGroup {
+	
+	/** Phép toán lấy dấu dương (3 + (+3))*/
+	public static final String PLUS = "+";
+	
+	/** Phép toán lấy dấu âm (3 + (-3))*/
+	public static final String MINUS = "-";
+	
+	/** Phép toán phủ định*/
+	public static final String LOGIC_NOT = "!";
+	
+	/** Phép toán tăng thêm 1*/
+	public static final String INCREASE = "++";
+	
+	/** Phép toán giảm đi 1*/
+	public static final String DECREASE = "--";
+	
+	private static final String[] ASSIGNS = {INCREASE, DECREASE};
 	
 	private boolean mLeft;
 	private String mOperator;
@@ -60,6 +79,13 @@ public class UnaryExpression extends ExpressionGroup {
 	}
 	
 	/**
+	 * Kiểm tra đây là một biểu thức gán
+	 */
+	public boolean isAssignOperator(){
+		return Utils.find(ASSIGNS, getOperator());
+	}
+	
+	/**
 	 * Trả về phép toán của biểu thức
 	 */
 	public String getOperator(){
@@ -71,6 +97,11 @@ public class UnaryExpression extends ExpressionGroup {
 	 */
 	public Expression getSubElement(){
 		return g[0];
+	}
+
+	@Override
+	protected int handle(ExpressionVisitor visitor) {
+		return visitor.visit(this);
 	}
 }
 

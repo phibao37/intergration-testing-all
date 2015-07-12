@@ -58,14 +58,14 @@ public interface BodyFunctionVisitor {
 		stmList.add(root);
 		
 		Statement stmTrue = root.getTrue();
-		while (stmTrue instanceof ForwardStatement//)
-				|| stmTrue instanceof ScopeStatement)
+		while (stmTrue instanceof ForwardStatement)
+				//|| stmTrue instanceof ScopeStatement)
 			stmTrue = stmTrue.getTrue();
 		root.setTrue(stmTrue);
 		
 		Statement stmFalse = root.getFalse();
-		while (stmFalse instanceof ForwardStatement//)
-				|| stmFalse instanceof ScopeStatement)
+		while (stmFalse instanceof ForwardStatement)
+				//|| stmFalse instanceof ScopeStatement)
 			stmFalse = stmFalse.getTrue();
 		root.setFalse(stmFalse);
 

@@ -36,7 +36,6 @@ import org.eclipse.cdt.core.parser.IParserLogService;
 import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
-
 import cdt.models.CFunction;
 import cdt.models.CType;
 import core.Utils;
@@ -53,7 +52,6 @@ import core.visitor.UnitVisitor;
  *
  */
 public class CUnitVisitor implements UnitVisitor {
-	
 	private ArrayList<Function> mFunctions = new ArrayList<>();
 	private ArrayList<Variable> mVariables = new ArrayList<>();
 	
@@ -173,9 +171,12 @@ public class CUnitVisitor implements UnitVisitor {
 		//Đây là một khai báo biến mảng
 		if (declare instanceof IASTArrayDeclarator) {
 			
+			IASTArrayModifier[] mdfs = ((IASTArrayDeclarator) declare)
+					.getArrayModifiers();
+			
 			//Duyệt qua các thành phần khai báo cỡ mảng ([0], [1])
-			for (IASTArrayModifier arrMdf : ((IASTArrayDeclarator) declare)
-					.getArrayModifiers()) {
+			for (int i = mdfs.length - 1; i >= 0; i--) {
+				IASTArrayModifier arrMdf = mdfs[i];
 				int capacity = 0;
 				IASTExpression constant = arrMdf.getConstantExpression();
 				

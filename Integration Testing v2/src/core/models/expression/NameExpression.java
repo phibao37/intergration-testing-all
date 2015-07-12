@@ -1,6 +1,7 @@
 package core.models.expression;
 
 import core.models.Expression;
+import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một biểu thức chỉ gồm một tên tham chiếu. Tên này được dùng cho khai báo
@@ -24,6 +25,11 @@ public class NameExpression extends Expression implements NamedAttribute {
 	@Override
 	public String getName() {
 		return getContent();
+	}
+
+	@Override
+	protected int handle(ExpressionVisitor visitor) {
+		return visitor.visit(this);
 	}
 	
 	

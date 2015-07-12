@@ -1,5 +1,7 @@
 package core.models;
 
+import core.visitor.ExpressionVisitor;
+
 /**
  * Mô tả một biến số. Mỗi biến số tương đương với các biến trong chương trình, tồn tại
  * trong một khoảng phạm vi nhất định.<br/>
@@ -11,6 +13,7 @@ public class Variable extends ExpressionGroup {
 	
 	private String mName;
 	private Type mType;
+	private int mScope;
 	
 	/**
 	 * Tạo một biến số mới qua tên và kiểu, chưa đặt giá trị.<br/>
@@ -66,10 +69,31 @@ public class Variable extends ExpressionGroup {
 	}
 	
 	/**
+	 * Thiết đặt scope (vùng khối mà nó có hiệu lực) cho biến
+	 */
+	public void setScope(int scope){
+		mScope = scope;
+	}
+	
+	/**
+	 * Trả về scope của biến
+	 */
+	public int getScope(){
+		return mScope;
+	}
+	
+	/**
+	 * Kiểm tra biến đã được gán giá trị
+	 */
+	public boolean isValueSet(){
+		return getValue() != null;
+	}
+	
+	/**
 	 * Thiết đặt giá trị cho biến nếu như nó chưa có giá trị
 	 */
 	public void initValueIfNotSet(){
-		if (getValue() == null)
+		if (!isValueSet())
 			setValue(getType().getDefaultValue());
 	}
 
@@ -77,4 +101,19 @@ public class Variable extends ExpressionGroup {
 	protected String generateContent() {
 		return String.format("%s(%s, %s)", getName(), getType(), getValue());
 	}
+
+	/**
+	 * Tạo ra một biến mới có cùng giá trị (đã được sao chép) từ biến này
+	 */
+	@Override
+	public Variable clone() {
+		return (Variable) super.clone();
+	}
+
+	@Override
+	protected int handle(ExpressionVisitor visitor) {
+		throw new RuntimeException("Khong duyet qua bien");
+	}
+	
+	
 }

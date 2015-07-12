@@ -22,7 +22,7 @@ public class ArrayType extends Type {
 	/**
 	 * Tạo một kiểu mảng với kiểu phần tử con và số lượng phần tử
 	 * @param content kiểu của các phần tử con
-	 * @param capacity kích thước của kiểu mảng
+	 * @param capacity kích thước của kiểu mảng, bằng 0 nếu là kích thước chưa xác định
 	 */
 	public ArrayType(Type subType, int capacity) {
 		super(String.format("%s[%s]", subType, capacity == 0 ? "" : capacity));
@@ -50,11 +50,9 @@ public class ArrayType extends Type {
 		Expression[] elements = new Expression[size];
 		
 		for (int i = 0; i < size; i++)
-			elements[i] = mSubType.getDefaultValue();
+			elements[i] = null;
 		
 		return new ArrayExpression(elements);
 	}
-
-
 
 }

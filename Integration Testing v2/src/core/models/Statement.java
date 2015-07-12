@@ -1,7 +1,13 @@
 package core.models;
 
+import core.error.StatementNoRootException;
 import core.graph.Graphable;
+import core.models.expression.BinaryExpression;
+import core.models.expression.DeclareExpression;
+import core.models.expression.FunctionCallExpression;
 import core.models.expression.ReturnExpression;
+import core.models.expression.UnaryExpression;
+import core.models.statement.ScopeStatement;
 
 /**
  * Một câu lệnh đại diện cho một đỉnh trong dòng đường đi của chương trình,
@@ -112,6 +118,19 @@ public class Statement extends Element implements Graphable {
 	}
 	
 	/**
+	 * Trả về chính nó nếu là câu lệnh bình thường.<br/>
+	 * Nếu nó là câu lệnh đánh dấu scope (mở khối {, đóng khối }), trả về câu lệnh
+	 * bình thường gấn nhất trong đường đi tiếp theo của nó
+	 * @param current câu lệnh cần xem để bỏ qua các dấu scope
+	 */
+	public static Statement skipScope(Statement current){
+		if (current instanceof ScopeStatement)
+			return skipScope(current.getTrue());
+		else
+			return current;
+	}
+	
+	/**
 	 * Kiểm tra câu lệnh điều kiện
 	 */
 	public boolean isCondition(){
@@ -131,15 +150,36 @@ public class Statement extends Element implements Graphable {
 	public void setRoot(Expression root){
 		mRoot = root;
 		
-		if (root instanceof ReturnExpression)
+		if (root instanceof DeclareExpression)
+			mType = DECLARATION;
+		
+		else if (root instanceof ReturnExpression)
 			mType = RETURN;
+		
+		else if (root instanceof BinaryExpression){
+			BinaryExpression bin = (BinaryExpression) root;
+			if (bin.isAssignOperator())
+				mType = ASSIGNMENT;
+		}
+		
+		else if (root instanceof UnaryExpression){
+			UnaryExpression unary = (UnaryExpression) root;
+			if (unary.isAssignOperator())
+				mType = ASSIGNMENT_ONE;
+		}
+		
+		else if (root instanceof FunctionCallExpression)
+			mType = FUNCTION_CALL;
 	}
 	
 	/**
 	 * Trả về biểu thức gốc của câu lệnh này
+	 * @throws StatementNoRootException câu lệnh chưa có biểu thức gốc
 	 * @see #setRoot(Expression)
 	 */
-	public Expression getRoot(){
+	public Expression getRoot() throws StatementNoRootException{
+		if (mRoot == null)
+			throw new StatementNoRootException(this);
 		return mRoot;
 	}
 	
@@ -189,19 +229,24 @@ public class Statement extends Element implements Graphable {
 	public static final int ASSIGNMENT = 2;
 	
 	/**
+	 * Câu lệnh gán biến qua phép tăng 1/ giảm 1
+	 */
+	public static final int ASSIGNMENT_ONE = 3;
+	
+	/**
 	 * Câu lệnh điều kiện
 	 */
-	public static final int CONDITION = 3;
+	public static final int CONDITION = 4;
 	
 	/**
 	 * Câu lệnh gọi hàm
 	 */
-	public static final int FUNCTION_CALL = 4;	
+	public static final int FUNCTION_CALL = 5;	
 	
 	/**
 	 * Câu lệnh return, kêt thúc hàm
 	 */
-	public static final int RETURN = 5;
+	public static final int RETURN = 6;
 	
 }
 

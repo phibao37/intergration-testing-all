@@ -3,6 +3,7 @@ package core.models.expression;
 import core.models.Expression;
 import core.models.ExpressionGroup;
 import core.models.Type;
+import core.visitor.ExpressionVisitor;
 
 /**
  * Một dạng "biểu thức" đặc biệt, mô tả câu lệnh khai báo biến trong chương trình.<br/>
@@ -55,6 +56,11 @@ public class DeclareExpression extends ExpressionGroup {
 		for (int i = 1; i < g.length; i++)
 			content += ", " + g[i];
 		return content;
+	}
+
+	@Override
+	protected int handle(ExpressionVisitor visitor) {
+		return visitor.visit(this);
 	}
 
 }

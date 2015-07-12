@@ -1,5 +1,7 @@
 package core.models;
 
+import core.visitor.ExpressionVisitor;
+
 /**
  * Mô tả một biểu thức có trong mã nguồn, có thẻ là:
  * <ul>
@@ -13,6 +15,8 @@ package core.models;
  *
  */
 public abstract class Expression extends Element {
+	
+	private Expression mSource = this;
 	
 	/**
 	 * Khởi tạo một biểu thức rỗng<br/>
@@ -48,22 +52,85 @@ public abstract class Expression extends Element {
 	}
 	
 	/**
-	 * Tạo ra một bản sao của biểu thức
+	 * Tạo ra một bản sao của biểu thức. Các biểu thức bản sao và cả bản chính đều sẽ
+	 * có chung một nguồn, sử dụng {@link #equalsSource(Expression)} để kiểm tra
 	 */
 	public Expression clone(){
-		return (Expression) super.clone();
+		Expression clone = (Expression) super.clone();
+		
+		clone.mSource = this.mSource;
+		return clone;
 	}
+	
+	/**
+	 * Kiểm tra 2 biểu thức được sao chép từ cùng một nguồn, hoặc cái này được
+	 * sao chép từ cái kia (sao chép qua {@link #clone()})
+	 */
+	protected boolean equalsSource(Expression other){
+		if (other == null)
+			return false;
+		return mSource == other.mSource;
+	}
+	
+	/**
+	 * Áp dụng một bộ duyệt cấu trúc cho biểu thức. Bộ duyệt này sẽ lần lượt được
+	 * truyền từ biểu thức gốc, sau đó là các biểu thức con bên trong nó
+	 * @param visitor bộ duyệt trên các biểu thức. Để "bắt" được các biểu biểu thức đang
+	 * được duyệt qua, sử dụng (override) một trong các phương thức 
+	 * <code>int visit(SomeExpression ep) {...}</code> trong bộ duyệt, với
+	 * <code>SomeExpression</code> là loại biểu thức cần "bắt"
+	 * @return
+	 * {@link ExpressionVisitor#PROCESS_CONTINUE}: đã duyệt qua hết mọi biểu thức<br/>
+	 * {@link ExpressionVisitor#PROCESS_SKIP}: một số biểu thức con bị bỏ qua<br/>
+	 * {@link ExpressionVisitor#PROCESS_ABORT}: một biểu thức đã hủy áp dụng<br/>
+	 */
+	public int accept(ExpressionVisitor visitor){
+		int process = ExpressionVisitor.PROCESS_SKIP;
+		if (visitor.preVisit(this)){
+			process = handle(visitor);
+			if (process == ExpressionVisitor.PROCESS_CONTINUE 
+					&& this instanceof ExpressionGroup){
+				for (Expression e: ((ExpressionGroup)this).g){
+					if (e == null)
+						continue;
+					int child_process = e.accept(visitor);
+					
+					if (child_process == ExpressionVisitor.PROCESS_ABORT){
+						process = child_process;
+						break;
+					}
+					
+					if (child_process == ExpressionVisitor.PROCESS_SKIP)
+						break;
+				}
+				
+			}
+		}
+		
+		visitor.postVisit(this);
+		return process;
+	}
+	
+	
+	/**
+	 * Xử lý với từng loại biểu thức. Mỗi loại biểu thức cần truyền chính nó vào phương
+	 * thức tương ứng trong bộ visit
+	 */
+	protected abstract int handle(ExpressionVisitor visitor);
 	
 	/**
 	 * In cây quan hệ
 	 * @param margin khoảng cách đầu dòng
 	 */
 	public void printTree(String margin){
-		System.out.println(margin + this);
+		System.out.println(margin + this + ", " + this.getClass().getSimpleName());
 		if (this instanceof ExpressionGroup){
 			Expression[] g = ((ExpressionGroup)this).g;
 			for (Expression ep: g)
-				ep.printTree(margin + "   ");
+				if (ep == null)
+					System.out.println(margin + "   NULL");
+				else
+					ep.printTree(margin + "   ");
 		}
 	}
 	

@@ -15,7 +15,6 @@ import cdt.CMainProcess;
 import core.Setting;
 import core.graph.canvas.StatementCanvas;
 import core.models.Function;
-
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -64,8 +63,11 @@ public class GUIBeta {
 				main.run();
 				ArrayList<Function> fnList = main.getFunctions();
 				
-				if (fnList.size() > 0)
-					canvas.setFunction(fnList.get(0));
+				if (fnList.size() > 0){
+					Function fn = fnList.get(0);
+					canvas.setFunction(fn);
+					main.beginTestFunction(fn);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -83,8 +85,11 @@ public class GUIBeta {
 				main.run();
 				ArrayList<Function> fnList = main.getFunctions();
 				
-				if (fnList.size() > 0)
-					canvas.setFunction(fnList.get(0));
+				if (fnList.size() > 0){
+					Function fn = fnList.get(0);
+					canvas.setFunction(fn);
+					main.beginTestFunction(fn);
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

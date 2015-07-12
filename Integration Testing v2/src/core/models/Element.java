@@ -44,21 +44,11 @@ public abstract class Element implements Cloneable {
 	public boolean equals(Object o){
 		if (this == o)
 			return true;
-		if (o instanceof String)
-			return equals((String)o);
-		if (o == null || o.getClass() == this.getClass())
+		if (o == null || o.getClass() != this.getClass())
 			return false;
 		
 		Element other = (Element) o;
 		return other.getContent().equals(getContent());
-	}
-	
-	/**
-	 * So sánh phần tử có cùng nội dung hiển thị với một chuỗi
-	 * @param content chuỗi cần so sánh với nội dung hiển thị
-	 */
-	public boolean equals(String content){
-		return getContent().equals(content);
 	}
 	
 	/**
@@ -74,12 +64,12 @@ public abstract class Element implements Cloneable {
 
 	@Override
 	public String toString() {
-		return mContent;
+		return getContent();
 	}
 
 	@Override
 	public int hashCode() {
-		return mContent.hashCode();
+		return getContent().hashCode();
 	}
 	
 }

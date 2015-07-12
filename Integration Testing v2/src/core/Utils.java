@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Các tiện ích chung
@@ -36,6 +38,16 @@ public class Utils {
 	}
 	
 	/**
+	 * Tìm xem một đối tượng có trong một mảng hay không
+	 */
+	public static boolean find(Object[] arr, Object find){
+		for (Object o: arr)
+			if ((o == null && find == o) || o.equals(find))
+				return true;
+		return false;
+	}
+	
+	/**
 	 * Trả về chuỗi nối từ một mảng
 	 * @param sep chuỗi ngăn cách
 	 * @param args danh sách phần tử
@@ -49,6 +61,13 @@ public class Utils {
 		for (int i = 1; i < args.length; i++)
 			result += sep + args[i];
 		return result;
+	}
+	
+	/**
+	 * Chuyển từ mảng sang danh sách
+	 */
+	public static <T> ArrayList<T> toList(T[] array){
+		return new ArrayList<T>(Arrays.asList(array));
 	}
 	
 }

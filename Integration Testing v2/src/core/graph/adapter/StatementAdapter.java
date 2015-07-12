@@ -2,6 +2,7 @@ package core.graph.adapter;
 
 import core.graph.node.StatementNode;
 import core.models.Statement;
+import core.models.statement.ScopeStatement;
 import core.unit.CFG;
 
 /**
@@ -21,48 +22,21 @@ public class StatementAdapter extends NodeAdapter<StatementNode> {
 		Statement[] stmList = cfg.getStatements();
 		
 		for (Statement stm: stmList)
-			this.add(new StatementNode(stm));
+			if (!(stm instanceof ScopeStatement))
+				this.add(new StatementNode(stm));
 		
 		for (StatementNode node: this){
 			Statement stm = node.getStatement();
-			StatementNode nodeTrue = this.getNodeByElement(stm.getTrue());
-			StatementNode nodeFalse = this.getNodeByElement(stm.getFalse());
+			StatementNode nodeTrue = getNodeByElement(
+					Statement.skipScope(stm.getTrue()));
+			StatementNode nodeFalse = getNodeByElement(
+					Statement.skipScope(stm.getFalse()));
 			
 			if (nodeTrue == nodeFalse)
 				node.setRefers(new StatementNode[]{nodeTrue});
 			else
 				node.setRefers(new StatementNode[]{nodeTrue, nodeFalse});
 		}
-		/*StatementNode beginNode = new StatementNode(cfg.getStatements()[0]);
-		Queue<StatementNode> queue = new LinkedList<StatementNode>();
-		
-		queue.add(beginNode);
-		this.add(beginNode);
-		while (!queue.isEmpty()){
-			StatementNode node = queue.remove();
-			Statement sNode = node.getStatement();
-			int length = sNode.isCondition() ? 2 : 1;
-			StatementNode[] refer = new StatementNode[length];
-			Statement[] sRefer = new Statement[length];
-			
-			sRefer[0] = sNode.getTrue();
-			if (length == 2)
-				sRefer[1] = sNode.getFalse();
-			
-			for (int i = 0; i < length; i++){
-				if (sRefer[i] == null)
-					continue;
-				
-				refer[i] = getNodeByElement(sRefer[i]);
-				if (refer[i] == null){
-					refer[i] = new StatementNode(sRefer[i]);
-					queue.add(refer[i]);
-					this.add(refer[i]);
-				}
-			}
-			
-			node.setRefers(refer);
-		}*/
 		
 	}
 }

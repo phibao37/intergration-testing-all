@@ -1,5 +1,7 @@
 package core.models;
 
+import core.models.type.ArrayType;
+
 /**
  * Mô tả kiểu của các biến số trong các ngôn ngữ
  * @author ducvu
@@ -22,4 +24,11 @@ public abstract class Type extends Element {
 	 * Giá trị này dùng để khởi tạo các biến số không tham gia vào các ràng buộc
 	 */
 	public abstract Expression getDefaultValue();
+	
+	/**
+	 * Kiểm tra kiểu mảng
+	 */
+	public boolean isArrayType(){
+		return this instanceof ArrayType;
+	}
 }

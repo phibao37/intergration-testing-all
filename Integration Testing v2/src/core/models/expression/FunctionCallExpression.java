@@ -2,6 +2,7 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả biểu thức gọi hàm, bao gồm tên của hàm cần gọi và một danh sách các
@@ -30,7 +31,7 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	
 	@Override
 	protected String generateContent() {
-		if (g == null){
+		if (g == null || g.length == 0){
 			return getName() + "()";
 		}
 		
@@ -53,5 +54,10 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	 */
 	public Expression[] getArguments(){
 		return g;
+	}
+
+	@Override
+	protected int handle(ExpressionVisitor visitor) {
+		return visitor.visit(this);
 	}
 }

@@ -2,6 +2,7 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.visitor.ExpressionVisitor;
 
 /**
  * Kiểu biểu thức bao một biểu thức con duy nhất.<br/>
@@ -29,5 +30,10 @@ public class PlaceHolderExpression extends ExpressionGroup {
 	 */
 	public Expression getElement(){
 		return g[0];
+	}
+
+	@Override
+	protected int handle(ExpressionVisitor visitor) {
+		return visitor.visit(this);
 	}
 }
