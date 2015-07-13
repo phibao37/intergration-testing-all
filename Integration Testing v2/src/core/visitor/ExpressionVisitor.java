@@ -1,6 +1,7 @@
 package core.visitor;
 
 import core.models.Expression;
+import core.models.Statement;
 import core.models.expression.ArrayExpression;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
@@ -84,6 +85,17 @@ public abstract class ExpressionVisitor {
 	}
 	
 	public int visit(PlaceHolderExpression place){
+		return PROCESS_CONTINUE;
+	}
+	
+	/**
+	 * Được gọi khi đang duyệt qua các câu lệnh trong hàm số
+	 * @param statement câu lệnh đang được duyệt qua
+	 * @return {@link #PROCESS_CONTINUE} biểu thức gốc sẽ được thăm tiếp theo<br/>
+	 * {@link #PROCESS_SKIP} bỏ qua biểu thức gốc, thăm câu lệnh kế tiếp<br/>
+	 * {@link #PROCESS_CONTINUE} hủy bỏ quả trình duyệt
+	 */
+	public int visit(Statement statement){
 		return PROCESS_CONTINUE;
 	}
 }

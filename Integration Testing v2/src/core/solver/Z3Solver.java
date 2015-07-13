@@ -2,8 +2,6 @@ package core.solver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-
 import core.models.Expression;
 import core.models.Type;
 import core.models.Variable;
@@ -12,6 +10,8 @@ import core.models.expression.BinaryExpression;
 import core.models.expression.IDExpression;
 import core.models.expression.UnaryExpression;
 import core.models.type.ArrayType;
+import core.models.type.BasicType;
+import core.solver.Z3.Func;
 import core.unit.VariableTable;
 
 /**
@@ -61,17 +61,34 @@ public class Z3Solver implements Solver {
 		
 		String result = z3.getLine();
 		if (RESULT_SAT.equals(result)) {
-
-			//Lấy kết quả của z3 (kết quả bên trong khối model)
-			List<String> lines = z3.getLines();
-			String input = lines.get(1); // Bỏ qua dòng đầu (model
-			for (int i = 2;
-					i < lines.size() - 1;// Bỏ qua dòng cuối (đóng model)
-					i++)
-				input += "\n" + lines.get(i);
 			
-			//Đưa kết quả của z3 vào lại input của z3 để rút gọn các biểu thức hàm
-			z3.setRaw(input);
+			//Tạo bản sao danh sách các biến để xem những biến nào đã được z3 giải
+			ArrayList<Variable> nonResult = new ArrayList<Variable>(mTable);
+			
+			//Bỏ qua dòng đầu: (model
+			z3.getLine(); 
+			
+			while (z3.hasFunction()){
+				Func func = z3.getFunction();
+				Variable var = mTable.find(func.getName());
+				
+				//Xóa biến đã được z3 giải
+				nonResult.remove(var);
+
+				//Thêm các khai báo hàm bên trong model
+				z3.addFunction(func);
+			}
+			
+			//Bỏ qua dòng cuối: đóng model)
+			z3.getLine();
+			
+			for (Variable var: nonResult){
+				Func func = toZ3Func(var, false);
+				
+				//Với các biến không được z3 giải, tạo khai báo hàm mặc định theo kiểu
+				func.setValueFromType();
+				z3.addFunction(func);
+			}
 
 			for (Variable v: testcases)
 				//Rút gọn các biểu thức hàm trong z3 nếu không là biến mảng
@@ -99,14 +116,8 @@ public class Z3Solver implements Solver {
 					String value = z3.getLine();						// (I)
 					String name = v.getName();
 					
-					//Biến testcase này không có ràng buộc nào nên z3 không tạo ra biến,
-					//tự tạo giá trị mặc định cho biến này
-					if (value.endsWith("unknown constant " + name + "\")"))
-						mTable.find(name).initValueIfNotSet();
-					
 					//Gán giá trị cho biến thường
-					else
-						mTable.updateVariableValue(name, str2Expression(value));
+					mTable.updateVariableValue(name, str2Expression(value));
 				}
 			
 			for (ArrayIndexExpression arr: array){
@@ -167,30 +178,38 @@ public class Z3Solver implements Solver {
 		//Thêm bản sao vào bảng biến, vì sẽ được gán giá trị sau đó
 		mTable.add(var.clone());
 		
+		//Thêm khai báo hàm vào z3 từ biến testcase
+		z3.addFunction(toZ3Func(var, true));
+		return this;
+	}
+	
+	/**
+	 * Chuyển từ biến testcase sang dạng khai báo hàm trong z3
+	 * @param var biến testcase cần chuyển
+	 * @param declare dự định để khai báo (declare) hoặc tạo (define)
+	 * @return hàm ứng với biến testcase
+	 */
+	private static Z3.Func toZ3Func(Variable var, boolean declare){
 		Type type = var.getType();
+		Z3.Func func = null;
 		
-		//Với biến kiểu mảng, cần dùng 
-		//declare-fun <tên biến> (<kiểu chỉ số>...) <kiểu phần tử>
 		if (type instanceof ArrayType){
-			String param = "";
+			int count = 0;
 			
-			//Kiểu của chỉ số mảng luôn là Int
 			while (type instanceof ArrayType){
-				param += " Int";
+				count++;
 				type = ((ArrayType) type).getSubType();
 			}
 			
-			z3.addLine("declare-fun %s (%s) %s", var.getName(),
-					param.substring(1), toSmt2(type));
-			
+			func = new Func(var.getName(), toSmt2(type));
+			for (int i = 1; i <= count; i++)
+				func.addParameter(declare ? "Int" : String.format("(x!%d Int)", i));
 		} 
 		
-		//Biến thường, sử dụng declare-const <tên biến> <kiểu biến>
 		else {
-			String name = var.getName();
-			z3.addLine("declare-const %s %s", name, toSmt2(type));
+			func = new Func(var.getName(), toSmt2(type));
 		}
-		return this;
+		return func;
 	}
 	
 	/**
@@ -275,25 +294,25 @@ public class Z3Solver implements Solver {
 		return ex.getContent();
 	}
 	
-	private static HashMap<String, String> smtMap = new HashMap<>();
+	private static HashMap<Type, String> smtMap = new HashMap<>();
 	
 	static{
-		smtMap.put("int", "Int");
-		smtMap.put("long", "Int");
-		smtMap.put("float", "Real");
-		smtMap.put("double", "Real");
+		smtMap.put(BasicType.INT, "Int");
+		smtMap.put(BasicType.FLOAT, "Real");
+		smtMap.put(BasicType.DOUBLE, "Real");
+		smtMap.put(BasicType.BOOL, "Bool");
+		smtMap.put(BasicType.BOOLEAN, "Bool");
 	}
 	
 	/**
 	 * Chuyển từ kiểu trong ngôn ngữ sang kiểu của Z3
 	 */
 	public static String toSmt2(Type t){
-		String content = t.getContent();
 		
-		if (smtMap.containsKey(content))
-			return smtMap.get(content);
+		if (smtMap.containsKey(t))
+			return smtMap.get(t);
 		
-		return content;
+		return t.getContent();
 	}
 	
 	@Override

@@ -4,8 +4,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import core.error.IllegalFormatException;
 
 /**
  * Lớp tạo đối tượng tương tác với bộ giải hệ điều kiện Z3 (sử dụng ngôn ngữ SMT2)
@@ -14,16 +19,43 @@ public class Z3 {
 	
 	public static void main(String[] args){
 		Z3 z3 = new Z3()
-			.addLine("declare-const a Int")
+			.addLine("declare-fun a (Int Int) Int")
+			.addLine("declare-fun b (Int Int) Int")
+			.addLine("declare-fun c () Int")
 			//.addLine("assert (> a 10)")
 			//.addLine("assert (< a 13)")
-			.addLine("assert (= 4 (- a))")
+			.addLine("assert (= 4 (a 2 2))")
+			.addLine("assert (= (b 2 2) 1)")
+			.addLine("assert (> c 4)")
 			.addLine("check-sat")
 			.addLine("get-model")
 			.execute();
 		
-		while (z3.hasLine())
-			System.out.println(z3.getLine());
+		System.out.println(z3.getLine());
+		System.out.println(z3.getLine());
+		while (z3.hasFunction())
+			System.out.println("Function: " + z3.getFunction());
+		System.out.println(z3.getLine());
+	}
+	
+	/**
+	 * Kiểm tra một chuỗi có các cặp dấu ngoặc ( và ) tương ứng với nhau
+	 * @param lines chuỗi kiểm tra
+	 * @return số lượng dấu ( và ) bằng nhau 
+	 * @throws IllegalFormatException xuất hiện dấu ) trước dấu (, thí dụ ())(
+	 */
+	private boolean checkBracket(String lines) throws IllegalFormatException{
+		int count = 0;
+		
+		for (char c: lines.toCharArray()){
+			if (c == '(')
+				count++;
+			else if (c == ')')
+				count--;
+			if (count < 0)
+				throw new IllegalFormatException(lines, "Open-close bracket");
+		}
+		return count == 0;
 	}
 	
 	/**
@@ -88,17 +120,96 @@ public class Z3 {
 	}
 	
 	/**
-	 * Lấy ra danh sách toàn bộ các dòng trong output
-	 */
-	public List<String> getLines(){
-		return outBlock;
-	}
-	
-	/**
 	 * Kiểm tra còn có dòng nào trong output hay không
 	 */
 	public boolean hasLine(){
 		return !outBlock.isEmpty();
+	}
+	
+	/**
+	 * Kiểm tra còn có khai báo hàm (define-func) nào trong output hay không 
+	 */
+	public boolean hasFunction(){
+		if (mPickFunction == null)
+			try{
+				mPickFunction = pickFunction(false);
+			}catch (IllegalFormatException e) {}
+		return mPickFunction != null;
+	}
+	
+	/**
+	 * Trả về khai báo hàm tiếp theo trong output, hoặc null nếu không có
+	 */
+	public Func getFunction(){
+		if (mPickFunction == null)
+			try{
+				return pickFunction(true);
+			}catch (IllegalFormatException e) {
+				return null;
+			}
+		else {
+			Func pick = mPickFunction;
+			mPickFunction = null;
+			while (mPickCount > 0){
+				outBlock.remove();
+				mPickCount--;
+			}
+			return pick;
+		}
+	}
+	
+	/**
+	 * Thêm một khai báo hàm vào stack
+	 * @param func hàm khai báo (dạng declare-fun nếu chưa có giá trị, và define-fun 
+	 * nếu đã có giá trị)
+	 * @return đối tượng hiện hành (this)
+	 */
+	public Z3 addFunction(Func func){
+		return addLine(func.toString());
+	}
+	
+	private Func mPickFunction;
+	private int mPickCount;
+	private static Pattern PICK_FUNC = Pattern.compile(
+			"\\(define-fun (\\w+) \\(((?> ?\\(x\\!\\d+ \\w+\\))*)\\) (\\w+) (.+)\\)");
+	
+	/**
+	 * Lấy ra một khai báo hàm
+	 * @param remove loại bỏ khỏi output hay không
+	 * @return hàm được khai báo
+	 * @throws IllegalFormatException không đúng định dạng hàm hoặc đã hết output
+	 */
+	private Func pickFunction(boolean remove) throws IllegalFormatException{
+		String lines = "";
+		mPickCount = 0;
+		
+		try {
+			do {
+				lines += " " + outBlock.get(mPickCount++).trim();
+			} while (!checkBracket(lines));
+		} catch (IndexOutOfBoundsException e) {
+			throw new IllegalFormatException(lines, "Z3 function");
+		}
+		lines = lines.substring(1);
+		
+		Matcher m = PICK_FUNC.matcher(lines);
+		if (!m.matches())
+			throw new IllegalFormatException(lines, "Z3 function");
+		
+		Func func = new Func(m.group(1), m.group(3)).setValue(m.group(4));
+		String paras = m.group(2);
+		
+		if (!paras.isEmpty()){
+			for (String para: paras.split(" "))
+				func.addParameter(para);
+		}
+		
+		if (remove)
+		while (mPickCount > 0){
+			outBlock.remove();
+			mPickCount--;
+		}
+		return func;
 	}
 	
 	/**
@@ -122,6 +233,7 @@ public class Z3 {
 			
 			fout.write(raw.getBytes());
 			
+			//System.out.println("Raw = " + raw);
 			raw = null;
 			inBlock.clear();
 			outBlock.clear();
@@ -143,6 +255,100 @@ public class Z3 {
 			e.printStackTrace();
 		}
 		return this;
+	}
+	
+	/**
+	 * Kiểu hàm trong chương trình z3
+	 */
+	public static class Func{
+		
+		private String mType, mName, mValue;
+		private ArrayList<String> mPara;
+		
+		/**
+		 * Tạo một hàm mới với tên và kiểu
+		 * @param name tên của hàm
+		 * @param type kiểu trả về của hàm
+		 */
+		public Func(String name, String type){
+			mName = name;
+			mType = type;
+			mPara = new ArrayList<String>();
+		}
+		
+		/**
+		 * Thêm tham số cho hàm
+		 * @param para tham số, bao gồm cả cặp () nếu đang tạo hàm (define-func)
+		 * @return hàm đang được thêm tham số
+		 */
+		public Func addParameter(String para){
+			mPara.add(para);
+			return this;
+		}
+		
+		/**
+		 * Đặt giá trị trả về cho hàm
+		 * @param value giá trị mới
+		 * @return hàm đang được đặt giá trị
+		 */
+		public Func setValue(String value){
+			mValue = value;
+			return this;
+		}
+		
+		private static HashMap<String, String> typeMap = new HashMap<>();
+		
+		static{
+			typeMap.put("Int", "0");
+			typeMap.put("Real", "0.0");
+			typeMap.put("Bool", "false");
+		}
+		
+		/**
+		 * Gán giá trị trả về cho hàm từ kiểu trả về của nó
+		 * @return hàm đang được đặt giá trị
+		 */
+		public Func setValueFromType(){
+			setValue(typeMap.get(getType()));
+			return this;
+		}
+		
+		/**
+		 * Trả về tên của khai báo hàm
+		 */
+		public String getName(){
+			return mName;
+		}
+		
+		/**
+		 * Trả về kiểu giá trị trả về của hàm
+		 */
+		public String getType(){
+			return mType;
+		}
+
+		@Override
+		public String toString() {
+			String s_para = "";
+			
+			if (!mPara.isEmpty()){
+				s_para = mPara.get(0);
+				for (int i = 1; i < mPara.size(); i++)
+					s_para += " " + mPara.get(i);
+			}
+			
+			if (mValue == null)
+				return String.format("declare-fun %s (%s) %s", mName, s_para, mType);
+			else
+				return String.format("define-fun %s (%s) %s %s", 
+						mName, s_para, mType, mValue);
+		}
+
+		@Override
+		public int hashCode() {
+			return toString().hashCode();
+		}
+		
 	}
 
 }

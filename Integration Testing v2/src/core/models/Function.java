@@ -3,8 +3,12 @@ package core.models;
 import java.io.File;
 
 import core.Utils;
+import core.error.StatementNoRootException;
+import core.models.statement.FlagStatement;
+import core.models.statement.ScopeStatement;
 import core.unit.CFG;
 import core.visitor.BodyFunctionVisitor;
+import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một hàm trong chương trình. Một hàm được khai báo bao gồm tên hàm, danh sách
@@ -100,6 +104,39 @@ public class Function extends Element {
 	 */
 	public CFG getCFG(boolean subCondition){
 		return subCondition ? mCFG_3 : mCFG_12;
+	}
+	
+	/**
+	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 
+	 * ở trong phần thân hàm
+	 * @param visitor bộ duyệt biểu thức. 
+	 * Sử dụng {@link ExpressionVisitor#visit(Statement)} để "bắt" được khi các
+	 * câu lệnh được duyệt vào
+	 * @throws NullPointerException chưa có đồ thị CFG
+	 */
+	public void accept(ExpressionVisitor visitor) 
+			throws NullPointerException{
+		int process;
+		
+		for (Statement stm: getCFG(true).getStatements()){
+			process = visitor.visit(stm);
+			
+			if (process == ExpressionVisitor.PROCESS_ABORT)
+				break;
+			else if (process == ExpressionVisitor.PROCESS_CONTINUE
+					&& !(stm instanceof ScopeStatement)
+					&& !(stm instanceof FlagStatement)){
+				
+				try {
+					process = stm.getRoot().accept(visitor);
+					if (process == ExpressionVisitor.PROCESS_ABORT)
+						break;
+				} catch (StatementNoRootException e) {
+					//Câu lệnh chưa có biểu thức gốc, chuyển sang câu lệnh khác
+				}
+				
+			}
+		}
 	}
 	
 	/**

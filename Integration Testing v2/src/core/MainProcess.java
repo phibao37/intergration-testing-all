@@ -55,13 +55,15 @@ public abstract class MainProcess implements FilenameFilter {
 	}
 	
 	public void beginTestFunction(Function func){
-		//CFG cfg_12 = func.getCFG(false);
-		CFG cfg_3 = func.getCFG(true);
+		int feasible = 0;
+		
+		CFG cfg_12 = func.getCFG(false);
+		//CFG cfg_3 = func.getCFG(true);
 		
 		//cfg_12.getBasisPaths();
 		//cfg_3.getBasisPaths();
 		
-		for (BasisPath path: cfg_3.getBasisPaths()){
+		for (BasisPath path: cfg_12.getBasisPaths()){
 			System.out.println("\n" + path);
 			
 			try {
@@ -78,12 +80,16 @@ public abstract class MainProcess implements FilenameFilter {
 				System.out.println(" & " + e);
 			
 			mSolver.beginSolve(ce.getTestcases(), ce, ce.getArrayAccesses());
-			if (mSolver.getSolutionCode() == Solver.SUCCESS)
+			if (mSolver.getSolutionCode() == Solver.SUCCESS){
 				for (Variable sol: mSolver.getSolution())
-				System.out.println(" ==> " + sol);
+					System.out.println(" ==> " + sol);
+				feasible++;
+			}
 			else
 				System.out.println(" ==> " + mSolver.getSolutionMessage());
 		}
+		System.out.printf("\n *** Feasible: %d, Unsat: %d\n\n", feasible, 
+				cfg_12.getBasisPaths().size() - feasible);
 	}
 	
 	/**
