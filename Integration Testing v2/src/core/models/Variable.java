@@ -1,5 +1,6 @@
 package core.models;
 
+import core.graph.Graphable;
 import core.visitor.ExpressionVisitor;
 
 /**
@@ -9,7 +10,7 @@ import core.visitor.ExpressionVisitor;
  * @author ducvu
  *
  */
-public class Variable extends ExpressionGroup {
+public class Variable extends ExpressionGroup implements Graphable {
 	
 	private String mName;
 	private Type mType;
@@ -114,6 +115,13 @@ public class Variable extends ExpressionGroup {
 	protected int handle(ExpressionVisitor visitor) {
 		throw new RuntimeException("Khong duyet qua bien");
 	}
-	
+
+	@Override
+	public String getHTMLContent() {
+		return String.format("%s %s%s", 
+				getType().getHTMLContent(), 
+				getName(), 
+				isValueSet() ? " = " + getValue() : "");
+	}
 	
 }

@@ -29,6 +29,7 @@ public class BasisPathParser {
 	
 	private ConstraintEquations mConstraints;
 	private VariableTable tables;
+	private BasisPath mPath;
 	
 	/**
 	 * Thêm một biểu thức ràng buộc mới
@@ -52,6 +53,13 @@ public class BasisPathParser {
 	}
 	
 	/**
+	 * Trả về đường thi hành đang được phân tích
+	 */
+	public BasisPath getPath(){
+		return mPath;
+	}
+	
+	/**
 	 * Phân tích một đường thi hành để tìm các ràng buộc testcase
 	 * @param path đường thi hành cần phân tích
 	 * @param func hàm chứa đường thi hành, dùng để lấy các biến tham số 
@@ -62,6 +70,7 @@ public class BasisPathParser {
 	 */
 	public void parseBasisPath(BasisPath path, Function func) 
 			throws StatementNoRootException{
+		mPath = path;
 		mConstraints = new ConstraintEquations(func.getParameters());
 		tables = new VariableTable();
 		
@@ -138,7 +147,8 @@ public class BasisPathParser {
 	/**
 	 * Xử lý câu lệnh theo kiểu và biểu thức gốc của nó
 	 */
-	protected void handleStatement(Statement stm, Expression expression, Statement next){
+	protected void handleStatement(Statement stm, Expression expression, 
+			Statement next){
 		switch (stm.getType()){
 		case Statement.DECLARATION:
 			handleDeclare((DeclareExpression) expression);
@@ -286,7 +296,11 @@ public class BasisPathParser {
 	 * Xử lý biểu thức RETURN
 	 */
 	protected void handleReturn(ReturnExpression rt){
+		Expression value = rt.getReturnExpression();
 		
+		if (value != null){
+			mConstraints.setReturnValue(tables.evalExpression(value));
+		}
 	}
 	
 	/**

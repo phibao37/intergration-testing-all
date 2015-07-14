@@ -5,7 +5,7 @@ package core.models;
  * @author ducvu
  *
  */
-public abstract class Element implements Cloneable {
+public abstract class Element implements Cloneable, Contentable {
 	
 	protected String mContent;
 	
@@ -26,6 +26,7 @@ public abstract class Element implements Cloneable {
 	/**
 	 * Trả về nội dung hiển thị của phần tử
 	 */
+	@Override
 	public String getContent(){
 		return mContent;
 	}

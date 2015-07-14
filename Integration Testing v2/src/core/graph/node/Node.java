@@ -56,7 +56,7 @@ public class Node extends JLabel {
 	 * @param element
 	 */
 	protected Node(Graphable element){
-		String content = element.getContent();
+		String content = element.getNodeContent();
 		Dimension size;
 		
 		mElement = element;
@@ -186,7 +186,7 @@ public class Node extends JLabel {
 	}
 	
 	public String toString(){
-		return mElement.getContent();
+		return mElement.getNodeContent();
 	}
 
 	/** Phương thức giúp mở bảng menu khi có sự kiện ấn chuột phải*/

@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
+import core.GUI;
 import core.graph.adapter.StatementAdapter;
 import core.graph.node.Node;
 import core.graph.node.StatementNode;
@@ -50,8 +51,7 @@ public class StatementCanvas extends Canvas {
 		smtNodeList.addAll(adapter);
 		StatementNode beginNode = smtNodeList.get(0);
 		
-		//TODO ?beginNode.setLocation(GUI.instance.getGraphWidth()/2, paddingY);
-		beginNode.setLocation(getWidth()/2, paddingY);
+		beginNode.setLocation(GUI.instance.getDefaultCanvasWidth()/2, paddingY);
 		for (StatementNode node: smtNodeList){
 			StatementNode[] refer = (StatementNode[]) node.getRefers();
 			boolean isCondition = node.isConditionNode();
@@ -174,13 +174,11 @@ public class StatementCanvas extends Canvas {
 	
 	/** Mở nội dung mã nguồn chứa nội dung của hàm ứng với đồ thị này*/
 	protected void openViewSource(){
-		//GUI.instance.openFileView(fn.getFile());
+		GUI.instance.openFileView(mFunc.getSourceFile());
 	}
 	
 	protected void openViewPath(){
-		//UnitMain unit = fn.getUnitSuite();
-		//int level = BodyStatementVisitor.STATEMENT_CONDITION;
-		//GUI.instance.setTestPath(unit.getBasisPath(level), unit.getSolutions(level));
+		GUI.instance.beginTestFunction(getFunction());
 	}
 	
 	@Override
@@ -213,7 +211,7 @@ public class StatementCanvas extends Canvas {
 		private JMenuItem viewSource, seePath;
 
 		private PopupMenu() {
-			viewSource = new JMenuItem("View source");
+			viewSource = new JMenuItem("Xem nguồn");
 			viewSource.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					canvas.openViewSource();
@@ -221,7 +219,7 @@ public class StatementCanvas extends Canvas {
 			});
 			this.add(viewSource);
 			
-			seePath = new JMenuItem("View path");
+			seePath = new JMenuItem("Kiểm thử đơn vị");
 			seePath.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					canvas.openViewPath();

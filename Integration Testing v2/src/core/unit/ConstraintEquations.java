@@ -15,6 +15,7 @@ public class ConstraintEquations extends ArrayList<Expression> {
 	
 	private Variable[] mTestcases;
 	private ArrayList<ArrayIndexExpression> mArray;
+	private Expression mReturn;
 	
 	/**
 	 * Tạo một hệ ràng buộc mới
@@ -51,4 +52,17 @@ public class ConstraintEquations extends ArrayList<Expression> {
 		return mArray;
 	}
 	
+	/**
+	 * Đặt biểu thức cho câu lệnh return hàm (nếu có)
+	 */
+	public void setReturnValue(Expression value){
+		mReturn = value;
+	}
+	
+	/**
+	 * Trả về biểu thức bên trong câu lệnh return (nếu có)
+	 */
+	public Expression getReturnValue(){
+		return mReturn;
+	}
 }

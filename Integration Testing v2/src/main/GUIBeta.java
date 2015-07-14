@@ -66,7 +66,7 @@ public class GUIBeta {
 				if (fnList.size() > 0){
 					Function fn = fnList.get(0);
 					canvas.setFunction(fn);
-					main.beginTestFunction(fn);
+					main.beginTestFunctionBeta(fn);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -88,7 +88,7 @@ public class GUIBeta {
 				if (fnList.size() > 0){
 					Function fn = fnList.get(0);
 					canvas.setFunction(fn);
-					main.beginTestFunction(fn);
+					main.beginTestFunctionBeta(fn);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -5,18 +5,22 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import core.error.FunctionNotFoundException;
 import core.error.StatementNoRootException;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
+import core.models.expression.FunctionCallExpression;
 import core.solver.Solver;
+import core.solver.Solver.Result;
 import core.solver.Z3Solver;
 import core.unit.BasisPath;
 import core.unit.BasisPathParser;
 import core.unit.CFG;
 import core.unit.ConstraintEquations;
 import core.visitor.BodyFunctionVisitor;
+import core.visitor.ExpressionVisitor;
 import core.visitor.UnitVisitor;
 
 /**
@@ -52,18 +56,89 @@ public abstract class MainProcess implements FilenameFilter {
 		//Duyệt qua các thân hàm để tạo các đồ thị CFG
 		for (Function func: mFunctions)
 			func.parseCFG(mBodyVisitor);
+		
+		//Duyệt qua các lời gọi hàm để liên kết tới các khai báo tương ứng
+		for (Function func: mFunctions){
+			func.accept(new ExpressionVisitor() {
+				@Override
+				public int visit(FunctionCallExpression call) {
+					try {
+						func.addRefer(findFunctionByCall(call));
+					} catch (FunctionNotFoundException e) {
+						//e.printStackTrace();
+						//Tìm trong các #include<header> của bộ biên dịch ???
+					}
+					return PROCESS_CONTINUE;
+				}
+				
+			});
+		}
 	}
 	
-	public void beginTestFunction(Function func){
+	/**
+	 * Tìm hàm số trong danh sách khai báo khớp với một lời gọi hàm
+	 * @param call lời gọi hàm, thí dụ: test(x, y)
+	 * @return hàm số tương thích với với lời gọi, thí dụ: void test(int x, int y){..} 
+	 * @throws FunctionNotFoundException không tìm được khai báo khớp lời gọi ham
+	 */
+	protected Function findFunctionByCall(FunctionCallExpression call) 
+			throws FunctionNotFoundException{
+		for (Function func: mFunctions){
+			
+			//Lọc ra hàm khớp tên lời gọi
+			if (!func.getName().equals(call.getName()))
+				continue;
+			
+			//Lọc ra hàm có số lượng đối số bằng số lượng tham số gọi 
+			if (func.getParameters().length != call.getArguments().length)
+				continue;
+			
+			//TODO các biểu thức tham số phải khớp kiểu trong khai báo hàm
+			//TODO có nhũng lời gọi bỏ qua tham số cuối cùng đã được định nghĩa
+			//System.out.printf("Find %s => Found %s\n", call, func.getName());
+			
+			return func;
+			
+		}
+		throw new FunctionNotFoundException(call);
+	}
+	
+	/**
+	 * Bắt đầu quá trình kiểm thử một hàm (đơn vị)
+	 * @param func hàm cần kiểm thử
+	 * @return danh sách các đường thi hành đã được gán các ràng buộc và các testcase
+	 */
+	public ArrayList<BasisPath> beginTestFunction(Function func){
+		ArrayList<BasisPath> paths = func.getCFG(true).getBasisPaths();
+		
+		for (BasisPath path: paths){
+			try {
+				mPathParser.parseBasisPath(path, func);
+			} catch (StatementNoRootException e1) {
+				System.out.println(" !!! " + e1.getMessage());
+				continue;
+			}
+			
+			ConstraintEquations ce = mPathParser.getConstrains();
+			path.setConstraint(ce);
+			
+			Result result = mSolver.solve(ce.getTestcases(), ce, ce.getArrayAccesses());
+			path.setSolveResult(result);
+		}
+		
+		return paths;
+	}
+	
+	public void beginTestFunctionBeta(Function func){
 		int feasible = 0;
 		
-		CFG cfg_12 = func.getCFG(false);
-		//CFG cfg_3 = func.getCFG(true);
+		//CFG cfg_12 = func.getCFG(false);
+		CFG cfg_3 = func.getCFG(true);
 		
 		//cfg_12.getBasisPaths();
 		//cfg_3.getBasisPaths();
 		
-		for (BasisPath path: cfg_12.getBasisPaths()){
+		for (BasisPath path: cfg_3.getBasisPaths()){
 			System.out.println("\n" + path);
 			
 			try {
@@ -79,17 +154,18 @@ public abstract class MainProcess implements FilenameFilter {
 			for (ArrayIndexExpression e: ce.getArrayAccesses())
 				System.out.println(" & " + e);
 			
-			mSolver.beginSolve(ce.getTestcases(), ce, ce.getArrayAccesses());
-			if (mSolver.getSolutionCode() == Solver.SUCCESS){
-				for (Variable sol: mSolver.getSolution())
+			Result result = mSolver.solve(ce.getTestcases(), ce, ce.getArrayAccesses());
+			if (result.getSolutionCode() == Solver.SUCCESS){
+				for (Variable sol: result.getSolution())
 					System.out.println(" ==> " + sol);
 				feasible++;
+				System.out.println(" RETURN " + result.getReturnValue());
 			}
 			else
-				System.out.println(" ==> " + mSolver.getSolutionMessage());
+				System.out.println(" ==> " + result.getSolutionMessage());
 		}
 		System.out.printf("\n *** Feasible: %d, Unsat: %d\n\n", feasible, 
-				cfg_12.getBasisPaths().size() - feasible);
+				cfg_3.getBasisPaths().size() - feasible);
 	}
 	
 	/**
@@ -180,6 +256,13 @@ public abstract class MainProcess implements FilenameFilter {
 	 */
 	public ArrayList<Function> getFunctions(){
 		return mFunctions;
+	}
+	
+	/**
+	 * Kiểm tra không có hàm số nào được tìm thấy
+	 */
+	public boolean isEmptyFunction(){
+		return mFunctions.isEmpty();
 	}
 	
 	/**

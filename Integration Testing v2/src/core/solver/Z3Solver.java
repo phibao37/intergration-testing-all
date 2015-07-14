@@ -2,6 +2,7 @@ package core.solver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import core.models.Expression;
 import core.models.Type;
 import core.models.Variable;
@@ -12,6 +13,7 @@ import core.models.expression.UnaryExpression;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
 import core.solver.Z3.Func;
+import core.unit.ConstraintEquations;
 import core.unit.VariableTable;
 
 /**
@@ -22,6 +24,7 @@ public class Z3Solver implements Solver {
 	private Variable[] mTestcase;
 	private String mSolutionStr;
 	private int mSolutionCode;
+	private Expression mReturnValue;
 	
 	private VariableTable mTable;
 	private Z3 z3 = new Z3();
@@ -36,8 +39,8 @@ public class Z3Solver implements Solver {
 	public static final String RESULT_UNKNOWN = "unknown";
 	
 	@Override
-	public void beginSolve(Variable[] testcases,
-			ArrayList<Expression> constraints,
+	public Result solve(Variable[] testcases,
+			ConstraintEquations constraints,
 			ArrayList<ArrayIndexExpression> array) {
 		
 		//Khởi tạo bảng biến, reset lại nghiệm
@@ -45,6 +48,7 @@ public class Z3Solver implements Solver {
 		mTestcase = null;
 		mSolutionCode = UNKNOWN;
 		mSolutionStr = RESULT_UNKNOWN;
+		mReturnValue = null;
 		
 		//Thêm các khai báo biến vào bảng biến
 		for (Variable testcase: testcases)
@@ -109,6 +113,12 @@ public class Z3Solver implements Solver {
 				//Sau đó, rút gọn giá trị phần tử mảng tại vị trí tương ứng
 				z3.addLine("simplify (%s%s)", arr.getName(), params); 	// (III)
 			}
+			
+			//Nếu có đính kèm biểu thức trả về, tính toán và rút gọn luôn
+			mReturnValue = constraints.getReturnValue();
+			if (mReturnValue != null)
+				z3.addLine("simplify %s", parseCondition(mReturnValue));//(IV)
+			
 			z3.execute();
 			
 			for (Variable v: testcases)
@@ -134,17 +144,35 @@ public class Z3Solver implements Solver {
 						indexs, str2Expression(z3.getLine()));			// (III)
 			}
 			
+			if (mReturnValue != null){
+				mReturnValue = str2Expression(z3.getLine());			//(IV)
+			}
+			
 			//Đặt kết quả
 			mTestcase = new Variable[testcases.length];
 			mTable.toArray(mTestcase);
 			mSolutionCode = SUCCESS;
-			mSolutionStr = mTable.toString();
+			if (mTable.isEmpty())
+				mSolutionStr = "";
+			else{
+				String left ="";
+				String right = "";
+				
+				for (Variable var: mTable){
+					left += ", " + var.getName();
+					right += ", " + var.getValue();
+				}
+				
+				mSolutionStr = String.format("(%s) = (%s)",
+						left.substring(2), right.substring(2));
+			}
 			
 		} else if (RESULT_UNSAT.equals(result)){
 			mSolutionCode = ERROR;
 			mSolutionStr = RESULT_UNSAT; //+ Why?
 		} 
 		
+		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue);
 	}
 	
 	/**
@@ -313,20 +341,6 @@ public class Z3Solver implements Solver {
 			return smtMap.get(t);
 		
 		return t.getContent();
-	}
-	
-	@Override
-	public Variable[] getSolution() {
-		return mTestcase;
-	}
-	
-	@Override
-	public int getSolutionCode() {
-		return mSolutionCode;
-	}
-
-	public String getSolutionMessage(){
-		return mSolutionStr;
 	}
 
 }

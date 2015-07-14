@@ -1,9 +1,11 @@
 package core.models;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import core.Utils;
 import core.error.StatementNoRootException;
+import core.graph.Graphable;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.unit.CFG;
@@ -19,7 +21,7 @@ import core.visitor.ExpressionVisitor;
  * @author ducvu
  *
  */
-public class Function extends Element {
+public class Function extends Element implements Graphable {
 	
 	private String mName;
 	private Variable[] mParas;
@@ -28,6 +30,8 @@ public class Function extends Element {
 	
 	private CFG mCFG_12;
 	private CFG mCFG_3;
+	
+	private ArrayList<Function> mRefers;
 	
 	private File mFile;
 	
@@ -45,6 +49,7 @@ public class Function extends Element {
 		mType = returnType;
 		setContent(String.format("%s %s(%s)%s", mType, mName, 
 				Utils.merge(", ", paras), getBodyString(mBody)));
+		mRefers = new ArrayList<Function>();
 	}
 	
 	/**
@@ -107,6 +112,23 @@ public class Function extends Element {
 	}
 	
 	/**
+	 * Thêm một hàm nằm trong danh sách tham chiếu, tức những hàm được hàm này gọi
+	 * bên trong phần thân của nó (có thể bao gồm chính nó)
+	 * @param refer hàm được tham chiếu tới
+	 */
+	public void addRefer(Function refer){
+		mRefers.add(refer);
+	}
+	
+	/**
+	 * Trả về danh sách các hàm được tham chiếu trong hàm này
+	 * @see #addRefer(Function)
+	 */
+	public ArrayList<Function> getRefers(){
+		return mRefers;
+	}
+	
+	/**
 	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 
 	 * ở trong phần thân hàm
 	 * @param visitor bộ duyệt biểu thức. 
@@ -152,5 +174,37 @@ public class Function extends Element {
 	 */
 	public File getSourceFile(){
 		return mFile;
+	}
+	
+	/**
+	 * Trả về dạng tóm tắt của hàm, bao gồm tên hàm và tên tập tin mã nguồn
+	 */
+	public String getNameAndFile(){
+		return String.format("%s %s - %s", 
+				getReturnType(), getName(), getSourceFile().getName());
+	}
+	
+	@Override
+	public String getNodeContent() {
+		return getName();
+	}
+
+	@Override
+	public String getHTMLContent() {
+		StringBuilder b = new StringBuilder();
+		int iMax = mParas.length - 1;
+		
+		if (iMax >= 0)
+	    for (int i = 0; ; i++) {
+	        b.append(mParas[i].getHTMLContent());
+	        if (i == iMax)
+	        	break;
+	        b.append(", ");
+	    }
+		
+		return String.format("%s %s(%s)", 
+				mType.getHTMLContent(), 
+				getName(), 
+				b);
 	}
 }

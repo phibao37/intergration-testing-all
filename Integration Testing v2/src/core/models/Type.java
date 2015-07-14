@@ -1,5 +1,6 @@
 package core.models;
 
+import core.graph.Graphable;
 import core.models.type.ArrayType;
 
 /**
@@ -7,7 +8,7 @@ import core.models.type.ArrayType;
  * @author ducvu
  *
  */
-public abstract class Type extends Element {
+public abstract class Type extends Element implements Graphable {
 	
 	protected Object defaultValue;
 	
@@ -31,4 +32,12 @@ public abstract class Type extends Element {
 	public boolean isArrayType(){
 		return this instanceof ArrayType;
 	}
+
+	@Override
+	public String getHTMLContent() {
+		return String.format("<span style=\"color:%s\">%s</span>", 
+				HTML_COLOR, getContent());
+	}
+
+	private static String HTML_COLOR = "blue";
 }

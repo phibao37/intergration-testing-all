@@ -81,16 +81,16 @@ public class Canvas extends JPanel {
 		add(navigator);
 		navigator.setLayout(null);
 		
-		JLabel lbl_clear = new LightLabel();
-		lbl_clear.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				resetAll(true);
-			}
-		});
-		lbl_clear.setIcon(new ImageIcon(Canvas.class.getResource("/image/clear.png")));
-		lbl_clear.setBounds(5, 5, 30, 30);
-		navigator.add(lbl_clear);
+//		JLabel lbl_clear = new LightLabel();
+//		lbl_clear.addMouseListener(new MouseAdapter() {
+//			@Override
+//			public void mouseClicked(MouseEvent e) {
+//				resetAll(true);
+//			}
+//		});
+//		lbl_clear.setIcon(new ImageIcon(Canvas.class.getResource("/image/clear.png")));
+//		lbl_clear.setBounds(5, 5, 30, 30);
+//		navigator.add(lbl_clear);
 		
 		JLabel lbl_fullscreen = new LightLabel();
 		lbl_fullscreen.addMouseListener(new MouseAdapter() {
