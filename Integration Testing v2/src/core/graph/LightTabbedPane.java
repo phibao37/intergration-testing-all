@@ -147,8 +147,9 @@ public class LightTabbedPane extends JTabbedPane {
 	 * Thêm một tab nếu nó chưa tồn tại, sau đó chuyển đến tab đó
 	 * @param constructType dùng để tạo đối tượng nếu tab chưa tồn tại
 	 * @param construct đối tượng dùng để so sánh sự tồn tại của tab
+	 * @return đối tượng đã được lựa chọn
 	 */
-	public void openTab(String title, Icon icon, String tip, 
+	public Component openTab(String title, Icon icon, String tip, 
 			Constructor<?> constructType, Object... construct){
 		EqualsConstruct ec = null, cur;
 		int index = getTabCount();
@@ -174,6 +175,7 @@ public class LightTabbedPane extends JTabbedPane {
 			}
 		}
 		setSelectedIndex(index);
+		return getSelectedComponent();
 	}
 	@Override
 	public void setTitleAt(int index, String title){

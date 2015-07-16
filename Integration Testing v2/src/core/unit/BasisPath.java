@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
+import core.solver.Solver;
 import core.solver.Solver.Result;
 
 /**
@@ -53,13 +54,13 @@ public class BasisPath extends ArrayList<Statement> {
 		int i = 0;
 		
 		for (Statement stm: this){
+			i++;
 			if (stm instanceof FlagStatement || stm instanceof ScopeStatement)
 				continue;
 			
 			content += String.format(" -> %s",	stm);
 			if (stm.isCondition())
-				content += String.format(" (%s)", stm.getTrue() == get(i+1));
-			i++;
+				content += String.format(" (%s)", stm.getTrue() == get(i));
 		}
 		
 		return content.isEmpty() ? content : content.substring(4);
@@ -91,6 +92,14 @@ public class BasisPath extends ArrayList<Statement> {
 	 */
 	public void setSolveResult(Result mResult) {
 		this.mResult = mResult;
+	}
+	
+	/**
+	 * Kiểm tra đường thi hành này là không khả thi, không thế thực hiện được
+	 * @return true nếu đã được gán kết quả giải hệ và kết quả là vô nghiệm
+	 */
+	public boolean isUnreachable(){
+		return mResult != null && mResult.getSolutionCode() == Solver.ERROR;
 	}
 	
 }

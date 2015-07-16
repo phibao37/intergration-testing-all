@@ -50,6 +50,7 @@ public class Node extends JLabel {
 	private Node[] mRefers;
 	private Canvas mCanvas;
 	private int x, y;
+	private int mFlags = FLAG_CLEAR;
 	
 	/**
 	 * Tạo một nút mới từ phần tử tương ứng
@@ -178,6 +179,30 @@ public class Node extends JLabel {
 	 */
 	public Node[] getRefers(){
 		return mRefers;
+	}
+	
+	/**
+	 * Xóa các flag khác
+	 */
+	public static final int FLAG_CLEAR = 0;
+	
+	/**
+	 * Thêm một đính kèm cờ hiệu cho nút này
+	 * @param flag cờ hiệu để chỉ định một tình trạng, hoặc {@link #FLAG_CLEAR} nếu
+	 * muốn hủy tất cả
+	 */
+	public void addFlag(int flag){
+		if (flag == FLAG_CLEAR)
+			mFlags = FLAG_CLEAR;
+		else
+			mFlags = mFlags | flag;
+	}
+	
+	/**
+	 * Kiểm tra nút có giữ một cờ hiệu nào không
+	 */
+	public boolean hasFlag(int flag){
+		return (mFlags & flag) != 0;
 	}
 	
 	/** Thiết đặt canvas chứa nút*/

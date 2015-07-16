@@ -13,6 +13,7 @@ import core.models.expression.DeclareExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
 import core.models.expression.NameExpression;
+import core.models.expression.NotNegativeExpression;
 import core.models.expression.PlaceHolderExpression;
 import core.models.expression.ReturnExpression;
 import core.models.expression.UnaryExpression;
@@ -114,10 +115,8 @@ public class BasisPathParser {
 						
 						//Thêm điều kiện các chỉ số phải không âm
 						for (Expression index: array.getIndexes()){
-							addConstrain(new BinaryExpression(
-									tables.evalExpression(index),
-									BinaryExpression.GREATER_EQUALS, 
-									new IDExpression("0")));
+							addConstrain(new NotNegativeExpression(
+									tables.evalExpression(index)));
 						}
 						
 						//Thêm các biểu thức truy cập biến mảng testcase (scope = 1)

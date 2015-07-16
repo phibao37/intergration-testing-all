@@ -247,7 +247,6 @@ public class Statement extends Element implements Graphable {
 	 * Câu lệnh return, kêt thúc hàm
 	 */
 	public static final int RETURN = 6;
-	
 }
 
 

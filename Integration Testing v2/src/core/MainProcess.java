@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import core.error.FunctionNotFoundException;
 import core.error.StatementNoRootException;
+import core.error.ThreadStateException;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Variable;
@@ -42,14 +43,15 @@ public abstract class MainProcess implements FilenameFilter {
 	private Solver mSolver = Z3Solver.DEFAULT;
 	
 	/**
-	 * Chạy tiến trình nạp chính
+	 * Nạp các hàm (và các biến toàn cục, ..) vào tiến trình
 	 */
-	public void run(){
+	public void loadFunctionFromFiles(){
 		//Xóa dữ liệu cũ
 		mFunctions.clear();
 		mVariables.clear();
 		
-		//Duyệt các tập tin đang làm việc, thêm các hàm và biến tìm được vào danh sách
+		//Duyệt các tập tin đang làm việc, thêm các hàm và biến tìm được 
+		//vào danh sách
 		for (File file: mFiles)
 			loadFile(file);
 		
@@ -104,30 +106,51 @@ public abstract class MainProcess implements FilenameFilter {
 	}
 	
 	/**
-	 * Bắt đầu quá trình kiểm thử một hàm (đơn vị)
+	 * Bắt đầu quá trình kiểm thử một hàm (đơn vị). Các đường thi hành của cả 2 đồ thị
+	 * phủ cấp 1-2 và 3 đều được phân tích và giải ra nghiệm tương ứng
 	 * @param func hàm cần kiểm thử
-	 * @return danh sách các đường thi hành đã được gán các ràng buộc và các testcase
+	 * @param listener các công việc khi việc kiểm thử đã xong
+	 * @throws ThreadStateException tiến trình trước chưa chạy xong
 	 */
-	public ArrayList<BasisPath> beginTestFunction(Function func){
-		ArrayList<BasisPath> paths = func.getCFG(true).getBasisPaths();
-		
-		for (BasisPath path: paths){
-			try {
-				mPathParser.parseBasisPath(path, func);
-			} catch (StatementNoRootException e1) {
-				System.out.println(" !!! " + e1.getMessage());
-				continue;
+	public void beginTestFunction(Function func, Returned listener) 
+			throws ThreadStateException {
+
+		new RunThread<Void>(listener) {
+			
+			@Override
+			protected Void doTask() {
+				GUI.instance.setStatus("Đang phân tích các đường thi hành");
+				ArrayList<BasisPath> paths = new ArrayList<BasisPath>();
+				
+				paths.addAll(func.getCFG(false).getBasisPaths());
+				paths.addAll(func.getCFG(true).getBasisPaths());
+				
+				int i = 1, length = paths.size();
+				
+				for (BasisPath path : paths) {
+					try {
+						mPathParser.parseBasisPath(path, func);
+					} catch (StatementNoRootException e1) {
+						System.out.println(" !!! " + e1.getMessage());
+						continue;
+					}
+
+					ConstraintEquations ce = mPathParser.getConstrains();
+					path.setConstraint(ce);
+					
+					GUI.instance.setStatus("Đang giải hệ %d/%d", i++, length);
+					Result result = mSolver.solve(ce.getTestcases(), ce,
+							ce.getArrayAccesses());
+					path.setSolveResult(result);
+				}
+				GUI.instance.setStatus(null);
+				return null;
 			}
-			
-			ConstraintEquations ce = mPathParser.getConstrains();
-			path.setConstraint(ce);
-			
-			Result result = mSolver.solve(ce.getTestcases(), ce, ce.getArrayAccesses());
-			path.setSolveResult(result);
-		}
-		
-		return paths;
+
+		}.ensureStart();
+
 	}
+		
 	
 	public void beginTestFunctionBeta(Function func){
 		int feasible = 0;
@@ -270,6 +293,83 @@ public abstract class MainProcess implements FilenameFilter {
 	 */
 	public ArrayList<Variable> getGlobalVariables(){
 		return mVariables;
+	}
+	
+	/**
+	 * Thread dùng để chạy các công việc cần xử lý<br/>
+	 * Cần sử dụng {@link #ensureStart()} thay vì {@link #start()}
+	 * @param <R> listener cho kết quả
+	 */
+	protected abstract class RunThread<R> extends Thread{
+		
+		protected Return<R> mCallBack;
+		
+		/**
+		 * Tạo một thread cùng với listener kết quả, có thể null nếu không muốn nhận
+		 */
+		public RunThread(Return<R> listener){
+			mCallBack = listener;
+		}
+		
+		@Override
+		public final void run() {
+			R result = doTask();
+			
+			if (mCallBack != null)
+				mCallBack.receive(result);
+			instance = null;
+		}
+		
+		/**
+		 * Kiểm tra và chạy tiến trình
+		 * @throws ThreadStateException tiến trình trước chưa chạy xong
+		 */
+		public synchronized void ensureStart() throws ThreadStateException{
+			if (instance != null)
+				throw new ThreadStateException(instance);
+			instance = this;
+			start();
+		}
+
+		/**
+		 * Các công việc xử lý chính diễn ra ở đây
+		 * @return kết quả sau khi công việc đã hoàn thành
+		 */
+		protected abstract R doTask();
+		
+		
+	}
+	
+	private static Thread instance;
+	
+	/**
+	 * Mô tả một listener dùng để truyền vào các thread để lấy kết quả
+	 * @param <R> kiểu kết quả mong đợi
+	 */
+	public static interface Return<R>{
+		
+		/**
+		 * Phương thức sẽ được gọi khi tiến trình hoàn thành công việc
+		 * @param result kết quả của công việc
+		 */
+		public void receive(R result);
+	}
+	
+	/**
+	 * Mô tả một listener dùng để truyền vào các thread.<br/>
+	 * Hàm {@link #receive()} sẽ được gọi sau khi thread đã xong công việc
+	 */
+	public static abstract class Returned implements Return<Void>{
+
+		@Override
+		public final void receive(Void result) {
+			receive();
+		}
+		
+		/**
+		 * Công việc cần thực hiện sau khi thread đã hoàn thành công việc
+		 */
+		public abstract void receive();
 	}
 	
 }

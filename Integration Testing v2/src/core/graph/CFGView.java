@@ -44,6 +44,13 @@ public class CFGView extends JScrollPane implements LightTabbedPane.EqualsConstr
 		CFG cfg = fn.getCFG(subCondition);
 		canvas.setAdapter(new StatementAdapter(cfg));
 	}
+	
+	/**
+	 * Trả về canvas ở bên trong
+	 */
+	public StatementCanvas getCanvas(){
+		return canvas;
+	}
 
 	public boolean equalsConstruct(Object... constructItem) {	
 		return fn == constructItem[0] && subCondition == (Boolean)constructItem[1];

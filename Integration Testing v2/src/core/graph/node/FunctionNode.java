@@ -31,7 +31,7 @@ public class FunctionNode extends Node {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2){
-					openViewSource();
+					beginTest();
 				}
 			}
 		});

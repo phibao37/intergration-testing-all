@@ -60,7 +60,7 @@ public class GUIBeta {
 			try {
 				CMainProcess main = new CMainProcess();
 				main.setWorkingFiles(fileChooser_C.getSelectedFiles(), false);
-				main.run();
+				main.loadFunctionFromFiles();
 				ArrayList<Function> fnList = main.getFunctions();
 				
 				if (fnList.size() > 0){
@@ -82,7 +82,7 @@ public class GUIBeta {
 			try {
 				JMainProcess main = new JMainProcess();
 				main.setWorkingFiles(fileChooser_J.getSelectedFiles(), false);
-				main.run();
+				main.loadFunctionFromFiles();
 				ArrayList<Function> fnList = main.getFunctions();
 				
 				if (fnList.size() > 0){

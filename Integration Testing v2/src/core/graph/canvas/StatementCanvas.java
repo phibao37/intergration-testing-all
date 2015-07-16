@@ -1,6 +1,7 @@
 package core.graph.canvas;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -16,6 +17,7 @@ import core.graph.adapter.StatementAdapter;
 import core.graph.node.Node;
 import core.graph.node.StatementNode;
 import core.models.Function;
+import core.models.Statement;
 
 /**
  * Lớp đồ họa giúp hiển thị các nút câu lệnh
@@ -27,6 +29,8 @@ public class StatementCanvas extends Canvas {
 	public static final Color TRUE = Color.BLUE;
 	public static final Color FALSE = Color.GREEN;
 	public static final Color SELECTED = Color.RED;
+	
+	private static final Font FONT_LABEL = new Font("TimesRoman", Font.BOLD, 12);
 	
 	private static final long serialVersionUID = 1L;
 	private Function mFunc;
@@ -51,7 +55,11 @@ public class StatementCanvas extends Canvas {
 		smtNodeList.addAll(adapter);
 		StatementNode beginNode = smtNodeList.get(0);
 		
-		beginNode.setLocation(GUI.instance.getDefaultCanvasWidth()/2, paddingY);
+		int width = getWidth();
+		if (width == 0)
+			width = GUI.instance.getDefaultCanvasWidth();
+		
+		beginNode.setLocation(width/2, paddingY);
 		for (StatementNode node: smtNodeList){
 			StatementNode[] refer = (StatementNode[]) node.getRefers();
 			boolean isCondition = node.isConditionNode();
@@ -89,33 +97,69 @@ public class StatementCanvas extends Canvas {
 		postSetAdapter();
 	}
 	
+	/**
+	 * Lựa chọn (làm nổi bật) một đường đi trong đồ thị
+	 * @param path danh sách có thứ tự các câu lệnh trên đường đi
+	 */
+	public void setSelectedPath(ArrayList<Statement> path){
+		resetAllSelectingPath(false);
+		mAdapter.selectNodesByPath(path);
+		this.repaint();
+	}
+	
+	/**
+	 * Hủy bỏ đường đi đang được lựa chọn
+	 */
+	private void resetAllSelectingPath(boolean repaint){
+		for (StatementNode node: smtNodeList){
+			node.addFlag(Node.FLAG_CLEAR);
+			node.setLabel(StatementNode.LABEL_NONE);
+		}
+		if (repaint)
+			this.repaint();
+	}
+	
+	/**
+	 * Bỏ chọn đường đi đang được lựa chọn của canvas 
+	 */
+	public void resetAllSelectingPath(){
+		resetAllSelectingPath(true);
+	}
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		int x1, y1, x2, y2, xs, ys;
-		 Node[] refer;
+		StatementNode[] refer;
 		 int d = 12, h = 5, gap = 25;
 		 Graphics2D g2 = (Graphics2D) g;
 		 boolean rightSide;
 	     
 	     g2.setStroke(NORMAL_STROKE);
+	     g2.setFont(FONT_LABEL);
 		 for (StatementNode n1: smtNodeList){
-			 refer = n1.getRefers();
+			 refer = (StatementNode[]) n1.getRefers();
 			 xs = n1.getX() + n1.getWidth()/2;
 			 ys = n1.getY() + n1.getHeight();
 			 boolean isCondition = n1.isConditionNode();
 			 int length = isCondition ? refer.length : 1;
 			 
 			 for (int i = 0; i < length; i++){
-				 Node n2 = refer[i];
+				 StatementNode n2 = refer[i];
+				 boolean isTrue = i == 0;
 				 if (n2 == null) continue;
 				 
 				 if (n2 == n1){
 					 n1.setBorder(Node.DOUBLE_BORDER);
 				} else {
 					Color color;
-					if (isCondition)
-						color = i == 0 ? TRUE : FALSE;
+					
+					if (n1.hasFlag(isTrue ? 
+							StatementNode.FLAG_SELECT_TRUE
+							: StatementNode.FLAG_SELECT_FALSE))
+						color = SELECTED;
+					else if (isCondition)
+						color = isTrue ? TRUE : FALSE;
 					else
 						color = DEFAULT;
 					g2.setColor(color);
@@ -167,6 +211,20 @@ public class StatementCanvas extends Canvas {
 					drawArrowLine(g2, x1, y1, x2, y2, d, h); 
 				 }
 			 }
+			 
+			 if (!n1.getLabel().isEmpty()) {
+					int x = n1.getX() + n1.getWidth();
+					int y = n1.getY();
+					String str = n1.getLabel();
+					int lbr = (str.length() - str.replace(", ", "").length()) / 2;
+					int w = 7 * str.length() - 8 * lbr - 1;
+
+					g2.setColor(Color.YELLOW);
+					g2.fillOval(x, y - 17, w + 8, 17);
+					g2.setColor(Color.BLACK);
+					g2.drawString(n1.getLabel(), x + 4, y - 4);
+
+				}
 		 }
 		 
 		 super.postPaintComponent(g2);
@@ -190,6 +248,8 @@ public class StatementCanvas extends Canvas {
 	
 	@Override
 	protected void refresh() {
+		for (StatementNode node: mAdapter)
+			node.setLocation(0, 0);
 		setAdapter(mAdapter);
 		super.refresh();
 	}

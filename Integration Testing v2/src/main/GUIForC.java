@@ -27,6 +27,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -34,17 +36,27 @@ import javax.swing.table.DefaultTableModel;
 import cdt.CMainProcess;
 import cdt.SelectFunction;
 import core.GUI;
+import core.MainProcess.Returned;
 import core.error.MainNotFoundException;
+import core.error.ThreadStateException;
 import core.graph.CFGView;
 import core.graph.FileView;
 import core.graph.LightTabbedPane;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.canvas.FunctionCanvas;
+import core.graph.canvas.StatementCanvas;
 import core.models.Function;
+import core.models.Statement;
+import core.models.expression.NotNegativeExpression;
+import core.models.statement.FlagStatement;
+import core.models.statement.ScopeStatement;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
+import core.unit.ConstraintEquations;
 
 import javax.swing.LayoutStyle.ComponentPlacement;
+
+import java.awt.FlowLayout;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -60,9 +72,9 @@ public class GUIForC extends GUI {
 	private LightTabbedPane infoTab;
 	private LightTabbedPane tabbedCanvas;
 
-	private DefaultTableModel pathModel;
-	private JTable table;
 	private Function preRoot;
+	private DefaultTableModel detailModel;
+	private DefaultTableCellRenderer centerRenderer;
 	
 	/** Tiến trình chính của ứng dụng */
 	private CMainProcess main;
@@ -91,7 +103,7 @@ public class GUIForC extends GUI {
 			tabbedCanvas.setSelectedIndex(0);
 			try {
 				main.setWorkingFiles(fileChooser.getSelectedFiles(), true);
-				main.run();
+				main.loadFunctionFromFiles();
 				if (main.isEmptyFunction())
 					return;
 				fGraph.setAdapter(new FunctionAdapter(main.getFunctions()));
@@ -138,42 +150,150 @@ public class GUIForC extends GUI {
 	}
 	
 	@Override
-	public void openFuntionView(Function fn, boolean subCondition){
+	public CFGView openFuntionView(Function fn, boolean subCondition){
 		try {
-			tabbedCanvas.openTab(fn.getName(), null, fn.getNameAndFile(),
+			return (CFGView) tabbedCanvas.openTab(
+					fn.getName() + (subCondition ? "-3" : "-1,2"),
+					null, 
+					fn.getNameAndFile(),
 					CFGView.class.getConstructor(Function.class, boolean.class),
 					fn, subCondition);
-		} catch (Exception e) {}
+		} catch (Exception e) {
+			return null;
+		}
 	}
+	
+	private JLabel lbl_loading;
+	private JLabel lbl_status;
+
+	private int currentIndex;
+	private Function currentFunction;
+	
+	private ArrayList<JTable> listTable;
+	private ArrayList<Boolean> listSubCondition;
+	private ArrayList<ArrayList<BasisPath>> listPath;
 
 	@Override
 	public void beginTestFunction(Function func) {
-		ArrayList<BasisPath> paths = main.beginTestFunction(func);
-		int i;
-		
-		for (i = pathModel.getRowCount()-1;i>=0;i--)
-			pathModel.removeRow(i);
-		
-		i = 0;
-		for (BasisPath path: paths){
-			Result result = path.getSolveResult();
-			pathModel.addRow(new Object[]{
-				i,
-				path.toStringSkipMarkdown(),
-				result.getSolutionMessage(),
-				result.getReturnValue()
+		try {
+			main.beginTestFunction(func, new Returned() {
+				
+				@Override
+				public void receive() {
+					currentFunction = func;
+					
+					setStatus("Đang tìm các nhánh dựa trên các cấp độ phủ");
+					listPath.clear();
+					listPath.add(func.getCFG(false).getCoverStatementPaths());
+					listPath.add(func.getCFG(false).getCoverBranchPaths());
+					listPath.add(func.getCFG(true).getCoverBranchPaths());
+					
+					listSubCondition.clear();
+					listSubCondition.add(false);
+					listSubCondition.add(false);
+					listSubCondition.add(true);
+					
+					for (int i = 0; i < listPath.size(); i++){
+						DefaultTableModel pathModel = (DefaultTableModel) 
+								listTable.get(i).getModel();
+						removeTableModel(pathModel);
+						
+						int j = 1;
+						for (BasisPath path: listPath.get(i)){
+							Result r = path.getSolveResult();
+							pathModel.addRow(new Object[]{
+								j++,
+								path.toStringSkipMarkdown(),
+								r.getSolutionMessage(),
+								r.getReturnValue()
+							});
+						}
+						pathModel.addRow(new Object[]{null, null, null, null});
+					}
+					
+					openFileView(func.getSourceFile());
+					openFuntionView(func, listSubCondition.get(currentIndex));
+					setStatus(null);
+				}
 			});
-			i++;
+		} catch (ThreadStateException e) {
+			alertError("Việc xử lý chưa hoàn thành");
 		}
-		pathModel.addRow(new Object[]{null, null, null, null});
+	}
+	
+	/**
+	 * Có sự thay đổi các tab table
+	 */
+	private void tableTabChanged(int index){
+		currentIndex = index;
+		if (listPath.isEmpty()) return;
+		if (index < 3)
+			openFuntionView(currentFunction, listSubCondition.get(currentIndex));
+	}
+	
+	private void selectPathByIndex(int index){
+		StatementCanvas canvas = openFuntionView(
+				currentFunction, 
+				listSubCondition.get(currentIndex)
+				).getCanvas();
+		index--;
 		
-		openFileView(func.getSourceFile());
-		openFuntionView(func, true);
+		if (index < 0){
+			canvas.resetAllSelectingPath();
+			return;
+		}
+		
+		BasisPath path = listPath.get(currentIndex).get(index);
+		ConstraintEquations constraint = path.getConstraint();
+		int i = 0, j = 0;
+		
+		canvas.setSelectedPath(path);
+		removeTableModel(detailModel);
+		for (Statement stm: path){
+			if (stm instanceof ScopeStatement)
+				continue;
+			else if (stm instanceof FlagStatement){
+				i++;
+				continue;
+			}
+			while (j < constraint.size() && 
+					constraint.get(j) instanceof NotNegativeExpression)
+				j++;
+			
+			detailModel.addRow(new Object[]{
+					i++,
+					stm,
+					stm.isCondition() ? constraint.get(j++) : ""
+			});
+		}
+		
+		infoTab.setSelectedIndex(0);
 	}
 
 	@Override
 	public int getDefaultCanvasWidth() {
 		return fGraph.getWidth();
+	}
+	
+	@Override
+	public void setStatus(String status, Object... args){
+		if (status == null || status.isEmpty()){
+			lbl_loading.setVisible(false);
+			lbl_status.setVisible(false);
+		}
+		else {
+			lbl_loading.setVisible(true);
+			lbl_status.setVisible(true);
+			lbl_status.setText(String.format(status, args));
+		}
+	}
+	
+	/**
+	 * Xóa hết các ô trong một bảng
+	 */
+	private static void removeTableModel(DefaultTableModel model){
+		for (int j = model.getRowCount()-1;j>=0;j--)
+			model.removeRow(j);
 	}
 
 	public GUIForC() {
@@ -185,6 +305,11 @@ public class GUIForC extends GUI {
 	 */
 	private void initialize() {
 		main = new CMainProcess();
+		listTable = new ArrayList<JTable>();
+		listSubCondition = new ArrayList<Boolean>();
+		listPath = new ArrayList<ArrayList<BasisPath>>();
+		centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		frmMain = new JFrame();
 		frmMain.setTitle("Kiểm thử tích hơp cho C");
@@ -205,33 +330,6 @@ public class GUIForC extends GUI {
 		detailWrap.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		splitPane_main.setRightComponent(detailWrap);
 
-		JScrollPane extraWrap = new JScrollPane();
-		extraWrap.setBorder(null);
-		detailWrap.setLeftComponent(extraWrap);
-		
-		table = new JTable();
-		table.setModel(new DefaultTableModel(
-			new Object[][] {
-			},
-			new String[] {
-				"STT", "\u0110\u01B0\u1EDDng d\u1EABn", "Testcases", "Return"
-			}
-		));
-		table.getColumnModel().getColumn(0).setPreferredWidth(30);
-		table.getColumnModel().getColumn(0).setMinWidth(30);
-		table.getColumnModel().getColumn(0).setMaxWidth(30);
-		table.getColumnModel().getColumn(3).setPreferredWidth(70);
-		table.getColumnModel().getColumn(3).setMaxWidth(70);
-		extraWrap.setViewportView(table);
-		extraWrap.getViewport().setBackground(Color.WHITE);
-
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-		for (int x = 0; x < table.getColumnCount(); x++) {
-			table.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
-		}
-		pathModel = (DefaultTableModel) table.getModel();
-
 		infoTab = new LightTabbedPane(JTabbedPane.TOP);
 		infoTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		infoTab.setBorder(null);
@@ -240,19 +338,89 @@ public class GUIForC extends GUI {
 		JScrollPane infoWrap = new JScrollPane();
 		infoWrap.setBorder(null);
 		infoTab.addTab("Chi tiết", null, infoWrap, null);
+		
+		JTable table_1 = new JTable();
+		table_1.setModel(detailModel = new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"STT", "C\u00E2u l\u1EC7nh", "C\u00E1c r\u00E0ng bu\u1ED9c"
+			}
+		));
+		table_1.getColumnModel().getColumn(0).setPreferredWidth(30);
+		table_1.getColumnModel().getColumn(0).setMinWidth(30);
+		table_1.getColumnModel().getColumn(0).setMaxWidth(30);
+		infoWrap.setViewportView(table_1);
+		infoWrap.getViewport().setBackground(Color.WHITE);
 		infoTab.setTabCloseableAt(0, false);
+		
+		for (int x = 0; x < table_1.getColumnCount(); x++) {
+			table_1.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
+		}
+		
+		JTabbedPane tab_table = new JTabbedPane(JTabbedPane.TOP);
+		tab_table.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				JTabbedPane tab = (JTabbedPane) e.getSource();
+				tableTabChanged(tab.getSelectedIndex());
+			}
+		});
+		detailWrap.setLeftComponent(tab_table);
+		
+		/*---------BEGIN ADD TABLES-----------*/
+		
+		String[] tab_names = {"Phủ câu lệnh", "Phủ nhánh", "Phủ điều kiện con"};
+		for (String tab_name: tab_names){
+			JScrollPane extraWrap = new JScrollPane();
+			extraWrap.setBorder(null);
+			
+			JTable table = new JTable();
+			table.setModel(new DefaultTableModel(
+				new Object[][] {
+				},
+				new String[] {
+					"STT", "\u0110\u01B0\u1EDDng d\u1EABn", "Testcases", "Return"
+				}
+			));
+			table.getColumnModel().getColumn(0).setPreferredWidth(30);
+			table.getColumnModel().getColumn(0).setMinWidth(30);
+			table.getColumnModel().getColumn(0).setMaxWidth(30);
+			table.getColumnModel().getColumn(3).setPreferredWidth(70);
+			table.getColumnModel().getColumn(3).setMaxWidth(70);
+			extraWrap.setViewportView(table);
+			extraWrap.getViewport().setBackground(Color.WHITE);
 
-		JPanel infoView = new JPanel();
-		infoView.setBorder(null);
-		infoView.setBackground(Color.WHITE);
-		infoWrap.setViewportView(infoView);
+			
+			for (int x = 0; x < table.getColumnCount(); x++) {
+				table.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
+			}
+			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
+						return;
+					Object index = table.getValueAt(table.getSelectedRow(), 0);
+					
+					if (index == null)
+						selectPathByIndex(0);
+					else
+						selectPathByIndex(Integer.valueOf(index + ""));
+				}
+			});
+			
+			tab_table.add(tab_name, extraWrap);
+			listTable.add(table);
+		}
+		
+		/*---------END ADD TABLES-----------*/
 
 		detailWrap.setDividerLocation(250);
 		splitPane_main.setDividerLocation(600);
 
 		JLabel lbl_open_file = new JLabel();
 		lbl_open_file.setHorizontalAlignment(SwingConstants.CENTER);
-		lbl_open_file.setBounds(0, 5, 80, 30);
+		lbl_open_file.setBounds(10, 5, 80, 30);
 		lbl_open_file.setToolTipText("Mở tập tin C/thư mục");
 		lbl_open_file.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lbl_open_file.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
@@ -267,27 +435,34 @@ public class GUIForC extends GUI {
 		});
 		lbl_open_file.setIcon(new ImageIcon(GUIForC.class
 				.getResource("/image/file.png")));
+		
+		JPanel panel_tray = new JPanel();
+		panel_tray.setBackground(Color.WHITE);
 		GroupLayout groupLayout = new GroupLayout(frmMain.getContentPane());
 		groupLayout.setHorizontalGroup(
-			groupLayout.createParallelGroup(Alignment.LEADING)
-				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(10)
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(panel_toolbar, GroupLayout.PREFERRED_SIZE, 1230, GroupLayout.PREFERRED_SIZE)
-							.addContainerGap())
-						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 1342, Short.MAX_VALUE)
-							.addGap(10))))
+			groupLayout.createParallelGroup(Alignment.TRAILING)
+				.addComponent(panel_toolbar, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
+				.addComponent(splitPane_main, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
+				.addComponent(panel_tray, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addComponent(panel_toolbar, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 644, Short.MAX_VALUE)
-					.addGap(11))
+					.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
+					.addComponent(panel_tray, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
 		);
+		panel_tray.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+		
+		lbl_status = new JLabel("");
+		lbl_status.setVisible(false);
+		panel_tray.add(lbl_status);
+		
+		lbl_loading = new JLabel("");
+		lbl_loading.setVisible(false);
+		lbl_loading.setIcon(new ImageIcon(GUIForC.class.getResource("/image/loading.gif")));
+		panel_tray.add(lbl_loading);
 		
 		tabbedCanvas = new LightTabbedPane(JTabbedPane.TOP);
 		tabbedCanvas.setBorder(null);
@@ -323,7 +498,7 @@ public class GUIForC extends GUI {
 		//tabbedCanvas.setTabCloseableAt(1, false);
 
 		JLabel lbl_set_root = new JLabel();
-		lbl_set_root.setBounds(90, 5, 100, 30);
+		lbl_set_root.setBounds(100, 5, 100, 30);
 		lbl_set_root.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -360,5 +535,4 @@ public class GUIForC extends GUI {
 		JOptionPane.showMessageDialog(frmMain, s, "Errors",
 				JOptionPane.ERROR_MESSAGE);
 	}
-	
 }

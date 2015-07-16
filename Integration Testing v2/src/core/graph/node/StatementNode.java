@@ -10,6 +10,8 @@ import core.models.Statement;
 public class StatementNode extends Node {
 	private static final long serialVersionUID = 175537134709065602L;
 	
+	private String mLabel = "";
+	
 	/** Tạo một nút từ một câu lệnh tương ứng*/
 	public StatementNode(Statement statement){
 		super(statement);
@@ -36,6 +38,40 @@ public class StatementNode extends Node {
 		if (trueStm.isCondition())
 			return false;
 		return trueStm.getType() == Statement.RETURN || trueStm.getTrue() == falseStm;
+	}
+	
+	/**
+	 * Gán nút này không có số thứ tự
+	 */
+	public static final int LABEL_NONE = -1;
+	
+	/**
+	 * Cờ hiệu nút này có nhánh true được chọn
+	 */
+	public static final int FLAG_SELECT_TRUE = 1;
+	
+	/**
+	 * Cờ hiệu nút này có nhánh false được chọn
+	 */
+	public static final int FLAG_SELECT_FALSE = 2;
+	
+	/**
+	 * Thêm nhãn thứ tự cho nút
+	 * @param label số thứ tự vị trí của nút trong đường đi, hoặc {@link #LABEL_NONE} 
+	 * nếu muốn hủy bỏ toàn bộ 
+	 */
+	public void setLabel(int label){
+		if (label == LABEL_NONE)
+			mLabel = "";
+		else
+			mLabel += (mLabel.isEmpty() ? "" : ", ") + label;
+	}
+	
+	/**
+	 * Trả về nhãn thứ tự cho nút
+	 */
+	public String getLabel(){
+		return mLabel;
 	}
 	
 	/** Kiểm tra nút này đã được đặt vị trí*/

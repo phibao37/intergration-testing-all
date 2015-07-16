@@ -1,6 +1,8 @@
 package core;
 
 import java.io.File;
+
+import core.graph.CFGView;
 import core.models.Function;
 
 /**
@@ -34,8 +36,9 @@ public class GUI {
 	 * Mở đồ thị CFG của một hàm trong chương trình để xem
 	 * @param fn hàm trong chương trình
 	 * @param subCondition đồ thị phủ các điều kiện con ?
+	 * @return 
 	 */
-	public void openFuntionView(Function fn, boolean subCondition){
+	public CFGView openFuntionView(Function fn, boolean subCondition){
 		throw new RuntimeException();
 	}
 	
@@ -54,4 +57,9 @@ public class GUI {
 	public int getDefaultCanvasWidth(){
 		return 0;
 	}
+	
+	/**
+	 * Đặt thông báo trạng thái cho ứng dụng
+	 */
+	public void setStatus(String status, Object... args) {}
 }

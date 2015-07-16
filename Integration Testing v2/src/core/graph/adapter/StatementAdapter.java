@@ -1,5 +1,8 @@
 package core.graph.adapter;
 
+import java.util.ArrayList;
+import java.util.function.Predicate;
+
 import core.graph.node.StatementNode;
 import core.models.Statement;
 import core.models.statement.ScopeStatement;
@@ -38,5 +41,38 @@ public class StatementAdapter extends NodeAdapter<StatementNode> {
 				node.setRefers(new StatementNode[]{nodeTrue, nodeFalse});
 		}
 		
+	}
+	
+	/**
+	 * Đánh dấu các nút đồ họa ứng với danh sách các câu lệnh
+	 */
+	@SuppressWarnings("unchecked")
+	public void selectNodesByPath(ArrayList<Statement> stmList){
+		ArrayList<Statement> copy = (ArrayList<Statement>) stmList.clone();
+		
+		copy.removeIf(new Predicate<Statement>() {
+			@Override
+			public boolean test(Statement t) {
+				return t instanceof ScopeStatement;
+			}
+		});
+		
+		StatementNode[] path = new StatementNode[copy.size()];
+		int i = 0;
+		
+		for (Statement stm: copy){
+			path[i] = getNodeByElement(stm);
+			path[i].setLabel(i);
+			i++;
+		}
+		
+		for (i = 0; i < path.length - 1; i++){
+			StatementNode[] refer = (StatementNode[]) path[i].getRefers();
+			
+			if (refer[0] == path[i+1])
+				path[i].addFlag(StatementNode.FLAG_SELECT_TRUE);
+			else
+				path[i].addFlag(StatementNode.FLAG_SELECT_FALSE);
+		}
 	}
 }

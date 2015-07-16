@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Các tiện ích chung
@@ -61,6 +62,16 @@ public class Utils {
 		for (int i = 1; i < args.length; i++)
 			result += sep + args[i];
 		return result;
+	}
+	
+	/**
+	 * @see #merge(String, Object[])
+	 */
+	public static String merge(String sep, List<?> list){
+		Object[] array = new Object[list.size()];
+		list.toArray(array);
+		
+		return merge(sep, array);
 	}
 	
 	/**
