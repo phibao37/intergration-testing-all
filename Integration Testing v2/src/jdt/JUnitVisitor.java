@@ -75,7 +75,7 @@ public class JUnitVisitor implements UnitVisitor {
 		Type type = para.getType();
 		int dimen = para.getExtraDimensions();
 		Variable var = null;
-		
+
 		//Không có khai báo biến mảng, số lượng [] bằng 0
 		if (dimen == 0){
 			var = new Variable(name, JType.parse(type.toString()));

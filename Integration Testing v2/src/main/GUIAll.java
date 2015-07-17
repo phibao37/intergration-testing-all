@@ -36,6 +36,7 @@ import javax.swing.table.DefaultTableModel;
 import cdt.CMainProcess;
 import cdt.SelectFunction;
 import core.GUI;
+import core.MainProcess;
 import core.MainProcess.Returned;
 import core.error.CoreException;
 import core.error.MainNotFoundException;
@@ -65,17 +66,19 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import jdt.JMainProcess;
+
 /**
  * Lớp giao diện hiển thị của ứng dụng
  * 
  * @author ducvu
  */
-public class GUIForC extends GUI {
+public class GUIAll extends GUI {
 
 	private JFrame frmMain;
 	private FunctionCanvas fGraph;
 	//private VCanvas vGraph;
-	private JFileChooser fileChooser;
+	private JFileChooser fileChooserC, fileChooserJ;
 	private LightTabbedPane infoTab;
 	private LightTabbedPane tabbedCanvas;
 
@@ -84,7 +87,7 @@ public class GUIForC extends GUI {
 	private DefaultTableCellRenderer centerRenderer;
 	
 	/** Tiến trình chính của ứng dụng */
-	private CMainProcess main;
+	private MainProcess main;
 
 	/**
 	 * Chạy ứng dụng
@@ -93,7 +96,7 @@ public class GUIForC extends GUI {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GUIForC window = new GUIForC();
+					GUIAll window = new GUIAll();
 					window.frmMain.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -104,12 +107,42 @@ public class GUIForC extends GUI {
 
 	/** Mở hộp thoại để chọn tập tin */
 	private void openCFiles() {
-		int status = fileChooser.showDialog(frmMain, "Mở tập tin C/thư mục");
+		int status = fileChooserC.showDialog(frmMain, "Mở tập tin C/thư mục");
 
 		if (status == JFileChooser.APPROVE_OPTION) {
 			tabbedCanvas.setSelectedIndex(0);
 			try {
-				main.setWorkingFiles(fileChooser.getSelectedFiles(), true);
+				main = new CMainProcess();
+				main.setWorkingFiles(fileChooserC.getSelectedFiles(), true);
+				main.loadFunctionFromFiles();
+				if (main.isEmptyFunction())
+					return;
+				fGraph.setAdapter(new FunctionAdapter(main.getFunctions()));
+				preRoot = null;
+			} 
+			catch (MainNotFoundException e) {
+				if (main.getFunctions().size() == 1)
+					fGraph.setAdapter(new FunctionAdapter(
+							main.getFunctions().get(0)));
+				else
+					this.openSelectFunction();
+			} 
+			catch (Exception e) {
+				alertError(e.getMessage());
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/** Mở hộp thoại để chọn tập tin */
+	private void openJavaFiles() {
+		int status = fileChooserJ.showDialog(frmMain, "Mở tập tin Java");
+
+		if (status == JFileChooser.APPROVE_OPTION) {
+			tabbedCanvas.setSelectedIndex(0);
+			try {
+				main = new JMainProcess();
+				main.setWorkingFiles(fileChooserJ.getSelectedFiles(), true);
 				main.loadFunctionFromFiles();
 				if (main.isEmptyFunction())
 					return;
@@ -307,7 +340,7 @@ public class GUIForC extends GUI {
 			model.removeRow(j);
 	}
 
-	public GUIForC() {
+	public GUIAll() {
 		initialize();
 	}
 
@@ -315,7 +348,7 @@ public class GUIForC extends GUI {
 	 * Khởi tạo nội dung của khung ứng dụng.
 	 */
 	private void initialize() {
-		main = new CMainProcess();
+		//main = new CMainProcess();
 		listTable = new ArrayList<JTable>();
 		listSubCondition = new ArrayList<Boolean>();
 		listPath = new ArrayList<ArrayList<BasisPath>>();
@@ -450,27 +483,27 @@ public class GUIForC extends GUI {
 		
 				JPanel panel_toolbar_left = new JPanel();
 				
-						JLabel lbl_open_file = new JLabel();
-						lbl_open_file.setHorizontalAlignment(SwingConstants.CENTER);
-						lbl_open_file.setBounds(10, 5, 80, 30);
-						lbl_open_file.setToolTipText("Mở tập tin C/thư mục");
-						lbl_open_file.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-						lbl_open_file.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-						lbl_open_file.setOpaque(true);
-						lbl_open_file.setBackground(SystemColor.controlHighlight);
-						lbl_open_file.setText("Mở ...");
-						lbl_open_file.addMouseListener(new MouseAdapter() {
+						JLabel lbl_open_c = new JLabel();
+						lbl_open_c.setHorizontalAlignment(SwingConstants.CENTER);
+						lbl_open_c.setBounds(10, 5, 80, 30);
+						lbl_open_c.setToolTipText("Mở tập tin C/thư mục");
+						lbl_open_c.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+						lbl_open_c.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
+						lbl_open_c.setOpaque(true);
+						lbl_open_c.setBackground(SystemColor.controlHighlight);
+						lbl_open_c.setText("Mở ...");
+						lbl_open_c.addMouseListener(new MouseAdapter() {
 							@Override
 							public void mouseClicked(MouseEvent e) {
 								openCFiles();
 							}
 						});
-						lbl_open_file.setIcon(new ImageIcon(GUIForC.class
+						lbl_open_c.setIcon(new ImageIcon(GUIAll.class
 								.getResource("/image/file.png")));
 						//tabbedCanvas.setTabCloseableAt(1, false);
 
 						JLabel lbl_set_root = new JLabel();
-						lbl_set_root.setBounds(100, 5, 100, 30);
+						lbl_set_root.setBounds(210, 5, 100, 30);
 						lbl_set_root.addMouseListener(new MouseAdapter() {
 							@Override
 							public void mouseClicked(MouseEvent e) {
@@ -479,7 +512,7 @@ public class GUIForC extends GUI {
 						});
 						lbl_set_root.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 						lbl_set_root.setHorizontalAlignment(SwingConstants.CENTER);
-						lbl_set_root.setIcon(new ImageIcon(GUIForC.class
+						lbl_set_root.setIcon(new ImageIcon(GUIAll.class
 								.getResource("/image/root.png")));
 						lbl_set_root.setToolTipText("Đặt hàm số gốc tùy chỉnh");
 						lbl_set_root.setText("Đặt gốc...");
@@ -487,7 +520,7 @@ public class GUIForC extends GUI {
 						lbl_set_root.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
 						lbl_set_root.setBackground(SystemColor.controlHighlight);
 						panel_toolbar_left.setLayout(null);
-						panel_toolbar_left.add(lbl_open_file);
+						panel_toolbar_left.add(lbl_open_c);
 						panel_toolbar_left.add(lbl_set_root);
 						
 						JPanel panel = new JPanel();
@@ -504,6 +537,24 @@ public class GUIForC extends GUI {
 								.addComponent(panel_toolbar_left, GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
 								.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
 						);
+						
+						JLabel lbl_open_j = new JLabel();
+						lbl_open_j.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+						lbl_open_j.setIcon(new ImageIcon(GUIAll.class.getResource("/image/file.png")));
+						lbl_open_j.addMouseListener(new MouseAdapter() {
+							@Override
+							public void mouseClicked(MouseEvent e) {
+								openJavaFiles();
+							}
+						});
+						lbl_open_j.setToolTipText("Mở tập tin C/thư mục");
+						lbl_open_j.setText("Mở Java");
+						lbl_open_j.setOpaque(true);
+						lbl_open_j.setHorizontalAlignment(SwingConstants.CENTER);
+						lbl_open_j.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
+						lbl_open_j.setBackground(SystemColor.controlHighlight);
+						lbl_open_j.setBounds(100, 5, 100, 30);
+						panel_toolbar_left.add(lbl_open_j);
 						panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 						
 						JButton btnCit = new JButton("Cài đặt");
@@ -512,7 +563,7 @@ public class GUIForC extends GUI {
 								new SettingDialog(frmMain).setVisible(true);
 							}
 						});
-						btnCit.setIcon(new ImageIcon(GUIForC.class.getResource("/image/file.png")));
+						btnCit.setIcon(new ImageIcon(GUIAll.class.getResource("/image/file.png")));
 						panel.add(btnCit);
 						panel_toolbar.setLayout(gl_panel_toolbar);
 		panel_tray.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
@@ -523,7 +574,7 @@ public class GUIForC extends GUI {
 		
 		lbl_loading = new JLabel("");
 		lbl_loading.setVisible(false);
-		lbl_loading.setIcon(new ImageIcon(GUIForC.class.getResource("/image/loading.gif")));
+		lbl_loading.setIcon(new ImageIcon(GUIAll.class.getResource("/image/loading.gif")));
 		panel_tray.add(lbl_loading);
 		
 		tabbedCanvas = new LightTabbedPane(JTabbedPane.TOP);
@@ -559,13 +610,21 @@ public class GUIForC extends GUI {
 		tabbedCanvas.setTabCloseableAt(0, false);
 		frmMain.getContentPane().setLayout(groupLayout);
 
-		fileChooser = new JFileChooser();
+		fileChooserC = new JFileChooser();
 		FileNameExtensionFilter cFilter = new FileNameExtensionFilter(
 				"Mã nguồn C (*.c; *.cpp)", new String[] { "C", "CPP" });
-		fileChooser.setMultiSelectionEnabled(true);
+		fileChooserC.setMultiSelectionEnabled(true);
 		// fileChooser.setFileHidingEnabled(false);
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-		fileChooser.setFileFilter(cFilter);
+		fileChooserC.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooserC.setFileFilter(cFilter);
+		
+		fileChooserJ = new JFileChooser();
+		FileNameExtensionFilter jFilter = new FileNameExtensionFilter(
+				"Mã nguồn Java (*.java)", new String[] { "JAVA" });
+		fileChooserJ.setMultiSelectionEnabled(true);
+		// fileChooser.setFileHidingEnabled(false);
+		fileChooserJ.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooserJ.setFileFilter(jFilter);
 	}
 	
 	/*----------------- LOG AND ERROR -----------------*/

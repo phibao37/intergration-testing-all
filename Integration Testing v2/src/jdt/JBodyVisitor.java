@@ -301,7 +301,6 @@ class JStatement extends Statement{
 
 	public JStatement(ASTNode node) {
 		super(node.toString().replaceAll("\n", ""));
-		//setRoot
 	}
 	
 }
