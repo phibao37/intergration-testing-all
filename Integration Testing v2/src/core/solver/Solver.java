@@ -2,6 +2,7 @@ package core.solver;
 
 import java.util.ArrayList;
 
+import core.error.CoreException;
 import core.models.Expression;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
@@ -27,15 +28,18 @@ public interface Solver {
 	 * không tham gia vào các điều kiện (chỉ dùng để lấy giá trị), biến mảng a cũng cần
 	 * được khởi tạo tại các vị trí 2, 4, tức nó phải là mảng chứa được 4 phần tử
 	 * @return kết quả sau khi đã giải xong hệ ràng buộc
+	 * @throws CoreException các lỗi liên quan đến việc giải hệ
 	 */
 	public Result solve(Variable[] testcases, ConstraintEquations constraints,
-			ArrayList<ArrayIndexExpression> array);
+			ArrayList<ArrayIndexExpression> array) throws CoreException;
 	
 	
 	/**
 	 * Kết quả sau khi giải một hệ ràng buộc
 	 */
 	public static class Result{
+		
+		public static final Result DEFAULT = new Result(UNKNOWN, "unknown", null, null);
 		
 		private int mCode;
 		private String mMessage;

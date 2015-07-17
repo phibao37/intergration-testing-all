@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 
+import core.S;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.node.FunctionNode;
 import core.graph.node.Node;
@@ -50,17 +51,17 @@ public class FunctionCanvas extends Canvas {
 				fnNodeList.add(n);
 			} else {
 				//Position all node in this row
-				leftCX = centerX - marginX * (rowNode.size()-1)/2;
+				leftCX = centerX - S.CANVAS_MARGIN_X * (rowNode.size()-1)/2;
 				FunctionNode node = rowNode.get(0);
 				leftX = leftCX - node.getWidth()/2;
 				node.setLocation(leftX, currentY);
 				for (int i = 1; i < rowNode.size(); i++){
-					leftCX += marginX;
+					leftCX += S.CANVAS_MARGIN_X;
 					node = rowNode.get(i);
 					node.setLocation(leftCX - node.getWidth()/2, currentY);
 				}
 				
-				currentY = currentY + marginY;
+				currentY = currentY + S.CANVAS_MARGIN_Y;
 				rowNode.clear();
 			}
 		}

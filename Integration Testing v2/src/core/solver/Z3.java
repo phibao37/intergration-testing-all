@@ -3,6 +3,7 @@ package core.solver;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,14 +11,17 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import core.S;
+import core.error.CoreException;
 import core.error.IllegalFormatException;
+import core.error.InvalidSettingException;
 
 /**
  * Lớp tạo đối tượng tương tác với bộ giải hệ điều kiện Z3 (sử dụng ngôn ngữ SMT2)
  */
 public class Z3 {
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws CoreException{
 		Z3 z3 = new Z3()
 			.addLine("declare-fun a (Int Int) Int")
 			.addLine("declare-fun b (Int Int) Int")
@@ -58,17 +62,6 @@ public class Z3 {
 		return count == 0;
 	}
 	
-	/**
-	 * Thiết đặt thư mục chứa chương trình ứng dụng (chứa z3.exe)
-	 */
-	public static void setDirectory(String dir){
-		BIN_DIR = new File(dir);
-		if (!BIN_DIR.isDirectory())
-			throw new IllegalArgumentException(dir + " is not a directory");
-	}
-	
-	/** Thư mục chứa chương trình thực thi z3*/
-	private static File BIN_DIR = new File("D:\\App\\Library\\z3\\bin");
 	
 	/** Tên tập tin để nhập dữ liệu để truyền vào z3*/
 	private static final String INPUT = "input.smt2";
@@ -216,11 +209,17 @@ public class Z3 {
 	 * Xây dựng input và thực thi với bộ giải hệ. Đầu ra (output) có thể được lấy sau đó
 	 * thông qua {@link #getLine()} hoặc {@link #getLines()}
 	 * @return đối tượng hiện thời (this)
+	 * @throws InvalidSettingException thư mục Z3 không tồn tại
 	 */
-	public Z3 execute(){
+	public Z3 execute() throws InvalidSettingException{
 		try{
+			File BIN_DIR = new File(S.Z3_BIN_DIR);
+			if (!BIN_DIR.isDirectory())
+				throw new InvalidSettingException(BIN_DIR + " is not a directory");
+			
 			File input = new File(BIN_DIR, INPUT);
 			File z3 = new File(BIN_DIR, Z3);
+				
 			FileOutputStream fout = new FileOutputStream(input);
 			
 			if (raw == null) 
@@ -239,7 +238,12 @@ public class Z3 {
 			outBlock.clear();
 			fout.close();
 			
-			Process p = Runtime.getRuntime().exec(z3 + " -smt2 " + input);
+			Process p = null;
+			try{
+				p = Runtime.getRuntime().exec(z3 + " -smt2 " + input);
+			} catch (IOException e){
+				throw new InvalidSettingException(e.getMessage());
+			}
 			while (p.isAlive()) {
 				Thread.sleep(100);
 			}
@@ -251,7 +255,7 @@ public class Z3 {
 			while ((line = in.readLine()) != null) 
 				outBlock.add(line);
 			
-		} catch (Exception e){
+		} catch (IOException | InterruptedException e){
 			e.printStackTrace();
 		}
 		return this;

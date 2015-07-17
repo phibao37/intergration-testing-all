@@ -15,6 +15,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 
+import core.S;
 import core.graph.Graphable;
 import core.graph.canvas.Canvas;
 
@@ -27,11 +28,8 @@ import core.graph.canvas.Canvas;
  */
 public class Node extends JLabel {
 	private static final long serialVersionUID = -4883719306522826155L;
-	
-	/** Kích thước của văn bản trong nút*/
-	public static int FONT_SIZE = 12;
 
-	private static Font FONT = new Font("Tahoma", Font.BOLD, FONT_SIZE);
+	private static Font FONT = new Font("Tahoma", Font.BOLD, S.NODE_FONT_SIZE);
 	
 	private static final int MAX_STR_LEN = 30;
 	private static final int PADDING_W = 15;
@@ -157,13 +155,14 @@ public class Node extends JLabel {
 	}
 	
 	/** Thiết đặt kích thước cho văn bản trong nút*/
-	public static void setFontSize(Integer size){
+	public static void addFontSize(int size){
+		size = S.NODE_FONT_SIZE + size;
 		if (size < 5)
 			size = 5;
 		else if (size > 40)
 			size = 40;
-		FONT_SIZE = size;
-		FONT = FONT.deriveFont((float)FONT_SIZE);
+		S.NODE_FONT_SIZE = size;
+		FONT = FONT.deriveFont((float)size);
 	}
 	
 	/**

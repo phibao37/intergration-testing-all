@@ -37,11 +37,13 @@ import cdt.CMainProcess;
 import cdt.SelectFunction;
 import core.GUI;
 import core.MainProcess.Returned;
+import core.error.CoreException;
 import core.error.MainNotFoundException;
 import core.error.ThreadStateException;
 import core.graph.CFGView;
 import core.graph.FileView;
 import core.graph.LightTabbedPane;
+import core.graph.SettingDialog;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.canvas.FunctionCanvas;
 import core.graph.canvas.StatementCanvas;
@@ -57,6 +59,11 @@ import core.unit.ConstraintEquations;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -179,7 +186,11 @@ public class GUIForC extends GUI {
 			main.beginTestFunction(func, new Returned() {
 				
 				@Override
-				public void receive() {
+				public void receive(CoreException e) {
+					if (e != null){
+						alertError(e.getMessage());
+						return;
+					}
 					currentFunction = func;
 					
 					setStatus("Đang tìm các nhánh dựa trên các cấp độ phủ");
@@ -317,9 +328,6 @@ public class GUIForC extends GUI {
 		frmMain.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		frmMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		JPanel panel_toolbar = new JPanel();
-		panel_toolbar.setBorder(new MatteBorder(0, 0, 1, 0, (Color) Color.LIGHT_GRAY));
-
 		JSplitPane splitPane_main = new JSplitPane();
 		splitPane_main.setBorder(null);
 		splitPane_main.setDividerSize(3);
@@ -417,42 +425,96 @@ public class GUIForC extends GUI {
 
 		detailWrap.setDividerLocation(250);
 		splitPane_main.setDividerLocation(600);
-
-		JLabel lbl_open_file = new JLabel();
-		lbl_open_file.setHorizontalAlignment(SwingConstants.CENTER);
-		lbl_open_file.setBounds(10, 5, 80, 30);
-		lbl_open_file.setToolTipText("Mở tập tin C/thư mục");
-		lbl_open_file.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lbl_open_file.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-		lbl_open_file.setOpaque(true);
-		lbl_open_file.setBackground(SystemColor.controlHighlight);
-		lbl_open_file.setText("Mở ...");
-		lbl_open_file.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				openCFiles();
-			}
-		});
-		lbl_open_file.setIcon(new ImageIcon(GUIForC.class
-				.getResource("/image/file.png")));
 		
 		JPanel panel_tray = new JPanel();
 		panel_tray.setBackground(Color.WHITE);
+		
+		JPanel panel_toolbar = new JPanel();
 		GroupLayout groupLayout = new GroupLayout(frmMain.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
-				.addComponent(panel_toolbar, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
-				.addComponent(splitPane_main, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
-				.addComponent(panel_tray, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
+				.addComponent(panel_tray, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
+				.addComponent(panel_toolbar, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
+				.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addComponent(panel_toolbar, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+					.addComponent(panel_toolbar, GroupLayout.PREFERRED_SIZE, 43, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 625, Short.MAX_VALUE)
+					.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 620, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panel_tray, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
 		);
+		panel_toolbar.setBorder(new MatteBorder(0, 0, 1, 0, (Color) Color.LIGHT_GRAY));
+		
+				JPanel panel_toolbar_left = new JPanel();
+				
+						JLabel lbl_open_file = new JLabel();
+						lbl_open_file.setHorizontalAlignment(SwingConstants.CENTER);
+						lbl_open_file.setBounds(10, 5, 80, 30);
+						lbl_open_file.setToolTipText("Mở tập tin C/thư mục");
+						lbl_open_file.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+						lbl_open_file.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
+						lbl_open_file.setOpaque(true);
+						lbl_open_file.setBackground(SystemColor.controlHighlight);
+						lbl_open_file.setText("Mở ...");
+						lbl_open_file.addMouseListener(new MouseAdapter() {
+							@Override
+							public void mouseClicked(MouseEvent e) {
+								openCFiles();
+							}
+						});
+						lbl_open_file.setIcon(new ImageIcon(GUIForC.class
+								.getResource("/image/file.png")));
+						//tabbedCanvas.setTabCloseableAt(1, false);
+
+						JLabel lbl_set_root = new JLabel();
+						lbl_set_root.setBounds(100, 5, 100, 30);
+						lbl_set_root.addMouseListener(new MouseAdapter() {
+							@Override
+							public void mouseClicked(MouseEvent e) {
+								openSelectFunction();
+							}
+						});
+						lbl_set_root.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+						lbl_set_root.setHorizontalAlignment(SwingConstants.CENTER);
+						lbl_set_root.setIcon(new ImageIcon(GUIForC.class
+								.getResource("/image/root.png")));
+						lbl_set_root.setToolTipText("Đặt hàm số gốc tùy chỉnh");
+						lbl_set_root.setText("Đặt gốc...");
+						lbl_set_root.setOpaque(true);
+						lbl_set_root.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
+						lbl_set_root.setBackground(SystemColor.controlHighlight);
+						panel_toolbar_left.setLayout(null);
+						panel_toolbar_left.add(lbl_open_file);
+						panel_toolbar_left.add(lbl_set_root);
+						
+						JPanel panel = new JPanel();
+						GroupLayout gl_panel_toolbar = new GroupLayout(panel_toolbar);
+						gl_panel_toolbar.setHorizontalGroup(
+							gl_panel_toolbar.createParallelGroup(Alignment.LEADING)
+								.addGroup(gl_panel_toolbar.createSequentialGroup()
+									.addComponent(panel_toolbar_left, GroupLayout.PREFERRED_SIZE, 601, GroupLayout.PREFERRED_SIZE)
+									.addPreferredGap(ComponentPlacement.RELATED, 261, Short.MAX_VALUE)
+									.addComponent(panel, GroupLayout.PREFERRED_SIZE, 500, GroupLayout.PREFERRED_SIZE))
+						);
+						gl_panel_toolbar.setVerticalGroup(
+							gl_panel_toolbar.createParallelGroup(Alignment.LEADING)
+								.addComponent(panel_toolbar_left, GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
+								.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
+						);
+						panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+						
+						JButton btnCit = new JButton("Cài đặt");
+						btnCit.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								new SettingDialog(frmMain).setVisible(true);
+							}
+						});
+						btnCit.setIcon(new ImageIcon(GUIForC.class.getResource("/image/file.png")));
+						panel.add(btnCit);
+						panel_toolbar.setLayout(gl_panel_toolbar);
 		panel_tray.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 		
 		lbl_status = new JLabel("");
@@ -495,28 +557,6 @@ public class GUIForC extends GUI {
 //		vGraph.setParent(vGraphWrap);
 //		vGraphWrap.setViewportView(vGraph);
 		tabbedCanvas.setTabCloseableAt(0, false);
-		//tabbedCanvas.setTabCloseableAt(1, false);
-
-		JLabel lbl_set_root = new JLabel();
-		lbl_set_root.setBounds(100, 5, 100, 30);
-		lbl_set_root.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				openSelectFunction();
-			}
-		});
-		lbl_set_root.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lbl_set_root.setHorizontalAlignment(SwingConstants.CENTER);
-		lbl_set_root.setIcon(new ImageIcon(GUIForC.class
-				.getResource("/image/root.png")));
-		lbl_set_root.setToolTipText("Đặt hàm số gốc tùy chỉnh");
-		lbl_set_root.setText("Đặt gốc...");
-		lbl_set_root.setOpaque(true);
-		lbl_set_root.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-		lbl_set_root.setBackground(SystemColor.controlHighlight);
-		panel_toolbar.setLayout(null);
-		panel_toolbar.add(lbl_open_file);
-		panel_toolbar.add(lbl_set_root);
 		frmMain.getContentPane().setLayout(groupLayout);
 
 		fileChooser = new JFileChooser();

@@ -81,4 +81,28 @@ public class Utils {
 		return new ArrayList<T>(Arrays.asList(array));
 	}
 	
+	/**
+	 * Chuyển kiểu cơ bản sang kiểu bao tương ưng
+	 */
+	public static Class<?> toWrapper(Class<?> cls){
+		if (cls == int.class)
+			cls = Integer.class;
+		else if (cls == long.class)
+			cls = Long.class;
+		else if (cls == float.class)
+			cls = Float.class;
+		else if (cls == double.class)
+			cls = Double.class;
+		else if (cls == short.class)
+			cls = Short.class;
+		else if (cls == char.class)
+			cls = Character.class;
+		else if (cls == boolean.class)
+			cls = Boolean.class;
+		else if (cls == byte.class)
+			cls = Byte.class;
+		
+		return cls;
+	}
+	
 }

@@ -13,6 +13,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import core.GUI;
+import core.S;
 import core.graph.adapter.StatementAdapter;
 import core.graph.node.Node;
 import core.graph.node.StatementNode;
@@ -76,17 +77,17 @@ public class StatementCanvas extends Canvas {
 					continue;
 				if (!(rNode.isLocationSet() && rNode.isConditionNode())) {
 					int cx = x - rNode.getWidth() / 2;
-					int cy = y + marginY - rNode.getHeight() / 2;
+					int cy = y + S.CANVAS_MARGIN_Y - rNode.getHeight() / 2;
 
 					if (isCondition){
 						if (is1StmCondition){
 							if (i == 0){
-								cx -= marginX;
-								cy -= marginY/2;
+								cx -= S.CANVAS_MARGIN_X;
+								cy -= S.CANVAS_MARGIN_Y/2;
 							}
 						}
 						else
-							cx += i == 0 ? -marginX : marginX;
+							cx += i == 0 ? -S.CANVAS_MARGIN_X : S.CANVAS_MARGIN_X;
 					}
 					rNode.setLocation(cx, cy);
 				}

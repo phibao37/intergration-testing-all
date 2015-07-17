@@ -3,6 +3,7 @@ package core.solver;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import core.error.CoreException;
 import core.models.Expression;
 import core.models.Type;
 import core.models.Variable;
@@ -41,7 +42,7 @@ public class Z3Solver implements Solver {
 	@Override
 	public Result solve(Variable[] testcases,
 			ConstraintEquations constraints,
-			ArrayList<ArrayIndexExpression> array) {
+			ArrayList<ArrayIndexExpression> array) throws CoreException {
 		
 		//Khởi tạo bảng biến, reset lại nghiệm
 		mTable = new VariableTable();

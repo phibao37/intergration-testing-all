@@ -5,6 +5,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import core.error.CoreException;
 import core.error.FunctionNotFoundException;
 import core.error.StatementNoRootException;
 import core.error.ThreadStateException;
@@ -118,7 +119,7 @@ public abstract class MainProcess implements FilenameFilter {
 		new RunThread<Void>(listener) {
 			
 			@Override
-			protected Void doTask() {
+			protected Void doTask() throws CoreException {
 				GUI.instance.setStatus("Đang phân tích các đường thi hành");
 				ArrayList<BasisPath> paths = new ArrayList<BasisPath>();
 				
@@ -127,23 +128,27 @@ public abstract class MainProcess implements FilenameFilter {
 				
 				int i = 1, length = paths.size();
 				
-				for (BasisPath path : paths) {
-					try {
-						mPathParser.parseBasisPath(path, func);
-					} catch (StatementNoRootException e1) {
-						System.out.println(" !!! " + e1.getMessage());
-						continue;
-					}
+				try {
+					for (BasisPath path : paths) {
+						try {
+							mPathParser.parseBasisPath(path, func);
+						} catch (StatementNoRootException e1) {
+							System.out.println(" !!! " + e1.getMessage());
+							continue;
+						}
 
-					ConstraintEquations ce = mPathParser.getConstrains();
-					path.setConstraint(ce);
-					
-					GUI.instance.setStatus("Đang giải hệ %d/%d", i++, length);
-					Result result = mSolver.solve(ce.getTestcases(), ce,
-							ce.getArrayAccesses());
-					path.setSolveResult(result);
+						ConstraintEquations ce = mPathParser.getConstrains();
+						path.setConstraint(ce);
+
+						GUI.instance.setStatus("Đang giải hệ %d/%d", i++,
+								length);
+						Result result = mSolver.solve(ce.getTestcases(), ce,
+								ce.getArrayAccesses());
+						path.setSolveResult(result);
+					}
+				} finally{
+					GUI.instance.setStatus(null);
 				}
-				GUI.instance.setStatus(null);
 				return null;
 			}
 
@@ -177,7 +182,12 @@ public abstract class MainProcess implements FilenameFilter {
 			for (ArrayIndexExpression e: ce.getArrayAccesses())
 				System.out.println(" & " + e);
 			
-			Result result = mSolver.solve(ce.getTestcases(), ce, ce.getArrayAccesses());
+			Result result = Result.DEFAULT;
+			try {
+				result = mSolver.solve(ce.getTestcases(), ce, ce.getArrayAccesses());
+			} catch (CoreException e1) {
+				e1.printStackTrace();
+			}
 			if (result.getSolutionCode() == Solver.SUCCESS){
 				for (Variable sol: result.getSolution())
 					System.out.println(" ==> " + sol);
@@ -313,10 +323,17 @@ public abstract class MainProcess implements FilenameFilter {
 		
 		@Override
 		public final void run() {
-			R result = doTask();
+			R result = null;
+			CoreException core = null;
+			
+			try {
+				result = doTask();
+			} catch (CoreException e) {
+				core = e;
+			}
 			
 			if (mCallBack != null)
-				mCallBack.receive(result);
+				mCallBack.receive(result, core);
 			instance = null;
 		}
 		
@@ -329,14 +346,15 @@ public abstract class MainProcess implements FilenameFilter {
 				throw new ThreadStateException(instance);
 			instance = this;
 			start();
+			
 		}
 
 		/**
 		 * Các công việc xử lý chính diễn ra ở đây
 		 * @return kết quả sau khi công việc đã hoàn thành
+		 * @throws CoreException có thể có lỗi trong quá trình xử lý
 		 */
-		protected abstract R doTask();
-		
+		protected abstract R doTask() throws CoreException;
 		
 	}
 	
@@ -351,8 +369,9 @@ public abstract class MainProcess implements FilenameFilter {
 		/**
 		 * Phương thức sẽ được gọi khi tiến trình hoàn thành công việc
 		 * @param result kết quả của công việc
+		 * @param e ngoại lệ trong việc xử lý, lúc đó result sẽ là null
 		 */
-		public void receive(R result);
+		public void receive(R result, CoreException e);
 	}
 	
 	/**
@@ -362,14 +381,15 @@ public abstract class MainProcess implements FilenameFilter {
 	public static abstract class Returned implements Return<Void>{
 
 		@Override
-		public final void receive(Void result) {
-			receive();
+		public final void receive(Void result, CoreException e) {
+			receive(e);
 		}
 		
 		/**
 		 * Công việc cần thực hiện sau khi thread đã hoàn thành công việc
+		 * @param có ngoại lệ trong quá trình xử lý
 		 */
-		public abstract void receive();
+		public abstract void receive(CoreException e);
 	}
 	
 }

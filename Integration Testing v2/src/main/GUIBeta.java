@@ -12,7 +12,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import cdt.CMainProcess;
-import core.Setting;
+import core.S;
 import core.graph.canvas.StatementCanvas;
 import core.models.Function;
 import java.awt.Color;
@@ -164,6 +164,6 @@ public class GUIBeta {
 		fileChooser_J.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooser_J.setFileFilter(jFilter);
 		
-		Setting.loadSetting();
+		S.load();
 	}
 }

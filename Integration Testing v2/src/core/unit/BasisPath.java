@@ -18,7 +18,7 @@ public class BasisPath extends ArrayList<Statement> {
 	private static final long serialVersionUID = 8275921168369912688L;
 	
 	private ConstraintEquations mConstraint;
-	private Result mResult;
+	private Result mResult = Result.DEFAULT;
 	
 	/**
 	 * Tạo ra bản sao đường thi hành

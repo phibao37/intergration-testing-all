@@ -23,7 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import core.Setting;
+import core.S;
 import core.graph.LightLabel;
 import core.graph.node.Node;
 
@@ -40,21 +40,6 @@ public class Canvas extends JPanel {
 	
 	/** Khoảng cách giữa lề bên trên và nút trên cùng */
 	protected static final int paddingY = 40;
-    
-    /** Khoảng cách chiều ngang giữa 2 nút kề nhau */
-	protected static int marginX = 120;
-	
-    /** Khoảng cách chiều dọc giữa 2 hàng kề nhau */
-	protected static int marginY = 100;
-	
-	/** Đặt giá trị khoảng cách chiều ngang giữa 2 nút*/
-	public static void setMarginX(Integer x){
-		marginX = x;
-	}
-	/** Đặt giá trị khoảng cách chiều dọc giữa 2 hàng*/
-	public static void setMarginY(Integer y){
-		marginY = y;
-	}
 	
 	protected final static BasicStroke NORMAL_STROKE = new BasicStroke(1.5f);
 	protected final static BasicStroke DASHED_STROKE = 
@@ -130,30 +115,31 @@ public class Canvas extends JPanel {
 				if (code >=37 && code <= 40){
 					switch (code){
 					case 37: //left arrow
-						Setting.setProperty(Setting.CvMarginX, marginX - delta);
+						S.CANVAS_MARGIN_X -= delta;
 						break;
 					case 38: //up arrow
-						Setting.setProperty(Setting.CvMarginY, marginY + delta);
+						S.CANVAS_MARGIN_Y += delta;
 						break;
 					case 39: //right arrow
-						Setting.setProperty(Setting.CvMarginX, marginX + delta);
+						S.CANVAS_MARGIN_X += delta;
 						break;
 					case 40: //bottom arrow
-						Setting.setProperty(Setting.CvMarginY, marginY - delta);
+						S.CANVAS_MARGIN_Y -= delta;
 						break;
 					}
+					S.save();
 					Canvas.this.refresh();
 				}
 				else if (code == 107 || code == 109){
-					Setting.setProperty(Setting.NodeFontSize, 
-						Node.FONT_SIZE + (code == 107 ? 1 : -1));
+					Node.addFontSize(code == 107 ? 1 : -1);
+					
 					if (code == 107 || code == 109){
 						for (Node n: defaultNodeList)
 							n.reApplyFont();
 					}
+					S.save();
 					Canvas.this.repaint();
 				}
-				//System.out.println(code);
 			}
 		});
 	}
