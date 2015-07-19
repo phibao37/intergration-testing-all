@@ -1,5 +1,7 @@
 package core.unit;
 
+import java.util.ArrayList;
+
 import core.error.StatementNoRootException;
 import core.models.ArrayVariable;
 import core.models.Expression;
@@ -104,9 +106,32 @@ public class BasisPathParser {
 				else
 					tables.newCloseScope();
 			} else {
-				Expression root = stm.getRoot();
+				Expression root = stm.getRoot().clone();
+				PlaceHolderExpression holder = new PlaceHolderExpression(root);
+				ArrayList<UnaryExpression> postFix = new ArrayList<UnaryExpression>();
 				
-				new PlaceHolderExpression(root).accept(new ExpressionVisitor() {
+				holder.accept(new ExpressionVisitor() {
+					
+					@Override
+					public int visit(UnaryExpression unary) {
+						if (unary == root //chỉ xét bên trong gốc
+								|| !unary.isAssignOperator()) //chỉ xét gán
+							return PROCESS_CONTINUE;
+						
+						//Thí dụ: (x < ++i)
+						//Thực hiện tăng/giảm cho biến prefix trước: i = i + 1
+						if (unary.isLeftOperator())
+							handleAssignOne(unary);
+						
+						//Với các biến postfix, thêm vào danh sách để xử lý sau
+						else
+							postFix.add(unary);
+						
+						//Thay thế bằng biến: (x < i)
+						holder.replace(unary, unary.getSubElement());
+						
+						return PROCESS_ABORT;
+					}
 
 					@Override
 					public int visit(ArrayIndexExpression array) {
@@ -136,9 +161,15 @@ public class BasisPathParser {
 					}
 					
 				});
+				
 				//Xủ lý theo từng kiểu
 				handleStatement(stm, root, 
 						i + 1 == path.size() ? null : path.get(i+1));
+				
+				//Thực hiện tăng các biểu thức x++, y-- sau khi đã thực hiện xong
+				//TODO chưa thực sự đúng vì có thể có nhiều biểu thức trong 1 lệnh
+				for (UnaryExpression unary: postFix)
+					handleAssignOne(unary);
 			}
 		}
 	}

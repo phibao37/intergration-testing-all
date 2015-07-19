@@ -7,7 +7,9 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -16,7 +18,6 @@ import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Function;
 import core.models.Variable;
-import core.models.type.ArrayType;
 import core.visitor.UnitVisitor;
 
 public class JUnitVisitor implements UnitVisitor {
@@ -54,8 +55,11 @@ public class JUnitVisitor implements UnitVisitor {
 					varPara[i] = parseParameter(paras.get(i));
 				
 				//Thêm một hàm mới được tìm thấy
-				mFunctions.add(new Function(s_name, varPara, node.getBody(), 
-						JType.parse(s_type)));
+				Function fn = new Function(s_name, varPara, node.getBody(), 
+						JType.parse(s_type));
+				
+				fn.setSourceFile(file);
+				mFunctions.add(fn);
 				
 				return false;
 			}
@@ -70,24 +74,28 @@ public class JUnitVisitor implements UnitVisitor {
 	 * @param para
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private static Variable parseParameter(SingleVariableDeclaration para){
 		String name = para.getName().getIdentifier();
 		Type type = para.getType();
-		int dimen = para.getExtraDimensions();
 		Variable var = null;
-
-		//Không có khai báo biến mảng, số lượng [] bằng 0
-		if (dimen == 0){
-			var = new Variable(name, JType.parse(type.toString()));
-		} 
 		
 		//Có một hoặc nhiều cặp [] trong khai báo
+		if (type instanceof ArrayType){
+			ArrayType arrType = (ArrayType) type;
+			core.models.Type arr = JType.parse(arrType.getElementType().toString());
+			List<Dimension> dimen = arrType.dimensions();
+			
+			for (Dimension d: dimen){
+				d.annotations();
+				arr = new core.models.type.ArrayType(arr, 0);
+			}
+			var = new ArrayVariable(name, (core.models.type.ArrayType) arr);
+		} 
+		
+		//Không có khai báo biến mảng, số lượng [] bằng 0
 		else {
-			core.models.Type arr = JType.parse(type.toString());
-			for (int i = 0; i < dimen; i++)
-				arr = new ArrayType(arr, 0);
-			//TODO chưa lấy được chỉ số phần tử mảng khi khai báo
-			var = new ArrayVariable(name, (ArrayType) arr);
+			var = new Variable(name, JType.parse(type.toString()));
 		}
 		
 		return var;

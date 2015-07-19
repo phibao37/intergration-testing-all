@@ -231,11 +231,13 @@ public class GUIAll extends GUI {
 					listPath.add(func.getCFG(false).getCoverStatementPaths());
 					listPath.add(func.getCFG(false).getCoverBranchPaths());
 					listPath.add(func.getCFG(true).getCoverBranchPaths());
+					listPath.add(func.getCFG(false).getBasisPaths());
 					
 					listSubCondition.clear();
 					listSubCondition.add(false);
 					listSubCondition.add(false);
 					listSubCondition.add(true);
+					listSubCondition.add(false);
 					
 					for (int i = 0; i < listPath.size(); i++){
 						DefaultTableModel pathModel = (DefaultTableModel) 
@@ -271,7 +273,7 @@ public class GUIAll extends GUI {
 	private void tableTabChanged(int index){
 		currentIndex = index;
 		if (listPath.isEmpty()) return;
-		if (index < 3)
+		//if (index < 3)
 			openFuntionView(currentFunction, listSubCondition.get(currentIndex));
 	}
 	
@@ -410,7 +412,8 @@ public class GUIAll extends GUI {
 		
 		/*---------BEGIN ADD TABLES-----------*/
 		
-		String[] tab_names = {"Phủ câu lệnh", "Phủ nhánh", "Phủ điều kiện con"};
+		String[] tab_names = {"Phủ câu lệnh", "Phủ nhánh", "Phủ điều kiện con", 
+				"Tất cả nhánh"};
 		for (String tab_name: tab_names){
 			JScrollPane extraWrap = new JScrollPane();
 			extraWrap.setBorder(null);
