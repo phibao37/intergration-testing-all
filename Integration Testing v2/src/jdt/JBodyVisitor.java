@@ -3,8 +3,14 @@ package jdt;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.util.Pair;
+import jdt.JEpUtil;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EmptyStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -14,11 +20,16 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
+import core.error.StatementNoRootException;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.visitor.BodyFunctionVisitor;
+import core.visitor.BodyFunctionVisitor.ForwardStatement;
 
 /**
  * Duyệt thân hàm Java và lấy ra danh sách các câu lệnh đã được liên kết
@@ -162,7 +173,8 @@ public class JBodyVisitor implements BodyFunctionVisitor {
 				visitCondition(astCond, bfCond, bfBody, _break);
 			else
 				bfCond.setBranch(bfBody);
-			
+			//_break = end;
+			//_continue = scopeIn;
 			visitStatement(stmFor.getBody(), bfBody, _continue, _break, _continue);
 			
 			//Cả điều kiện và phần thân đều rỗng => lặp vô hạn
@@ -175,12 +187,64 @@ public class JBodyVisitor implements BodyFunctionVisitor {
 				visitList(astUpdate, _continue, bfCond);
 			else
 				_continue.setBranch(bfCond);
+			
 		}
-		
+		else if(stm instanceof WhileStatement){
+			WhileStatement stmWhile = (WhileStatement) stm;
+			Expression astCond = stmWhile.getExpression();
+			
+			//Tạo scope ảo cho trường hợp có khai báo thêm biến chạy
+			//Statement scopeIn = ScopeStatement.newOpenScope();
+			//begin.setBranch(scopeIn);
+			//_break = end;
+			//_continue = scopeIn;
+			Statement bfCond = new ForwardStatement(); //trước khi so sanh
+			Statement bfBody = new ForwardStatement(); //trước khi vào phần thân
+			
+			begin.setBranch(bfCond);
+			_break = end;
+			_continue = bfCond;
+			
+			visitCondition(astCond, bfCond, bfBody, end);
+			visitStatement(stmWhile.getBody(), bfBody, _continue, _break, _continue);
+			
+		}
+		else if(stm instanceof DoStatement){
+			DoStatement stmDo = (DoStatement) stm;
+			Expression astCond = stmDo.getExpression();
+			
+			//Tạo scope ảo cho trường hợp có khai báo thêm biến chạy
+			//Statement scopeIn = ScopeStatement.newOpenScope();
+			//begin.setBranch(scopeIn);
+			//_break = end;
+			//_continue = scopeIn;
+			Statement bfBody = new ForwardStatement(); //trước khi vào phần while
+			Statement bfEx = new ForwardStatement(); //trước khi vào so sanh
+			
+			begin.setBranch(bfBody);
+			_break = end;
+			_continue = bfEx;
+			
+			visitStatement(stmDo.getBody(), bfBody, _continue, _break, _continue);
+			visitCondition(astCond, bfEx, bfBody, end);
+		}
+		else if (stm instanceof SwitchStatement){
+			SwitchStatement astSw = (SwitchStatement) stm;
+			Statement scopeIn = ScopeStatement.newOpenScope();
+			Statement scopeOut = ScopeStatement.newCloseScope(end);
+			begin.setBranch(scopeIn);
+			visitSwitch(astSw.getExpression(),astSw, scopeIn, scopeOut);
+		}
 		else if (stm instanceof Block){
 			visitBlock((Block) stm, begin, end, _break, _continue);
 		}
+		else if (stm instanceof BreakStatement){
+			begin.setBranch(_break);
+		}
 		
+		else if (stm instanceof ContinueStatement){
+			begin.setBranch(_continue);
+		}
 		else if (stm instanceof ReturnStatement){
 			Statement stmReturn = new JStatement(stm);
 			begin.setBranch(stmReturn);
@@ -194,7 +258,80 @@ public class JBodyVisitor implements BodyFunctionVisitor {
 		}
 		
 	}
-	
+	/**
+	 * Duyệt qua câu lệnh SWITCH
+	 * @param cond biểu thức quyết định switch
+	 * @param body phần thân switch
+	 * @param begin câu lệnh cần được gán 2 nhánh tới câu lệnh đầu tiên trong khối
+	 * @param end câu lệnh kết thúc, cũng là câu lệnh mà break đi tới
+	 */
+	@SuppressWarnings("unchecked")
+	private void visitSwitch(Expression cond, SwitchStatement body,
+			Statement begin, Statement end){
+		ArrayList<Pair<ArrayList<SwitchCase>, Statement>> caseLink = 
+				new ArrayList<>();
+		ArrayList<SwitchCase> cases = new ArrayList<>();
+
+		List<org.eclipse.jdt.core.dom.Statement> childs = body.statements();
+		Statement defaultPoint = null, before = new ForwardStatement(), after = null;
+		int i = 0;
+		
+		while (i < childs.size()){
+			org.eclipse.jdt.core.dom.Statement stm = childs.get(i);
+			if (stm instanceof SwitchCase){
+				SwitchCase stmCase = (SwitchCase) stm;
+				if(!stmCase.isDefault())
+					cases.add((SwitchCase) stm);
+				else{
+					cases.clear();
+					while (i+1 < childs.size() && childs.get(i+1) instanceof SwitchCase)
+						i++;
+					defaultPoint = before;
+				}
+			} else {
+				//Vừa mới ra khỏi một dãy case
+				if (cases.size() > 0){
+					caseLink.add(new Pair<>(cases, before));
+					cases = new ArrayList<>();
+				}
+				
+				after = new ForwardStatement();
+				visitStatement(stm, before, after, end, null);
+				before = after;
+			}
+			i++;
+		}
+		before.setBranch(end);
+		
+		//Nút trước khi bắt đầu default
+		Statement beforeDefault = new ForwardStatement();
+		
+		beforeDefault.setBranch(defaultPoint == null ? end : defaultPoint);
+		if (caseLink.size() == 0){
+			begin.setBranch(beforeDefault);
+			return;
+		}
+		
+		Statement[] mid = new Statement[caseLink.size() + 1];
+		mid[0] = begin;
+		for (i = 1; i < mid.length - 1; i++)
+			mid[i] = new ForwardStatement();
+		mid[i] = beforeDefault;
+		//String control = cond.getRawSignature();
+		
+		for (i = 0; i < caseLink.size(); i++){
+			Pair<ArrayList<SwitchCase>, Statement> pair = caseLink.get(i);
+			cases = pair.getKey();
+			String join = "";
+			for (SwitchCase astCase: cases){
+				join += String.format("||%s==%s", cond,
+								astCase.getExpression());
+			}
+			
+			visitCondition(JEpUtil.getExpression(join.substring(2)), 
+					mid[i], pair.getValue(), mid[i+1]);
+		}
+	}
 	/**
 	 * Duyệt qua một biểu thức điều kiện và tách các điều kiện con ra
 	 * @param cond nút điều kiện
@@ -301,15 +438,16 @@ class JStatement extends Statement{
 
 	public JStatement(ASTNode node) {
 		super(node.toString().replaceAll("\n", ""));
+		setRoot(JEpUtil.parseNode(node));
+		try {
+			System.out.printf("\n%s => %s\n", this, getRoot().getClass());
+			getRoot().printTree("  -");
+		} catch (StatementNoRootException e) {
+			System.out.printf("\n%s\n => No root\n", this);
+		}
 	}
 	
 }
-
-
-
-
-
-
 
 
 

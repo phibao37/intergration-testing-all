@@ -74,10 +74,15 @@ public class JUnitVisitor implements UnitVisitor {
 	 * @param para
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private static Variable parseParameter(SingleVariableDeclaration para){
-		String name = para.getName().getIdentifier();
-		Type type = para.getType();
+		return createVariable(para.getType(), para.getName().getIdentifier());
+	}
+	
+	/**
+	 * Tạo biến từ kiểu và tên biến
+	 */
+	@SuppressWarnings("unchecked")
+	public static Variable createVariable(Type type, String name){
 		Variable var = null;
 		
 		//Có một hoặc nhiều cặp [] trong khai báo
