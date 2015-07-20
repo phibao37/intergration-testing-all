@@ -37,6 +37,11 @@ public class S {
 	 */
 	public static String Z3_BIN_DIR = "D:\\App\\Library\\z3\\bin";
 	
+	/**
+	 * Số lượng lần lặp tối đa khi kiểm thử một vòng lặp
+	 */
+	public static int MAX_LOOP_TEST = 8;
+	
 	/*---------------------------------------------------------------------*/
 	
 	private static Properties prop = new Properties();

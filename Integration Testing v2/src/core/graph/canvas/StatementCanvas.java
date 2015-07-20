@@ -30,6 +30,7 @@ public class StatementCanvas extends Canvas {
 	public static final Color TRUE = Color.BLUE;
 	public static final Color FALSE = Color.GREEN;
 	public static final Color SELECTED = Color.RED;
+	public static final Color SELECTED_EXTRA = Color.ORANGE;
 	
 	private static final Font FONT_LABEL = new Font("TimesRoman", Font.BOLD, 12);
 	
@@ -99,12 +100,26 @@ public class StatementCanvas extends Canvas {
 	}
 	
 	/**
-	 * Lựa chọn (làm nổi bật) một đường đi trong đồ thị
+	 * Lựa chọn (làm nổi bật bằng màu đỏ) một đường đi trong đồ thị
 	 * @param path danh sách có thứ tự các câu lệnh trên đường đi
 	 */
 	public void setSelectedPath(ArrayList<Statement> path){
 		resetAllSelectingPath(false);
-		mAdapter.selectNodesByPath(path);
+		mAdapter.selectNodesByPath(path, 
+				StatementNode.FLAG_SELECT_TRUE, StatementNode.FLAG_SELECT_FALSE, true);
+		this.repaint();
+	}
+	
+	/**
+	 * Lựa chọn (làm nổi bật bằng màu vàng) một đường đi trong đồ thị
+	 * @param path danh sách có thứ tự các câu lệnh trên đường đi
+	 */
+	public void setSelectedExtraPath(ArrayList<Statement> path){
+		int flagTrue = StatementNode.FLAG_SELECT_TRUE_EXTRA,
+			flagFalse = StatementNode.FLAG_SELECT_FALSE_EXTRA;
+		for (StatementNode node: smtNodeList)
+			node.removeFlag(flagTrue | flagFalse);
+		mAdapter.selectNodesByPath(path, flagTrue, flagFalse, false);
 		this.repaint();
 	}
 	
@@ -113,7 +128,8 @@ public class StatementCanvas extends Canvas {
 	 */
 	private void resetAllSelectingPath(boolean repaint){
 		for (StatementNode node: smtNodeList){
-			node.addFlag(Node.FLAG_CLEAR);
+			node.removeFlag(StatementNode.FLAG_SELECT_TRUE 
+					| StatementNode.FLAG_SELECT_FALSE);
 			node.setLabel(StatementNode.LABEL_NONE);
 		}
 		if (repaint)
@@ -123,8 +139,20 @@ public class StatementCanvas extends Canvas {
 	/**
 	 * Bỏ chọn đường đi đang được lựa chọn của canvas 
 	 */
-	public void resetAllSelectingPath(){
+	public void resetSelectingPath(){
 		resetAllSelectingPath(true);
+	}
+	
+	/**
+	 * Bỏ chọn đường đi phụ trong đồ thị
+	 */
+	public void resetSelectingExtraPath(){
+		for (StatementNode node: smtNodeList){
+			node.removeFlag(
+					StatementNode.FLAG_SELECT_TRUE_EXTRA 
+					| StatementNode.FLAG_SELECT_FALSE_EXTRA);
+		}
+		this.repaint();
 	}
 	
 	@Override
@@ -154,8 +182,11 @@ public class StatementCanvas extends Canvas {
 					 n1.setBorder(Node.DOUBLE_BORDER);
 				} else {
 					Color color;
-					
 					if (n1.hasFlag(isTrue ? 
+							StatementNode.FLAG_SELECT_TRUE_EXTRA
+							: StatementNode.FLAG_SELECT_FALSE_EXTRA))
+						color = SELECTED_EXTRA;
+					else if (n1.hasFlag(isTrue ? 
 							StatementNode.FLAG_SELECT_TRUE
 							: StatementNode.FLAG_SELECT_FALSE))
 						color = SELECTED;

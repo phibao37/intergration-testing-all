@@ -38,11 +38,14 @@ import java.awt.Font;
 import java.io.File;
 
 import core.S;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 public class SettingDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
 	private JLabel entry_z3_dir;
+	private JSpinner spinner_max_loop;
 
 	/**
 	 * Launch the application.
@@ -59,11 +62,13 @@ public class SettingDialog extends JDialog {
 	}
 	
 	private void loadSettings(){
+		spinner_max_loop.setValue(S.MAX_LOOP_TEST);
 		entry_z3_dir.setText(S.Z3_BIN_DIR);
 	}
 	
 	private void applySettings(){
 		S.Z3_BIN_DIR = entry_z3_dir.getText();
+		S.MAX_LOOP_TEST = (int) spinner_max_loop.getValue();
 		S.save();
 	}
 
@@ -96,6 +101,30 @@ public class SettingDialog extends JDialog {
 				JPanel panel = new JPanel();
 				panel.setBackground(Color.WHITE);
 				scrollPane.setViewportView(panel);
+				GridBagLayout gbl_panel = new GridBagLayout();
+				gbl_panel.columnWidths = new int[]{30, 127, 0, 30, 0};
+				gbl_panel.rowHeights = new int[]{30, 30, 0};
+				gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+				panel.setLayout(gbl_panel);
+				
+				JLabel lblSLnKim = new JLabel("Số lần kiểm thử lặp");
+				GridBagConstraints gbc_lblSLnKim = new GridBagConstraints();
+				gbc_lblSLnKim.anchor = GridBagConstraints.SOUTHWEST;
+				gbc_lblSLnKim.insets = new Insets(0, 0, 0, 5);
+				gbc_lblSLnKim.gridx = 1;
+				gbc_lblSLnKim.gridy = 1;
+				panel.add(lblSLnKim, gbc_lblSLnKim);
+				
+				spinner_max_loop = new JSpinner();
+				spinner_max_loop.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
+				spinner_max_loop.setPreferredSize(new Dimension(40, 20));
+				GridBagConstraints gbc_spinner_max_loop = new GridBagConstraints();
+				gbc_spinner_max_loop.anchor = GridBagConstraints.SOUTHWEST;
+				gbc_spinner_max_loop.insets = new Insets(0, 0, 0, 5);
+				gbc_spinner_max_loop.gridx = 2;
+				gbc_spinner_max_loop.gridy = 1;
+				panel.add(spinner_max_loop, gbc_spinner_max_loop);
 			}
 		}
 		
@@ -238,10 +267,12 @@ public class SettingDialog extends JDialog {
 	@Override
 	public void setVisible(boolean b) {
 		if (b){
-			loadSettings();
+			try{
+				loadSettings();
+			} catch (Exception e){
+				javax.swing.JOptionPane.showMessageDialog(this, e.getMessage());
+			}
 		}
 		super.setVisible(b);
 	}
-	
-	
 }

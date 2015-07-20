@@ -4,12 +4,7 @@ public class Convert {
 	
 	public static void main(String[] args){
 		//System.out.println(dec2bin(16));
-		int a[] = {1, 2, 4, 3};
-		
-		for (int i: a){
-			i++;
-			System.out.println(i);
-		}
+		System.out.println(23 & ~-1);
 	}
 	
 	public static long dec2bin(int x){

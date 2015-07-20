@@ -11,6 +11,7 @@ import core.error.StatementNoRootException;
 import core.error.ThreadStateException;
 import core.models.Expression;
 import core.models.Function;
+import core.models.Statement;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.FunctionCallExpression;
@@ -21,6 +22,7 @@ import core.unit.BasisPath;
 import core.unit.BasisPathParser;
 import core.unit.CFG;
 import core.unit.ConstraintEquations;
+import core.unit.LoopablePath;
 import core.visitor.BodyFunctionVisitor;
 import core.visitor.ExpressionVisitor;
 import core.visitor.UnitVisitor;
@@ -155,6 +157,61 @@ public abstract class MainProcess implements FilenameFilter {
 		}.ensureStart();
 
 	}
+	
+	/**
+	 * Bắt đầu quá trình kiểm thử một đường thi hành có chứa vòng lặp. Các vòng lặp này
+	 * sẽ được nhân hệ số lần lặp dựa vào danh sách chỉ số cung cấp, sau đó ghép nối lại
+	 * tạo ra một danh sách các đường thi hành lặp. Cuối cùng, ta giải hệ ràng buộc
+	 * tại các đường thi hành này để sinh testcase
+	 * @param path đường thi hành có chứa vòng lặp
+	 * @param indexes danh sách các chỉ số mô tả số lần lặp, duyệt theo thứ tự in-order
+	 * (duyệt cha -> duyệt lần lượt các vòng lặp con)
+	 * @param listener công việc cần thực hiện khi việc kiểm thử đã xong. Một danh sách
+	 * các đường thi hành đã đính kèm nghiệm testcase sẽ được truyền vào
+	 * @throws ThreadStateException tiến trình trước chưa chạy xong
+	 */
+	public void beginTestLoopPath(LoopablePath path, ArrayList<Integer> indexes, 
+			Function current, Return<ArrayList<BasisPath>> listener) 
+					throws ThreadStateException{
+		
+		new RunThread<ArrayList<BasisPath>>(listener) {
+			@Override
+			protected ArrayList<BasisPath> doTask() throws CoreException {
+				ArrayList<ArrayList<Statement>> paths = new ArrayList<>();
+				ArrayList<BasisPath> basisPath = new ArrayList<BasisPath>();
+				
+				paths.add(new ArrayList<Statement>());
+				GUI.instance.setStatus("Đang phân tích các vòng lặp");
+				path.joinLoopStatement(paths, indexes.iterator());
+				int i = 1, length = paths.size();
+				
+				for (ArrayList<Statement> path: paths){
+					BasisPath basis = new BasisPath();
+					
+					basis.addAll(path);
+					basisPath.add(basis);
+					
+					try {
+						mPathParser.parseBasisPath(basis, current);
+					} catch (StatementNoRootException e1) {
+						System.out.println(" !!! " + e1.getMessage());
+						continue;
+					}
+
+					ConstraintEquations ce = mPathParser.getConstrains();
+					basis.setConstraint(ce);
+
+					GUI.instance.setStatus("Đang giải hệ %d/%d", i++, length);
+					Result result = mSolver.solve(ce.getTestcases(), ce,
+							ce.getArrayAccesses());
+					basis.setSolveResult(result);
+				}
+				
+				GUI.instance.setStatus(null);
+				return basisPath;
+			}
+		}.ensureStart();
+	}
 		
 	
 	public void beginTestFunctionBeta(Function func){
@@ -168,6 +225,7 @@ public abstract class MainProcess implements FilenameFilter {
 		
 		for (BasisPath path: cfg_3.getBasisPaths()){
 			System.out.println("\n" + path);
+			System.out.println("Loop: " + new LoopablePath(path));
 			
 			try {
 				mPathParser.parseBasisPath(path, func);
@@ -310,7 +368,7 @@ public abstract class MainProcess implements FilenameFilter {
 	 * Cần sử dụng {@link #ensureStart()} thay vì {@link #start()}
 	 * @param <R> listener cho kết quả
 	 */
-	protected abstract class RunThread<R> extends Thread{
+	protected static abstract class RunThread<R> extends Thread{
 		
 		protected Return<R> mCallBack;
 		
@@ -332,10 +390,16 @@ public abstract class MainProcess implements FilenameFilter {
 				core = e;
 			}
 			
-			if (mCallBack != null)
-				mCallBack.receive(result, core);
+			if (mCallBack != null){
+				if (core == null)
+					mCallBack.receive(result);
+				else
+					mCallBack.error(core);
+			}
 			instance = null;
 		}
+
+		private static Thread instance;
 		
 		/**
 		 * Kiểm tra và chạy tiến trình
@@ -358,8 +422,6 @@ public abstract class MainProcess implements FilenameFilter {
 		
 	}
 	
-	private static Thread instance;
-	
 	/**
 	 * Mô tả một listener dùng để truyền vào các thread để lấy kết quả
 	 * @param <R> kiểu kết quả mong đợi
@@ -369,9 +431,16 @@ public abstract class MainProcess implements FilenameFilter {
 		/**
 		 * Phương thức sẽ được gọi khi tiến trình hoàn thành công việc
 		 * @param result kết quả của công việc
-		 * @param e ngoại lệ trong việc xử lý, lúc đó result sẽ là null
 		 */
-		public void receive(R result, CoreException e);
+		public void receive(R result);
+		
+		/**
+		 * Phương thức sẽ được gọi khi tiến trình có ngoại lệ xảy ra
+		 * @param e ngoại lệ trong việc xử lý
+		 */
+		public default void error(CoreException e){
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -381,15 +450,14 @@ public abstract class MainProcess implements FilenameFilter {
 	public static abstract class Returned implements Return<Void>{
 
 		@Override
-		public final void receive(Void result, CoreException e) {
-			receive(e);
+		public final void receive(Void result) {
+			receive();
 		}
 		
 		/**
 		 * Công việc cần thực hiện sau khi thread đã hoàn thành công việc
-		 * @param có ngoại lệ trong quá trình xử lý
 		 */
-		public abstract void receive(CoreException e);
+		public abstract void receive();
 	}
 	
 }

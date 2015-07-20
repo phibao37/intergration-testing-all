@@ -56,6 +56,16 @@ public class StatementNode extends Node {
 	public static final int FLAG_SELECT_FALSE = 2;
 	
 	/**
+	 * Cờ hiệu nút này có nhánh true được chọn bổ sung
+	 */
+	public static final int FLAG_SELECT_TRUE_EXTRA = 4;
+	
+	/**
+	 * Cờ hiệu nút này có nhánh false được chọn bổ sung
+	 */
+	public static final int FLAG_SELECT_FALSE_EXTRA = 8;
+	
+	/**
 	 * Thêm nhãn thứ tự cho nút
 	 * @param label số thứ tự vị trí của nút trong đường đi, hoặc {@link #LABEL_NONE} 
 	 * nếu muốn hủy bỏ toàn bộ 

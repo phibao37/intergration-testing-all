@@ -47,7 +47,8 @@ public class StatementAdapter extends NodeAdapter<StatementNode> {
 	 * Đánh dấu các nút đồ họa ứng với danh sách các câu lệnh
 	 */
 	@SuppressWarnings("unchecked")
-	public void selectNodesByPath(ArrayList<Statement> stmList){
+	public void selectNodesByPath(ArrayList<Statement> stmList, 
+			int flagTrue, int flagFalse, boolean addLabel){
 		ArrayList<Statement> copy = (ArrayList<Statement>) stmList.clone();
 		
 		copy.removeIf(new Predicate<Statement>() {
@@ -62,7 +63,8 @@ public class StatementAdapter extends NodeAdapter<StatementNode> {
 		
 		for (Statement stm: copy){
 			path[i] = getNodeByElement(stm);
-			path[i].setLabel(i);
+			if (addLabel)
+				path[i].setLabel(i);
 			i++;
 		}
 		
@@ -70,9 +72,9 @@ public class StatementAdapter extends NodeAdapter<StatementNode> {
 			StatementNode[] refer = (StatementNode[]) path[i].getRefers();
 			
 			if (refer[0] == path[i+1])
-				path[i].addFlag(StatementNode.FLAG_SELECT_TRUE);
+				path[i].addFlag(flagTrue);
 			else
-				path[i].addFlag(StatementNode.FLAG_SELECT_FALSE);
+				path[i].addFlag(flagFalse);
 		}
 	}
 }

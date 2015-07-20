@@ -37,6 +37,7 @@ import cdt.CMainProcess;
 import cdt.SelectFunction;
 import core.GUI;
 import core.MainProcess;
+import core.MainProcess.Return;
 import core.MainProcess.Returned;
 import core.error.CoreException;
 import core.error.MainNotFoundException;
@@ -47,7 +48,11 @@ import core.graph.LightTabbedPane;
 import core.graph.SettingDialog;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.canvas.FunctionCanvas;
+import core.graph.canvas.LoopCanvas;
+import core.graph.canvas.LoopCanvas.OnApplyValue;
+import core.graph.canvas.LoopCanvas.OnNodeSelect;
 import core.graph.canvas.StatementCanvas;
+import core.graph.node.LoopNode;
 import core.models.Function;
 import core.models.Statement;
 import core.models.expression.NotNegativeExpression;
@@ -56,6 +61,7 @@ import core.models.statement.ScopeStatement;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.ConstraintEquations;
+import core.unit.LoopablePath;
 
 import javax.swing.LayoutStyle.ComponentPlacement;
 
@@ -205,13 +211,12 @@ public class GUIAll extends GUI {
 	
 	private JLabel lbl_loading;
 	private JLabel lbl_status;
-
-	private int currentIndex;
 	private Function currentFunction;
+	private int currentindex;
 	
-	private ArrayList<JTable> listTable;
-	private ArrayList<Boolean> listSubCondition;
-	private ArrayList<ArrayList<BasisPath>> listPath;
+	private ArrayList<StorePathTable> listTable;
+	private StoreLoopTable table_loop_path;
+	private StorePathTable table_loop_result;
 
 	@Override
 	public void beginTestFunction(Function func) {
@@ -219,33 +224,49 @@ public class GUIAll extends GUI {
 			main.beginTestFunction(func, new Returned() {
 				
 				@Override
-				public void receive(CoreException e) {
-					if (e != null){
-						alertError(e.getMessage());
-						return;
-					}
+				public void error(CoreException e) {
+					alertError(e.getMessage());
+				}
+
+				@Override
+				public void receive() {
 					currentFunction = func;
 					
 					setStatus("Đang tìm các nhánh dựa trên các cấp độ phủ");
-					listPath.clear();
-					listPath.add(func.getCFG(false).getCoverStatementPaths());
-					listPath.add(func.getCFG(false).getCoverBranchPaths());
-					listPath.add(func.getCFG(true).getCoverBranchPaths());
-					listPath.add(func.getCFG(false).getBasisPaths());
+					ArrayList<BasisPath> base = func.getCFG(false).getBasisPaths();
 					
-					listSubCondition.clear();
-					listSubCondition.add(false);
-					listSubCondition.add(false);
-					listSubCondition.add(true);
-					listSubCondition.add(false);
+					listTable.get(0).setBasisPaths(
+							func.getCFG(false).getCoverStatementPaths());
+					listTable.get(1).setBasisPaths(
+							func.getCFG(false).getCoverBranchPaths());
+					listTable.get(2).setBasisPaths(
+							func.getCFG(true).getCoverBranchPaths());
+					listTable.get(3).setBasisPaths(base);
 					
-					for (int i = 0; i < listPath.size(); i++){
+					ArrayList<LoopablePath> loopablePath = new ArrayList<>();
+					ArrayList<BasisPath> loopPath = new ArrayList<>();
+
+					setStatus("Đang tìm các đường chứa vòng lặp");
+					for (BasisPath path: base){
+						LoopablePath l = new LoopablePath(path);
+						if (l.getLoops().size() > 0){
+							loopablePath.add(l);
+							loopPath.add(path);
+						}
+					}
+					table_loop_path.setBasisPaths(loopPath);
+					table_loop_path.setLoopPaths(loopablePath);
+					table_loop_result.setBasisPaths(null);
+					
+					for (StorePathTable table: listTable){
 						DefaultTableModel pathModel = (DefaultTableModel) 
-								listTable.get(i).getModel();
+								table.getModel();
 						removeTableModel(pathModel);
+						if (table.getBasisPaths() == null)
+							continue;
 						
 						int j = 1;
-						for (BasisPath path: listPath.get(i)){
+						for (BasisPath path: table.getBasisPaths()){
 							Result r = path.getSolveResult();
 							pathModel.addRow(new Object[]{
 								j++,
@@ -258,8 +279,41 @@ public class GUIAll extends GUI {
 					}
 					
 					openFileView(func.getSourceFile());
-					openFuntionView(func, listSubCondition.get(currentIndex));
+					openFuntionView(func, currentindex == 2);
 					setStatus(null);
+				}
+			});
+		} catch (ThreadStateException e) {
+			alertError("Việc xử lý chưa hoàn thành");
+		}
+	}
+	
+	private void beginTestLoop(LoopablePath path, ArrayList<Integer> indexes) {
+		try {
+			main.beginTestLoopPath(path, indexes, currentFunction, new Return<ArrayList<BasisPath>>() {
+				@Override
+				public void error(CoreException e) {
+					alertError(e.getMessage());
+				}
+				
+				@Override
+				public void receive(ArrayList<BasisPath> result) {
+					DefaultTableModel pathModel = (DefaultTableModel) 
+							table_loop_result.getModel();
+					removeTableModel(pathModel);
+					table_loop_result.setBasisPaths(result);
+					
+					int j = 1;
+					for (BasisPath path: result){
+						Result r = path.getSolveResult();
+						pathModel.addRow(new Object[]{
+							j++,
+							path.toStringSkipMarkdown(),
+							r.getSolutionMessage(),
+							r.getReturnValue()
+						});
+					}
+					pathModel.addRow(new Object[]{null, null, null, null});
 				}
 			});
 		} catch (ThreadStateException e) {
@@ -271,25 +325,22 @@ public class GUIAll extends GUI {
 	 * Có sự thay đổi các tab table
 	 */
 	private void tableTabChanged(int index){
-		currentIndex = index;
-		if (listPath.isEmpty()) return;
-		//if (index < 3)
-			openFuntionView(currentFunction, listSubCondition.get(currentIndex));
+		currentindex = index;
+		if (currentFunction == null) return;
+		openFuntionView(currentFunction, index == 2);
 	}
 	
-	private void selectPathByIndex(int index){
+	private void selectPathByIndex(BasisPath path, boolean subCondition){
 		StatementCanvas canvas = openFuntionView(
 				currentFunction, 
-				listSubCondition.get(currentIndex)
+				subCondition
 				).getCanvas();
-		index--;
 		
-		if (index < 0){
-			canvas.resetAllSelectingPath();
+		if (path == null){
+			canvas.resetSelectingPath();
 			return;
 		}
 		
-		BasisPath path = listPath.get(currentIndex).get(index);
 		ConstraintEquations constraint = path.getConstraint();
 		int i = 0, j = 0;
 		
@@ -351,9 +402,7 @@ public class GUIAll extends GUI {
 	 */
 	private void initialize() {
 		//main = new CMainProcess();
-		listTable = new ArrayList<JTable>();
-		listSubCondition = new ArrayList<Boolean>();
-		listPath = new ArrayList<ArrayList<BasisPath>>();
+		listTable = new ArrayList<StorePathTable>();
 		centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		
@@ -410,15 +459,17 @@ public class GUIAll extends GUI {
 		});
 		detailWrap.setLeftComponent(tab_table);
 		
+		
 		/*---------BEGIN ADD TABLES-----------*/
 		
 		String[] tab_names = {"Phủ câu lệnh", "Phủ nhánh", "Phủ điều kiện con", 
 				"Tất cả nhánh"};
+		int index = 0;
 		for (String tab_name: tab_names){
 			JScrollPane extraWrap = new JScrollPane();
 			extraWrap.setBorder(null);
 			
-			JTable table = new JTable();
+			StorePathTable table = new StorePathTable(index++ == 2);
 			table.setModel(new DefaultTableModel(
 				new Object[][] {
 				},
@@ -433,33 +484,131 @@ public class GUIAll extends GUI {
 			table.getColumnModel().getColumn(3).setMaxWidth(70);
 			extraWrap.setViewportView(table);
 			extraWrap.getViewport().setBackground(Color.WHITE);
-
-			
-			for (int x = 0; x < table.getColumnCount(); x++) {
-				table.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
-			}
-			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-				
-				@Override
-				public void valueChanged(ListSelectionEvent e) {
-					if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
-						return;
-					Object index = table.getValueAt(table.getSelectedRow(), 0);
-					
-					if (index == null)
-						selectPathByIndex(0);
-					else
-						selectPathByIndex(Integer.valueOf(index + ""));
-				}
-			});
 			
 			tab_table.add(tab_name, extraWrap);
 			listTable.add(table);
 		}
 		
 		/*---------END ADD TABLES-----------*/
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBorder(null);
+		panel_1.setBackground(Color.WHITE);
+		tab_table.addTab("Các vòng lặp", null, panel_1, null);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBorder(null);
+		scrollPane.getViewport().setBackground(Color.WHITE);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBorder(null);
+		scrollPane_1.getVerticalScrollBar().setUnitIncrement(16);
+		
+		JScrollPane scrollPane_2 = new JScrollPane();
+		scrollPane_2.setBorder(null);
+		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
+		gl_panel_1.setHorizontalGroup(
+			gl_panel_1.createParallelGroup(Alignment.LEADING)
+				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+				.addComponent(scrollPane_1, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+				.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+		);
+		gl_panel_1.setVerticalGroup(
+			gl_panel_1.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel_1.createSequentialGroup()
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(scrollPane_2, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE))
+		);
+		
+		table_loop_result = new StorePathTable(false);
+		table_loop_result.setModel(new DefaultTableModel(
+				new Object[][] {
+				},
+				new String[] {
+					"STT", "\u0110\u01B0\u1EDDng d\u1EABn", "Testcases", "Return"
+				}
+			));
+		table_loop_result.getColumnModel().getColumn(0).setPreferredWidth(30);
+		table_loop_result.getColumnModel().getColumn(0).setMinWidth(30);
+		table_loop_result.getColumnModel().getColumn(0).setMaxWidth(30);
+		table_loop_result.getColumnModel().getColumn(3).setPreferredWidth(70);
+		table_loop_result.getColumnModel().getColumn(3).setMaxWidth(70);
+		scrollPane_2.setViewportView(table_loop_result);
+		
+		scrollPane_2.getViewport().setBackground(Color.WHITE);
+		
+		LoopCanvas loop_canvas = new LoopCanvas();
+		loop_canvas.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				StatementCanvas canvas = openFuntionView(
+						currentFunction, 
+						currentindex == 2
+						).getCanvas();
+				canvas.resetSelectingExtraPath();
+			}
+		});
+		loop_canvas.setBackground(Color.WHITE);
+		scrollPane_1.setViewportView(loop_canvas);
+		
+		loop_canvas.setOnNodeSelect(new OnNodeSelect() {
+			@Override
+			public void selected(LoopNode node) {
+				StatementCanvas canvas = openFuntionView(
+						currentFunction, false
+						).getCanvas();
+				canvas.setSelectedExtraPath(node.getStatement().getOriginList());
+			}
+		});
+		loop_canvas.setOnApplyValue(new OnApplyValue() {
+			@Override
+			public void applied(ArrayList<Integer> indexes, LoopablePath path) {
+				beginTestLoop(path, indexes);
+			}
+		});
+		
+		table_loop_path = new StoreLoopTable();
+		table_loop_path.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"STT", "\u0110\u01B0\u1EDDng thi h\u00E0nh"
+			}
+		));
+		table_loop_path.getColumnModel().getColumn(0).setPreferredWidth(30);
+		table_loop_path.getColumnModel().getColumn(0).setMinWidth(30);
+		table_loop_path.getColumnModel().getColumn(0).setMaxWidth(30);
+		scrollPane.setViewportView(table_loop_path);
+		
+		listTable.add(table_loop_path);
+		listTable.add(table_loop_result);
+		table_loop_path.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				StoreLoopTable table = (StoreLoopTable) table_loop_path;
+				if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
+					return;
+				openFuntionView(
+						currentFunction, false
+						).getCanvas().resetSelectingExtraPath();
+				removeTableModel((DefaultTableModel) table_loop_result.getModel());
+				
+				Object index = table.getValueAt(table.getSelectedRow(), 0);
+				
+				if (index != null){
+					int i = Integer.valueOf(index + "") - 1;
+					loop_canvas.setLoopPath(table.getLoopPaths().get(i));
+				}
+			}
+		});
+		
+		panel_1.setLayout(gl_panel_1);
 
-		detailWrap.setDividerLocation(250);
+		detailWrap.setDividerLocation(400);
 		splitPane_main.setDividerLocation(600);
 		
 		JPanel panel_tray = new JPanel();
@@ -628,10 +777,72 @@ public class GUIAll extends GUI {
 		// fileChooser.setFileHidingEnabled(false);
 		fileChooserJ.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooserJ.setFileFilter(jFilter);
+		
+		for (StorePathTable table: listTable){
+			for (int x = 0; x < table.getColumnCount(); x++) {
+				table.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
+			}
+			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				
+				@Override
+				public void valueChanged(ListSelectionEvent e) {
+					if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
+						return;
+					Object index = table.getValueAt(table.getSelectedRow(), 0);
+					
+					if (index == null)
+						selectPathByIndex(null, table.isSubCondition());
+					else{
+						int i = Integer.valueOf(index + "") - 1;
+						selectPathByIndex(table.getBasisPaths().get(i), table.isSubCondition());
+					}
+				}
+			});
+		}
+	}
+	
+	private static class StorePathTable extends JTable{
+		private static final long serialVersionUID = 1L;
+		private ArrayList<BasisPath> mPath;
+		private boolean mSubcondition;
+		
+		public StorePathTable(boolean subCondition){
+			mSubcondition = subCondition;
+		}
+		
+		public boolean isSubCondition(){
+			return mSubcondition;
+		}
+
+		public ArrayList<BasisPath> getBasisPaths() {
+			return mPath;
+		}
+
+		public void setBasisPaths(ArrayList<BasisPath> mPath) {
+			this.mPath = mPath;
+		}
+	}
+	
+	private static class StoreLoopTable extends StorePathTable{
+		private static final long serialVersionUID = 1L;
+		private ArrayList<LoopablePath> mLoop;
+		
+		public StoreLoopTable() {
+			super(false);
+		}
+
+		public ArrayList<LoopablePath> getLoopPaths() {
+			return mLoop;
+		}
+
+		public void setLoopPaths(ArrayList<LoopablePath> mLoop) {
+			this.mLoop = mLoop;
+		}
+		
 	}
 	
 	/*----------------- LOG AND ERROR -----------------*/
-	
+
 	/** Bật thông báo lỗi với nội dung chỉ định */
 	public void alertError(String s) {
 		JOptionPane.showMessageDialog(frmMain, s, "Errors",

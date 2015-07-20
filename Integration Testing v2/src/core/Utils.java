@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -103,6 +104,48 @@ public class Utils {
 			cls = Byte.class;
 		
 		return cls;
+	}
+	
+	/**
+	 * Nhân 2 danh sách với nhau và trả về danh sách kết quả
+	 * @param list1 danh sách bên trái
+	 * @param list2 danh sách bên phải
+	 * @return danh sách kết quả, mỗi phần tử là một danh sách bao gồm 
+	 * 1 phần tử của danh sách bên trái ghép với 1 phần tử của danh sách bên phải
+	 */
+	public static <T extends Collection<V>, V> ArrayList<ArrayList<V>> multiply(
+			List<T> list1, List<T> list2){
+		ArrayList<ArrayList<V>> lists = new ArrayList<ArrayList<V>>();
+		
+		for (T item1: list1)
+			for (T item2: list2){
+				ArrayList<V> list = new ArrayList<V>();
+				list.addAll(item1);
+				list.addAll(item2);
+				lists.add(list);
+			}
+		
+		return lists;
+	}
+	
+	/**
+	 * Nhân mỗi phần tử của danh sách bên trái với mỗi phân tử của danh sách bên phải
+	 * @param list1 danh sách bên trái, kiểu phần tử phải là 1 ArrayList
+	 * @param list2 danh sách bên phải
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T extends Collection<V>, V> void addMultiply(
+			List<T> list1, List<T> list2){
+		List<T> lists = new ArrayList<T>(list1);
+		list1.clear();
+		
+		for (T item1: lists)
+			for (T item2: list2){
+				ArrayList<V> list = new ArrayList<V>();
+				list.addAll(item1);
+				list.addAll(item2);
+				list1.add((T) list);
+			}
 	}
 	
 }
