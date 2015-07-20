@@ -59,7 +59,7 @@ public class LoopStatement extends Statement {
 			
 			//Chọn kiểm thử vòng lặp này
 			if (loop == -1){
-				for (int i = 0; i < S.MAX_LOOP_TEST; i++)
+				for (int i = 0; i <= S.MAX_LOOP_TEST; i++)
 					lists.add(join(inBody, i));
 			} 
 			
