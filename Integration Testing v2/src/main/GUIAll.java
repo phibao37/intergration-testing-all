@@ -73,6 +73,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import jdt.JMainProcess;
+import java.awt.Dimension;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -636,14 +637,14 @@ public class GUIAll extends GUI {
 				JPanel panel_toolbar_left = new JPanel();
 				
 						JLabel lbl_open_c = new JLabel();
+						lbl_open_c.setPreferredSize(new Dimension(80, 30));
 						lbl_open_c.setHorizontalAlignment(SwingConstants.CENTER);
-						lbl_open_c.setBounds(10, 5, 80, 30);
 						lbl_open_c.setToolTipText("Mở tập tin C/thư mục");
 						lbl_open_c.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 						lbl_open_c.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
 						lbl_open_c.setOpaque(true);
 						lbl_open_c.setBackground(SystemColor.controlHighlight);
-						lbl_open_c.setText("Mở ...");
+						lbl_open_c.setText("Mở C...");
 						lbl_open_c.addMouseListener(new MouseAdapter() {
 							@Override
 							public void mouseClicked(MouseEvent e) {
@@ -655,7 +656,7 @@ public class GUIAll extends GUI {
 						//tabbedCanvas.setTabCloseableAt(1, false);
 
 						JLabel lbl_set_root = new JLabel();
-						lbl_set_root.setBounds(210, 5, 100, 30);
+						lbl_set_root.setPreferredSize(new Dimension(100, 30));
 						lbl_set_root.addMouseListener(new MouseAdapter() {
 							@Override
 							public void mouseClicked(MouseEvent e) {
@@ -671,8 +672,26 @@ public class GUIAll extends GUI {
 						lbl_set_root.setOpaque(true);
 						lbl_set_root.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
 						lbl_set_root.setBackground(SystemColor.controlHighlight);
-						panel_toolbar_left.setLayout(null);
+						panel_toolbar_left.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
 						panel_toolbar_left.add(lbl_open_c);
+						
+						JLabel lbl_open_j = new JLabel();
+						lbl_open_j.setPreferredSize(new Dimension(100, 30));
+						lbl_open_j.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+						lbl_open_j.setIcon(new ImageIcon(GUIAll.class.getResource("/image/file.png")));
+						lbl_open_j.addMouseListener(new MouseAdapter() {
+							@Override
+							public void mouseClicked(MouseEvent e) {
+								openJavaFiles();
+							}
+						});
+						lbl_open_j.setToolTipText("Mở tập tin C/thư mục");
+						lbl_open_j.setText("Mở Java");
+						lbl_open_j.setOpaque(true);
+						lbl_open_j.setHorizontalAlignment(SwingConstants.CENTER);
+						lbl_open_j.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
+						lbl_open_j.setBackground(SystemColor.controlHighlight);
+						panel_toolbar_left.add(lbl_open_j);
 						panel_toolbar_left.add(lbl_set_root);
 						
 						JPanel panel = new JPanel();
@@ -689,27 +708,10 @@ public class GUIAll extends GUI {
 								.addComponent(panel_toolbar_left, GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
 								.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
 						);
-						
-						JLabel lbl_open_j = new JLabel();
-						lbl_open_j.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-						lbl_open_j.setIcon(new ImageIcon(GUIAll.class.getResource("/image/file.png")));
-						lbl_open_j.addMouseListener(new MouseAdapter() {
-							@Override
-							public void mouseClicked(MouseEvent e) {
-								openJavaFiles();
-							}
-						});
-						lbl_open_j.setToolTipText("Mở tập tin C/thư mục");
-						lbl_open_j.setText("Mở Java");
-						lbl_open_j.setOpaque(true);
-						lbl_open_j.setHorizontalAlignment(SwingConstants.CENTER);
-						lbl_open_j.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-						lbl_open_j.setBackground(SystemColor.controlHighlight);
-						lbl_open_j.setBounds(100, 5, 100, 30);
-						panel_toolbar_left.add(lbl_open_j);
-						panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
+						panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 						
 						JButton btnCit = new JButton("Cài đặt");
+						btnCit.setPreferredSize(new Dimension(120, 30));
 						btnCit.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
 								new SettingDialog(frmMain).setVisible(true);

@@ -130,21 +130,20 @@ public class Utils {
 	
 	/**
 	 * Nhân mỗi phần tử của danh sách bên trái với mỗi phân tử của danh sách bên phải
-	 * @param list1 danh sách bên trái, kiểu phần tử phải là 1 ArrayList
+	 * @param list1 danh sách bên trái
 	 * @param list2 danh sách bên phải
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T extends Collection<V>, V> void addMultiply(
-			List<T> list1, List<T> list2){
-		List<T> lists = new ArrayList<T>(list1);
+			List<ArrayList<V>> list1, List<T> list2){
+		List<ArrayList<V>> lists = new ArrayList<ArrayList<V>>(list1);
 		list1.clear();
 		
-		for (T item1: lists)
+		for (ArrayList<V> item1: lists)
 			for (T item2: list2){
 				ArrayList<V> list = new ArrayList<V>();
 				list.addAll(item1);
 				list.addAll(item2);
-				list1.add((T) list);
+				list1.add(list);
 			}
 	}
 	
