@@ -20,7 +20,7 @@ import core.visitor.ExpressionVisitor;
 public class IDExpression extends Expression {
 
 	public static void main(String[] args){
-		System.out.println(Double.valueOf("12dd"));
+		System.out.println("Infinity".matches("t|(Infinity)|y|zt"));
 	}
 	
 	private Type mType;
@@ -54,7 +54,7 @@ public class IDExpression extends Expression {
 			mValue = Float.valueOf(content);
 			return BasicType.FLOAT;
 		}
-		if (content.matches("[\\+\\-]?(\\d+d)|(\\d*\\.\\d+d?)")){
+		if (content.matches("[\\+\\-]?(\\d+d)|(\\d*\\.\\d+d?)|(Infinity)")){
 			mValue = Double.valueOf(content);
 			return BasicType.DOUBLE;
 		}
@@ -86,5 +86,10 @@ public class IDExpression extends Expression {
 	@Override
 	protected int handle(ExpressionVisitor visitor) {
 		return visitor.visit(this);
+	}
+
+	@Override
+	public boolean isConstant() {
+		return true;
 	}
 }

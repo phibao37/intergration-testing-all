@@ -71,6 +71,17 @@ public abstract class ExpressionGroup extends Expression {
 	}
 
 	/**
+	 * Một biểu thức nhóm là hằng số nếu tất cả các biểu thức con đều là hằng số
+	 */
+	@Override
+	public boolean isConstant() {
+		for (Expression child: g)
+			if (!child.isConstant())
+				return false;
+		return true;
+	}
+
+	/**
 	 * Tạo ra một bản sao của biểu thức. Các thành phần biểu thức con cũng tự nó được
 	 * sao chép (deep-clone)
 	 */

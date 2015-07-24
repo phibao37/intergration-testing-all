@@ -1,5 +1,6 @@
 package core.solver;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -192,12 +193,37 @@ public class Z3Solver implements Solver {
 		//Có dấu âm
 		if (str.charAt(0) == '-'){
 			neg = true;
-			str = str.substring(1);
+			str = str.substring(2);
+		}
+		
+		//Loại bỏ dấu ngoặc ( ... )
+		while (str.matches("\\(.*\\)"))
+			str = str.substring(1, str.length() - 1);
+		
+		//Là một phép chia
+		if (str.matches("/ [\\d\\.]+ [\\d\\.]+")){
+			String[] part = str.split(" ");
+			BigDecimal d1 = new BigDecimal(part[1]);
+			BigDecimal d2 = new BigDecimal(part[2]);
+			
+			if (d2.compareTo(BigDecimal.ZERO) == 0)
+				str = "Infinity";
+			else{
+				try{
+					str = d1.divide(d2).toString();
+				} catch (Exception e){
+					str = d1.divide(d2, 10, BigDecimal.ROUND_HALF_DOWN).toString();
+				}
+			}
 		}
 		
 		if (neg)
-			str = "-" + str.trim(); //thường là có khoảng trắng ở phia sau dấu âm
+			str = "-" + str;
 		return new IDExpression(str);
+	}
+	
+	public static void main(String[] args){
+		System.out.println(str2Expression("/ 1.0 7.0"));
 	}
 	
 	/**

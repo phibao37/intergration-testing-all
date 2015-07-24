@@ -34,6 +34,8 @@ public class BasisPathParser {
 	private VariableTable tables;
 	private BasisPath mPath;
 	
+	private ArrayList<UnaryExpression> postFix = new ArrayList<UnaryExpression>();
+	
 	/**
 	 * Thêm một biểu thức ràng buộc mới
 	 */
@@ -107,60 +109,8 @@ public class BasisPathParser {
 					tables.newCloseScope();
 			} else {
 				Expression root = stm.getRoot().clone();
-				PlaceHolderExpression holder = new PlaceHolderExpression(root);
-				ArrayList<UnaryExpression> postFix = new ArrayList<UnaryExpression>();
-				
-				holder.accept(new ExpressionVisitor() {
-					
-					@Override
-					public int visit(UnaryExpression unary) {
-						if (unary == root //chỉ xét bên trong gốc
-								|| !unary.isAssignOperator()) //chỉ xét gán
-							return PROCESS_CONTINUE;
-						
-						//Thí dụ: (x < ++i)
-						//Thực hiện tăng/giảm cho biến prefix trước: i = i + 1
-						if (unary.isLeftOperator())
-							handleAssignOne(unary);
-						
-						//Với các biến postfix, thêm vào danh sách để xử lý sau
-						else
-							postFix.add(unary);
-						
-						//Thay thế bằng biến: (x < i)
-						holder.replace(unary, unary.getSubElement());
-						
-						return PROCESS_ABORT;
-					}
-
-					@Override
-					public int visit(ArrayIndexExpression array) {
-						if (array.isDeclare())
-							return PROCESS_CONTINUE;
-						
-						//Thêm điều kiện các chỉ số phải không âm
-						for (Expression index: array.getIndexes()){
-							addConstrain(new NotNegativeExpression(
-									tables.evalExpression(index)));
-						}
-						
-						//Thêm các biểu thức truy cập biến mảng testcase (scope = 1)
-						if (tables.getScope(array.getName()) == 1){
-							Expression[] indexes = array.getIndexes();
-							Expression[] indexs = new Expression[indexes.length];
-							
-							for (int i = 0; i < indexs.length; i++)
-								indexs[i] = tables.evalExpression(indexes[i]);
-							
-							addArrayAccess(new ArrayIndexExpression(
-									array.getName(), 
-									indexs));
-						}
-							
-						return PROCESS_CONTINUE;
-					}
-					
-				});
+				postFix.clear();
+				preVisitRoot(root);
 				
 				//Xủ lý theo từng kiểu
 				handleStatement(stm, root, 
@@ -203,6 +153,67 @@ public class BasisPathParser {
 		default:
 			System.out.println("Unhandle statement: " + stm);
 		}
+	}
+	
+	/**
+	 * Các công việc cần được xử lý trước khi chính thức xủ lý biểu thức gốc.<br/>
+	 * Thí dụ: biểu thức (++i == 3) cần được xủ lý i = i + 1 trước, sau đó thay thế
+	 * biểu thức thành (i == 3)
+	 */
+	protected void preVisitRoot(Expression root){
+		PlaceHolderExpression holder = new PlaceHolderExpression(root);
+		
+		holder.accept(new ExpressionVisitor() {
+			
+			@Override
+			public int visit(UnaryExpression unary) {
+				if (unary == root //chỉ xét bên trong gốc
+						|| !unary.isAssignOperator()) //chỉ xét gán
+					return PROCESS_CONTINUE;
+				
+				//Thí dụ: (x < ++i)
+				//Thực hiện tăng/giảm cho biến prefix trước: i = i + 1
+				if (unary.isLeftOperator())
+					handleAssignOne(unary);
+				
+				//Với các biến postfix, thêm vào danh sách để xử lý sau
+				else
+					postFix.add(unary);
+				
+				//Thay thế bằng biến: (x < i)
+				holder.replace(unary, unary.getSubElement());
+				
+				return PROCESS_ABORT;
+			}
+
+			@Override
+			public int visit(ArrayIndexExpression array) {
+				if (array.isDeclare())
+					return PROCESS_CONTINUE;
+				
+				//Thêm điều kiện các chỉ số phải không âm
+				for (Expression index: array.getIndexes()){
+					addConstrain(new NotNegativeExpression(
+							tables.evalExpression(index)));
+				}
+				
+				//Thêm các biểu thức truy cập biến mảng testcase (scope = 1)
+				if (tables.getScope(array.getName()) == 1){
+					Expression[] indexes = array.getIndexes();
+					Expression[] indexs = new Expression[indexes.length];
+					
+					for (int i = 0; i < indexs.length; i++)
+						indexs[i] = tables.evalExpression(indexes[i]);
+					
+					addArrayAccess(new ArrayIndexExpression(
+							array.getName(), 
+							indexs));
+				}
+					
+				return PROCESS_CONTINUE;
+			}
+			
+		});
 	}
 	
 	/**
@@ -317,9 +328,19 @@ public class BasisPathParser {
 	
 	/**
 	 * Xử lý một biểu thức gọi hàm
+	 * @return nếu hàm được gọi để lấy giá trị, thì giá trị kết quả sẽ được trả về
+	 * <ul>
+	 * <li>Hàm sẽ được chuyển qua bộ biên dịch để tạo file thực thi, sau đó truyền
+	 * các tham số vào và nhận lấy kết quả, được chuyển sang biểu thức</li>
+	 * <li>
+	 * Các hàm mà đã biết được cả nội dung thân hàm có thể được chạy theo chế độ static
+	 * nếu hỗ trợ
+	 * </li>
+	 * </ul>
 	 */
-	protected void handleFunctionCall(FunctionCallExpression call){
+	protected Expression handleFunctionCall(FunctionCallExpression call){
 		
+		return null;
 	}
 	
 	/**

@@ -2,6 +2,7 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.models.Function;
 import core.visitor.ExpressionVisitor;
 
 /**
@@ -18,6 +19,7 @@ import core.visitor.ExpressionVisitor;
 public class FunctionCallExpression extends ExpressionGroup implements NamedAttribute{
 	
 	private String mName;
+	private Function mFunc;
 	
 	/**
 	 * Tạo một biểu thức gọi hàm với tên và danh sách tham số
@@ -54,6 +56,20 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	 */
 	public Expression[] getArguments(){
 		return g;
+	}
+	
+	/**
+	 * Thiết đặt hàm số được cho là đúng với lời gọi hàm này
+	 */
+	public void setFunction(Function func){
+		mFunc = func;
+	}
+	
+	/**
+	 * Trả về hàm số tương ứng với lời gọi hàm này, hoặc null nếu không có
+	 */
+	public Function getFunction(){
+		return mFunc;
 	}
 
 	@Override

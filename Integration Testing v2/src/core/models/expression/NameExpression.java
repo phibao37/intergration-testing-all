@@ -31,6 +31,11 @@ public class NameExpression extends Expression implements NamedAttribute {
 	protected int handle(ExpressionVisitor visitor) {
 		return visitor.visit(this);
 	}
+
+	@Override
+	public boolean isConstant() {
+		return false;
+	}
 	
 	
 }

@@ -1,5 +1,6 @@
 package core.graph.canvas;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import core.S;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.node.FunctionNode;
 import core.graph.node.Node;
+import core.inte.FunctionPair;
 
 /**
  * Lớp đồ họa giúp hiển thị các nút đồ thị biểu diễn quan hệ giữa các hàm
@@ -16,6 +18,8 @@ import core.graph.node.Node;
  */
 public class FunctionCanvas extends Canvas {
 	private static final long serialVersionUID = 251346753783856185L;
+	public static final Color DEFAULT = Color.BLACK;
+	public static final Color SELECTED = Color.RED;
 	
 	private FunctionAdapter mAdapter;
 	private ArrayList<FunctionNode> fnNodeList = new ArrayList<FunctionNode>();
@@ -69,6 +73,25 @@ public class FunctionCanvas extends Canvas {
 		defaultNodeList.addAll(fnNodeList);
 		postSetAdapter();
 	}
+	
+	/**
+	 * Đánh dấu một cặp hàm-gọi-hàm là đang được chọn
+	 */
+	public void setSelectFunctionPair(FunctionPair pair){
+		for (FunctionNode node: fnNodeList)
+			node.clearAllSelectedRefer();
+		mAdapter.selectFunctionPair(pair);
+		this.repaint();
+	}
+	
+	/**
+	 * Bỏ đánh dấu tất cả các cặp hàm gọi hàm đang được chọn
+	 */
+	public void clearAllSelectedFunctionPair(){
+		for (FunctionNode node: fnNodeList)
+			node.clearAllSelectedRefer();
+		this.repaint();
+	}
 
 	@Override
 	protected void paintComponent(Graphics g) {
@@ -85,7 +108,10 @@ public class FunctionCanvas extends Canvas {
 			 xs = n1.getX() + n1.getWidth()/2;
 			 ys = n1.getY() + n1.getHeight();
 			 
+			 int i = 0;
 			 for (Node n2: refer){
+				 g2.setColor(n1.isSelectedRefer(i++) ? SELECTED : DEFAULT);
+				 
 				 //Recurse
 				 if (n2 == n1){
 					 n1.setBorder(FunctionNode.DOUBLE_BORDER);

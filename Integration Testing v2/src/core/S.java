@@ -10,7 +10,19 @@ import java.util.Properties;
 
 
 /**
- * Rút gọn của Settings. Lớp tiện ích giúp lưu trữ các cài đặt của ứng dụng
+ * Rút gọn của Settings. Lớp tiện ích giúp lưu trữ các cài đặt của ứng dụng.<br/>
+ * Các thuộc tính cài đặt cần là một biến thực thể <b>public</b>, <b>static</b> và 
+ * <b>non-final</b>. Hơn nữa kiểu của biến phải là một trong các điều kiện sau:
+ * <ul>
+ * 	<li>Là các kiểu cơ bản: boolean, byte, char, short, int, long, float, double</li>
+ * 	<li>hoặc là kiểu tham chiếu có phương thức <b>valueOf</b> tạo đối tượng từ 
+ * 	một chuỗi, thí dụ: {@link Integer#valueOf(String)} , 
+ * {@link Float#valueOf(String)}, ...</li>
+ * <li>hoặc có 1 constructor nhận 1 đầu vào là 1 chuỗi, thí dụ: 
+ * {@link java.math.BigInteger#BigInteger(String)}, 
+ * {@link java.io.File#File(String)}, ...
+ * </li>
+ * </ul>
  * @author ducvu
  *
  */
@@ -26,7 +38,6 @@ public class S {
 	 */
 	public static int CANVAS_MARGIN_Y = 100;
 	
-	
 	/**
 	 * Kích thước văn bản bên trong nút đồ thị
 	 */
@@ -35,12 +46,33 @@ public class S {
 	/**
 	 * Thư mục bin chứa bộ giải hệ Z3
 	 */
-	public static String Z3_BIN_DIR = "D:\\App\\Library\\z3\\bin";
+	public static File DIR_Z3_BIN = new File("D:\\App\\Library\\z3\\bin");
+	
+	/**
+	 * Thư mục lưu các tập tin tạm thời để xử lý
+	 */
+	public static File DIR_TEMP = new File("integration/temp").getAbsoluteFile();
 	
 	/**
 	 * Số lượng lần lặp tối đa khi kiểm thử một vòng lặp
 	 */
 	public static int MAX_LOOP_TEST = 8;
+	
+	
+	/**
+	 * Thư mục chứa bộ biên dịch GCC
+	 */
+	public static File DIR_GCC = new File("D:\\App\\Library\\Cygwin\\bin");
+	
+	/*---------------------------------------------------------------------*/
+	
+	/**
+	 * Chuẩn hóa các cài đặt khi được nạp từ tập tin.<br/>
+	 * Thí dụ: tạo thư mục nếu chưa có, báo lỗi sai dữ liệu, ...
+	 */
+	public static void postSetting(){
+		DIR_TEMP.mkdirs();
+	}
 	
 	/*---------------------------------------------------------------------*/
 	
@@ -48,10 +80,7 @@ public class S {
 	private static File prop_file = new File("integration/setting.properties");
 	private static HashMap<String, Field> prop_map = new HashMap<String, Field>();
 	
-	/**
-	 * Nạp các cài đặt vào chương trình
-	 */
-	public static void load(){
+	static{
 		prop_map.clear();
 		for (Field field: S.class.getFields()){
 			int mod = field.getModifiers();
@@ -64,10 +93,9 @@ public class S {
 				prop_map.put(field.getName(), field);
 			}
 		}
-		
+
+		if (prop_file.exists())
 		try {
-			if (!prop_file.exists())
-				return;
 			
 			FileInputStream file = new FileInputStream(prop_file);
 			prop.load(file);
@@ -89,9 +117,13 @@ public class S {
 				field.set(null, value);
 			}
 			
-		} catch (Exception e) {
+		} 
+		
+		catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		postSetting();
 	}
 	
 	/**

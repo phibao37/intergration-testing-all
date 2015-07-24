@@ -2,11 +2,13 @@ package core.unit;
 
 import java.util.ArrayList;
 
+import core.error.StatementNoRootException;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.solver.Solver;
 import core.solver.Solver.Result;
+import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một đường thi hành cơ bản, đó là một dãy có thứ tự duy nhất các câu lệnh
@@ -64,6 +66,37 @@ public class BasisPath extends ArrayList<Statement> {
 		}
 		
 		return content.isEmpty() ? content : content.substring(4);
+	}
+	
+	/**
+	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 
+	 * theo danh sách trong đường thi hành
+	 * @param visitor bộ duyệt biểu thức. 
+	 * Sử dụng {@link ExpressionVisitor#visit(Statement)} để "bắt" được khi các
+	 * câu lệnh được duyệt vào
+	 */
+	public void accept(ExpressionVisitor visitor){
+		int process;
+		
+		for (Statement stm: this){
+			process = visitor.visit(stm);
+			
+			if (process == ExpressionVisitor.PROCESS_ABORT)
+				break;
+			else if (process == ExpressionVisitor.PROCESS_CONTINUE
+					&& !(stm instanceof ScopeStatement)
+					&& !(stm instanceof FlagStatement)){
+				
+				try {
+					process = stm.getRoot().accept(visitor);
+					if (process == ExpressionVisitor.PROCESS_ABORT)
+						break;
+				} catch (StatementNoRootException e) {
+					//Câu lệnh chưa có biểu thức gốc, chuyển sang câu lệnh khác
+				}
+				
+			}
+		}
 	}
 
 	/**

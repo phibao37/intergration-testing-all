@@ -2,12 +2,16 @@ package core;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import core.error.ProcessErrorException;
 
 /**
  * Các tiện ích chung
@@ -23,7 +27,7 @@ public class Utils {
 	 * @throws IOException lỗi lấy nội dung
 	 */
 	public static String getContentFile(File file) throws IOException {
-		StringBuilder content = new StringBuilder();
+		/*StringBuilder content = new StringBuilder();
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		try {
 			String line = br.readLine();
@@ -36,6 +40,26 @@ public class Utils {
 		finally {
 			br.close();
 		}
+		return content.toString();*/
+		return getContentStream(new FileInputStream(file));
+	}
+	
+	/**
+	 * Lấy chuỗi nội dung từ một inputstream
+	 */
+	public static String getContentStream(InputStream stream) throws IOException{
+		StringBuilder content = new StringBuilder();
+		BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+		String line;
+		
+		try {
+			while ((line = br.readLine()) != null)
+				content.append(line).append("\n");
+		}
+		finally {
+			br.close();
+		}
+		
 		return content.toString();
 	}
 	
@@ -45,6 +69,26 @@ public class Utils {
 	public static boolean find(Object[] arr, Object find){
 		for (Object o: arr)
 			if ((o == null && find == o) || o.equals(find))
+				return true;
+		return false;
+	}
+	
+	/**
+	 * Tìm xem một đối tượng có trong một danh sách hay không
+	 */
+	public static boolean find(Iterable<?> list, Object find){
+		for (Object o: list)
+			if ((o == null && find == o) || o.equals(find))
+				return true;
+		return false;
+	}
+	
+	/**
+	 * Tìm xem một đối tượng có trong một danh sách hay không, chỉ sử dụng ==
+	 */
+	public static boolean findExact(Iterable<?> list, Object find){
+		for (Object o: list)
+			if (o == find)
 				return true;
 		return false;
 	}
@@ -147,4 +191,62 @@ public class Utils {
 			}
 	}
 	
+	/**
+	 * Chạy một tiến trình và đợi lấy chuỗi kết quả trả về
+	 * @param target đối tượng cần được thực thi, thường là String hoặc File
+	 * @param envp danh sách các biến môi trường, hoặc null
+	 * @param dir thư mục mà tiến trình sẽ được thực thi, hoặc null
+	 * @param args danh sách các tham số tùy chọn
+	 * @return chuỗi kết quả sau khi thực thi
+	 * @throws IOException có lỗi I/O khi thực thi 
+	 * @throws InterruptedException tiến trình đang chạy bị dừng đột ngột
+	 * @throws ProcessErrorException tiến trình trả về mã lỗi khác 0
+	 * @throws NullPointerException đối tượng thực thi hoặc các tham số bằng null
+	 */
+	public static String runCommand(Object target, String[] envp, 
+			File dir, Object... args) 
+			throws IOException, InterruptedException, 
+			ProcessErrorException, NullPointerException{
+		
+		String[] cmdArray = new String[args.length + 1];
+		cmdArray[0] = target.toString();
+		for (int i = 0; i < args.length; i++)
+			cmdArray[i + 1] = args[i].toString();
+		
+		Process p = Runtime.getRuntime().exec(cmdArray, envp, dir);
+		int exit = p.waitFor();
+		
+		if (exit != 0)
+			throw new ProcessErrorException(exit, 
+					Utils.getContentStream(p.getErrorStream()));
+		
+		return Utils.getContentStream(p.getInputStream());
+	}
+	
+	/**
+	 * Trả về kích thước của tập tin hoặc thư mục
+	 */
+	public static long getFileSize(File file){
+		long size = 0;
+		
+		if (file.isDirectory())
+			for (File child: file.listFiles())
+				size += getFileSize(child);
+		else
+			size += file.length();
+		
+		return size;
+	}
+	
+	/**
+	 * Xóa một tập tin hoặc một thư mục
+	 */
+	public static void deleteFile(File file){
+		if (file.isDirectory()){
+			for (File child: file.listFiles())
+				deleteFile(child);
+		}
+		
+		file.delete();
+	}
 }

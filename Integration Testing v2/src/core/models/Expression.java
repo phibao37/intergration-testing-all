@@ -119,6 +119,12 @@ public abstract class Expression extends Element {
 	protected abstract int handle(ExpressionVisitor visitor);
 	
 	/**
+	 * Trả về <i>true</i> nếu giá trị của biểu thức luôn là một hằng số<br/>
+	 * Trả về <i>false</i> nếu trong biểu thức tồn tại các tham số, biến,...
+	 */
+	public abstract boolean isConstant();
+	
+	/**
 	 * In cây quan hệ
 	 * @param margin khoảng cách đầu dòng
 	 */

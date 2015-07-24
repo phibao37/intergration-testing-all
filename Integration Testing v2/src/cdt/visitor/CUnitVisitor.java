@@ -9,6 +9,7 @@ import org.eclipse.cdt.core.dom.ast.ASTNodeProperty;
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTArrayDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTArrayModifier;
+import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
@@ -36,6 +37,7 @@ import org.eclipse.cdt.core.parser.IParserLogService;
 import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
+
 import cdt.models.CFunction;
 import cdt.models.CType;
 import core.Utils;
@@ -285,6 +287,46 @@ public class CUnitVisitor implements UnitVisitor {
 	
 	static void printAllNode(String source){
 		IASTTranslationUnit u = getIASTTranslationUnit("", source.toCharArray());
+		
+		handle(u);
 		printTree(u, " | ");
 	}
+	
+	static void handle(IASTTranslationUnit unit){
+		unit.accept(new ASTVisitor() {
+			{ shouldVisitDeclarations = true; }
+
+			@Override
+			public int visit(IASTDeclaration declaration) {
+				
+				if (declaration instanceof IASTFunctionDefinition) {
+					IASTFunctionDefinition fnDefine = 
+							(IASTFunctionDefinition) declaration;
+					IASTFunctionDeclarator fnDeclare = fnDefine.getDeclarator();
+					
+					System.out.printf("Function: %s, type: %s, comment: %s\n",
+							fnDeclare.getName().getRawSignature(),
+							fnDefine.getDeclSpecifier().getRawSignature(),
+							"Somehow get the comment above function define???"
+							);
+				}
+				return PROCESS_SKIP;
+			}
+
+			@Override
+			public int visit(IASTComment comment) {
+				System.out.println("Comment: " + comment.getRawSignature());
+				return PROCESS_CONTINUE;
+			}
+			
+		});
+		
+		for (IASTComment cmt: unit.getComments())
+			System.out.println("Comment: " + cmt.getRawSignature());
+	}
 }
+
+
+
+
+

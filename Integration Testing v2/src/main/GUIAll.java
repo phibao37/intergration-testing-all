@@ -8,9 +8,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -41,18 +44,21 @@ import core.MainProcess.Return;
 import core.MainProcess.Returned;
 import core.error.CoreException;
 import core.error.MainNotFoundException;
-import core.error.ThreadStateException;
 import core.graph.CFGView;
 import core.graph.FileView;
 import core.graph.LightTabbedPane;
 import core.graph.SettingDialog;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.canvas.FunctionCanvas;
+import core.graph.canvas.FunctionPairCanvas;
 import core.graph.canvas.LoopCanvas;
 import core.graph.canvas.LoopCanvas.OnApplyValue;
 import core.graph.canvas.LoopCanvas.OnNodeSelect;
 import core.graph.canvas.StatementCanvas;
+import core.graph.node.FunctionPairNode;
 import core.graph.node.LoopNode;
+import core.inte.FunctionCallGraph;
+import core.inte.FunctionPair;
 import core.models.Function;
 import core.models.Statement;
 import core.models.expression.NotNegativeExpression;
@@ -73,7 +79,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import jdt.JMainProcess;
+
 import java.awt.Dimension;
+
+import javax.swing.JRadioButton;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -124,15 +133,21 @@ public class GUIAll extends GUI {
 				main.loadFunctionFromFiles();
 				if (main.isEmptyFunction())
 					return;
-				fGraph.setAdapter(new FunctionAdapter(main.getFunctions()));
-				preRoot = null;
-			} 
-			catch (MainNotFoundException e) {
-				if (main.getFunctions().size() == 1)
-					fGraph.setAdapter(new FunctionAdapter(
-							main.getFunctions().get(0)));
-				else
-					this.openSelectFunction();
+				
+				FunctionCallGraph fcg = main.getFunctionCallGraph();
+				try{
+					fcg.setByMain();
+					setIntegration();
+					preRoot = null;
+				} catch (MainNotFoundException e1){
+					if (fcg.size() == 1)
+						fcg.setRoot(fcg.get(0));
+					else {
+						openSelectFunction();
+						return;
+					}
+				}
+				fGraph.setAdapter(new FunctionAdapter(fcg));
 			} 
 			catch (Exception e) {
 				alertError(e.getMessage());
@@ -153,15 +168,21 @@ public class GUIAll extends GUI {
 				main.loadFunctionFromFiles();
 				if (main.isEmptyFunction())
 					return;
-				fGraph.setAdapter(new FunctionAdapter(main.getFunctions()));
-				preRoot = null;
-			} 
-			catch (MainNotFoundException e) {
-				if (main.getFunctions().size() == 1)
-					fGraph.setAdapter(new FunctionAdapter(
-							main.getFunctions().get(0)));
-				else
-					this.openSelectFunction();
+				
+				FunctionCallGraph fcg = main.getFunctionCallGraph();
+				try{
+					fcg.setByMain();
+					setIntegration();
+					preRoot = null;
+				} catch (MainNotFoundException e1){
+					if (fcg.size() == 1)
+						fcg.setRoot(fcg.get(0));
+					else {
+						openSelectFunction();
+						return;
+					}
+				}
+				fGraph.setAdapter(new FunctionAdapter(fcg));
 			} 
 			catch (Exception e) {
 				alertError(e.getMessage());
@@ -169,19 +190,23 @@ public class GUIAll extends GUI {
 			}
 		}
 	}
-
+	
 	/** Mở hộp thoại để chọn hàm gốc */
 	private void openSelectFunction() {
 		if (main == null || main.isEmptyFunction())
 			return;
-		ArrayList<Function> funcs = main.getFunctions();
+		ArrayList<Function> funcs = main.getFunctionCallGraph();
 		SelectFunction select = new SelectFunction(frmMain, funcs, preRoot);
 		Function selected = select.showDialog();
 
 		if (selected == null)
 			return;
+		
+		FunctionCallGraph fcg = main.getFunctionCallGraph().setRoot(selected);
 		preRoot = selected;
-		fGraph.setAdapter(new FunctionAdapter(selected));
+		
+		fGraph.setAdapter(new FunctionAdapter(fcg));
+		setIntegration();
 	}
 
 	/**
@@ -212,100 +237,72 @@ public class GUIAll extends GUI {
 	
 	private JLabel lbl_loading;
 	private JLabel lbl_status;
+	
 	private Function currentFunction;
-	private int currentindex;
+	private boolean isWorking;
+	private boolean shouldOpenSubCondition;
 	
 	private ArrayList<StorePathTable> listTable;
 	private StoreLoopTable table_loop_path;
 	private StorePathTable table_loop_result;
+	private FunctionPairCanvas panel_function_pair;
+	private ButtonGroup group_inte_type;
+	private StorePathTable table_test_pair;
 
 	@Override
 	public void beginTestFunction(Function func) {
-		try {
-			main.beginTestFunction(func, new Returned() {
-				
-				@Override
-				public void error(CoreException e) {
-					alertError(e.getMessage());
-				}
-
-				@Override
-				public void receive() {
-					currentFunction = func;
-					
-					setStatus("Đang tìm các nhánh dựa trên các cấp độ phủ");
-					ArrayList<BasisPath> base = func.getCFG(false).getBasisPaths();
-					
-					listTable.get(0).setBasisPaths(
-							func.getCFG(false).getCoverStatementPaths());
-					listTable.get(1).setBasisPaths(
-							func.getCFG(false).getCoverBranchPaths());
-					listTable.get(2).setBasisPaths(
-							func.getCFG(true).getCoverBranchPaths());
-					listTable.get(3).setBasisPaths(base);
-					
-					ArrayList<LoopablePath> loopablePath = new ArrayList<>();
-					ArrayList<BasisPath> loopPath = new ArrayList<>();
-
-					setStatus("Đang tìm các đường chứa vòng lặp");
-					for (BasisPath path: base){
-						LoopablePath l = new LoopablePath(path);
-						if (l.getLoops().size() > 0){
-							loopablePath.add(l);
-							loopPath.add(path);
-						}
-					}
-					table_loop_path.setBasisPaths(loopPath);
-					table_loop_path.setLoopPaths(loopablePath);
-					table_loop_result.setBasisPaths(null);
-					
-					for (StorePathTable table: listTable){
-						DefaultTableModel pathModel = (DefaultTableModel) 
-								table.getModel();
-						removeTableModel(pathModel);
-						if (table.getBasisPaths() == null)
-							continue;
-						
-						int j = 1;
-						for (BasisPath path: table.getBasisPaths()){
-							Result r = path.getSolveResult();
-							pathModel.addRow(new Object[]{
-								j++,
-								path.toStringSkipMarkdown(),
-								r.getSolutionMessage(),
-								r.getReturnValue()
-							});
-						}
-						pathModel.addRow(new Object[]{null, null, null, null});
-					}
-					
-					openFileView(func.getSourceFile());
-					openFuntionView(func, currentindex == 2);
-					setStatus(null);
-				}
-			});
-		} catch (ThreadStateException e) {
+		if (isWorking){
 			alertError("Việc xử lý chưa hoàn thành");
+			return;
 		}
-	}
-	
-	private void beginTestLoop(LoopablePath path, ArrayList<Integer> indexes) {
-		try {
-			main.beginTestLoopPath(path, indexes, currentFunction, new Return<ArrayList<BasisPath>>() {
-				@Override
-				public void error(CoreException e) {
-					alertError(e.getMessage());
-				}
+		
+		isWorking = true;
+		main.beginTestUnit(func, new Returned() {	
+			@Override
+			public void error(CoreException e) {
+				alertError(e.getMessage());
+				isWorking = false;
+			}
+
+			@Override
+			public void receive() {
+				currentFunction = func;
 				
-				@Override
-				public void receive(ArrayList<BasisPath> result) {
+				setStatus("Đang tìm các nhánh dựa trên các cấp độ phủ");
+				ArrayList<BasisPath> base = func.getCFG(false).getBasisPaths();
+				
+				listTable.get(0).setBasisPaths(
+						func.getCFG(false).getCoverStatementPaths());
+				listTable.get(1).setBasisPaths(
+						func.getCFG(false).getCoverBranchPaths());
+				listTable.get(2).setBasisPaths(
+						func.getCFG(true).getCoverBranchPaths());
+				listTable.get(3).setBasisPaths(base);
+				
+				ArrayList<LoopablePath> loopablePath = new ArrayList<>();
+				ArrayList<BasisPath> loopPath = new ArrayList<>();
+
+				setStatus("Đang tìm các đường chứa vòng lặp");
+				for (BasisPath path: base){
+					LoopablePath l = new LoopablePath(path);
+					if (l.getLoops().size() > 0){
+						loopablePath.add(l);
+						loopPath.add(path);
+					}
+				}
+				table_loop_path.setBasisPaths(loopPath);
+				table_loop_path.setLoopPaths(loopablePath);
+				table_loop_result.setBasisPaths(null);
+				
+				for (StorePathTable table: listTable){
 					DefaultTableModel pathModel = (DefaultTableModel) 
-							table_loop_result.getModel();
+							table.getModel();
 					removeTableModel(pathModel);
-					table_loop_result.setBasisPaths(result);
+					if (table.getBasisPaths() == null)
+						continue;
 					
 					int j = 1;
-					for (BasisPath path: result){
+					for (BasisPath path: table.getBasisPaths()){
 						Result r = path.getSolveResult();
 						pathModel.addRow(new Object[]{
 							j++,
@@ -316,19 +313,114 @@ public class GUIAll extends GUI {
 					}
 					pathModel.addRow(new Object[]{null, null, null, null});
 				}
-			});
-		} catch (ThreadStateException e) {
+				
+				openFileView(func.getSourceFile());
+				openFuntionView(func, shouldOpenSubCondition);
+				
+				setStatus(null);
+				isWorking = false;
+			}
+		});
+	
+	}
+	
+	private void beginTestLoop(LoopablePath path, ArrayList<Integer> indexes) {
+		if (isWorking){
 			alertError("Việc xử lý chưa hoàn thành");
+			return;
 		}
+		
+		isWorking = true;
+		main.beginTestLoopPath(path, indexes, currentFunction, 
+				new Return<ArrayList<BasisPath>>() {
+			@Override
+			public void error(CoreException e) {
+				alertError(e.getMessage());
+				isWorking = false;
+			}
+			
+			@Override
+			public void receive(ArrayList<BasisPath> result) {
+				DefaultTableModel pathModel = (DefaultTableModel) 
+						table_loop_result.getModel();
+				removeTableModel(pathModel);
+				table_loop_result.setBasisPaths(result);
+				
+				int j = 1;
+				for (BasisPath path: result){
+					Result r = path.getSolveResult();
+					pathModel.addRow(new Object[]{
+						j++,
+						path.toStringSkipMarkdown(),
+						r.getSolutionMessage(),
+						r.getReturnValue()
+					});
+				}
+				pathModel.addRow(new Object[]{null, null, null, null});
+				isWorking = false;
+			}
+		});
+	
+	}
+	
+	/**
+	 * Áp dụng các giao diện tích hợp
+	 */
+	private void setIntegration(){
+		if (main == null)
+			return;
+		FunctionCallGraph fcg = main.getFunctionCallGraph();
+		int type = Integer.valueOf(group_inte_type.getSelection().getActionCommand());
+		panel_function_pair.setFunctionPairList(fcg.getList(type));
+	}
+	
+	private void beginTestFunctionPair(FunctionPair pair){
+		if (isWorking){
+			alertError("Việc xử lý chưa hoàn thành");
+			return;
+		}
+		
+		isWorking = true;
+		fGraph.setSelectFunctionPair(pair);
+		currentFunction = pair.getCaller();
+		main.beginTestFunctionPair(pair, new Return<ArrayList<BasisPath>>() {
+			
+			@Override
+			public void error(CoreException e) {
+				alertError(e.getMessage());
+				isWorking = false;
+			}
+
+			@Override
+			public void receive(ArrayList<BasisPath> result) {
+				DefaultTableModel pathModel = (DefaultTableModel) 
+						table_test_pair.getModel();
+				removeTableModel(pathModel);
+				table_test_pair.setBasisPaths(result);
+				
+				int j = 1;
+				for (BasisPath path: result){
+					Result r = path.getSolveResult();
+					pathModel.addRow(new Object[]{
+						j++,
+						path.toStringSkipMarkdown(),
+						r.getSolutionMessage(),
+						r.getReturnValue()
+					});
+				}
+				pathModel.addRow(new Object[]{null, null, null, null});
+				isWorking = false;
+			}
+		});
 	}
 	
 	/**
 	 * Có sự thay đổi các tab table
 	 */
 	private void tableTabChanged(int index){
-		currentindex = index;
+		shouldOpenSubCondition = index == 2;
 		if (currentFunction == null) return;
-		openFuntionView(currentFunction, index == 2);
+		openFuntionView(currentFunction, shouldOpenSubCondition);
 	}
 	
 	private void selectPathByIndex(BasisPath path, boolean subCondition){
@@ -460,7 +552,6 @@ public class GUIAll extends GUI {
 		});
 		detailWrap.setLeftComponent(tab_table);
 		
-		
 		/*---------BEGIN ADD TABLES-----------*/
 		
 		String[] tab_names = {"Phủ câu lệnh", "Phủ nhánh", "Phủ điều kiện con", 
@@ -546,9 +637,7 @@ public class GUIAll extends GUI {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				StatementCanvas canvas = openFuntionView(
-						currentFunction, 
-						currentindex == 2
-						).getCanvas();
+						currentFunction, false).getCanvas();
 				canvas.resetSelectingExtraPath();
 			}
 		});
@@ -608,6 +697,79 @@ public class GUIAll extends GUI {
 		});
 		
 		panel_1.setLayout(gl_panel_1);
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setBackground(Color.WHITE);
+		tab_table.addTab("Tích hợp", null, panel_2, null);
+		
+		JScrollPane scrollPane_3 = new JScrollPane();
+		scrollPane_3.setBorder(null);
+		scrollPane_3.getVerticalScrollBar().setUnitIncrement(16);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBackground(Color.WHITE);
+		
+		JScrollPane scrollPane_4 = new JScrollPane();
+		scrollPane_4.getViewport().setBackground(Color.WHITE);
+		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
+		gl_panel_2.setHorizontalGroup(
+			gl_panel_2.createParallelGroup(Alignment.LEADING)
+				.addComponent(panel_3, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+				.addGroup(gl_panel_2.createSequentialGroup()
+					.addComponent(scrollPane_3, GroupLayout.PREFERRED_SIZE, 265, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(scrollPane_4, GroupLayout.DEFAULT_SIZE, 483, Short.MAX_VALUE))
+		);
+		gl_panel_2.setVerticalGroup(
+			gl_panel_2.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_2.createSequentialGroup()
+					.addComponent(panel_3, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
+						.addComponent(scrollPane_4, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
+						.addComponent(scrollPane_3, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)))
+		);
+		
+		table_test_pair = new StorePathTable(false);
+		table_test_pair.setModel(new DefaultTableModel(
+				new Object[][] {
+				},
+				new String[] {
+					"STT", "\u0110\u01B0\u1EDDng d\u1EABn", "Testcases", "Return"
+				}
+			));
+		table_test_pair.getColumnModel().getColumn(0).setPreferredWidth(30);
+		table_test_pair.getColumnModel().getColumn(0).setMinWidth(30);
+		table_test_pair.getColumnModel().getColumn(0).setMaxWidth(30);
+		table_test_pair.getColumnModel().getColumn(3).setPreferredWidth(70);
+		table_test_pair.getColumnModel().getColumn(3).setMaxWidth(70);
+		scrollPane_4.setViewportView(table_test_pair);
+		
+		listTable.add(table_test_pair);
+		
+		panel_function_pair = new FunctionPairCanvas();
+		panel_function_pair.setOnItemSelected(new FunctionPairCanvas.OnItemSelected() {
+			@Override
+			public void selected(FunctionPairNode node) {
+				beginTestFunctionPair(node.getFunctionPair());
+			}
+		});
+		scrollPane_3.setViewportView(panel_function_pair);
+		panel_3.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+		
+		JRadioButton rdbtnBottomUp = new JRadioButton("Bottom-up");
+		rdbtnBottomUp.setSelected(true);
+		rdbtnBottomUp.setActionCommand("0");
+		panel_3.add(rdbtnBottomUp);
+		
+		JRadioButton rdbtnTopdown = new JRadioButton("Top-down");
+		rdbtnTopdown.setActionCommand("1");
+		panel_3.add(rdbtnTopdown);
+		panel_2.setLayout(gl_panel_2);
+		
+		group_inte_type = new ButtonGroup();
+		group_inte_type.add(rdbtnBottomUp);
+		group_inte_type.add(rdbtnTopdown);
 
 		detailWrap.setDividerLocation(400);
 		splitPane_main.setDividerLocation(600);
@@ -711,13 +873,14 @@ public class GUIAll extends GUI {
 						panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 						
 						JButton btnCit = new JButton("Cài đặt");
+						btnCit.setHorizontalTextPosition(SwingConstants.LEFT);
 						btnCit.setPreferredSize(new Dimension(120, 30));
 						btnCit.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
 								new SettingDialog(frmMain).setVisible(true);
 							}
 						});
-						btnCit.setIcon(new ImageIcon(GUIAll.class.getResource("/image/file.png")));
+						btnCit.setIcon(new ImageIcon(GUIAll.class.getResource("/image/setting.png")));
 						panel.add(btnCit);
 						panel_toolbar.setLayout(gl_panel_toolbar);
 		panel_tray.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
@@ -801,6 +964,17 @@ public class GUIAll extends GUI {
 				}
 			});
 		}
+		
+		Enumeration<AbstractButton> iter = group_inte_type.getElements();
+		while (iter.hasMoreElements())
+			iter.nextElement().addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setIntegration();
+				}
+			});
+		
+		
 	}
 	
 	private static class StorePathTable extends JTable{

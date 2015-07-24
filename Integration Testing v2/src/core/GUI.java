@@ -21,7 +21,6 @@ public class GUI {
 	 */
 	protected GUI(){
 		GUI.instance = this;
-		S.load();
 	}
 	
 	/**

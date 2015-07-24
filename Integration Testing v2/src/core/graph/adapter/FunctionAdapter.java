@@ -6,6 +6,9 @@ import java.util.Queue;
 
 import core.error.MainNotFoundException;
 import core.graph.node.FunctionNode;
+import core.graph.node.Node;
+import core.inte.FunctionCallGraph;
+import core.inte.FunctionPair;
 import core.models.Function;
 
 /**
@@ -21,29 +24,11 @@ public class FunctionAdapter extends NodeAdapter<FunctionNode> {
 
 	/**
 	 * Phân tích cấu trúc hàm gọi hàm, tìm ra hàm số <b>main</b> làm nút gốc
-	 * @param fList Danh sách hàm số đã được gán các hàm được gọi bên trong nó
+	 * @param fGraph Danh sách hàm số đã được gán các hàm được gọi bên trong nó
 	 * @throws MainNotFoundException khi không có hàm <b>main</b> được tìm thấy
 	 */
-	public FunctionAdapter(ArrayList<Function> fList) throws MainNotFoundException{
-		Function main = null;
-		for (Function f: fList){
-			if (f.getName().equals("main")){
-				main = f;
-			}
-		}
-		if (main == null)
-			throw new MainNotFoundException();
-		generateNode(main);
-	}
-	
-	/**
-	 * Phân tích cấu trúc hàm gọi hàm với một hàm gốc được chỉ định
-	 * @param root hàm số gốc, không nhất thiết là hàm main
-	 */
-	public FunctionAdapter(Function root){
-		if (root == null)
-			throw new NullPointerException();
-		generateNode(root);
+	public FunctionAdapter(FunctionCallGraph fGraph){
+		generateNode(fGraph.getRoot());
 	}
 	
 	/**
@@ -79,6 +64,23 @@ public class FunctionAdapter extends NodeAdapter<FunctionNode> {
 				if (!queue.isEmpty())
 					queue.add(null);
 			}
+		}
+	}
+
+	/**
+	 * Đánh dấu một cặp hàm gọi hàm là đang được chọn
+	 */
+	public void selectFunctionPair(FunctionPair pair) {
+		FunctionNode caller = getNodeByElement(pair.getCaller());
+		FunctionNode calling = getNodeByElement(pair.getCalling());
+		int i = 0;
+		
+		for (Node refer: caller.getRefers()){
+			if (refer == calling){
+				caller.setSelectedRefer(i);
+				break;
+			}
+			i++;
 		}
 	}
 	

@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import core.error.CoreException;
 import core.error.FunctionNotFoundException;
 import core.error.StatementNoRootException;
-import core.error.ThreadStateException;
+import core.inte.FunctionCallGraph;
+import core.inte.FunctionPair;
+import core.inte.IntegrationPathParser;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Statement;
@@ -36,13 +38,14 @@ public abstract class MainProcess implements FilenameFilter {
 
 	private ArrayList<File> mFiles = new ArrayList<>();
 	
-	private ArrayList<Function> mFunctions = new ArrayList<>();
+	private FunctionCallGraph mFunctions = new FunctionCallGraph();
 	private ArrayList<Variable> mVariables = new ArrayList<>();
 	
 	private UnitVisitor mUnitVisitor;
 	private BodyFunctionVisitor mBodyVisitor;
 	
-	private BasisPathParser mPathParser = BasisPathParser.DEFAULT;
+	private BasisPathParser mUnitPathParser = BasisPathParser.DEFAULT;
+	private IntegrationPathParser mIntePathParser = IntegrationPathParser.DEFAULT;
 	private Solver mSolver = Z3Solver.DEFAULT;
 	
 	/**
@@ -68,7 +71,10 @@ public abstract class MainProcess implements FilenameFilter {
 				@Override
 				public int visit(FunctionCallExpression call) {
 					try {
-						func.addRefer(findFunctionByCall(call));
+						Function refer = findFunctionByCall(call);
+						
+						call.setFunction(refer);
+						func.addRefer(refer);
 					} catch (FunctionNotFoundException e) {
 						//e.printStackTrace();
 						//Tìm trong các #include<header> của bộ biên dịch ???
@@ -89,23 +95,29 @@ public abstract class MainProcess implements FilenameFilter {
 	protected Function findFunctionByCall(FunctionCallExpression call) 
 			throws FunctionNotFoundException{
 		for (Function func: mFunctions){
-			
-			//Lọc ra hàm khớp tên lời gọi
-			if (!func.getName().equals(call.getName()))
-				continue;
-			
-			//Lọc ra hàm có số lượng đối số bằng số lượng tham số gọi 
-			if (func.getParameters().length != call.getArguments().length)
-				continue;
-			
-			//TODO các biểu thức tham số phải khớp kiểu trong khai báo hàm
-			//TODO có nhũng lời gọi bỏ qua tham số cuối cùng đã được định nghĩa
-			//System.out.printf("Find %s => Found %s\n", call, func.getName());
-			
-			return func;
-			
+			if (isMatchFunctionCall(func, call))
+				return func;
 		}
 		throw new FunctionNotFoundException(call);
+	}
+	
+	/**
+	 * Kiểm tra một lời gọi hàm có khớp với một hàm số
+	 */
+	private static boolean isMatchFunctionCall(Function func, 
+			FunctionCallExpression call){
+		//Lọc ra hàm khớp tên lời gọi
+		if (!func.getName().equals(call.getName()))
+			return false;
+		
+		//Lọc ra hàm có số lượng đối số bằng số lượng tham số gọi 
+		if (func.getParameters().length != call.getArguments().length)
+			return false;
+		
+		//TODO các biểu thức tham số phải khớp kiểu trong khai báo hàm
+		//TODO có nhũng lời gọi bỏ qua tham số cuối cùng đã được định nghĩa
+		//System.out.printf("Find %s => Found %s\n", call, func.getName());
+		return true;
 	}
 	
 	/**
@@ -113,10 +125,8 @@ public abstract class MainProcess implements FilenameFilter {
 	 * phủ cấp 1-2 và 3 đều được phân tích và giải ra nghiệm tương ứng
 	 * @param func hàm cần kiểm thử
 	 * @param listener các công việc khi việc kiểm thử đã xong
-	 * @throws ThreadStateException tiến trình trước chưa chạy xong
 	 */
-	public void beginTestFunction(Function func, Returned listener) 
-			throws ThreadStateException {
+	public void beginTestUnit(Function func, Returned listener){
 
 		new RunThread<Void>(listener) {
 			
@@ -133,13 +143,13 @@ public abstract class MainProcess implements FilenameFilter {
 				try {
 					for (BasisPath path : paths) {
 						try {
-							mPathParser.parseBasisPath(path, func);
+							mUnitPathParser.parseBasisPath(path, func);
 						} catch (StatementNoRootException e1) {
 							System.out.println(" !!! " + e1.getMessage());
 							continue;
 						}
 
-						ConstraintEquations ce = mPathParser.getConstrains();
+						ConstraintEquations ce = mUnitPathParser.getConstrains();
 						path.setConstraint(ce);
 
 						GUI.instance.setStatus("Đang giải hệ %d/%d", i++,
@@ -154,7 +164,7 @@ public abstract class MainProcess implements FilenameFilter {
 				return null;
 			}
 
-		}.ensureStart();
+		}.start();
 
 	}
 	
@@ -171,8 +181,7 @@ public abstract class MainProcess implements FilenameFilter {
 	 * @throws ThreadStateException tiến trình trước chưa chạy xong
 	 */
 	public void beginTestLoopPath(LoopablePath path, ArrayList<Integer> indexes, 
-			Function current, Return<ArrayList<BasisPath>> listener) 
-					throws ThreadStateException{
+			Function current, Return<ArrayList<BasisPath>> listener) {
 		
 		new RunThread<ArrayList<BasisPath>>(listener) {
 			@Override
@@ -192,13 +201,13 @@ public abstract class MainProcess implements FilenameFilter {
 					basisPath.add(basis);
 					
 					try {
-						mPathParser.parseBasisPath(basis, current);
+						mUnitPathParser.parseBasisPath(basis, current);
 					} catch (StatementNoRootException e1) {
 						System.out.println(" !!! " + e1.getMessage());
 						continue;
 					}
 
-					ConstraintEquations ce = mPathParser.getConstrains();
+					ConstraintEquations ce = mUnitPathParser.getConstrains();
 					basis.setConstraint(ce);
 
 					GUI.instance.setStatus("Đang giải hệ %d/%d", i++, length);
@@ -210,7 +219,70 @@ public abstract class MainProcess implements FilenameFilter {
 				GUI.instance.setStatus(null);
 				return basisPath;
 			}
-		}.ensureStart();
+		}.start();
+	}
+	
+	/**
+	 * Bắt đầu quá trình kiểm thử một cặp hàm gọi hàm. Đầu tiên, phân tích các đường đi
+	 * trong tập phủ câu lệnh của hàm gọi, lọc lấy các đường đi có gọi đến hàm được gọi.
+	 * <br/> Sau đó phân tích trên các đường đi này để tìm các ràng buộc sao cho đi
+	 * đúng đường đi này và tương tác được với hàm được gọi. Cuối cùng, ta giải hệ
+	 * để tạo ra testcase cho hàm gọi
+	 * @param pair cặp hàm gọi hàm
+	 * @param paths danh sách các đường thi hành dùng để kiểm thử việc gọi hàm
+	 */
+	public void beginTestFunctionPair(FunctionPair pair, 
+			Return<ArrayList<BasisPath>> paths){
+		
+		new RunThread<ArrayList<BasisPath>>(paths) {
+			
+			private boolean foundCall;
+			
+			@Override
+			protected ArrayList<BasisPath> doTask() throws CoreException {
+				Function caller = pair.getCaller();
+				Function calling = pair.getCalling();
+				
+				//Lấy danh sách các đường đi phủ nhánh trong hàm gọi
+				ArrayList<BasisPath> paths = caller.getCFG(false).getCoverBranchPaths();
+				ExpressionVisitor visitor = new ExpressionVisitor() {
+					@Override
+					public int visit(FunctionCallExpression call) {
+						if (isMatchFunctionCall(calling, call)){
+							foundCall = true;
+							return PROCESS_ABORT;
+						}
+						return PROCESS_CONTINUE;
+					}
+					
+				};
+				
+				GUI.instance.setStatus("Tìm các đường đi chứa lời gọi");
+				for (int i = paths.size() - 1; i >= 0; i--){
+					foundCall = false;
+					paths.get(i).accept(visitor);
+					
+					if (!foundCall)
+						paths.remove(i);
+				}
+				
+				int i = 1, length = paths.size();
+				for (BasisPath basis: paths){
+					GUI.instance.setStatus("Đang phân tích %d/%d", i++, length);
+					mIntePathParser.parseBasisPath(basis, caller, calling);
+					
+					ConstraintEquations ce = mIntePathParser.getConstrains();
+					basis.setConstraint(ce);
+
+					Result result = mSolver.solve(ce.getTestcases(), ce,
+							ce.getArrayAccesses());
+					basis.setSolveResult(result);
+				}
+				
+				GUI.instance.setStatus(null);
+				return paths;
+			}
+		}.start();
 	}
 		
 	
@@ -228,12 +300,12 @@ public abstract class MainProcess implements FilenameFilter {
 			System.out.println("Loop: " + new LoopablePath(path));
 			
 			try {
-				mPathParser.parseBasisPath(path, func);
+				mUnitPathParser.parseBasisPath(path, func);
 			} catch (StatementNoRootException e1) {
 				System.out.println(" !!! " + e1.getMessage());
 				continue;
 			}
-			ConstraintEquations ce = mPathParser.getConstrains();
+			ConstraintEquations ce = mUnitPathParser.getConstrains();
 			
 			for (Expression e: ce)
 				System.out.println(" ? " + e);
@@ -274,10 +346,11 @@ public abstract class MainProcess implements FilenameFilter {
 	}
 	
 	/**
-	 * Đặt bộ phân tích một đường thi hành để tìm ra hệ ràng buộc
+	 * Đặt bộ phân tích một đường thi hành để tìm ra hệ ràng buộc trên một 
+	 * đơn vị kiểm thử
 	 */
-	public void setBasisPathParser(BasisPathParser parser){
-		mPathParser = parser;
+	public void setUnitPathParser(BasisPathParser parser){
+		mUnitPathParser = parser;
 	}
 	
 	/**
@@ -343,9 +416,9 @@ public abstract class MainProcess implements FilenameFilter {
 	public abstract boolean accept(File dir, String name);
 	
 	/**
-	 * Trả về danh sách các hàm được khai báo
+	 * Trả về danh sách các hàm được khai báo được lưu trong cấu trúc gọi hàm
 	 */
-	public ArrayList<Function> getFunctions(){
+	public FunctionCallGraph getFunctionCallGraph(){
 		return mFunctions;
 	}
 	
@@ -396,21 +469,6 @@ public abstract class MainProcess implements FilenameFilter {
 				else
 					mCallBack.error(core);
 			}
-			instance = null;
-		}
-
-		private static Thread instance;
-		
-		/**
-		 * Kiểm tra và chạy tiến trình
-		 * @throws ThreadStateException tiến trình trước chưa chạy xong
-		 */
-		public synchronized void ensureStart() throws ThreadStateException{
-			if (instance != null)
-				throw new ThreadStateException(instance);
-			instance = this;
-			start();
-			
 		}
 
 		/**

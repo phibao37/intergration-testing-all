@@ -213,11 +213,14 @@ public class Z3 {
 	 */
 	public Z3 execute() throws InvalidSettingException{
 		try{
-			File BIN_DIR = new File(S.Z3_BIN_DIR);
+			File BIN_DIR = S.DIR_Z3_BIN;
 			if (!BIN_DIR.isDirectory())
 				throw new InvalidSettingException(BIN_DIR + " is not a directory");
 			
-			File input = new File(BIN_DIR, INPUT);
+			if (!S.DIR_TEMP.canWrite())
+				throw new InvalidSettingException("Can't write to " + S.DIR_TEMP);
+			
+			File input = new File(S.DIR_TEMP, INPUT);
 			File z3 = new File(BIN_DIR, Z3);
 				
 			FileOutputStream fout = new FileOutputStream(input);
@@ -240,13 +243,12 @@ public class Z3 {
 			
 			Process p = null;
 			try{
-				p = Runtime.getRuntime().exec(z3 + " -smt2 " + input);
+				p = Runtime.getRuntime().exec(
+						String.format("\"%s\" -smt2 \"%s\"", z3, input));
 			} catch (IOException e){
 				throw new InvalidSettingException(e.getMessage());
 			}
-			while (p.isAlive()) {
-				Thread.sleep(100);
-			}
+			p.waitFor();
 			
 			BufferedReader in = new BufferedReader(new InputStreamReader(
 					p.getInputStream()));

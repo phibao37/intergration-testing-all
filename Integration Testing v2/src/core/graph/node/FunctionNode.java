@@ -17,6 +17,8 @@ import core.models.Function;
 public class FunctionNode extends Node {
 	private static final long serialVersionUID = -4883719306522826155L;
 	
+	private boolean[] referSelected;
+	
 	/**
 	 * Tạo một nút đồ họa từ hàm tương ứng
 	 */
@@ -62,6 +64,30 @@ public class FunctionNode extends Node {
 		GUI.instance.beginTestFunction(getFunction());
 	}
 	
+	
+	
+	@Override
+	public void setRefers(Node[] refers) {
+		super.setRefers(refers);
+		referSelected = new boolean[refers.length];
+	}
+	
+	/**
+	 * Xóa bỏ mọi đánh dấu
+	 */
+	public void clearAllSelectedRefer(){
+		for (int i = 0; i < referSelected.length; i++)
+			referSelected[i] = false;
+	}
+	
+	public void setSelectedRefer(int index){
+		referSelected[index] = true;
+	}
+	
+	public boolean isSelectedRefer(int index){
+		return referSelected[index];
+	}
+
 	/** Trả về hàm tương ứng với nút*/
 	public Function getFunction(){
 		return (Function)mElement;

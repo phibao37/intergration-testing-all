@@ -12,7 +12,6 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import cdt.CMainProcess;
-import core.S;
 import core.graph.canvas.StatementCanvas;
 import core.models.Function;
 import java.awt.Color;
@@ -61,7 +60,7 @@ public class GUIBeta {
 				CMainProcess main = new CMainProcess();
 				main.setWorkingFiles(fileChooser_C.getSelectedFiles(), false);
 				main.loadFunctionFromFiles();
-				ArrayList<Function> fnList = main.getFunctions();
+				ArrayList<Function> fnList = main.getFunctionCallGraph();
 				
 				if (fnList.size() > 0){
 					Function fn = fnList.get(0);
@@ -83,7 +82,7 @@ public class GUIBeta {
 				JMainProcess main = new JMainProcess();
 				main.setWorkingFiles(fileChooser_J.getSelectedFiles(), false);
 				main.loadFunctionFromFiles();
-				ArrayList<Function> fnList = main.getFunctions();
+				ArrayList<Function> fnList = main.getFunctionCallGraph();
 				
 				if (fnList.size() > 0){
 					Function fn = fnList.get(0);
@@ -163,7 +162,5 @@ public class GUIBeta {
 		fileChooser_J.setMultiSelectionEnabled(true);
 		fileChooser_J.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooser_J.setFileFilter(jFilter);
-		
-		S.load();
 	}
 }
