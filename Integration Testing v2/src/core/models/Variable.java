@@ -70,6 +70,13 @@ public class Variable extends ExpressionGroup implements Graphable {
 	}
 	
 	/**
+	 * Trả về chuỗi hiển thị giá trị của biến số
+	 */
+	public String getValueString(){
+		return String.valueOf(getValue());
+	}
+	
+	/**
 	 * Thiết đặt scope (vùng khối mà nó có hiệu lực) cho biến
 	 */
 	public void setScope(int scope){

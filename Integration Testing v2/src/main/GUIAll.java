@@ -61,9 +61,11 @@ import core.inte.FunctionCallGraph;
 import core.inte.FunctionPair;
 import core.models.Function;
 import core.models.Statement;
+import core.models.Variable;
 import core.models.expression.NotNegativeExpression;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
+import core.solver.Solver;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.ConstraintEquations;
@@ -91,15 +93,14 @@ import javax.swing.JRadioButton;
  */
 public class GUIAll extends GUI {
 
-	private JFrame frmMain;
-	private FunctionCanvas fGraph;
+	private JFrame frame_main;
+	private FunctionCanvas canvas_fn_call;
 	//private VCanvas vGraph;
 	private JFileChooser fileChooserC, fileChooserJ;
-	private LightTabbedPane infoTab;
-	private LightTabbedPane tabbedCanvas;
+	private LightTabbedPane tab_info;
+	private LightTabbedPane tab_canvas;
 
 	private Function preRoot;
-	private DefaultTableModel detailModel;
 	private DefaultTableCellRenderer centerRenderer;
 	
 	/** Tiến trình chính của ứng dụng */
@@ -113,7 +114,7 @@ public class GUIAll extends GUI {
 			public void run() {
 				try {
 					GUIAll window = new GUIAll();
-					window.frmMain.setVisible(true);
+					window.frame_main.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -123,10 +124,10 @@ public class GUIAll extends GUI {
 
 	/** Mở hộp thoại để chọn tập tin */
 	private void openCFiles() {
-		int status = fileChooserC.showDialog(frmMain, "Mở tập tin C/thư mục");
+		int status = fileChooserC.showDialog(frame_main, "Mở tập tin C/thư mục");
 
 		if (status == JFileChooser.APPROVE_OPTION) {
-			tabbedCanvas.setSelectedIndex(0);
+			tab_canvas.setSelectedIndex(0);
 			try {
 				main = new CMainProcess();
 				main.setWorkingFiles(fileChooserC.getSelectedFiles(), true);
@@ -147,7 +148,7 @@ public class GUIAll extends GUI {
 						return;
 					}
 				}
-				fGraph.setAdapter(new FunctionAdapter(fcg));
+				canvas_fn_call.setAdapter(new FunctionAdapter(fcg));
 			} 
 			catch (Exception e) {
 				alertError(e.getMessage());
@@ -158,10 +159,10 @@ public class GUIAll extends GUI {
 	
 	/** Mở hộp thoại để chọn tập tin */
 	private void openJavaFiles() {
-		int status = fileChooserJ.showDialog(frmMain, "Mở tập tin Java");
+		int status = fileChooserJ.showDialog(frame_main, "Mở tập tin Java");
 
 		if (status == JFileChooser.APPROVE_OPTION) {
-			tabbedCanvas.setSelectedIndex(0);
+			tab_canvas.setSelectedIndex(0);
 			try {
 				main = new JMainProcess();
 				main.setWorkingFiles(fileChooserJ.getSelectedFiles(), true);
@@ -182,7 +183,7 @@ public class GUIAll extends GUI {
 						return;
 					}
 				}
-				fGraph.setAdapter(new FunctionAdapter(fcg));
+				canvas_fn_call.setAdapter(new FunctionAdapter(fcg));
 			} 
 			catch (Exception e) {
 				alertError(e.getMessage());
@@ -196,7 +197,7 @@ public class GUIAll extends GUI {
 		if (main == null || main.isEmptyFunction())
 			return;
 		ArrayList<Function> funcs = main.getFunctionCallGraph();
-		SelectFunction select = new SelectFunction(frmMain, funcs, preRoot);
+		SelectFunction select = new SelectFunction(frame_main, funcs, preRoot);
 		Function selected = select.showDialog();
 
 		if (selected == null)
@@ -205,7 +206,7 @@ public class GUIAll extends GUI {
 		FunctionCallGraph fcg = main.getFunctionCallGraph().setRoot(selected);
 		preRoot = selected;
 		
-		fGraph.setAdapter(new FunctionAdapter(fcg));
+		canvas_fn_call.setAdapter(new FunctionAdapter(fcg));
 		setIntegration();
 	}
 
@@ -216,7 +217,7 @@ public class GUIAll extends GUI {
 	 */
 	public void openFileView(File file) {
 		try {
-			infoTab.openTab(file.getName(), null, file.getAbsolutePath(), 
+			tab_info.openTab(file.getName(), null, file.getAbsolutePath(), 
 					FileView.class.getConstructor(File.class), file);
 		} catch (Exception e) {}
 	}
@@ -224,7 +225,7 @@ public class GUIAll extends GUI {
 	@Override
 	public CFGView openFuntionView(Function fn, boolean subCondition){
 		try {
-			return (CFGView) tabbedCanvas.openTab(
+			return (CFGView) tab_canvas.openTab(
 					fn.getName() + (subCondition ? "-3" : "-1,2"),
 					null, 
 					fn.getNameAndFile(),
@@ -248,6 +249,8 @@ public class GUIAll extends GUI {
 	private FunctionPairCanvas panel_function_pair;
 	private ButtonGroup group_inte_type;
 	private StorePathTable table_test_pair;
+	private JTable table_testcase;
+	private JTable table_path_details;
 
 	@Override
 	public void beginTestFunction(Function func) {
@@ -297,7 +300,7 @@ public class GUIAll extends GUI {
 				for (StorePathTable table: listTable){
 					DefaultTableModel pathModel = (DefaultTableModel) 
 							table.getModel();
-					removeTableModel(pathModel);
+					removeTableModel(table);
 					if (table.getBasisPaths() == null)
 						continue;
 					
@@ -343,7 +346,7 @@ public class GUIAll extends GUI {
 			public void receive(ArrayList<BasisPath> result) {
 				DefaultTableModel pathModel = (DefaultTableModel) 
 						table_loop_result.getModel();
-				removeTableModel(pathModel);
+				removeTableModel(table_loop_result);
 				table_loop_result.setBasisPaths(result);
 				
 				int j = 1;
@@ -381,8 +384,8 @@ public class GUIAll extends GUI {
 		}
 		
 		isWorking = true;
-		fGraph.setSelectFunctionPair(pair);
-		tabbedCanvas.setSelectedIndex(0);
+		canvas_fn_call.setSelectFunctionPair(pair);
+		tab_canvas.setSelectedIndex(0);
 		
 		currentFunction = pair.getCaller();
 		main.beginTestFunctionPair(pair, new Return<ArrayList<BasisPath>>() {
@@ -397,7 +400,7 @@ public class GUIAll extends GUI {
 			public void receive(ArrayList<BasisPath> result) {
 				DefaultTableModel pathModel = (DefaultTableModel) 
 						table_test_pair.getModel();
-				removeTableModel(pathModel);
+				removeTableModel(table_test_pair);
 				table_test_pair.setBasisPaths(result);
 				
 				int j = 1;
@@ -425,7 +428,10 @@ public class GUIAll extends GUI {
 		openFuntionView(currentFunction, shouldOpenSubCondition);
 	}
 	
-	private void selectPathByIndex(BasisPath path, boolean subCondition){
+	/**
+	 * Hiển thị kết quả chi tiết của một đường thi hành
+	 */
+	private void displayPathDetails(BasisPath path, boolean subCondition){
 		StatementCanvas canvas = openFuntionView(
 				currentFunction, 
 				subCondition
@@ -437,10 +443,14 @@ public class GUIAll extends GUI {
 		}
 		
 		ConstraintEquations constraint = path.getConstraint();
+		DefaultTableModel detailModel = (DefaultTableModel) table_path_details.getModel();
+		DefaultTableModel testcaseModel = (DefaultTableModel) table_testcase.getModel();
 		int i = 0, j = 0;
 		
 		canvas.setSelectedPath(path);
-		removeTableModel(detailModel);
+		removeTableModel(table_path_details);
+		removeTableModel(table_testcase);
+		
 		for (Statement stm: path){
 			if (stm instanceof ScopeStatement)
 				continue;
@@ -459,12 +469,24 @@ public class GUIAll extends GUI {
 			});
 		}
 		
-		infoTab.setSelectedIndex(0);
+		Result r = path.getSolveResult();
+		
+		if (r.getSolutionCode() == Solver.SUCCESS)
+			for (Variable testcase: r.getSolution()){
+				testcaseModel.addRow(new Object[]{
+						testcase.getType(),
+						testcase.getName(),
+						testcase.getValueString()
+				});
+			}
+		
+		if (tab_info.getSelectedIndex() > 1)
+			tab_info.setSelectedIndex(0);
 	}
 
 	@Override
 	public int getDefaultCanvasWidth() {
-		return fGraph.getWidth();
+		return canvas_fn_call.getWidth();
 	}
 	
 	@Override
@@ -483,7 +505,9 @@ public class GUIAll extends GUI {
 	/**
 	 * Xóa hết các ô trong một bảng
 	 */
-	private static void removeTableModel(DefaultTableModel model){
+	private static void removeTableModel(JTable table){
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		
 		for (int j = model.getRowCount()-1;j>=0;j--)
 			model.removeRow(j);
 	}
@@ -501,48 +525,72 @@ public class GUIAll extends GUI {
 		centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		
-		frmMain = new JFrame();
-		frmMain.setTitle("Kiểm thử tích hơp cho C");
-		frmMain.setBounds(50, 50, 1266, 630);
-		frmMain.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-		frmMain.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame_main = new JFrame();
+		frame_main.setTitle("Kiểm thử tích hơp cho C");
+		frame_main.setBounds(50, 50, 1266, 630);
+		frame_main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+		frame_main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		JSplitPane splitPane_main = new JSplitPane();
-		splitPane_main.setBorder(null);
-		splitPane_main.setDividerSize(3);
+		JSplitPane split_main = new JSplitPane();
+		split_main.setBorder(null);
+		split_main.setDividerSize(3);
 
-		JSplitPane detailWrap = new JSplitPane();
-		detailWrap.setBorder(null);
-		detailWrap.setDividerSize(2);
-		detailWrap.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		splitPane_main.setRightComponent(detailWrap);
+		JSplitPane split_details = new JSplitPane();
+		split_details.setBorder(null);
+		split_details.setDividerSize(2);
+		split_details.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		split_main.setRightComponent(split_details);
 
-		infoTab = new LightTabbedPane(JTabbedPane.TOP);
-		infoTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		infoTab.setBorder(null);
-		detailWrap.setRightComponent(infoTab);
+		tab_info = new LightTabbedPane(JTabbedPane.TOP);
+		tab_info.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		tab_info.setBorder(null);
+		split_details.setRightComponent(tab_info);
 
-		JScrollPane infoWrap = new JScrollPane();
-		infoWrap.setBorder(null);
-		infoTab.addTab("Chi tiết", null, infoWrap, null);
+		JScrollPane tb_path_details_wrap = new JScrollPane();
+		tb_path_details_wrap.setBorder(null);
+		tab_info.addTab("Chi tiết đường đi", null, tb_path_details_wrap, null);
 		
-		JTable table_1 = new JTable();
-		table_1.setModel(detailModel = new DefaultTableModel(
+		table_path_details = new JTable();
+		table_path_details.setModel(new DefaultTableModel(
 			new Object[][] {
 			},
 			new String[] {
 				"STT", "C\u00E2u l\u1EC7nh", "C\u00E1c r\u00E0ng bu\u1ED9c"
 			}
 		));
-		table_1.getColumnModel().getColumn(0).setPreferredWidth(30);
-		table_1.getColumnModel().getColumn(0).setMinWidth(30);
-		table_1.getColumnModel().getColumn(0).setMaxWidth(30);
-		infoWrap.setViewportView(table_1);
-		infoWrap.getViewport().setBackground(Color.WHITE);
-		infoTab.setTabCloseableAt(0, false);
+		table_path_details.getColumnModel().getColumn(0).setPreferredWidth(30);
+		table_path_details.getColumnModel().getColumn(0).setMinWidth(30);
+		table_path_details.getColumnModel().getColumn(0).setMaxWidth(30);
+		tb_path_details_wrap.setViewportView(table_path_details);
 		
-		for (int x = 0; x < table_1.getColumnCount(); x++) {
-			table_1.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
+		JScrollPane tb_testcase_wrap = new JScrollPane();
+		tab_info.addTab("Testcase", null, tb_testcase_wrap, null);
+		
+		tab_info.setTabCloseableAt(0, false);
+		tab_info.setTabCloseableAt(1, false);
+		
+		table_testcase = new JTable();
+		table_testcase.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"Ki\u1EC3u", "T\u00EAn bi\u1EBFn", "Gi\u00E1 tr\u1ECB"
+			}
+		));
+		table_testcase.getColumnModel().getColumn(0).setMinWidth(75);
+		table_testcase.getColumnModel().getColumn(0).setMaxWidth(75);
+		table_testcase.getColumnModel().getColumn(1).setPreferredWidth(200);
+		table_testcase.getColumnModel().getColumn(1).setMinWidth(50);
+		table_testcase.getColumnModel().getColumn(1).setMaxWidth(400);
+		for (int x = 0; x < table_testcase.getColumnCount(); x++) {
+			table_testcase.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
+		}
+		tb_testcase_wrap.setViewportView(table_testcase);
+		tb_testcase_wrap.getViewport().setBackground(Color.WHITE);
+		tb_path_details_wrap.getViewport().setBackground(Color.WHITE);
+		
+		for (int x = 0; x < table_path_details.getColumnCount(); x++) {
+			table_path_details.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
 		}
 		
 		JTabbedPane tab_table = new JTabbedPane(JTabbedPane.TOP);
@@ -552,7 +600,7 @@ public class GUIAll extends GUI {
 				tableTabChanged(tab.getSelectedIndex());
 			}
 		});
-		detailWrap.setLeftComponent(tab_table);
+		split_details.setLeftComponent(tab_table);
 		
 		/*---------BEGIN ADD TABLES-----------*/
 		
@@ -585,36 +633,36 @@ public class GUIAll extends GUI {
 		
 		/*---------END ADD TABLES-----------*/
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(null);
-		panel_1.setBackground(Color.WHITE);
-		tab_table.addTab("Các vòng lặp", null, panel_1, null);
+		JPanel panel_loop = new JPanel();
+		panel_loop.setBorder(null);
+		panel_loop.setBackground(Color.WHITE);
+		tab_table.addTab("Các vòng lặp", null, panel_loop, null);
 		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBorder(null);
-		scrollPane.getViewport().setBackground(Color.WHITE);
+		JScrollPane tb_loop_path_wrap = new JScrollPane();
+		tb_loop_path_wrap.setBorder(null);
+		tb_loop_path_wrap.getViewport().setBackground(Color.WHITE);
 		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBorder(null);
-		scrollPane_1.getVerticalScrollBar().setUnitIncrement(16);
+		JScrollPane cv_loop_wrap = new JScrollPane();
+		cv_loop_wrap.setBorder(null);
+		cv_loop_wrap.getVerticalScrollBar().setUnitIncrement(16);
 		
-		JScrollPane scrollPane_2 = new JScrollPane();
-		scrollPane_2.setBorder(null);
-		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
-		gl_panel_1.setHorizontalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
-				.addComponent(scrollPane_1, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
-				.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+		JScrollPane tb_loop_result_wrap = new JScrollPane();
+		tb_loop_result_wrap.setBorder(null);
+		GroupLayout gl_panel_loop = new GroupLayout(panel_loop);
+		gl_panel_loop.setHorizontalGroup(
+			gl_panel_loop.createParallelGroup(Alignment.LEADING)
+				.addComponent(tb_loop_path_wrap, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+				.addComponent(cv_loop_wrap, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+				.addComponent(tb_loop_result_wrap, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
 		);
-		gl_panel_1.setVerticalGroup(
-			gl_panel_1.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_panel_1.createSequentialGroup()
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+		gl_panel_loop.setVerticalGroup(
+			gl_panel_loop.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel_loop.createSequentialGroup()
+					.addComponent(tb_loop_path_wrap, GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
+					.addComponent(cv_loop_wrap, GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane_2, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE))
+					.addComponent(tb_loop_result_wrap, GroupLayout.PREFERRED_SIZE, 108, GroupLayout.PREFERRED_SIZE))
 		);
 		
 		table_loop_result = new StorePathTable(false);
@@ -630,12 +678,12 @@ public class GUIAll extends GUI {
 		table_loop_result.getColumnModel().getColumn(0).setMaxWidth(30);
 		table_loop_result.getColumnModel().getColumn(3).setPreferredWidth(70);
 		table_loop_result.getColumnModel().getColumn(3).setMaxWidth(70);
-		scrollPane_2.setViewportView(table_loop_result);
+		tb_loop_result_wrap.setViewportView(table_loop_result);
 		
-		scrollPane_2.getViewport().setBackground(Color.WHITE);
+		tb_loop_result_wrap.getViewport().setBackground(Color.WHITE);
 		
-		LoopCanvas loop_canvas = new LoopCanvas();
-		loop_canvas.addMouseListener(new MouseAdapter() {
+		LoopCanvas canvas_loop = new LoopCanvas();
+		canvas_loop.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				StatementCanvas canvas = openFuntionView(
@@ -643,10 +691,10 @@ public class GUIAll extends GUI {
 				canvas.resetSelectingExtraPath();
 			}
 		});
-		loop_canvas.setBackground(Color.WHITE);
-		scrollPane_1.setViewportView(loop_canvas);
+		canvas_loop.setBackground(Color.WHITE);
+		cv_loop_wrap.setViewportView(canvas_loop);
 		
-		loop_canvas.setOnNodeSelect(new OnNodeSelect() {
+		canvas_loop.setOnNodeSelect(new OnNodeSelect() {
 			@Override
 			public void selected(LoopNode node) {
 				StatementCanvas canvas = openFuntionView(
@@ -655,7 +703,7 @@ public class GUIAll extends GUI {
 				canvas.setSelectedExtraPath(node.getStatement().getOriginList());
 			}
 		});
-		loop_canvas.setOnApplyValue(new OnApplyValue() {
+		canvas_loop.setOnApplyValue(new OnApplyValue() {
 			@Override
 			public void applied(ArrayList<Integer> indexes, LoopablePath path) {
 				beginTestLoop(path, indexes);
@@ -673,7 +721,7 @@ public class GUIAll extends GUI {
 		table_loop_path.getColumnModel().getColumn(0).setPreferredWidth(30);
 		table_loop_path.getColumnModel().getColumn(0).setMinWidth(30);
 		table_loop_path.getColumnModel().getColumn(0).setMaxWidth(30);
-		scrollPane.setViewportView(table_loop_path);
+		tb_loop_path_wrap.setViewportView(table_loop_path);
 		
 		listTable.add(table_loop_path);
 		listTable.add(table_loop_result);
@@ -687,49 +735,49 @@ public class GUIAll extends GUI {
 				openFuntionView(
 						currentFunction, false
 						).getCanvas().resetSelectingExtraPath();
-				removeTableModel((DefaultTableModel) table_loop_result.getModel());
+				removeTableModel(table_loop_result);
 				
 				Object index = table.getValueAt(table.getSelectedRow(), 0);
 				
 				if (index != null){
 					int i = Integer.valueOf(index + "") - 1;
-					loop_canvas.setLoopPath(table.getLoopPaths().get(i));
+					canvas_loop.setLoopPath(table.getLoopPaths().get(i));
 				}
 			}
 		});
 		
-		panel_1.setLayout(gl_panel_1);
+		panel_loop.setLayout(gl_panel_loop);
 		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBackground(Color.WHITE);
-		tab_table.addTab("Tích hợp", null, panel_2, null);
+		JPanel panel_inte = new JPanel();
+		panel_inte.setBackground(Color.WHITE);
+		tab_table.addTab("Tích hợp", null, panel_inte, null);
 		
-		JScrollPane scrollPane_3 = new JScrollPane();
-		scrollPane_3.setBorder(null);
-		scrollPane_3.getVerticalScrollBar().setUnitIncrement(16);
+		JScrollPane pn_function_pair_wrap = new JScrollPane();
+		pn_function_pair_wrap.setBorder(null);
+		pn_function_pair_wrap.getVerticalScrollBar().setUnitIncrement(16);
 		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBackground(Color.WHITE);
+		JPanel panel_inte_type = new JPanel();
+		panel_inte_type.setBackground(Color.WHITE);
 		
-		JScrollPane scrollPane_4 = new JScrollPane();
-		scrollPane_4.getViewport().setBackground(Color.WHITE);
-		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
-		gl_panel_2.setHorizontalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addComponent(panel_3, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
-				.addGroup(gl_panel_2.createSequentialGroup()
-					.addComponent(scrollPane_3, GroupLayout.PREFERRED_SIZE, 265, GroupLayout.PREFERRED_SIZE)
+		JScrollPane tb_test_pair_wrap = new JScrollPane();
+		tb_test_pair_wrap.getViewport().setBackground(Color.WHITE);
+		GroupLayout gl_panel_inte = new GroupLayout(panel_inte);
+		gl_panel_inte.setHorizontalGroup(
+			gl_panel_inte.createParallelGroup(Alignment.LEADING)
+				.addComponent(panel_inte_type, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
+				.addGroup(gl_panel_inte.createSequentialGroup()
+					.addComponent(pn_function_pair_wrap, GroupLayout.PREFERRED_SIZE, 265, GroupLayout.PREFERRED_SIZE)
 					//.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane_4, GroupLayout.DEFAULT_SIZE, 483, Short.MAX_VALUE))
+					.addComponent(tb_test_pair_wrap, GroupLayout.DEFAULT_SIZE, 483, Short.MAX_VALUE))
 		);
-		gl_panel_2.setVerticalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_2.createSequentialGroup()
-					.addComponent(panel_3, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
+		gl_panel_inte.setVerticalGroup(
+			gl_panel_inte.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_inte.createSequentialGroup()
+					.addComponent(panel_inte_type, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
 					//.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane_4, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
-						.addComponent(scrollPane_3, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)))
+					.addGroup(gl_panel_inte.createParallelGroup(Alignment.LEADING)
+						.addComponent(tb_test_pair_wrap, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
+						.addComponent(pn_function_pair_wrap, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)))
 		);
 		
 		table_test_pair = new StorePathTable(false);
@@ -745,7 +793,7 @@ public class GUIAll extends GUI {
 		table_test_pair.getColumnModel().getColumn(0).setMaxWidth(30);
 		table_test_pair.getColumnModel().getColumn(3).setPreferredWidth(70);
 		table_test_pair.getColumnModel().getColumn(3).setMaxWidth(70);
-		scrollPane_4.setViewportView(table_test_pair);
+		tb_test_pair_wrap.setViewportView(table_test_pair);
 		
 		listTable.add(table_test_pair);
 		
@@ -756,43 +804,43 @@ public class GUIAll extends GUI {
 				beginTestFunctionPair(node.getFunctionPair());
 			}
 		});
-		scrollPane_3.setViewportView(panel_function_pair);
-		panel_3.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
+		pn_function_pair_wrap.setViewportView(panel_function_pair);
+		panel_inte_type.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
 		
-		JRadioButton rdbtnBottomUp = new JRadioButton("Bottom-up");
-		rdbtnBottomUp.setSelected(true);
-		rdbtnBottomUp.setActionCommand("0");
-		panel_3.add(rdbtnBottomUp);
+		JRadioButton rd_bottom_up = new JRadioButton("Bottom-up");
+		rd_bottom_up.setSelected(true);
+		rd_bottom_up.setActionCommand("0");
+		panel_inte_type.add(rd_bottom_up);
 		
-		JRadioButton rdbtnTopdown = new JRadioButton("Top-down");
-		rdbtnTopdown.setActionCommand("1");
-		panel_3.add(rdbtnTopdown);
-		panel_2.setLayout(gl_panel_2);
+		JRadioButton rd_top_down = new JRadioButton("Top-down");
+		rd_top_down.setActionCommand("1");
+		panel_inte_type.add(rd_top_down);
+		panel_inte.setLayout(gl_panel_inte);
 		
 		group_inte_type = new ButtonGroup();
-		group_inte_type.add(rdbtnBottomUp);
-		group_inte_type.add(rdbtnTopdown);
+		group_inte_type.add(rd_bottom_up);
+		group_inte_type.add(rd_top_down);
 
-		detailWrap.setDividerLocation(400);
-		splitPane_main.setDividerLocation(600);
+		split_details.setDividerLocation(400);
+		split_main.setDividerLocation(600);
 		
 		JPanel panel_tray = new JPanel();
 		panel_tray.setBackground(Color.WHITE);
 		
 		JPanel panel_toolbar = new JPanel();
-		GroupLayout groupLayout = new GroupLayout(frmMain.getContentPane());
+		GroupLayout groupLayout = new GroupLayout(frame_main.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addComponent(panel_tray, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
 				.addComponent(panel_toolbar, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
-				.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
+				.addComponent(split_main, GroupLayout.DEFAULT_SIZE, 1362, Short.MAX_VALUE)
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addComponent(panel_toolbar, GroupLayout.PREFERRED_SIZE, 43, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(splitPane_main, GroupLayout.DEFAULT_SIZE, 620, Short.MAX_VALUE)
+					.addComponent(split_main, GroupLayout.DEFAULT_SIZE, 620, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panel_tray, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
 		);
@@ -858,32 +906,32 @@ public class GUIAll extends GUI {
 						panel_toolbar_left.add(lbl_open_j);
 						panel_toolbar_left.add(lbl_set_root);
 						
-						JPanel panel = new JPanel();
+						JPanel panel_toolbar_right = new JPanel();
 						GroupLayout gl_panel_toolbar = new GroupLayout(panel_toolbar);
 						gl_panel_toolbar.setHorizontalGroup(
 							gl_panel_toolbar.createParallelGroup(Alignment.LEADING)
 								.addGroup(gl_panel_toolbar.createSequentialGroup()
 									.addComponent(panel_toolbar_left, GroupLayout.PREFERRED_SIZE, 601, GroupLayout.PREFERRED_SIZE)
 									.addPreferredGap(ComponentPlacement.RELATED, 261, Short.MAX_VALUE)
-									.addComponent(panel, GroupLayout.PREFERRED_SIZE, 500, GroupLayout.PREFERRED_SIZE))
+									.addComponent(panel_toolbar_right, GroupLayout.PREFERRED_SIZE, 500, GroupLayout.PREFERRED_SIZE))
 						);
 						gl_panel_toolbar.setVerticalGroup(
 							gl_panel_toolbar.createParallelGroup(Alignment.LEADING)
 								.addComponent(panel_toolbar_left, GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
-								.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
+								.addComponent(panel_toolbar_right, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
 						);
-						panel.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+						panel_toolbar_right.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 						
-						JButton btnCit = new JButton("Cài đặt");
-						btnCit.setHorizontalTextPosition(SwingConstants.LEFT);
-						btnCit.setPreferredSize(new Dimension(120, 30));
-						btnCit.addActionListener(new ActionListener() {
+						JButton btn_setting = new JButton("Cài đặt");
+						btn_setting.setHorizontalTextPosition(SwingConstants.LEFT);
+						btn_setting.setPreferredSize(new Dimension(120, 30));
+						btn_setting.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
-								new SettingDialog(frmMain).setVisible(true);
+								new SettingDialog(frame_main).setVisible(true);
 							}
 						});
-						btnCit.setIcon(new ImageIcon(GUIAll.class.getResource("/image/setting.png")));
-						panel.add(btnCit);
+						btn_setting.setIcon(new ImageIcon(GUIAll.class.getResource("/image/setting.png")));
+						panel_toolbar_right.add(btn_setting);
 						panel_toolbar.setLayout(gl_panel_toolbar);
 		panel_tray.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 		
@@ -896,26 +944,26 @@ public class GUIAll extends GUI {
 		lbl_loading.setIcon(new ImageIcon(GUIAll.class.getResource("/image/loading.gif")));
 		panel_tray.add(lbl_loading);
 		
-		tabbedCanvas = new LightTabbedPane(JTabbedPane.TOP);
-		tabbedCanvas.setBorder(null);
-		splitPane_main.setLeftComponent(tabbedCanvas);
+		tab_canvas = new LightTabbedPane(JTabbedPane.TOP);
+		tab_canvas.setBorder(null);
+		split_main.setLeftComponent(tab_canvas);
 
-		JScrollPane fGraphWrap = new JScrollPane();
-		fGraphWrap.setBorder(null);
+		JScrollPane cv_fn_call_wrap = new JScrollPane();
+		cv_fn_call_wrap.setBorder(null);
 
-		fGraph = new FunctionCanvas();
-		fGraph.setBorder(null);
-		fGraph.setBackground(Color.WHITE);
-		fGraph.setParent(fGraphWrap);
-		fGraphWrap.setViewportView(fGraph);
+		canvas_fn_call = new FunctionCanvas();
+		canvas_fn_call.setBorder(null);
+		canvas_fn_call.setBackground(Color.WHITE);
+		canvas_fn_call.setParent(cv_fn_call_wrap);
+		cv_fn_call_wrap.setViewportView(canvas_fn_call);
 
-		fGraphWrap.getViewport().addChangeListener(new ChangeListener() {
+		cv_fn_call_wrap.getViewport().addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JViewport v = (JViewport) e.getSource();
 				v.repaint();
 			}
 		});
-		tabbedCanvas.addTab("Đồ thị gọi hàm", null, fGraphWrap, null);
+		tab_canvas.addTab("Đồ thị gọi hàm", null, cv_fn_call_wrap, null);
 		
 //		JScrollPane vGraphWrap = new JScrollPane();
 //		vGraphWrap.setBorder(null);
@@ -926,8 +974,8 @@ public class GUIAll extends GUI {
 //		vGraph.setBorder(null);
 //		vGraph.setParent(vGraphWrap);
 //		vGraphWrap.setViewportView(vGraph);
-		tabbedCanvas.setTabCloseableAt(0, false);
-		frmMain.getContentPane().setLayout(groupLayout);
+		tab_canvas.setTabCloseableAt(0, false);
+		frame_main.getContentPane().setLayout(groupLayout);
 
 		fileChooserC = new JFileChooser();
 		FileNameExtensionFilter cFilter = new FileNameExtensionFilter(
@@ -958,10 +1006,10 @@ public class GUIAll extends GUI {
 					Object index = table.getValueAt(table.getSelectedRow(), 0);
 					
 					if (index == null)
-						selectPathByIndex(null, table.isSubCondition());
+						displayPathDetails(null, table.isSubCondition());
 					else{
 						int i = Integer.valueOf(index + "") - 1;
-						selectPathByIndex(table.getBasisPaths().get(i), table.isSubCondition());
+						displayPathDetails(table.getBasisPaths().get(i), table.isSubCondition());
 					}
 				}
 			});
@@ -1023,7 +1071,7 @@ public class GUIAll extends GUI {
 
 	/** Bật thông báo lỗi với nội dung chỉ định */
 	public void alertError(String s) {
-		JOptionPane.showMessageDialog(frmMain, s, "Errors",
+		JOptionPane.showMessageDialog(frame_main, s, "Errors",
 				JOptionPane.ERROR_MESSAGE);
 	}
 }

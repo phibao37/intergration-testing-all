@@ -2,6 +2,8 @@ package core.models;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 
 import core.Utils;
 import core.models.expression.ArrayExpression;
@@ -193,8 +195,6 @@ public class ArrayVariable extends Variable {
 	public ArrayExpression getValue() {
 		return mData;
 	}
-	
-	
 
 	@Override
 	public ArrayType getType() {
@@ -217,4 +217,62 @@ public class ArrayVariable extends Variable {
 		return replaced;
 	}
 	
+	@Override
+	public String getValueString() {
+		String value = "";
+		HashMap<int[], Expression> valueMap = getAllValue();
+		
+		for (int[] indexs: valueMap.keySet()){
+			value += ", ";
+			for (int index: indexs)
+				value += "[" + index + "]";
+			value += " => " + valueMap.get(indexs);
+		}
+		
+		return value.isEmpty() ? value : value.substring(2);
+	}
+
+	/**
+	 * Trả về ánh xạ giữa các chỉ số (kiểu nguyên) và giá trị của mảng ứng với các
+	 * chỉ số này. Chỉ các giá trị khác null mới được liệt kê
+	 */
+	public LinkedHashMap<int[], Expression> getAllValue(){
+		LinkedHashMap<int[], Expression> map = new LinkedHashMap<>();
+		
+		travelIndexMap(getValue(), new LinkedList<Integer>(), map);
+		return map;
+	}
+	
+	/**
+	 * Duyệt các giá trị ứng theo chỉ số
+	 */
+	private void travelIndexMap(Expression value, LinkedList<Integer> indexes, 
+			LinkedHashMap<int[], Expression> map){
+		if (value == null)
+			return;
+		
+		if (value instanceof ArrayExpression){
+			ArrayExpression array = (ArrayExpression) value;
+			
+			for (int i = 0; i < array.length(); i++){
+				indexes.add(i);
+				travelIndexMap(array.getElement(i), indexes, map);
+				indexes.removeLast();
+			}
+		} else {
+			int[] indexs = new int[indexes.size()];
+			
+			for (int i = 0; i < indexs.length; i++)
+				indexs[i] = indexes.get(i);
+			map.put(indexs, value);
+		}
+	}
+	
 }
+
+
+
+
+
+
+
