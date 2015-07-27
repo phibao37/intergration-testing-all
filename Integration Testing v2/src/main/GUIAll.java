@@ -382,6 +382,8 @@ public class GUIAll extends GUI {
 		
 		isWorking = true;
 		fGraph.setSelectFunctionPair(pair);
+		tabbedCanvas.setSelectedIndex(0);
+		
 		currentFunction = pair.getCaller();
 		main.beginTestFunctionPair(pair, new Return<ArrayList<BasisPath>>() {
 			
@@ -717,14 +719,14 @@ public class GUIAll extends GUI {
 				.addComponent(panel_3, GroupLayout.DEFAULT_SIZE, 754, Short.MAX_VALUE)
 				.addGroup(gl_panel_2.createSequentialGroup()
 					.addComponent(scrollPane_3, GroupLayout.PREFERRED_SIZE, 265, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
+					//.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(scrollPane_4, GroupLayout.DEFAULT_SIZE, 483, Short.MAX_VALUE))
 		);
 		gl_panel_2.setVerticalGroup(
 			gl_panel_2.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_2.createSequentialGroup()
 					.addComponent(panel_3, GroupLayout.PREFERRED_SIZE, 39, GroupLayout.PREFERRED_SIZE)
-					.addPreferredGap(ComponentPlacement.RELATED)
+					//.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
 						.addComponent(scrollPane_4, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)
 						.addComponent(scrollPane_3, GroupLayout.DEFAULT_SIZE, 327, Short.MAX_VALUE)))

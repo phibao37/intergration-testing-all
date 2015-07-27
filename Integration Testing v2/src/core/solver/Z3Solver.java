@@ -41,9 +41,9 @@ public class Z3Solver implements Solver {
 	public static final String RESULT_UNKNOWN = "unknown";
 	
 	@Override
-	public Result solve(Variable[] testcases,
-			ConstraintEquations constraints,
-			ArrayList<ArrayIndexExpression> array) throws CoreException {
+	public Result solve(ConstraintEquations constraints) throws CoreException {
+		Variable[] testcases = constraints.getTestcases();
+		ArrayList<ArrayIndexExpression> array = constraints.getArrayAccesses();
 		
 		//Khởi tạo bảng biến, reset lại nghiệm
 		mTable = new VariableTable();
@@ -117,7 +117,7 @@ public class Z3Solver implements Solver {
 			}
 			
 			//Nếu có đính kèm biểu thức trả về, tính toán và rút gọn luôn
-			mReturnValue = constraints.getReturnValue();
+			mReturnValue = constraints.getReturnExpression();
 			if (mReturnValue != null)
 				z3.addLine("simplify %s", parseCondition(mReturnValue));//(IV)
 			

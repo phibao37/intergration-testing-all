@@ -350,7 +350,7 @@ public class BasisPathParser {
 		Expression value = rt.getReturnExpression();
 		
 		if (value != null){
-			mConstraints.setReturnValue(tables.evalExpression(value));
+			mConstraints.setReturnExpression(tables.evalExpression(value));
 		}
 	}
 	

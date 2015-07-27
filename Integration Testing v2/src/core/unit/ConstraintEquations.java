@@ -5,10 +5,19 @@ import java.util.ArrayList;
 import core.models.Expression;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
+import core.solver.Solver;
 
 /**
- * Một tập các biểu thức ràng buộc 
- *
+ * Một bộ lưu trữ các ràng buộc dùng để giải ra testcase cho một đường thi hành.<br/>
+ * Bộ này bao gồm: 
+ * <ul>
+ * 	<li>{@link #getTestcases()}: danh sách các biến testcase cần giải</li>
+ * 	<li>{@link #get(int)}: bản thân bộ lưu trữ là môt danh sách các ràng buộc logic</li>
+ * 	<li>{@link #getArrayAccesses()}: các biểu thức truy cập vào các 
+ *  biển mảng testcase</li>
+ * 	<li>{@link #getReturnExpression()}: biểu thức trả về ứng với đường thi hành</li>
+ * </ul>
+ * @see Solver#solve(ConstraintEquations)
  */
 public class ConstraintEquations extends ArrayList<Expression> {
 	private static final long serialVersionUID = 2991049972861726397L;
@@ -55,14 +64,14 @@ public class ConstraintEquations extends ArrayList<Expression> {
 	/**
 	 * Đặt biểu thức cho câu lệnh return hàm (nếu có)
 	 */
-	public void setReturnValue(Expression value){
+	public void setReturnExpression(Expression value){
 		mReturn = value;
 	}
 	
 	/**
 	 * Trả về biểu thức bên trong câu lệnh return (nếu có)
 	 */
-	public Expression getReturnValue(){
+	public Expression getReturnExpression(){
 		return mReturn;
 	}
 }

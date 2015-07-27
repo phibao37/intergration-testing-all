@@ -154,8 +154,7 @@ public abstract class MainProcess implements FilenameFilter {
 
 						GUI.instance.setStatus("Đang giải hệ %d/%d", i++,
 								length);
-						Result result = mSolver.solve(ce.getTestcases(), ce,
-								ce.getArrayAccesses());
+						Result result = mSolver.solve(ce);
 						path.setSolveResult(result);
 					}
 				} finally{
@@ -211,8 +210,7 @@ public abstract class MainProcess implements FilenameFilter {
 					basis.setConstraint(ce);
 
 					GUI.instance.setStatus("Đang giải hệ %d/%d", i++, length);
-					Result result = mSolver.solve(ce.getTestcases(), ce,
-							ce.getArrayAccesses());
+					Result result = mSolver.solve(ce);
 					basis.setSolveResult(result);
 				}
 				
@@ -274,8 +272,7 @@ public abstract class MainProcess implements FilenameFilter {
 					ConstraintEquations ce = mIntePathParser.getConstrains();
 					basis.setConstraint(ce);
 
-					Result result = mSolver.solve(ce.getTestcases(), ce,
-							ce.getArrayAccesses());
+					Result result = mSolver.solve(ce);
 					basis.setSolveResult(result);
 				}
 				
@@ -314,7 +311,7 @@ public abstract class MainProcess implements FilenameFilter {
 			
 			Result result = Result.DEFAULT;
 			try {
-				result = mSolver.solve(ce.getTestcases(), ce, ce.getArrayAccesses());
+				result = mSolver.solve(ce);
 			} catch (CoreException e1) {
 				e1.printStackTrace();
 			}

@@ -1,11 +1,8 @@
 package core.solver;
 
-import java.util.ArrayList;
-
 import core.error.CoreException;
 import core.models.Expression;
 import core.models.Variable;
-import core.models.expression.ArrayIndexExpression;
 import core.unit.ConstraintEquations;
 
 /**
@@ -16,22 +13,47 @@ import core.unit.ConstraintEquations;
 public interface Solver {
 	
 	/**
-	 * Bắt đầu quá trình giải hệ ràng buộc
-	 * @param testcases danh sách các biến cần được giải để làm thỏa mãn hệ ràng buộc
-	 * @param constraints hệ ràng buộc, là một danh sách các biểu thức chỉ chứa 
-	 * các biến testcase, hợp với các phép toán so sánh (==, <, >=,...) hoặc các
-	 * phép toán logic (&&, ||, !)
-	 * @param array danh sách các biểu thức truy cập vào các biển mảng testcase, cần dùng
-	 * để khởi tạo các phần tử mảng tại các vị trí truy cập này. <br/>
-	 * Thí dụ với testcase của hàm int min(int a[], int n), 
-	 * trong chương trình có truy cập vào a[2], a[n-1]. Giải hệ được n = 5, giả sử biến a
-	 * không tham gia vào các điều kiện (chỉ dùng để lấy giá trị), biến mảng a cũng cần
-	 * được khởi tạo tại các vị trí 2, 4, tức nó phải là mảng chứa được 4 phần tử
+	 * Bắt đầu quá trình giải hệ ràng buộc, một bộ ràng buộc được truyền vào, cung cấp
+	 * các thông tin ràng buộc sau:
+	 * 
+	 * <ul>
+	 * 
+	 * 	<li>
+	 * 	{@link ConstraintEquations#getTestcases()}: danh sách các biến 
+	 * 	cần được giải để làm thỏa mãn hệ ràng buộc
+	 * 	</li>
+	 * 
+	 * 	<li>
+	 * 	{@link ConstraintEquations}: bản thân nó là một danh sách các biểu thức
+	 * 	ràng buộc chỉ chứa các biến testcase, hợp với các phép toán 
+	 * 	so sánh (==, <, >=,...) hoặc các phép toán logic (&&, ||, !)
+	 * 	</li>
+	 * 
+	 * 	<li>
+	 *  {@link ConstraintEquations#getArrayAccesses()}: danh sách các biểu thức
+	 *  truy cập vào các biển mảng testcase, cần dùng để khởi tạo các phần tử mảng 
+	 *  tại các vị trí truy cập này. <br/>
+	 *  Thí dụ với testcase của hàm int min(int a[], int n), 
+	 *  trong chương trình có truy cập vào a[2], a[n-1]. Giải hệ được n = 5, 
+	 *  giả sử biến a không tham gia vào các điều kiện (chỉ dùng để lấy giá trị), 
+	 *  biến mảng a cũng cần được khởi tạo tại các vị trí 2, 4, 
+	 *  tức nó phải là mảng chứa được 4 phần tử
+	 * 	</li>
+	 * 	
+	 * 	<li>
+	 * 	{@link ConstraintEquations#getReturnExpression()}: biểu thức mà unit đang được
+	 *  kiểm thử sẽ được trả về, có thể là hằng số (return 0), hoặc vẫn còn phụ thuộc
+	 *  vào các biến testcase (return x+y/2), khi đã giải ra được các giá trị cụ thể
+	 *  của testcase, biểu thức này sẽ được tính toán để lấy về giá trị hằng cuối cùng
+	 * 	</li>
+	 * 
+	 * </ul>
+	 * 
+	 * @param constraints bộ chứa các thông tin ràng buộc cần dùng để giải
 	 * @return kết quả sau khi đã giải xong hệ ràng buộc
 	 * @throws CoreException các lỗi liên quan đến việc giải hệ
 	 */
-	public Result solve(Variable[] testcases, ConstraintEquations constraints,
-			ArrayList<ArrayIndexExpression> array) throws CoreException;
+	public Result solve(ConstraintEquations constraints) throws CoreException;
 	
 	
 	/**
