@@ -25,6 +25,7 @@ public class IDExpression extends Expression {
 	
 	private Type mType;
 	private Object mValue;
+	private String mExtraDisplay;
 	
 	/**
 	 * Tạo một biểu thức hằng
@@ -32,6 +33,13 @@ public class IDExpression extends Expression {
 	 */
 	public IDExpression(String content){
 		super(content);
+	}
+	
+	/**
+	 * Tạo biểu thức hằng từ giá trị của nó
+	 */
+	public IDExpression(Object value){
+		super(String.valueOf(value));
 	}
 
 	@Override
@@ -86,6 +94,23 @@ public class IDExpression extends Expression {
 	@Override
 	protected int handle(ExpressionVisitor visitor) {
 		return visitor.visit(this);
+	}
+	
+	/**
+	 * Thiết đặt một cách hiển thị khác của biểu thức, chỉ dùng để hiển thị.<br/>
+	 * Thí dụ, ta có new IDExpression("0.333333333333333333").setExtraDisplay("1/3");
+	 */
+	public IDExpression setExtraDisplay(String display){
+		mExtraDisplay = display;
+		return this;
+	}
+	
+	@Override
+	public String toString() {
+		if (mExtraDisplay != null)
+			return mExtraDisplay;
+		else
+			return super.toString();
 	}
 
 	@Override

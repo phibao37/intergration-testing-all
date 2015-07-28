@@ -1,4 +1,4 @@
-package cdt;
+package main;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog;
@@ -27,6 +27,7 @@ import core.models.Function;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.Toolkit;
 
 /**
  * Hộp thoại giúp người dùng chọn một hàm làm hàm gốc
@@ -97,6 +98,7 @@ public class SelectFunction extends JDialog {
 	 */
 	public SelectFunction(JFrame parent, ArrayList<Function> funcs, Function preRoot) {
 		super(parent, null, Dialog.ModalityType.DOCUMENT_MODAL);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(SelectFunction.class.getResource("/image/root.png")));
 		setTitle("Chọn hàm số gốc");
 		setResizable(false);
 		

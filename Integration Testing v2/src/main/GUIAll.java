@@ -37,7 +37,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import cdt.CMainProcess;
-import cdt.SelectFunction;
 import core.GUI;
 import core.MainProcess;
 import core.MainProcess.Return;
@@ -526,7 +525,7 @@ public class GUIAll extends GUI {
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		frame_main = new JFrame();
-		frame_main.setTitle("Kiểm thử tích hơp cho C");
+		frame_main.setTitle("Kiểm thử tích hơp");
 		frame_main.setBounds(50, 50, 1266, 630);
 		frame_main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		frame_main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -923,15 +922,25 @@ public class GUIAll extends GUI {
 						panel_toolbar_right.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 						
 						JButton btn_setting = new JButton("Cài đặt");
-						btn_setting.setHorizontalTextPosition(SwingConstants.LEFT);
-						btn_setting.setPreferredSize(new Dimension(120, 30));
+						btn_setting.setIcon(new ImageIcon(GUIAll.class.getResource("/image/setting.png")));
+						btn_setting.setPreferredSize(new Dimension(100, 30));
 						btn_setting.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
 								new SettingDialog(frame_main).setVisible(true);
 							}
 						});
-						btn_setting.setIcon(new ImageIcon(GUIAll.class.getResource("/image/setting.png")));
 						panel_toolbar_right.add(btn_setting);
+						
+						JButton btn_about = new JButton("");
+						btn_about.addActionListener(new ActionListener() {
+							public void actionPerformed(ActionEvent e) {
+								new AboutDialog(frame_main).setVisible(true);
+							}
+						});
+						btn_about.setIcon(new ImageIcon(GUIAll.class.getResource("/image/info.png")));
+						btn_about.setHorizontalTextPosition(SwingConstants.LEFT);
+						btn_about.setPreferredSize(new Dimension(30, 30));
+						panel_toolbar_right.add(btn_about);
 						panel_toolbar.setLayout(gl_panel_toolbar);
 		panel_tray.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 		

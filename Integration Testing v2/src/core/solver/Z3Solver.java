@@ -185,6 +185,7 @@ public class Z3Solver implements Solver {
 	 */
 	private static IDExpression str2Expression(String str){
 		boolean neg = false;
+		String extra = null;
 		
 		//Loại bỏ dấu ngoặc ( ... )
 		while (str.matches("\\(.*\\)"))
@@ -213,13 +214,14 @@ public class Z3Solver implements Solver {
 					str = d1.divide(d2).toString();
 				} catch (Exception e){
 					str = d1.divide(d2, 10, BigDecimal.ROUND_HALF_DOWN).toString();
+					extra = d1.longValue() + "/" + d2.longValue();
 				}
 			}
 		}
 		
 		if (neg)
 			str = "-" + str;
-		return new IDExpression(str);
+		return new IDExpression(str).setExtraDisplay(extra);
 	}
 	
 	public static void main(String[] args){
@@ -356,7 +358,6 @@ public class Z3Solver implements Solver {
 		smtMap.put(BasicType.FLOAT, "Real");
 		smtMap.put(BasicType.DOUBLE, "Real");
 		smtMap.put(BasicType.BOOL, "Bool");
-		smtMap.put(BasicType.BOOLEAN, "Bool");
 	}
 	
 	/**

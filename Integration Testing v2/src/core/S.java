@@ -64,6 +64,13 @@ public class S {
 	 */
 	public static File DIR_GCC = new File("D:\\App\\Library\\Cygwin\\bin");
 	
+	/*----------------------------CONSTANT---------------------------------*/
+	
+	/**
+	 * Phiên bản ứng dụng
+	 */
+	public static final String VERSION = "2.0.0";
+	
 	/*---------------------------------------------------------------------*/
 	
 	/**

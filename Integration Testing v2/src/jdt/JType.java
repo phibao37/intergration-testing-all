@@ -20,7 +20,7 @@ private static HashMap<String, BasicType> typeMap;
 		typeMap.put("int", BasicType.INT);
 		typeMap.put("float", BasicType.FLOAT);
 		typeMap.put("double", BasicType.DOUBLE);
-		typeMap.put("boolean", BasicType.BOOLEAN);
+		typeMap.put("boolean", BasicType.BOOL);
 		typeMap.put("char", BasicType.CHAR);
 		typeMap.put("void", BasicType.VOID);
 	}

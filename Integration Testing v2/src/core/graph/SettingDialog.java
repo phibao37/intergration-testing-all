@@ -92,6 +92,7 @@ public class SettingDialog extends JDialog {
 	 */
 	public SettingDialog(JFrame parent) {
 		super(parent, null, Dialog.ModalityType.DOCUMENT_MODAL);
+		setIconImage(Toolkit.getDefaultToolkit().getImage(SettingDialog.class.getResource("/image/setting.png")));
 		setTitle("Cài đặt");
 		
 		setBounds(100, 100, 700, 400);
@@ -241,14 +242,10 @@ public class SettingDialog extends JDialog {
 		JRadioButton rdbtnZ = new JRadioButton("Z3");
 		rdbtnZ.setSelected(true);
 		panel_1.add(rdbtnZ);
-		
-		JRadioButton rdbtnRandom = new JRadioButton("Random");
-		panel_1.add(rdbtnRandom);
 		contentPanel.setLayout(gl_contentPanel);
 		
 		ButtonGroup group_solver = new ButtonGroup();
 		group_solver.add(rdbtnZ);
-		group_solver.add(rdbtnRandom);
 		
 		JLabel lblBGiiZ = new JLabel("Bộ giải Z3");
 		lblBGiiZ.setFont(new Font("Tahoma", Font.BOLD, 11));

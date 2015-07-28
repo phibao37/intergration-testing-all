@@ -53,20 +53,12 @@ public class BasicType extends Type {
 	 */
 	public static final BasicType STRING = new BasicType("string", "");
 	
-	/**
-	 * Kiểu dữ liệu chuỗi Java
-	 */
-	public static final BasicType STRING_JAVA = new BasicType("String", "");
 	
 	/**
 	 * Kiểu dữ liệu nhị phân
 	 */
 	public static final BasicType BOOL = new BasicType("bool", false);
-	
-	/**
-	 * Kiểu dữ liệu nhị phân Java
-	 */
-	public static final BasicType BOOLEAN = new BasicType("boolean", false);
+
 	
 	/**
 	 * Kiểu dữ liệu void (dùng cho trả về của hàm)

@@ -194,7 +194,7 @@ public class BasisPathParser {
 				//Thêm điều kiện các chỉ số phải không âm
 				for (Expression index: array.getIndexes()){
 					addConstrain(new NotNegativeExpression(
-							tables.evalExpression(index)));
+							tables.fillExpression(index)));
 				}
 				
 				//Thêm các biểu thức truy cập biến mảng testcase (scope = 1)
@@ -321,7 +321,7 @@ public class BasisPathParser {
 		//System.out.printf("\n***table = %s\n%s", tables, condition);
 		
 		//Fill biểu thức bởi các biến testcase, sau đó thêm vào hệ ràng buộc
-		condition = tables.evalExpression(condition);
+		condition = tables.fillExpression(condition);
 		//System.out.printf(" --> %s\n\n", condition);
 		addConstrain(condition);
 	}
@@ -350,7 +350,7 @@ public class BasisPathParser {
 		Expression value = rt.getReturnExpression();
 		
 		if (value != null){
-			mConstraints.setReturnExpression(tables.evalExpression(value));
+			mConstraints.setReturnExpression(tables.fillExpression(value));
 		}
 	}
 	

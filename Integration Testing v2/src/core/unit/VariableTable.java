@@ -3,7 +3,7 @@ package core.unit;
 import java.util.ArrayList;
 
 import core.eval.Evaluateable;
-import core.eval.Float2IntEval;
+import core.eval.SimpleEval;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Variable;
@@ -64,7 +64,7 @@ public class VariableTable extends ArrayList<Variable> {
 	 */
 	public void updateVariableValue(String name, Expression value){
 		//System.out.printf("Gan %s = %s", name, value);
-		value = evalExpression(value);
+		value = fillExpression(value);
 		//System.out.printf(" --> %s\n", value);
 		find(name).setValue(value);
 	}
@@ -77,7 +77,7 @@ public class VariableTable extends ArrayList<Variable> {
 	 * @throws NullPointerException - tên biến không tồn tại
 	 */
 	public void updateArrayValue(String name, Expression[] indexs, Expression value){
-		value = evalExpression(value);
+		value = fillExpression(value);
 		Expression[] newIndexs = new Expression[indexs.length];
 		
 		for (int i = 0; i < indexs.length; i++)
@@ -117,9 +117,11 @@ public class VariableTable extends ArrayList<Variable> {
 					ArrayVariable find = (ArrayVariable) find(array.getName());
 
 					if (find != null) {
-						if (find.isValueSet(array.getIndexes()))
-							copy.replace(array,
-									find.getValueAt(array.getIndexes()));
+						Expression[] indexes = array.getIndexes().clone();
+						for (int i = 0; i < indexes.length; i++)
+							indexes[i] = evalExpression(indexes[i]);
+						if (find.isValueSet(indexes))
+							copy.replace(array, find.getValueAt(indexes));
 					} else {
 						System.out.println("Not found: " + array);
 					}
@@ -169,7 +171,8 @@ public class VariableTable extends ArrayList<Variable> {
 	
 	/**
 	 * Thực hiện {@link #fillExpression(Expression)}, 
-	 * sau đó tính toán để rút gọn biểu thức
+	 * sau đó tính toán để rút gọn biểu thức. Việc tính toán này chỉ cần thiết
+	 * khi cần một giá trị cụ thể để truy cập vào các vị trí mảng
 	 * @param expression biểu thức cần thay thế và tính toán
 	 * @return biểu thức đã được tính toán
 	 */
@@ -177,7 +180,7 @@ public class VariableTable extends ArrayList<Variable> {
 		return DEFAULT_EVAL.evalExpression(fillExpression(expression));
 	}
 	
-	private static Evaluateable DEFAULT_EVAL = Float2IntEval.DEFAULT;
+	private static Evaluateable DEFAULT_EVAL = SimpleEval.DEFAULT;
 	
 	/**
 	 * Thiết đặt bộ tính toán giá trị mặc định
