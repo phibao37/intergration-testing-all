@@ -186,6 +186,10 @@ public class BasisPathParser {
 				
 				return PROCESS_SKIP;
 			}
+			
+		});
+		
+		holder.accept(new ExpressionVisitor() {
 
 			@Override
 			public int visit(ArrayIndexExpression array) {

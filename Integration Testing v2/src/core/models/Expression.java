@@ -99,32 +99,39 @@ public abstract class Expression extends Element {
 	 * <code>SomeExpression</code> là loại biểu thức cần "bắt"
 	 * @return
 	 * {@link ExpressionVisitor#PROCESS_CONTINUE}: đã duyệt qua hết mọi biểu thức<br/>
-	 * {@link ExpressionVisitor#PROCESS_SKIP}: một số biểu thức con bị bỏ qua<br/>
+	 * {@link ExpressionVisitor#PROCESS_SKIP}: các biểu thức con bị bỏ qua<br/>
 	 * {@link ExpressionVisitor#PROCESS_ABORT}: một biểu thức đã hủy áp dụng<br/>
 	 */
 	public int accept(ExpressionVisitor visitor){
 		int process = ExpressionVisitor.PROCESS_SKIP;
+		
+		//Tiền xử lý biểu thức cho phép thăm chính thức
 		if (visitor.preVisit(this)){
+			
+			//Chính thức thăm một biểu thức ứng với kiểu cụ thể
 			process = handle(visitor);
+			
+			//Kết quả thăm biểu thức cho phép duyệt các biểu thức con
 			if (process == ExpressionVisitor.PROCESS_CONTINUE 
 					&& this instanceof ExpressionGroup){
+				
+				//Áp dụng bộ duyệt cho biểu thức con
 				for (Expression e: ((ExpressionGroup)this).g){
-					if (e == null)
-						continue;
+					if (e == null) continue;
 					int child_process = e.accept(visitor);
 					
+					//Kết quả duyệt biểu thức con yêu cầu hủy quá trình duyệt,
+					//bỏ qua các biểu thức con khác, trả về kết quả lên biểu thức cha
 					if (child_process == ExpressionVisitor.PROCESS_ABORT){
 						process = child_process;
 						break;
 					}
-					
-//					if (child_process == ExpressionVisitor.PROCESS_SKIP)
-//						break;
 				}
 				
 			}
 		}
 		
+		//Hậu xử lý và trả về kết quả duyệt
 		visitor.postVisit(this);
 		return process;
 	}
