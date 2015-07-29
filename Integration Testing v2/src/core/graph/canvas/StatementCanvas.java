@@ -23,7 +23,7 @@ import core.models.Statement;
 /**
  * Lớp đồ họa giúp hiển thị các nút câu lệnh
  * @author ducvu
- *
+ * <br/>TODO bật/tắt thứ tự câu lệnh, hiện kí hiệu T/F trên đồ thị, thiết kế lại toobar
  */
 public class StatementCanvas extends Canvas {
 	public static final Color DEFAULT = Color.BLACK;

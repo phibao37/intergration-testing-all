@@ -17,6 +17,7 @@ import core.visitor.ExpressionVisitor;
 public abstract class Expression extends Element {
 	
 	private Expression mSource = this;
+	private boolean mBlockReplace = false;
 	
 	/**
 	 * Khởi tạo một biểu thức rỗng<br/>
@@ -67,9 +68,26 @@ public abstract class Expression extends Element {
 	 * sao chép từ cái kia (sao chép qua {@link #clone()})
 	 */
 	protected boolean equalsSource(Expression other){
-		if (other == null)
-			return false;
 		return mSource == other.mSource;
+	}
+	
+	/**
+	 * Đánh dấu một biểu thức có được phép thay thế hay không
+	 * (xem {@link ExpressionGroup#replace(Expression, Expression)})
+	 * @param block <b>true</b>: không cho phép thay thế chính nó và các biểu thức
+	 * con của nó, hoặc <b>false (mặc định)</b> nếu cho phép
+	 * @return đối tượng biểu thức hiện thời
+	 */
+	public Expression setBlockReplace(boolean block){
+		mBlockReplace = block;
+		return this;
+	}
+	
+	/**
+	 * Kiểm tra việc khóa sự thay thế
+	 */
+	protected boolean canNotReplace(){
+		return mBlockReplace;
 	}
 	
 	/**
@@ -100,8 +118,8 @@ public abstract class Expression extends Element {
 						break;
 					}
 					
-					if (child_process == ExpressionVisitor.PROCESS_SKIP)
-						break;
+//					if (child_process == ExpressionVisitor.PROCESS_SKIP)
+//						break;
 				}
 				
 			}
@@ -110,7 +128,6 @@ public abstract class Expression extends Element {
 		visitor.postVisit(this);
 		return process;
 	}
-	
 	
 	/**
 	 * Xử lý với từng loại biểu thức. Mỗi loại biểu thức cần truyền chính nó vào phương

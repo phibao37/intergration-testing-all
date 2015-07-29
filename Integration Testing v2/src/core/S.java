@@ -12,7 +12,8 @@ import java.util.Properties;
 /**
  * Rút gọn của Settings. Lớp tiện ích giúp lưu trữ các cài đặt của ứng dụng.<br/>
  * Các thuộc tính cài đặt cần là một biến thực thể <b>public</b>, <b>static</b> và 
- * <b>non-final</b>. Hơn nữa kiểu của biến phải là một trong các điều kiện sau:
+ * <b>non-final</b>, <b>non-transient</b>. 
+ * Hơn nữa kiểu của biến phải là một trong các điều kiện sau:
  * <ul>
  * 	<li>Là các kiểu cơ bản: boolean, byte, char, short, int, long, float, double</li>
  * 	<li>hoặc là kiểu tham chiếu có phương thức <b>valueOf</b> tạo đối tượng từ 
@@ -64,13 +65,7 @@ public class S {
 	 */
 	public static File DIR_GCC = new File("D:\\App\\Library\\Cygwin\\bin");
 	
-	/*----------------------------CONSTANT---------------------------------*/
-	
-	/**
-	 * Phiên bản ứng dụng
-	 */
-	public static final String VERSION = "2.0.0";
-	
+
 	/*---------------------------------------------------------------------*/
 	
 	/**
@@ -79,6 +74,34 @@ public class S {
 	 */
 	public static void postSetting(){
 		DIR_TEMP.mkdirs();
+	}
+	
+	/*---------------------------NON-SETTING-------------------------------*/
+	
+	/**
+	 * Phiên bản ứng dụng
+	 */
+	public static final String VERSION = "2.0.0";
+	
+	/**
+	 * Chế độ debug ứng dụng
+	 */
+	public static transient boolean DEBUG = true;
+	
+	/**
+	 * In ra console với định dạng, và chỉ in khi {@link #DEBUG} đang được bật
+	 */
+	public static void f(String format, Object ... args){
+		if (DEBUG)
+			System.out.printf(format, args);
+	}
+	
+	/**
+	 * In ra một chuỗi và xuống dòng, và chỉ in khi {@link #DEBUG} đang được bật
+	 */
+	public static void p(String string){
+		if (DEBUG)
+			System.out.println(string);
 	}
 	
 	/*---------------------------------------------------------------------*/
@@ -96,6 +119,7 @@ public class S {
 					Modifier.isPublic(mod) 
 					&& Modifier.isStatic(mod)
 					&& !Modifier.isFinal(mod)
+					&& !Modifier.isTransient(mod)
 				){
 				prop_map.put(field.getName(), field);
 			}
@@ -116,13 +140,18 @@ public class S {
 				if (cls.isPrimitive())
 					cls = Utils.toWrapper(cls);
 				try {
-					value = cls.getMethod("valueOf", String.class).invoke(null,
-							value);
-				} catch (NoSuchMethodException e1) {
-					value = cls.getConstructor(String.class).newInstance(value);
+					value = cls.getMethod("valueOf", String.class)
+							.invoke(null, value);
+					} catch (NoSuchMethodException e1) {
+						if (cls == Character.class)
+							value = cls.getConstructor(char.class)
+							.newInstance(((String)value).charAt(0));
+						else
+							value = cls.getConstructor(String.class)
+								.newInstance(value);
+					}
+					field.set(null, value);
 				}
-				field.set(null, value);
-			}
 			
 		} 
 		

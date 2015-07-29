@@ -162,7 +162,7 @@ public class Z3Solver implements Solver {
 				
 				for (Variable var: mTable){
 					left += ", " + var.getName();
-					right += ", " + var.getValue();
+					right += ", " + var.getValueString();
 				}
 				
 				mSolutionStr = String.format("(%s) = (%s)",

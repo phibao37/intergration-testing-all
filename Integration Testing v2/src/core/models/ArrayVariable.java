@@ -229,7 +229,7 @@ public class ArrayVariable extends Variable {
 			value += " => " + valueMap.get(indexs);
 		}
 		
-		return value.isEmpty() ? value : value.substring(2);
+		return "{" + (value.isEmpty() ? value : value.substring(2)) + "}";
 	}
 
 	/**

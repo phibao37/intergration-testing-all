@@ -79,7 +79,6 @@ public class BasisPathParser {
 		mConstraints = new ConstraintEquations(func.getParameters());
 		tables = new VariableTable();
 		
-		
 		//Thêm 1 scope cho các biến tham số
 		//Các biến global có scope = 0
 		tables.newOpenScope();
@@ -110,14 +109,16 @@ public class BasisPathParser {
 			} else {
 				Expression root = stm.getRoot().clone();
 				postFix.clear();
-				preVisitRoot(root);
 				
+				preVisitRoot(root);
+
 				//Xủ lý theo từng kiểu
 				handleStatement(stm, root, 
 						i + 1 == path.size() ? null : path.get(i+1));
 				
 				//Thực hiện tăng các biểu thức x++, y-- sau khi đã thực hiện xong
 				//TODO chưa thực sự đúng vì có thể có nhiều biểu thức trong 1 lệnh
+
 				for (UnaryExpression unary: postFix)
 					handleAssignOne(unary);
 			}
@@ -183,7 +184,7 @@ public class BasisPathParser {
 				//Thay thế bằng biến: (x < i)
 				holder.replace(unary, unary.getSubElement());
 				
-				return PROCESS_ABORT;
+				return PROCESS_SKIP;
 			}
 
 			@Override

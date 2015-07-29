@@ -27,20 +27,6 @@ public class Utils {
 	 * @throws IOException lỗi lấy nội dung
 	 */
 	public static String getContentFile(File file) throws IOException {
-		/*StringBuilder content = new StringBuilder();
-		BufferedReader br = new BufferedReader(new FileReader(file));
-		try {
-			String line = br.readLine();
-			while (line != null) {
-				content.append(line);
-				content.append("\n");
-				line = br.readLine();
-			}
-		}
-		finally {
-			br.close();
-		}
-		return content.toString();*/
 		return getContentStream(new FileInputStream(file));
 	}
 	
@@ -54,7 +40,7 @@ public class Utils {
 		
 		try {
 			while ((line = br.readLine()) != null)
-				content.append(line).append("\n");
+				content.append(line).append('\n');
 		}
 		finally {
 			br.close();

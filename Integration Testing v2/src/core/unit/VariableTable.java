@@ -65,7 +65,7 @@ public class VariableTable extends ArrayList<Variable> {
 	public void updateVariableValue(String name, Expression value){
 		//System.out.printf("Gan %s = %s", name, value);
 		value = fillExpression(value);
-		//System.out.printf(" --> %s\n", value);
+		//System.out.printf(" --> %s\n\n", value);
 		find(name).setValue(value);
 	}
 	
@@ -94,43 +94,57 @@ public class VariableTable extends ArrayList<Variable> {
 	 */
 	public Expression fillExpression(Expression expression){
 		PlaceHolderExpression copy = new PlaceHolderExpression(expression.clone());
+		ArrayList<Expression> justReplaces = new ArrayList<>();
 		
-			expression.accept(new ExpressionVisitor() {
+		expression.accept(new ExpressionVisitor() {
 
-				@Override
-				// Đang duyệt qua một tên biến, thay thế bằng giá trị của nó
-				public int visit(NameExpression name) {
-					Variable find = find(name.getName());
+			@Override
+			// Đang duyệt qua một tên biến, thay thế bằng giá trị của nó
+			public int visit(NameExpression name) {
+				Variable find = find(name.getName());
 
-					if (find != null) {
-						if (find.isValueSet())
-							copy.replace(name, find.getValue());
-					} else {
-						System.out.println("Not found: " + name);
+				if (find != null) {
+					if (find.isValueSet()){
+						Expression clone = find.getValue()
+								.clone()
+								.setBlockReplace(true);
+						justReplaces.add(clone);
+						copy.replace(name, clone);
 					}
-					return PROCESS_CONTINUE;
+				} else {
+					System.out.println("Not found: " + name);
 				}
+				return PROCESS_CONTINUE;
+			}
 
-				@Override
-				// Đang duyệt qua một truy cập mảng (a[1]),....
-				public int visit(ArrayIndexExpression array) {
-					ArrayVariable find = (ArrayVariable) find(array.getName());
+			@Override
+			// Đang duyệt qua một truy cập mảng (a[1]),....
+			public int visit(ArrayIndexExpression array) {
+				ArrayVariable find = (ArrayVariable) find(array.getName());
 
-					if (find != null) {
-						Expression[] indexes = array.getIndexes().clone();
-						for (int i = 0; i < indexes.length; i++)
-							indexes[i] = evalExpression(indexes[i]);
-						if (find.isValueSet(indexes))
-							copy.replace(array, find.getValueAt(indexes));
-					} else {
-						System.out.println("Not found: " + array);
+				if (find != null) {
+					Expression[] indexes = array.getIndexes().clone();
+					for (int i = 0; i < indexes.length; i++)
+						indexes[i] = evalExpression(indexes[i]);
+					if (find.isValueSet(indexes)){
+						Expression clone = find.getValueAt(indexes)
+								.clone()
+								.setBlockReplace(true);
+						justReplaces.add(clone);
+						copy.replace(array, clone);
 					}
-					return PROCESS_CONTINUE;
+				} else {
+					System.out.println("Not found: " + array);
 				}
+				return PROCESS_CONTINUE;
+			}
 
-			});
-			expression = copy.getElement();
+		});
 		
+		for (Expression just: justReplaces)
+			just.setBlockReplace(false);
+		
+		expression = copy.getElement();
 		return expression;
 	}
 	

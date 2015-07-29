@@ -49,13 +49,21 @@ public abstract class ExpressionGroup extends Expression {
 	public boolean replace(Expression find, Expression replace) {
 		boolean replaced = false;
 		
+		//Duyệt qua các biểu thức con trong nhóm
 		for (int i = 0; i < g.length; i++){
 			Expression item = g[i];
 			
+			//Biểu thức con này không cho phép thay thế, bỏ qua
+			if (item == null || item.canNotReplace())
+				continue;
+			
+			//Nếu biểu thức con khớp với biểu thức tìm kiểm, thay thế nó tại cùng vị trí
 			if (find.equalsSource(item)){
 				g[i] = replace;
 				replaced = true;
 			}
+			
+			//Tiếp tục tìm trong biểu thức con này khi chính nó cũng là biểu thức nhóm
 			else if (item instanceof ExpressionGroup){
 				replaced = ((ExpressionGroup) item).replace(find, replace);
 			}
@@ -64,6 +72,7 @@ public abstract class ExpressionGroup extends Expression {
 				break;
 		}
 		
+		//Đã có sự thay thế thành công, làm mới lại nội dung hiển thị
 		if (replaced)
 			setContent(generateContent());
 		
