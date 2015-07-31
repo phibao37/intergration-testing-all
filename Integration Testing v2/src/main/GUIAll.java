@@ -41,6 +41,7 @@ import core.GUI;
 import core.MainProcess;
 import core.MainProcess.Return;
 import core.MainProcess.Returned;
+import core.Utils;
 import core.error.CoreException;
 import core.error.MainNotFoundException;
 import core.graph.CFGView;
@@ -58,16 +59,16 @@ import core.graph.node.FunctionPairNode;
 import core.graph.node.LoopNode;
 import core.inte.FunctionCallGraph;
 import core.inte.FunctionPair;
+import core.models.Expression;
 import core.models.Function;
 import core.models.Statement;
 import core.models.Variable;
-import core.models.expression.NotNegativeExpression;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
-import core.unit.ConstraintEquations;
 import core.unit.LoopablePath;
+import javafx.util.Pair;
 
 import javax.swing.LayoutStyle.ComponentPlacement;
 
@@ -438,16 +439,15 @@ public class GUIAll extends GUI {
 			return;
 		}
 		
-		ConstraintEquations constraint = path.getConstraint();
 		DefaultTableModel detailModel = (DefaultTableModel) table_path_details.getModel();
 		DefaultTableModel testcaseModel = (DefaultTableModel) table_testcase.getModel();
+		ArrayList<Pair<Statement, ArrayList<Expression>>> al = path.getAnalyzic();
 		int i = 0, j = 0;
 		
 		canvas.setSelectedPath(path);
 		removeTableModel(table_path_details);
 		removeTableModel(table_testcase);
 		
-		if (constraint != null)
 		for (Statement stm: path){
 			if (stm instanceof ScopeStatement)
 				continue;
@@ -455,32 +455,12 @@ public class GUIAll extends GUI {
 				i++;
 				continue;
 			}
-			while (j < constraint.size() && 
-					constraint.get(j) instanceof NotNegativeExpression)
-				j++;
+			String cs = "";
+			if (al != null && j < al.size() && al.get(j).getKey() == stm)
+				cs = Utils.merge(", ", al.get(j++).getValue());
 			
-			detailModel.addRow(new Object[]{
-					i++,
-					stm,
-					stm.isCondition() ? constraint.get(j++) : ""
-			});
+			detailModel.addRow(new Object[]{i++, stm, cs });
 		}
-		
-		else
-			for (Statement stm: path){
-				if (stm instanceof ScopeStatement)
-					continue;
-				else if (stm instanceof FlagStatement){
-					i++;
-					continue;
-				}
-				
-				detailModel.addRow(new Object[]{
-						i++,
-						stm,
-						stm.isCondition() ? " - " : ""
-				});
-			}
 		
 		Result r = path.getSolveResult();
 		

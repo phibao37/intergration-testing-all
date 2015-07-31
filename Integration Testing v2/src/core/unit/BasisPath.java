@@ -3,11 +3,13 @@ package core.unit;
 import java.util.ArrayList;
 
 import core.error.StatementNoRootException;
+import core.models.Expression;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.solver.Solver.Result;
 import core.visitor.ExpressionVisitor;
+import javafx.util.Pair;
 
 /**
  * Mô tả một đường thi hành cơ bản, đó là một dãy có thứ tự duy nhất các câu lệnh
@@ -20,6 +22,7 @@ public class BasisPath extends ArrayList<Statement> {
 	
 	private ConstraintEquations mConstraint;
 	private Result mResult = Result.DEFAULT;
+	private ArrayList<Pair<Statement, ArrayList<Expression>>> mAnalyzic;
 	
 	/**
 	 * Tạo ra bản sao đường thi hành
@@ -132,6 +135,20 @@ public class BasisPath extends ArrayList<Statement> {
 	 */
 	public boolean isUnreachable(){
 		return mResult != null && mResult.getSolutionCode() == Result.ERROR;
+	}
+
+	/**
+	 * Trả về danh sách các cặp câu lệnh - tập ràng buộc ứng với đường thi hành
+	 */
+	public ArrayList<Pair<Statement, ArrayList<Expression>>> getAnalyzic() {
+		return mAnalyzic;
+	}
+
+	/**
+	 * Đặt danh sách các ràng buộc cho các câu lệnh trong đường thi hành
+	 */
+	public void setAnalyzic(ArrayList<Pair<Statement, ArrayList<Expression>>> al) {
+		this.mAnalyzic = al;
 	}
 	
 }

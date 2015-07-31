@@ -266,13 +266,17 @@ public abstract class MainProcess implements FilenameFilter {
 				
 				int i = 1, length = paths.size();
 				for (BasisPath basis: paths){
+					basis.setAnalyzic(null);
 					GUI.instance.setStatus("Đang phân tích %d/%d", i++, length);
 					mIntePathParser.setCalling(calling);
 					
 					int count = calling.getTestcaseCount(), j = 0;
 					
-					
+					System.out.println("Number of testcase: " + count);
 					for (; j < count; j++){
+						System.out.printf("Testcase %s\n", Utils.merge(", ", 
+								calling.getTestcaseList().get(j).getInputs()));
+						
 						mIntePathParser.setSelectedIndex(j);
 						mIntePathParser.parseBasisPath(basis, caller);
 						

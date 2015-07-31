@@ -81,7 +81,7 @@ public class S {
 	/**
 	 * Phiên bản ứng dụng
 	 */
-	public static final String VERSION = "2.0.0";
+	public static final String VERSION = "2.0.1";
 	
 	/**
 	 * Chế độ debug ứng dụng

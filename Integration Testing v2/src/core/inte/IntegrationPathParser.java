@@ -63,9 +63,13 @@ public class IntegrationPathParser extends BasisPathParser {
 					Variable[] inputs = testcase.getInputs();
 					
 					//Thêm ràng buộc các giá trị tham số phải giống các đầu vào testcase
+					System.out.println("Lời gọi hàm: " + _call);
 					for (int i = 0; i < args.length; i++){
-						addConstraintArgument( args[i], inputs[i]);
+						addConstraintArgument(args[i], inputs[i]);
+						System.out.printf("Khớp %s với %s\n", 
+								args[i], inputs[i].getValue());
 					}
+					System.out.println();
 					
 					//Thay thế biểu thức bằng kết quả output của testcase
 					holder.replace(call, testcase.getReturnOutput());
@@ -96,10 +100,10 @@ public class IntegrationPathParser extends BasisPathParser {
 			LinkedHashMap<int[], Expression> indexs = 
 					array1.getAllValue(); 
 			
-			//TODO tham số khi truyền vào một mảng cần là 1 tên duy nhất
 			/*
-			 *void test(int a[])
-			 *Chưa hỗ trợ: {int b[][];test(b[0])}, {test(a+2);} 
+			 * tham số khi truyền vào một mảng cần là 1 tên duy nhất
+			 * void test(int a[]){...}, gọi qua {int m[]; test(m);}
+			 * Chưa hỗ trợ: {int b[][];test(b[0])}, {test(m+2);} 
 			 */
 			ArrayVariable array2 = (ArrayVariable) 
 					tables.find(arg.getContent());
@@ -113,7 +117,7 @@ public class IntegrationPathParser extends BasisPathParser {
 							entry.getValue(), 
 							BinaryExpression.EQUALS, 
 							array2.getValueAt(key)
-					));
+					), false);
 				}
 				
 				//Đây là biến testcase, tạo thêm truy cập mảng mới
@@ -126,12 +130,12 @@ public class IntegrationPathParser extends BasisPathParser {
 							entry.getValue(), 
 							BinaryExpression.EQUALS, 
 							arr
-					));
+					), false);
 				}
 				
 				//Cho hệ ràng buộc này vô nghiệm
 				else
-					addConstrain(new IDExpression(false));
+					addConstrain(new IDExpression(false), false);
 			}
 		}
 		
@@ -140,7 +144,7 @@ public class IntegrationPathParser extends BasisPathParser {
 				arg, 
 				BinaryExpression.EQUALS, 
 				input.getValue()
-			));
+			), false);
 	}
 
 	@Override

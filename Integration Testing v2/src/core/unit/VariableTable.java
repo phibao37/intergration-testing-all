@@ -104,9 +104,9 @@ public class VariableTable extends ArrayList<Variable> {
 				Variable find = find(name.getName());
 				
 				if (find instanceof ArrayVariable){
-					System.out.println("Will not replace all array content");
+					//System.out.println("Will not replace all array content");
 				}
-				if (find != null) {
+				else if (find != null) {
 					if (find.isValueSet()){
 						Expression clone = find.getValue()
 								.clone()

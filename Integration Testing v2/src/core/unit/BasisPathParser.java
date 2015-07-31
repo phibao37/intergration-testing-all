@@ -23,6 +23,7 @@ import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.models.type.ArrayType;
 import core.visitor.ExpressionVisitor;
+import javafx.util.Pair;
 
 /**
  * Phân tích các câu lệnh trong một đường thi hành chỉ định, lấy ra hệ các ràng buộc
@@ -36,11 +37,27 @@ public class BasisPathParser {
 	
 	private ArrayList<UnaryExpression> postFix = new ArrayList<UnaryExpression>();
 	
+	private ArrayList<Pair<Statement, ArrayList<Expression>>> mAnalyzic;
+	private Statement mStatement;
+	private ArrayList<Expression> mStmConstraint;
+	
 	/**
 	 * Thêm một biểu thức ràng buộc mới
+	 * @param constraint biểu thức điều kiện ràng buộc
+	 * @param isMain có là điều kiện chính hay không, điều kiện chính sẽ được xuất hiện
+	 * đầu tiên trong danh sách các điều kiện
 	 */
-	protected void addConstrain(Expression constraint){
+	protected void addConstrain(Expression constraint, boolean isMain){
 		mConstraints.add(constraint);
+		
+		if (mStmConstraint == null){
+			mStmConstraint = new ArrayList<>();
+			mAnalyzic.add(new Pair<>(mStatement, mStmConstraint));
+		}
+		if (isMain)
+			mStmConstraint.add(0, constraint);
+		else
+			mStmConstraint.add(constraint);
 	}
 	
 	/**
@@ -85,6 +102,8 @@ public class BasisPathParser {
 		mPath = path;
 		mConstraints = new ConstraintEquations(func.getParameters());
 		tables = new VariableTable();
+		mAnalyzic = new ArrayList<>();
+		path.setAnalyzic(mAnalyzic);
 		
 		//Thêm 1 scope cho các biến tham số
 		//Các biến global có scope = 0
@@ -96,14 +115,14 @@ public class BasisPathParser {
 		
 		//Duyệt qua các câu lệnh trong đường thi hành
 		for (int i = 0; i < path.size(); i++){
-			Statement stm = path.get(i);
+			mStatement = path.get(i);
 			
 			//Các câu lệnh nhãn như BEGIN, END: bỏ qua
-			if (stm instanceof FlagStatement)
+			if (mStatement instanceof FlagStatement)
 				continue;
 			
-			if (stm instanceof ScopeStatement){
-				ScopeStatement stmScope = (ScopeStatement) stm;
+			if (mStatement instanceof ScopeStatement){
+				ScopeStatement stmScope = (ScopeStatement) mStatement;
 				
 				//Gặp một "câu lệnh" mở khối {, tăng scope cho bảng biến
 				if (stmScope.isOpenScope())
@@ -114,13 +133,14 @@ public class BasisPathParser {
 				else
 					tables.newCloseScope();
 			} else {
-				Expression root = stm.getRoot().clone();
+				Expression root = mStatement.getRoot().clone();
+				mStmConstraint = null;
 				postFix.clear();
 				
 				preVisitRoot(root);
 
 				//Xủ lý theo từng kiểu
-				handleStatement(stm, root, 
+				handleStatement(mStatement, root, 
 						i + 1 == path.size() ? null : path.get(i+1));
 				
 				//Thực hiện tăng các biểu thức x++, y-- sau khi đã thực hiện xong
@@ -206,7 +226,7 @@ public class BasisPathParser {
 				//Thêm điều kiện các chỉ số phải không âm
 				for (Expression index: array.getIndexes()){
 					addConstrain(new NotNegativeExpression(
-							tables.fillExpression(index)));
+							tables.fillExpression(index)), false);
 				}
 				
 				//Thêm các biểu thức truy cập biến mảng testcase (scope = 1)
@@ -362,7 +382,7 @@ public class BasisPathParser {
 		//Fill biểu thức bởi các biến testcase, sau đó thêm vào hệ ràng buộc
 		condition = tables.fillExpression(condition);
 		//System.out.printf(" --> %s\n\n", condition);
-		addConstrain(condition);
+		addConstrain(condition, true);
 	}
 	
 	/**
