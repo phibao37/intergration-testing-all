@@ -33,6 +33,17 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 		mName = arrayName;
 	}
 	
+	/**
+	 * Tạo một biểu thức truy cập mảng từ tên mảng và danh sách chỉ số
+	 * @param arrayName tên của biến mảng đang tham chiếu
+	 * @param index danh sách các chỉ số nguyên theo thứ tự từ ngoài vào trong, 
+	 * xác định vị trí phần tử trong mảng
+	 */
+	public ArrayIndexExpression(String arrayName, int... index){
+		super(int2exp(index));
+		mName = arrayName;
+	}
+	
 	@Override
 	protected String generateContent() {
 		String content = getName();
@@ -76,5 +87,16 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	@Override
 	protected int handle(ExpressionVisitor visitor) {
 		return visitor.visit(this);
+	}
+	
+	/**
+	 * Chuyển từ mảng các chỉ số nguyên sang mảng chỉ số biểu thức
+	 */
+	private static Expression[] int2exp(int[] indexes){
+		Expression[] arr = new Expression[indexes.length];
+		
+		for (int i = 0; i < arr.length; i++)
+			arr[i] = new IDExpression(indexes[i]);
+		return arr;
 	}
 }

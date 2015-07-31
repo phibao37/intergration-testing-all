@@ -1,11 +1,18 @@
 package core.inte;
 
-import core.error.StatementNoRootException;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+
+import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
+import core.models.Testcase;
+import core.models.Variable;
+import core.models.expression.ArrayIndexExpression;
+import core.models.expression.BinaryExpression;
 import core.models.expression.FunctionCallExpression;
+import core.models.expression.IDExpression;
 import core.models.expression.PlaceHolderExpression;
-import core.unit.BasisPath;
 import core.unit.BasisPathParser;
 import core.visitor.ExpressionVisitor;
 
@@ -15,37 +22,125 @@ import core.visitor.ExpressionVisitor;
 public class IntegrationPathParser extends BasisPathParser {
 	
 	private Function mCalling;
+	private int mSelectedIndex;
 	
-	public void parseBasisPath(BasisPath path, Function func, Function calling)
-			throws StatementNoRootException {
+	/**
+	 * Thiết đặt hàm số con được xét là đang được xét kiểm thử
+	 */
+	public void setCalling(Function calling){
 		mCalling = calling;
-		super.parseBasisPath(path, func);
+	}
+	
+	/**
+	 * Chọn vị trí testcase trong danh sách các testcase của hàm con sẽ được chọn
+	 * để phân tích 
+	 */
+	public void setSelectedIndex(int index){
+		mSelectedIndex = index;
 	}
 
 	@Override
 	protected void preVisitRoot(Expression root) {
 		super.preVisitRoot(root);
-		new PlaceHolderExpression(root).accept(new ExpressionVisitor() {
+		PlaceHolderExpression holder = new PlaceHolderExpression(root);
+		
+		//Quét qua biểu thức gốc để tìm các lời gọi hàm 
+		holder.accept(new ExpressionVisitor() {
 
 			@Override
 			public int visit(FunctionCallExpression call) {
 				Function link = call.getFunction();
 				
+				//Tạo bản sao, sau đó fill giá trị cho các tham số
+				FunctionCallExpression _call = (FunctionCallExpression) call.clone();
+				for (Expression arg: _call.getArguments())
+					_call.replace(arg, tables.fillExpression(arg));
+				
 				//Lời gọi hàm này tương ứng với hàm đang được gọi kiểm thử
 				if (link == mCalling){
+					Testcase testcase = link.getTestcaseList().get(mSelectedIndex);
+					Expression[] args = _call.getArguments();
+					Variable[] inputs = testcase.getInputs();
 					
+					//Thêm ràng buộc các giá trị tham số phải giống các đầu vào testcase
+					for (int i = 0; i < args.length; i++){
+						addConstraintArgument( args[i], inputs[i]);
+					}
 					
+					//Thay thế biểu thức bằng kết quả output của testcase
+					holder.replace(call, testcase.getReturnOutput());
 				}
 				
 				//Hàm được gọi không là hàm đang xét kiểm thử
 				else {
-					
+					//Chạy dùng trình biên dịch, ?????
 				}
 				
-				return PROCESS_CONTINUE;
+				return PROCESS_SKIP;
 			}
 			
 		});
+	}
+	
+	/**
+	 * Thêm các ràng buộc cần thiết để một tham số trong biểu thức gọi hàm khớp với
+	 * một biến đầu vào cho 1 unit tương ứng
+	 * @param arg tham số trong lời gọi hàm
+	 * @param input biến đầu vào cho hàm ứng với lời gọi
+	 */
+	protected void addConstraintArgument(Expression arg, Variable input){
+		
+		//Kiểu mảng, cần so sánh từng phần tử
+		if (input instanceof ArrayVariable){
+			ArrayVariable array1 = (ArrayVariable) input;
+			LinkedHashMap<int[], Expression> indexs = 
+					array1.getAllValue(); 
+			
+			//TODO tham số khi truyền vào một mảng cần là 1 tên duy nhất
+			/*
+			 *void test(int a[])
+			 *Chưa hỗ trợ: {int b[][];test(b[0])}, {test(a+2);} 
+			 */
+			ArrayVariable array2 = (ArrayVariable) 
+					tables.find(arg.getContent());
+			
+			for (Entry<int[], Expression> entry: indexs.entrySet()){
+				int[] key = entry.getKey();
+				
+				//Cả 2 mảng đều có phần tử tại vị trị này
+				if (array2.isValueSet(key)){
+					addConstrain(new BinaryExpression(
+							entry.getValue(), 
+							BinaryExpression.EQUALS, 
+							array2.getValueAt(key)
+					));
+				}
+				
+				//Đây là biến testcase, tạo thêm truy cập mảng mới
+				else if (array2.getScope() == 1){
+					ArrayIndexExpression arr = new ArrayIndexExpression(
+							array2.getName(), key);
+					
+					addArrayAccess(arr);
+					addConstrain(new BinaryExpression(
+							entry.getValue(), 
+							BinaryExpression.EQUALS, 
+							arr
+					));
+				}
+				
+				//Cho hệ ràng buộc này vô nghiệm
+				else
+					addConstrain(new IDExpression(false));
+			}
+		}
+		
+		else
+			addConstrain(new BinaryExpression(
+				arg, 
+				BinaryExpression.EQUALS, 
+				input.getValue()
+			));
 	}
 
 	@Override

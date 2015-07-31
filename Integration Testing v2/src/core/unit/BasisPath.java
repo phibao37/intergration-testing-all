@@ -6,7 +6,6 @@ import core.error.StatementNoRootException;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
-import core.solver.Solver;
 import core.solver.Solver.Result;
 import core.visitor.ExpressionVisitor;
 
@@ -132,7 +131,7 @@ public class BasisPath extends ArrayList<Statement> {
 	 * @return true nếu đã được gán kết quả giải hệ và kết quả là vô nghiệm
 	 */
 	public boolean isUnreachable(){
-		return mResult != null && mResult.getSolutionCode() == Solver.ERROR;
+		return mResult != null && mResult.getSolutionCode() == Result.ERROR;
 	}
 	
 }

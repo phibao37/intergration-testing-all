@@ -267,13 +267,29 @@ public abstract class MainProcess implements FilenameFilter {
 				int i = 1, length = paths.size();
 				for (BasisPath basis: paths){
 					GUI.instance.setStatus("Đang phân tích %d/%d", i++, length);
-					mIntePathParser.parseBasisPath(basis, caller, calling);
+					mIntePathParser.setCalling(calling);
 					
-					ConstraintEquations ce = mIntePathParser.getConstrains();
-					basis.setConstraint(ce);
-
-					Result result = mSolver.solve(ce);
-					basis.setSolveResult(result);
+					int count = calling.getTestcaseCount(), j = 0;
+					
+					
+					for (; j < count; j++){
+						mIntePathParser.setSelectedIndex(j);
+						mIntePathParser.parseBasisPath(basis, caller);
+						
+						ConstraintEquations ce = mIntePathParser.getConstrains();
+						Result result = mSolver.solve(ce);
+						
+						if (result.getSolutionCode() == Result.SUCCESS){
+							basis.setConstraint(ce);
+							basis.setSolveResult(result);
+							break;
+						}
+					}
+					
+					if (j == count){
+						basis.setSolveResult(new Result(Result.ERROR, 
+							"No testcase match", null, null));
+					}
 				}
 				
 				GUI.instance.setStatus(null);
@@ -315,7 +331,7 @@ public abstract class MainProcess implements FilenameFilter {
 			} catch (CoreException e1) {
 				e1.printStackTrace();
 			}
-			if (result.getSolutionCode() == Solver.SUCCESS){
+			if (result.getSolutionCode() == Result.SUCCESS){
 				for (Variable sol: result.getSolution())
 					System.out.println(" ==> " + sol);
 				feasible++;

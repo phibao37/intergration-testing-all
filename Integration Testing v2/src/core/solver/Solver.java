@@ -61,8 +61,6 @@ public interface Solver {
 	 */
 	public static class Result{
 		
-		public static final Result DEFAULT = new Result(UNKNOWN, "unknown", null, null);
-		
 		private int mCode;
 		private String mMessage;
 		private Variable[] mSolution;
@@ -117,20 +115,24 @@ public interface Solver {
 		public Expression getReturnValue(){
 			return mReturnValue;
 		}
+		
+		/**
+		 * Hệ giải ra nghiệm thành công
+		 */
+		public static final int SUCCESS = 1;
+		
+		/**
+		 * Hệ này vô nghiệm
+		 */
+		public static final int ERROR = 0;
+		
+		/**
+		 * Không biết rõ được có nghiệm hay không, nhưng không giải ra được nghiệm
+		 */
+		public static final int UNKNOWN = -1;
+		
+
+		public static final Result DEFAULT = new Result(UNKNOWN, "unknown", null, null);
 	}
-	
-	/**
-	 * Hệ giải ra nghiệm thành công
-	 */
-	public static final int SUCCESS = 1;
-	
-	/**
-	 * Hệ này vô nghiệm
-	 */
-	public static final int ERROR = 0;
-	
-	/**
-	 * Không biết rõ được có nghiệm hay không, nhưng không giải ra được nghiệm
-	 */
-	public static final int UNKNOWN = -1;
+
 }

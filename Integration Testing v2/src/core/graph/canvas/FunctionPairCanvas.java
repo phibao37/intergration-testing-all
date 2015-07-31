@@ -8,8 +8,9 @@ import core.inte.FunctionPair;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Color;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
+import java.awt.Component;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 public class FunctionPairCanvas extends JPanel {
@@ -41,12 +42,17 @@ public class FunctionPairCanvas extends JPanel {
 		
 		for (FunctionPair pair: pairList){
 			FunctionPairNode node = new FunctionPairNode(pair);
-			node.addFocusListener(new FocusAdapter() {
+			
+			node.addMouseListener(new MouseAdapter() {
 
 				@Override
-				public void focusGained(FocusEvent e) {
-					FunctionPairNode node = (FunctionPairNode) e.getComponent();
-					mOnItemSelected.selected(node);
+				public void mouseClicked(MouseEvent e) {
+					Component node = e.getComponent();
+					while (!(node instanceof FunctionPairNode))
+						node = node.getParent();
+					
+					mOnItemSelected.selected((FunctionPairNode) node, 
+							e.getClickCount() == 2);
 				}
 				
 			});
@@ -62,10 +68,10 @@ public class FunctionPairCanvas extends JPanel {
 	}
 	
 	public static interface OnItemSelected{
-		public void selected(FunctionPairNode node);
+		public void selected(FunctionPairNode node, boolean dbClick);
 		
 		static final OnItemSelected DEFAULT = new OnItemSelected() {
-			public void selected(FunctionPairNode node) {}
+			public void selected(FunctionPairNode node, boolean dbClick) {}
 		};
 	}
 }

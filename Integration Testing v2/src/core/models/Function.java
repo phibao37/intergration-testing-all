@@ -4,10 +4,15 @@ import java.io.File;
 import java.util.ArrayList;
 
 import core.Utils;
+import core.error.CoreException;
 import core.error.StatementNoRootException;
 import core.graph.Graphable;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
+import core.solver.Solver.Result;
+import core.solver.Z3Solver;
+import core.unit.BasisPath;
+import core.unit.BasisPathParser;
 import core.unit.CFG;
 import core.visitor.BodyFunctionVisitor;
 import core.visitor.ExpressionVisitor;
@@ -32,6 +37,7 @@ public class Function extends Element implements Graphable {
 	private CFG mCFG_3;
 	
 	private ArrayList<Function> mRefers;
+	private ArrayList<Testcase> mTestcases;
 	
 	private File mFile;
 	
@@ -140,7 +146,7 @@ public class Function extends Element implements Graphable {
 			throws NullPointerException{
 		int process;
 		
-		for (Statement stm: getCFG(true).getStatements()){
+		for (Statement stm: getCFG(false).getStatements()){
 			process = visitor.visit(stm);
 			
 			if (process == ExpressionVisitor.PROCESS_ABORT)
@@ -159,6 +165,45 @@ public class Function extends Element implements Graphable {
 				
 			}
 		}
+	}
+	
+	/**
+	 * Thiết đặt danh sách các testcase cho hàm số này
+	 * @param testcases danh sách các testcase cần dùng để kiểm thử hàm số
+	 */
+	public void setTestcaseList(ArrayList<Testcase> testcases){
+		mTestcases = testcases;
+	}
+	
+	/**
+	 * Trả về danh sách các testcase dùng để kiểm thử hàm này. Nếu chưa được gán trước
+	 * đó (sử dụng ), một bộ testcase đơn giản sẽ được tự động tạo ra
+	 */
+	public ArrayList<Testcase> getTestcaseList(){
+		if (mTestcases == null){
+			mTestcases = new ArrayList<>();
+			
+			try{
+			for (BasisPath path: getCFG(false).getBasisPaths()){
+				BasisPathParser parser = BasisPathParser.DEFAULT;
+				parser.parseBasisPath(path, this);
+				Result r = Z3Solver.DEFAULT.solve(parser.getConstrains());
+				
+				if (r.getSolutionCode() == Result.SUCCESS)
+					mTestcases.add(new Testcase(r));
+			}
+			} catch (CoreException e){
+				e.printStackTrace();
+			}
+		}
+		return mTestcases;
+	}
+	
+	/**
+	 * Trả về số lượng các testcase mà hàm này đang có
+	 */
+	public int getTestcaseCount(){
+		return getTestcaseList().size();
 	}
 	
 	/**

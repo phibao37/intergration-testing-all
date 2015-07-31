@@ -95,6 +95,17 @@ public class ArrayVariable extends Variable {
 	}
 	
 	/**
+	 * Kiểm tra mảng đã có giá trị ở một vị trí nhất định
+	 */
+	public boolean isValueSet(int... indexes){
+		try{
+			return getValueAt(indexes) != null;
+		} catch (Exception e){
+			return false;
+		}
+	}
+	
+	/**
 	 * Thiết đặt giá trị mới cho phần tử ở vị trí xác định
 	 * @param index chỉ số cần thay đổi
 	 * @param newValue giá trị biểu thức mới

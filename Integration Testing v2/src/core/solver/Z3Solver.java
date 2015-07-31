@@ -48,7 +48,7 @@ public class Z3Solver implements Solver {
 		//Khởi tạo bảng biến, reset lại nghiệm
 		mTable = new VariableTable();
 		mTestcase = null;
-		mSolutionCode = UNKNOWN;
+		mSolutionCode = Result.UNKNOWN;
 		mSolutionStr = RESULT_UNKNOWN;
 		mReturnValue = null;
 		
@@ -153,7 +153,7 @@ public class Z3Solver implements Solver {
 			//Đặt kết quả
 			mTestcase = new Variable[testcases.length];
 			mTable.toArray(mTestcase);
-			mSolutionCode = SUCCESS;
+			mSolutionCode = Result.SUCCESS;
 			if (mTable.isEmpty())
 				mSolutionStr = "";
 			else{
@@ -170,7 +170,7 @@ public class Z3Solver implements Solver {
 			}
 			
 		} else if (RESULT_UNSAT.equals(result)){
-			mSolutionCode = ERROR;
+			mSolutionCode = Result.ERROR;
 			mSolutionStr = RESULT_UNSAT; //+ Why?
 		} 
 		

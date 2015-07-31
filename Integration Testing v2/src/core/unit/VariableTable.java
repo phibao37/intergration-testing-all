@@ -102,7 +102,10 @@ public class VariableTable extends ArrayList<Variable> {
 			// Đang duyệt qua một tên biến, thay thế bằng giá trị của nó
 			public int visit(NameExpression name) {
 				Variable find = find(name.getName());
-
+				
+				if (find instanceof ArrayVariable){
+					System.out.println("Will not replace all array content");
+				}
 				if (find != null) {
 					if (find.isValueSet()){
 						Expression clone = find.getValue()

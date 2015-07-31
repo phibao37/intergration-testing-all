@@ -64,7 +64,6 @@ import core.models.Variable;
 import core.models.expression.NotNegativeExpression;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
-import core.solver.Solver;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.ConstraintEquations;
@@ -383,8 +382,6 @@ public class GUIAll extends GUI {
 		}
 		
 		isWorking = true;
-		canvas_fn_call.setSelectFunctionPair(pair);
-		tab_canvas.setSelectedIndex(0);
 		
 		currentFunction = pair.getCaller();
 		main.beginTestFunctionPair(pair, new Return<ArrayList<BasisPath>>() {
@@ -450,6 +447,7 @@ public class GUIAll extends GUI {
 		removeTableModel(table_path_details);
 		removeTableModel(table_testcase);
 		
+		if (constraint != null)
 		for (Statement stm: path){
 			if (stm instanceof ScopeStatement)
 				continue;
@@ -468,9 +466,25 @@ public class GUIAll extends GUI {
 			});
 		}
 		
+		else
+			for (Statement stm: path){
+				if (stm instanceof ScopeStatement)
+					continue;
+				else if (stm instanceof FlagStatement){
+					i++;
+					continue;
+				}
+				
+				detailModel.addRow(new Object[]{
+						i++,
+						stm,
+						stm.isCondition() ? " - " : ""
+				});
+			}
+		
 		Result r = path.getSolveResult();
 		
-		if (r.getSolutionCode() == Solver.SUCCESS)
+		if (r.getSolutionCode() == Result.SUCCESS)
 			for (Variable testcase: r.getSolution()){
 				testcaseModel.addRow(new Object[]{
 						testcase.getType(),
@@ -799,8 +813,11 @@ public class GUIAll extends GUI {
 		panel_function_pair = new FunctionPairCanvas();
 		panel_function_pair.setOnItemSelected(new FunctionPairCanvas.OnItemSelected() {
 			@Override
-			public void selected(FunctionPairNode node) {
-				beginTestFunctionPair(node.getFunctionPair());
+			public void selected(FunctionPairNode node, boolean dbClick) {
+				canvas_fn_call.setSelectFunctionPair(node.getFunctionPair());
+				tab_canvas.setSelectedIndex(0);
+				if (dbClick)
+					beginTestFunctionPair(node.getFunctionPair());
 			}
 		});
 		pn_function_pair_wrap.setViewportView(panel_function_pair);

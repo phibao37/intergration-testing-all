@@ -31,7 +31,7 @@ import core.visitor.ExpressionVisitor;
 public class BasisPathParser {
 	
 	private ConstraintEquations mConstraints;
-	private VariableTable tables;
+	protected VariableTable tables;
 	private BasisPath mPath;
 	
 	private ArrayList<UnaryExpression> postFix = new ArrayList<UnaryExpression>();
@@ -48,6 +48,13 @@ public class BasisPathParser {
 	 */
 	protected void addArrayAccess(ArrayIndexExpression array){
 		mConstraints.addArrayAccess(array);
+	}
+	
+	/**
+	 * Đặt biểu thức bên trong câu lệnh return ứng với đường đi này
+	 */
+	protected void setReturnExpression(Expression returned){
+		mConstraints.setReturnExpression(returned);
 	}
 	
 	/**
@@ -230,6 +237,7 @@ public class BasisPathParser {
 		for (Expression dc: declare.getDeclares()){
 			Expression left = dc, value = null;
 			Variable var = null;
+			NameExpression name = null;
 			
 			//Có khởi tạo giá trị khi khai báo: int a = 2, a[] = {1, 2};
 			if (dc instanceof BinaryExpression){
@@ -240,7 +248,8 @@ public class BasisPathParser {
 			
 			//Đây là một khai báo biến bình thường
 			if (left instanceof NameExpression){
-				var = new Variable(((NameExpression) left).getName(), type);
+				name = (NameExpression) left;
+				var = new Variable(name.getName(), type);
 			}
 			
 			//Đây là một khai báo mảng
@@ -248,6 +257,8 @@ public class BasisPathParser {
 				Type arrayType = type;
 				ArrayIndexExpression array = (ArrayIndexExpression) left;
 				Expression[] indexes = array.getIndexes();
+				name = new NameExpression(array.getName());
+				
 				for (int i = indexes.length - 1; i >= 0; i--){
 					Expression index = indexes[i];
 					int size;
@@ -266,12 +277,18 @@ public class BasisPathParser {
 				var = new ArrayVariable(array.getName(), (ArrayType) arrayType);
 			}
 			
-			if (value != null)
-				var.setValue(tables.fillExpression(value));
+//			if (value != null)
+//				var.setValue(tables.fillExpression(value));
 			
 			//Thêm biến vào bảng biến
 			tables.add(var);
 			
+			if (value != null)
+				handleAssign(new BinaryExpression(
+						name, 
+						BinaryExpression.ASSIGN, 
+						value
+				));
 		}
 	}
 	
@@ -288,9 +305,26 @@ public class BasisPathParser {
 			value = new BinaryExpression(name, op.substring(0, 1), value);
 		}
 		
-		//Biến thông thường
+		//Không có truy cập phần tử mảng
 		if (name instanceof NameExpression){
-			tables.updateVariableValue(((NameExpression) name).getName(), value);
+			boolean shouldReplace = true;
+			String s_name = ((NameExpression) name).getName();
+			
+			if (value instanceof NameExpression){
+				Variable find = tables.find(value.getContent());
+				
+				//Cả vế phải cũng là tham chiếu đến mảng, 2 biến này sẽ có cùng chung 
+				//tham chiếu tới giá trị của biển vế phải: int a[] = {1, 2}, b = a;
+				if (find instanceof ArrayVariable){
+					tables.find(s_name).setValue(find.getValue());
+					shouldReplace = false;
+				}
+				
+				//TODO chưa hỗ trợ: int test(int a[][][]){int b[][] = a[0];}
+			}
+			
+			if (shouldReplace)
+				tables.updateVariableValue(s_name, value);
 		}
 		
 		//Có truy cập vào phần tử mảng
@@ -355,7 +389,7 @@ public class BasisPathParser {
 		Expression value = rt.getReturnExpression();
 		
 		if (value != null){
-			mConstraints.setReturnExpression(tables.fillExpression(value));
+			setReturnExpression(tables.fillExpression(value));
 		}
 	}
 	
