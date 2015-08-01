@@ -3,7 +3,6 @@ package core.models.expression;
 import core.models.Expression;
 import core.models.Type;
 import core.models.type.BasicType;
-import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả các biểu thức hằng trong ngôn ngữ lập trình, thường là:
@@ -89,11 +88,6 @@ public class IDExpression extends Expression {
 	 */
 	public Object getJavaValue(){
 		return mValue;
-	}
-
-	@Override
-	protected int handle(ExpressionVisitor visitor) {
-		return visitor.visit(this);
 	}
 	
 	/**

@@ -3,7 +3,6 @@ package core.models.expression;
 import core.Utils;
 import core.models.Expression;
 import core.models.ExpressionGroup;
-import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một biểu thức nhị phân, bao gồm một dấu phép toán và hai
@@ -128,11 +127,6 @@ public class BinaryExpression extends ExpressionGroup {
 	 */
 	public boolean isAssignOperator(){
 		return Utils.find(ASSIGNS, getOperator());
-	}
-
-	@Override
-	protected int handle(ExpressionVisitor visitor) {
-		return visitor.visit(this);
 	}
 	
 }

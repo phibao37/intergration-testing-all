@@ -3,6 +3,7 @@ package core.models;
 import java.io.File;
 import java.util.ArrayList;
 
+import core.S;
 import core.Utils;
 import core.error.CoreException;
 import core.error.StatementNoRootException;
@@ -10,7 +11,6 @@ import core.graph.Graphable;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.solver.Solver.Result;
-import core.solver.Z3Solver;
 import core.unit.BasisPath;
 import core.unit.BasisPathParser;
 import core.unit.CFG;
@@ -187,7 +187,7 @@ public class Function extends Element implements Graphable {
 			for (BasisPath path: getCFG(false).getBasisPaths()){
 				BasisPathParser parser = BasisPathParser.DEFAULT;
 				parser.parseBasisPath(path, this);
-				Result r = Z3Solver.DEFAULT.solve(parser.getConstrains());
+				Result r = S.SOLVER.solve(parser.getConstrains());
 				
 				if (r.getSolutionCode() == Result.SUCCESS)
 					mTestcases.add(new Testcase(r));

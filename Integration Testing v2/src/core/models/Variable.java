@@ -1,7 +1,6 @@
 package core.models;
 
 import core.graph.Graphable;
-import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một biến số. Mỗi biến số tương đương với các biến trong chương trình, tồn tại
@@ -116,11 +115,6 @@ public class Variable extends ExpressionGroup implements Graphable {
 	@Override
 	public Variable clone() {
 		return (Variable) super.clone();
-	}
-
-	@Override
-	protected int handle(ExpressionVisitor visitor) {
-		throw new RuntimeException("Khong duyet qua bien");
 	}
 
 	@Override

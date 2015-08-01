@@ -3,7 +3,6 @@ package core.models.expression;
 import core.Utils;
 import core.models.Expression;
 import core.models.ExpressionGroup;
-import core.visitor.ExpressionVisitor;
 /**
  * Biểu thức một bên, bao gồm một phép toán và một biểu thức con ở bên trái hoặc
  * bên phải phép toán
@@ -97,11 +96,6 @@ public class UnaryExpression extends ExpressionGroup {
 	 */
 	public Expression getSubElement(){
 		return g[0];
-	}
-
-	@Override
-	protected int handle(ExpressionVisitor visitor) {
-		return visitor.visit(this);
 	}
 }
 

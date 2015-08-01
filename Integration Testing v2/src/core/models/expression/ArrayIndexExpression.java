@@ -2,7 +2,6 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
-import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một biểu thức truy cập phần tử mảng, bao gồm tên của biến mảng, 
@@ -82,11 +81,6 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	 */
 	public boolean isDeclare(){
 		return mDeclare;
-	}
-
-	@Override
-	protected int handle(ExpressionVisitor visitor) {
-		return visitor.visit(this);
 	}
 	
 	/**

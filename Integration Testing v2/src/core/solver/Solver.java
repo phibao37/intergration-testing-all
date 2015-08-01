@@ -1,5 +1,7 @@
 package core.solver;
 
+import java.lang.reflect.Field;
+
 import core.error.CoreException;
 import core.models.Expression;
 import core.models.Variable;
@@ -10,7 +12,7 @@ import core.unit.ConstraintEquations;
  * @author ducvu
  *
  */
-public interface Solver {
+public abstract class Solver {
 	
 	/**
 	 * Bắt đầu quá trình giải hệ ràng buộc, một bộ ràng buộc được truyền vào, cung cấp
@@ -53,9 +55,32 @@ public interface Solver {
 	 * @return kết quả sau khi đã giải xong hệ ràng buộc
 	 * @throws CoreException các lỗi liên quan đến việc giải hệ
 	 */
-	public Result solve(ConstraintEquations constraints) throws CoreException;
+	public abstract Result solve(ConstraintEquations constraints) throws CoreException;
 	
-	
+	/**
+	 * Trả về bộ giải ràng buộc ứng với tên. Bộ giải này cần nằm trong package
+	 * {@link core.solver}
+	 * @param name tên rút gọn của bộ giải, thí dụ "Z3" => Class của bộ giải
+	 * sẽ là "Z3Solver"
+	 * @return đối tượng bộ giải mặc định ứng với tên
+	 */
+	public static Solver valueOf(String name){
+		try {
+			Class<?> cls = Class.forName("core.solver." + name + "Solver");
+			Field DEFAULT = cls.getDeclaredField("DEFAULT");
+			return (Solver) DEFAULT.get(null);
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public String toString() {
+		String cls = this.getClass().getSimpleName();
+		return cls.substring(0, cls.length() - 6);
+	}
+
 	/**
 	 * Kết quả sau khi giải một hệ ràng buộc
 	 */

@@ -1,5 +1,7 @@
 package core.models;
 
+import java.lang.reflect.InvocationTargetException;
+
 import core.visitor.ExpressionVisitor;
 
 /**
@@ -137,10 +139,26 @@ public abstract class Expression extends Element {
 	}
 	
 	/**
-	 * Xử lý với từng loại biểu thức. Mỗi loại biểu thức cần truyền chính nó vào phương
-	 * thức tương ứng trong bộ visit
+	 * Xử lý với từng loại biểu thức
 	 */
-	protected abstract int handle(ExpressionVisitor visitor);
+	private int handle(ExpressionVisitor visitor){
+		boolean stop = false;
+		Class<?> cls = getClass();
+		
+		do{
+			try {
+				return (int) ExpressionVisitor.class
+						.getMethod("visit", cls)
+						.invoke(visitor, this);
+			} catch (NoSuchMethodException 
+					| IllegalAccessException | InvocationTargetException e) {
+				cls = cls.getSuperclass();
+				if (cls == Expression.class || cls == ExpressionGroup.class)
+					stop = true;
+			}
+		} while (!stop);
+		return ExpressionVisitor.PROCESS_CONTINUE;
+	}
 	
 	/**
 	 * Trả về <i>true</i> nếu giá trị của biểu thức luôn là một hằng số<br/>

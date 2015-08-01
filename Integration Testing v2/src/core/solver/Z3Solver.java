@@ -21,7 +21,7 @@ import core.unit.VariableTable;
 /**
  * Giải hệ theo chương trình Z3
  */
-public class Z3Solver implements Solver {
+public class Z3Solver extends Solver {
 	
 	private Variable[] mTestcase;
 	private String mSolutionStr;
@@ -34,7 +34,7 @@ public class Z3Solver implements Solver {
 	/**
 	 * Bộ giải hệ theo Z3 mặc định
 	 */
-	public static final Z3Solver DEFAULT = new Z3Solver();
+	static final Z3Solver DEFAULT = new Z3Solver();
 	
 	public static final String RESULT_SAT = "sat";
 	public static final String RESULT_UNSAT = "unsat";

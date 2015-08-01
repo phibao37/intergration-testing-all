@@ -2,7 +2,6 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
-import core.visitor.ExpressionVisitor;
 
 /**
  * Mô tả một biểu thức mảng, thường ở dưới dạng: {a1, a2,..., an}<br/>
@@ -54,11 +53,6 @@ public class ArrayExpression extends ExpressionGroup {
 		for (int i = 1; i < g.length; i++)
 			content += ", " + g[i];
 		return content + "}";
-	}
-
-	@Override
-	protected int handle(ExpressionVisitor visitor) {
-		return visitor.visit(this);
 	}
 
 }

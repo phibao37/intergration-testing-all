@@ -8,6 +8,8 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Properties;
 
+import core.solver.Solver;
+
 
 /**
  * Rút gọn của Settings. Lớp tiện ích giúp lưu trữ các cài đặt của ứng dụng.<br/>
@@ -59,6 +61,10 @@ public class S {
 	 */
 	public static int MAX_LOOP_TEST = 8;
 	
+	/**
+	 * Bộ giải hệ ràng buộc mặc định
+	 */
+	public static Solver SOLVER = Solver.valueOf("Z3");
 	
 	/**
 	 * Thư mục chứa bộ biên dịch GCC

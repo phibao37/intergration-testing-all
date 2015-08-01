@@ -17,9 +17,7 @@ import core.models.Statement;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.FunctionCallExpression;
-import core.solver.Solver;
 import core.solver.Solver.Result;
-import core.solver.Z3Solver;
 import core.unit.BasisPath;
 import core.unit.BasisPathParser;
 import core.unit.CFG;
@@ -46,7 +44,6 @@ public abstract class MainProcess implements FilenameFilter {
 	
 	private BasisPathParser mUnitPathParser = BasisPathParser.DEFAULT;
 	private IntegrationPathParser mIntePathParser = IntegrationPathParser.DEFAULT;
-	private Solver mSolver = Z3Solver.DEFAULT;
 	
 	/**
 	 * Nạp các hàm (và các biến toàn cục, ..) vào tiến trình
@@ -154,7 +151,7 @@ public abstract class MainProcess implements FilenameFilter {
 
 						GUI.instance.setStatus("Đang giải hệ %d/%d", i++,
 								length);
-						Result result = mSolver.solve(ce);
+						Result result = S.SOLVER.solve(ce);
 						path.setSolveResult(result);
 					}
 				} finally{
@@ -210,7 +207,7 @@ public abstract class MainProcess implements FilenameFilter {
 					basis.setConstraint(ce);
 
 					GUI.instance.setStatus("Đang giải hệ %d/%d", i++, length);
-					Result result = mSolver.solve(ce);
+					Result result = S.SOLVER.solve(ce);
 					basis.setSolveResult(result);
 				}
 				
@@ -281,7 +278,7 @@ public abstract class MainProcess implements FilenameFilter {
 						mIntePathParser.parseBasisPath(basis, caller);
 						
 						ConstraintEquations ce = mIntePathParser.getConstrains();
-						Result result = mSolver.solve(ce);
+						Result result = S.SOLVER.solve(ce);
 						
 						if (result.getSolutionCode() == Result.SUCCESS){
 							basis.setConstraint(ce);
@@ -331,7 +328,7 @@ public abstract class MainProcess implements FilenameFilter {
 			
 			Result result = Result.DEFAULT;
 			try {
-				result = mSolver.solve(ce);
+				result = S.SOLVER.solve(ce);
 			} catch (CoreException e1) {
 				e1.printStackTrace();
 			}
@@ -368,14 +365,6 @@ public abstract class MainProcess implements FilenameFilter {
 	 */
 	public void setUnitPathParser(BasisPathParser parser){
 		mUnitPathParser = parser;
-	}
-	
-	/**
-	 * Đặt bộ giải hệ ràng buộc. Bộ giải hệ phải được đặt trước khi có yêu cầu giải các
-	 * ràng buộc trên các đường thi hành
-	 */
-	public void setSolver(Solver solver){
-		mSolver = solver;
 	}
 	
 	/**
