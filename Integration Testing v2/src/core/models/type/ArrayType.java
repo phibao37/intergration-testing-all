@@ -25,7 +25,7 @@ public class ArrayType extends Type {
 	 * @param capacity kích thước của kiểu mảng, bằng 0 nếu là kích thước chưa xác định
 	 */
 	public ArrayType(Type subType, int capacity) {
-		super(String.format("%s[%s]", subType, capacity == 0 ? "" : capacity));
+		super(String.format("%s[%s]", subType, capacity == 0 ? "" : capacity), 0);
 		mSubType = subType;
 		mCapacity = capacity;
 	}

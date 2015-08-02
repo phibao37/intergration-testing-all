@@ -8,16 +8,18 @@ import core.models.type.ArrayType;
  * @author ducvu
  *
  */
-public abstract class Type extends Element implements Graphable {
+public abstract class Type extends Element implements Graphable, Comparable<Type> {
 	
-	protected Object defaultValue;
+	private int mSize;
 	
 	/**
 	 * Tạo một kiểu cùng với nội dung của nó
 	 * @param content chuỗi hiển thị của kiểu, thí dụ: int, float, bool,...
+	 * @param size cỡ của kiểu, xem {@link #getSize()}
 	 */
-	public Type(String content){
+	public Type(String content, int size){
 		super(content);
+		mSize = size;
 	}
 	
 	/**
@@ -25,6 +27,18 @@ public abstract class Type extends Element implements Graphable {
 	 * Giá trị này dùng để khởi tạo các biến số không tham gia vào các ràng buộc
 	 */
 	public abstract Expression getDefaultValue();
+	
+	@Override
+	public int compareTo(Type type) {
+		return Integer.compare(getSize(), type.getSize());
+	}
+
+	/**
+	 * Trả về cỡ/độ lớn của kiểu, thường dùng để quyết định các phép tính, chuyển kiểu
+	 */
+	public int getSize(){
+		return mSize;
+	}
 	
 	/**
 	 * Kiểm tra kiểu mảng

@@ -55,7 +55,6 @@ public class IDExpression extends Expression {
 	
 	private BasicType mType;
 	private String mExtraDisplay;
-	private int mFlag;
 	
 	private boolean valBool;
 	private char valChar;
@@ -157,7 +156,6 @@ public class IDExpression extends Expression {
 		valLong = valInt;
 		valFloat = valInt;
 		valDouble = valInt;
-		mFlag = mFlag | BOOLEAN;
 		if (mType == null){
 			mType = BasicType.BOOL;
 			setContent(val);
@@ -171,7 +169,6 @@ public class IDExpression extends Expression {
 		valLong = val;
 		valFloat = val;
 		valDouble = val;
-		mFlag = mFlag | CHARACTER;
 		if (mType == null){
 			mType = BasicType.CHAR;
 			setContent(val);
@@ -185,7 +182,6 @@ public class IDExpression extends Expression {
 		valLong = val;
 		valFloat = val;
 		valDouble = val;
-		mFlag = mFlag | INTEGER;
 		if (mType == null){
 			mType = BasicType.INT;
 			setContent(val);
@@ -199,7 +195,6 @@ public class IDExpression extends Expression {
 		valLong = val;
 		valFloat = val;
 		valDouble = val;
-		mFlag = mFlag | LONG;
 		if (mType == null){
 			mType = BasicType.LONG;
 			setContent(val);
@@ -213,7 +208,6 @@ public class IDExpression extends Expression {
 		valLong = (long) val;
 		valFloat = val;
 		valDouble = val;
-		mFlag = mFlag | FLOAT;
 		if (mType == null){
 			mType = BasicType.FLOAT;
 			setContent(val);
@@ -227,7 +221,6 @@ public class IDExpression extends Expression {
 		valLong = (long) val;
 		valFloat = (float) val;
 		valDouble = val;
-		mFlag = mFlag | DOUBLE;
 		if (mType == null){
 			mType = BasicType.DOUBLE;
 			setContent(val);
@@ -281,13 +274,6 @@ public class IDExpression extends Expression {
 	 */
 	public BasicType getType(){
 		return mType;
-	}
-	
-	/**
-	 * Trả về các cờ hiệu ứng với các kiểu mà biểu thức hằng này có thể áp dụng được
-	 */
-	public int getAvaialbeFlag(){
-		return mFlag;
 	}
 	
 	/**

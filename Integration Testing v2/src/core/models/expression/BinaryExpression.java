@@ -128,5 +128,4 @@ public class BinaryExpression extends ExpressionGroup {
 	public boolean isAssignOperator(){
 		return Utils.find(ASSIGNS, getOperator());
 	}
-	
 }
