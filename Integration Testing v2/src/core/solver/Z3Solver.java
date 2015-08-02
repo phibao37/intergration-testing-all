@@ -355,6 +355,7 @@ public class Z3Solver extends Solver {
 	
 	static{
 		smtMap.put(BasicType.INT, "Int");
+		smtMap.put(BasicType.LONG, "Int");
 		smtMap.put(BasicType.FLOAT, "Real");
 		smtMap.put(BasicType.DOUBLE, "Real");
 		smtMap.put(BasicType.BOOL, "Bool");

@@ -9,17 +9,14 @@ import core.models.type.BasicType;
  * @author ducvu
  *
  */
-public class CType extends BasicType {
-
-	protected CType(String content, Object defaultValue) {
-		super(content, defaultValue);
-	}
+public class CType {
 	
 	private static HashMap<String, BasicType> typeMap;
 	
 	static{
 		typeMap = new HashMap<>();
 		typeMap.put("int", BasicType.INT);
+		typeMap.put("long", BasicType.LONG);
 		typeMap.put("float", BasicType.FLOAT);
 		typeMap.put("double", BasicType.DOUBLE);
 		typeMap.put("bool", BasicType.BOOL);

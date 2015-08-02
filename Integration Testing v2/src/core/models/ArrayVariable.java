@@ -63,7 +63,7 @@ public class ArrayVariable extends Variable {
 		
 		try {
 			for (int i = 0; i < indexes.length; i++)
-				indexs[i] = (int) ((IDExpression)indexes[i]).getJavaValue();
+				indexs[i] = ((IDExpression)indexes[i]).intValue();
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}

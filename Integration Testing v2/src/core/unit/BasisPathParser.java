@@ -288,7 +288,7 @@ public class BasisPathParser {
 					if (index == null)
 						size = 0;
 					else if (index instanceof IDExpression){
-						size = (int) ((IDExpression) index).getJavaValue();
+						size = ((IDExpression) index).intValue();
 					}
 					else {
 						throw new RuntimeException("Named length array not support: "
@@ -360,7 +360,7 @@ public class BasisPathParser {
 	 * Xử lý một biểu thức gán 1 bên (x++, --y)
 	 */
 	protected void handleAssignOne(UnaryExpression assign){
-		IDExpression one = new IDExpression("1");
+		IDExpression one = new IDExpression(1);
 		Expression name = assign.getSubElement(), right;
 		String op = assign.getOperator();
 		String newOp;

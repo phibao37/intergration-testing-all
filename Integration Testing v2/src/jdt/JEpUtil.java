@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
@@ -133,9 +134,24 @@ public class JEpUtil {
 		else if(node instanceof Name){
 			return new NameExpression(node.toString());
 		}
-		else if(node instanceof BooleanLiteral || node instanceof NullLiteral || node instanceof NumberLiteral){
-			return new IDExpression(node.toString());
+//		else if(node instanceof BooleanLiteral || node instanceof NullLiteral || node instanceof NumberLiteral){
+//			return new IDExpression(node.toString());
+//		}
+		
+		else if (node instanceof BooleanLiteral){
+			return new IDExpression(((BooleanLiteral) node).booleanValue());
 		}
+		
+		else if (node instanceof NumberLiteral){
+			return new IDExpression(
+					((NumberLiteral) node).getToken(), 
+					IDExpression.NUMBER);
+		}
+		
+		else if (node instanceof CharacterLiteral){
+			return new IDExpression(((CharacterLiteral) node).charValue());
+		}
+		
 		else if(node instanceof PostfixExpression){
 			PostfixExpression exp = (PostfixExpression)node;
 			core.models.Expression element = parseNode(exp.getOperand());

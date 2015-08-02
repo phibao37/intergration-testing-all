@@ -10,7 +10,6 @@ import core.models.expression.IDExpression;
  *
  */
 public class BasicType extends Type {
-	
 	private Object mDefault;
 	
 	/**
@@ -25,8 +24,9 @@ public class BasicType extends Type {
 	
 	@Override
 	public Expression getDefaultValue() {
-		return new IDExpression(String.valueOf(mDefault));
+		return new IDExpression(mDefault);
 	}
+	
 	
 	/**
 	 * Kiểu dữ liệu số nguyên
@@ -34,24 +34,24 @@ public class BasicType extends Type {
 	public static final BasicType INT = new BasicType("int", 0);
 	
 	/**
+	 * Kiểu dữ liệu số nguyên lớn
+	 */
+	public static final BasicType LONG = new BasicType("long", 0L);
+	
+	/**
 	 * Kiểu dữ liệu số thực động
 	 */
-	public static final BasicType FLOAT = new BasicType("float", 0.0f);
+	public static final BasicType FLOAT = new BasicType("float", 0F);
 	
 	/**
 	 * Kiểu dữ liệu số thực
 	 */
-	public static final BasicType DOUBLE = new BasicType("double", 0.0);
+	public static final BasicType DOUBLE = new BasicType("double", 0D);
 	
 	/**
 	 * Kiểu dữ liệu kí tự
 	 */
 	public static final BasicType CHAR = new BasicType("char", '0');
-	
-	/**
-	 * Kiểu dữ liệu chuỗi
-	 */
-	public static final BasicType STRING = new BasicType("string", "");
 	
 	
 	/**

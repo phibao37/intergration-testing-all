@@ -7,17 +7,15 @@ import core.models.type.BasicType;
 /**
  * Một số kiểu cơ bản trong Java
  */
-public class JType extends BasicType {
+public class JType{
 
-	protected JType(String content, Object defaultValue) {
-		super(content, defaultValue);
-	}
 	
-private static HashMap<String, BasicType> typeMap;
+	private static HashMap<String, BasicType> typeMap;
 	
 	static{
 		typeMap = new HashMap<>();
 		typeMap.put("int", BasicType.INT);
+		typeMap.put("long", BasicType.LONG);
 		typeMap.put("float", BasicType.FLOAT);
 		typeMap.put("double", BasicType.DOUBLE);
 		typeMap.put("boolean", BasicType.BOOL);

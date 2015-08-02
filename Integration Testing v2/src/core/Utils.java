@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -234,5 +235,20 @@ public class Utils {
 		}
 		
 		file.delete();
+	}
+	
+	/**
+	 * Kiểm tra một tập chỉ thị có chứa 1 chỉ thị cụ thể hay không
+	 */
+	public static boolean hasFlag(int flags, int flag){
+		return (flags & flag) != 0;
+	}
+	
+	/**
+	 * Kiểm tra một số thực có thể rút gọn lại thành số nguyên: 2; 1.00; ...
+	 */
+	public static boolean isIntegerValue(BigDecimal bd) {
+		return bd.signum() == 0 || bd.scale() <= 0 
+				|| bd.stripTrailingZeros().scale() <= 0;
 	}
 }

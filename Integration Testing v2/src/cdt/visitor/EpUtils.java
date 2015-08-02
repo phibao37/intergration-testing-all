@@ -173,7 +173,20 @@ public class EpUtils {
 		
 		//Đang thăm 1 cấu trúc hằng
 		if (node instanceof IASTLiteralExpression){
-			return new IDExpression(node.getRawSignature());
+			int liter = ((IASTLiteralExpression) node).getKind();
+			int flag = 0;
+			
+			if (liter == IASTLiteralExpression.lk_integer_constant)
+				flag = IDExpression.INTEGER | IDExpression.LONG;
+			else if (liter == IASTLiteralExpression.lk_float_constant)
+				flag = IDExpression.FLOAT | IDExpression.DOUBLE;
+			else if (liter == IASTLiteralExpression.lk_char_constant)
+				flag = IDExpression.CHARACTER;
+			else if (liter == IASTLiteralExpression.lk_true
+					|| liter == IASTLiteralExpression.lk_false)
+				flag = IDExpression.BOOLEAN;
+
+			return new IDExpression(node.toString(), flag);
 		}
 		
 		//Đang thăm 1 tham chiếu tên biến
