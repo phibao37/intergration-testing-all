@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import core.S;
+import core.S.SCREEN;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -196,9 +197,8 @@ public class AboutDialog extends JDialog {
 			}
 		}
 		
-		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-	    int x = (int) ((dimension.getWidth() - getWidth()) / 2);
-	    int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+	    int x = (SCREEN.WIDTH - getWidth())/2;
+	    int y = (SCREEN.HEIGHT - getHeight())/2;
 	    setLocation(x, y);
 	}
 }

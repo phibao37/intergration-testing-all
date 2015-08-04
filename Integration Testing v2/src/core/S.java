@@ -1,11 +1,14 @@
 package core;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import core.solver.Solver;
@@ -39,7 +42,7 @@ public class S {
 	/**
 	 * Khoảng cách chiều dọc giữa hai nút kề nhau trong đồ thị
 	 */
-	public static int CANVAS_MARGIN_Y = 100;
+	public static int CANVAS_MARGIN_Y = 70;
 	
 	/**
 	 * Kích thước văn bản bên trong nút đồ thị
@@ -71,6 +74,22 @@ public class S {
 	 */
 	public static File DIR_GCC = new File("D:\\App\\Library\\Cygwin\\bin");
 	
+	
+	/**
+	 * Số lần lặp tối đa để giải hệ random
+	 */
+	public static int RAND_LOOP = 500;
+	
+	/**
+	 * Cận dưới khi sinh random cho các kiểu số
+	 */
+	public static int RAND_MIN = -50;
+	
+	/**
+	 * Cận trên khi sinh random cho các kiểu số
+	 */
+	public static int RAND_MAX = 50;
+	
 
 	/*---------------------------------------------------------------------*/
 	
@@ -87,7 +106,7 @@ public class S {
 	/**
 	 * Phiên bản ứng dụng
 	 */
-	public static final String VERSION = "2.0.1";
+	public static final String VERSION = "2.0.2";
 	
 	/**
 	 * Chế độ debug ứng dụng
@@ -108,6 +127,30 @@ public class S {
 	public static void p(String string){
 		if (DEBUG)
 			System.out.println(string);
+	}
+	
+	/*---------------------------INNER CLASS-------------------------------*/
+	
+	/**
+	 * Các thông số về màn hình như kích thước ngang, dọc,...
+	 */
+	public static class SCREEN{
+		
+		/**
+		 * Chiều ngang của màn hình (px)
+		 */
+		public static final int WIDTH;
+		
+		/**
+		 * Chiều dọc của màn hình (px)
+		 */
+		public static final int HEIGHT;
+		
+		static {
+			Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+			WIDTH = (int) size.getWidth();
+			HEIGHT = (int) size.getHeight();
+		}
 	}
 	
 	/*---------------------------------------------------------------------*/
@@ -173,10 +216,11 @@ public class S {
 	 */
 	public static void save(){
 		try{
-			for (String key: prop_map.keySet()){
-				Field field = prop_map.get(key);
-				prop.setProperty(key, String.valueOf(field.get(null)));
-			}
+			for (Entry<String, Field> entry: prop_map.entrySet())
+				prop.setProperty(
+						entry.getKey(), 
+						String.valueOf(entry.getValue().get(null))
+				);
 			prop_file.getParentFile().mkdirs();
 			FileOutputStream file = new FileOutputStream(prop_file);
 

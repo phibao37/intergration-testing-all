@@ -41,6 +41,7 @@ import core.GUI;
 import core.MainProcess;
 import core.MainProcess.Return;
 import core.MainProcess.Returned;
+import core.S.SCREEN;
 import core.Utils;
 import core.error.CoreException;
 import core.error.MainNotFoundException;
@@ -264,6 +265,7 @@ public class GUIAll extends GUI {
 			public void error(CoreException e) {
 				alertError(e.getMessage());
 				isWorking = false;
+				e.printStackTrace();
 			}
 
 			@Override
@@ -339,6 +341,7 @@ public class GUIAll extends GUI {
 			public void error(CoreException e) {
 				alertError(e.getMessage());
 				isWorking = false;
+				e.printStackTrace();
 			}
 			
 			@Override
@@ -391,6 +394,7 @@ public class GUIAll extends GUI {
 			public void error(CoreException e) {
 				alertError(e.getMessage());
 				isWorking = false;
+				e.printStackTrace();
 			}
 
 			@Override
@@ -989,6 +993,7 @@ public class GUIAll extends GUI {
 		fileChooserC.setMultiSelectionEnabled(true);
 		// fileChooser.setFileHidingEnabled(false);
 		fileChooserC.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooserC.setPreferredSize(SIZE_CHOOSER);
 		fileChooserC.setFileFilter(cFilter);
 		
 		fileChooserJ = new JFileChooser();
@@ -997,6 +1002,7 @@ public class GUIAll extends GUI {
 		fileChooserJ.setMultiSelectionEnabled(true);
 		// fileChooser.setFileHidingEnabled(false);
 		fileChooserJ.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooserJ.setPreferredSize(SIZE_CHOOSER);
 		fileChooserJ.setFileFilter(jFilter);
 		
 		for (StorePathTable table: listTable){
@@ -1032,6 +1038,9 @@ public class GUIAll extends GUI {
 		
 		
 	}
+	
+	private static final Dimension SIZE_CHOOSER = 
+			new Dimension(SCREEN.WIDTH/2, SCREEN.HEIGHT/2);
 	
 	private static class StorePathTable extends JTable{
 		private static final long serialVersionUID = 1L;

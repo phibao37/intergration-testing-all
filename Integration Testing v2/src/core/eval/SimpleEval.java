@@ -2,7 +2,6 @@ package core.eval;
 
 import core.models.Expression;
 import core.models.expression.BinaryExpression;
-import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
 import core.models.expression.UnaryExpression;
 import core.models.type.BasicType;
@@ -211,9 +210,6 @@ public class SimpleEval implements Evaluateable {
 				}
 			}
 		}
-		
-		else if (ex instanceof FunctionCallExpression)
-			throw new RuntimeException("I can't calculate this: " + ex);
 		
 		return (IDExpression) ex;
 	}

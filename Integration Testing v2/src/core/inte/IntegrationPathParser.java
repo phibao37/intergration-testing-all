@@ -113,11 +113,11 @@ public class IntegrationPathParser extends BasisPathParser {
 				
 				//Cả 2 mảng đều có phần tử tại vị trị này
 				if (array2.isValueSet(key)){
-					addConstrain(new BinaryExpression(
+					addConstraint(new BinaryExpression(
 							entry.getValue(), 
 							BinaryExpression.EQUALS, 
 							array2.getValueAt(key)
-					), false);
+					));
 				}
 				
 				//Đây là biến testcase, tạo thêm truy cập mảng mới
@@ -126,25 +126,25 @@ public class IntegrationPathParser extends BasisPathParser {
 							array2.getName(), key);
 					
 					addArrayAccess(arr);
-					addConstrain(new BinaryExpression(
+					addConstraint(new BinaryExpression(
 							entry.getValue(), 
 							BinaryExpression.EQUALS, 
 							arr
-					), false);
+					));
 				}
 				
 				//Cho hệ ràng buộc này vô nghiệm
 				else
-					addConstrain(new IDExpression(false), false);
+					addConstraint(new IDExpression(false));
 			}
 		}
 		
 		else
-			addConstrain(new BinaryExpression(
+			addConstraint(new BinaryExpression(
 				arg, 
 				BinaryExpression.EQUALS, 
 				input.getValue()
-			), false);
+			));
 	}
 
 	@Override

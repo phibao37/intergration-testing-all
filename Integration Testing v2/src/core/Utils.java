@@ -251,4 +251,5 @@ public class Utils {
 		return bd.signum() == 0 || bd.scale() <= 0 
 				|| bd.stripTrailingZeros().scale() <= 0;
 	}
+	
 }

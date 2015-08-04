@@ -83,6 +83,13 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 		return mDeclare;
 	}
 	
+	
+	
+	@Override
+	public boolean isConstant() {
+		return false;
+	}
+
 	/**
 	 * Chuyển từ mảng các chỉ số nguyên sang mảng chỉ số biểu thức
 	 */

@@ -111,7 +111,7 @@ public abstract class Expression extends Element {
 		if (visitor.preVisit(this)){
 			
 			//Chính thức thăm một biểu thức ứng với kiểu cụ thể
-			process = handle(visitor);
+			process = handleVisit(visitor);
 			
 			//Kết quả thăm biểu thức cho phép duyệt các biểu thức con
 			if (process == ExpressionVisitor.PROCESS_CONTINUE 
@@ -131,6 +131,7 @@ public abstract class Expression extends Element {
 				}
 				
 			}
+			handleLeave(visitor);
 		}
 		
 		//Hậu xử lý và trả về kết quả duyệt
@@ -139,9 +140,9 @@ public abstract class Expression extends Element {
 	}
 	
 	/**
-	 * Xử lý với từng loại biểu thức
+	 * Xử lý việc thăm với từng loại biểu thức
 	 */
-	private int handle(ExpressionVisitor visitor){
+	private int handleVisit(ExpressionVisitor visitor){
 		boolean stop = false;
 		Class<?> cls = getClass();
 		
@@ -158,6 +159,28 @@ public abstract class Expression extends Element {
 			}
 		} while (!stop);
 		return ExpressionVisitor.PROCESS_CONTINUE;
+	}
+	
+	/**
+	 * Xử lý việc rời đi với từng loại biểu thức
+	 */
+	private void handleLeave(ExpressionVisitor visitor){
+		boolean stop = false;
+		Class<?> cls = getClass();
+		
+		do{
+			try {
+				ExpressionVisitor.class
+						.getMethod("leave", cls)
+						.invoke(visitor, this);
+				return;
+			} catch (NoSuchMethodException 
+					| IllegalAccessException | InvocationTargetException e) {
+				cls = cls.getSuperclass();
+				if (cls == Expression.class || cls == ExpressionGroup.class)
+					stop = true;
+			}
+		} while (!stop);
 	}
 	
 	/**
@@ -181,5 +204,4 @@ public abstract class Expression extends Element {
 					ep.printTree(margin + "   ");
 		}
 	}
-	
 }

@@ -16,8 +16,18 @@ import core.models.type.BasicType;
  * @author ducvu
  *
  */
-public class IDExpression extends Expression {
+public class IDExpression extends Expression implements Conditionable {
 
+	/**
+	 * Biểu thức hằng số nguyên 0
+	 */
+	public static final IDExpression ZERO = new IDExpression(0);
+	
+	/**
+	 * Biểu thức hằng số nguyên 1
+	 */
+	public static final IDExpression ONE = new IDExpression(1);
+	
 	/**
 	 * Cho biết nội dung có thể là dạng nhị phân
 	 */
@@ -300,6 +310,11 @@ public class IDExpression extends Expression {
 	@Override
 	public boolean isConstant() {
 		return true;
+	}
+
+	@Override
+	public boolean isConditionExpression() {
+		return getType() == BasicType.BOOL;
 	}
 	
 }

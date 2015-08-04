@@ -17,7 +17,7 @@ import core.models.ExpressionGroup;
  * @author ducvu
  *
  */
-public class BinaryExpression extends ExpressionGroup {
+public class BinaryExpression extends ExpressionGroup implements Conditionable {
 	
 	/**
 	 * Phép toán gán (=)
@@ -81,6 +81,9 @@ public class BinaryExpression extends ExpressionGroup {
 	private static final String[] ASSIGNS = {ASSIGN, ASSIGN_ADD, ASSIGN_MINUS,
 		ASSIGN_MUL, ASSIGN_DIV, ASSIGN_MOD};
 	
+	private static final String[] CONDITIONS = {LOGIC_AND, LOGIC_OR, EQUALS, 
+		NOT_EQUALS, LESS, LESS_EQUALS, GREATER, GREATER_EQUALS};
+	
 	private String mOperator;
 	
 	
@@ -127,5 +130,10 @@ public class BinaryExpression extends ExpressionGroup {
 	 */
 	public boolean isAssignOperator(){
 		return Utils.find(ASSIGNS, getOperator());
+	}
+
+	@Override
+	public boolean isConditionExpression() {
+		return Utils.find(CONDITIONS, getOperator());
 	}
 }

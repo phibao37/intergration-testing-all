@@ -11,16 +11,19 @@ import core.models.Type;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
+import core.models.expression.Conditionable;
 import core.models.expression.DeclareExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
 import core.models.expression.NameExpression;
+import core.models.expression.NamedAttribute;
 import core.models.expression.PlaceHolderExpression;
 import core.models.expression.ReturnExpression;
 import core.models.expression.UnaryExpression;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.models.type.ArrayType;
+import core.models.type.BasicType;
 import core.visitor.ExpressionVisitor;
 import javafx.util.Pair;
 
@@ -41,12 +44,44 @@ public class BasisPathParser {
 	private ArrayList<Expression> mStmConstraint;
 	
 	/**
-	 * Thêm một biểu thức ràng buộc mới
-	 * @param constraint biểu thức điều kiện ràng buộc
-	 * @param isMain có là điều kiện chính hay không, điều kiện chính sẽ được xuất hiện
-	 * đầu tiên trong danh sách các điều kiện
+	 * Thêm một điều kiện ràng buộc chính (điều kiện quyết định nhánh)
+	 * @param condition biểu thức điều kiện ràng buộc
+	 * @param not dạng phủ định (nhánh false)
 	 */
-	protected void addConstrain(Expression constraint, boolean isMain){
+	protected void addCondition(Expression condition, boolean not){
+		boolean notCondition = true;
+		
+		if (condition instanceof Conditionable)
+			notCondition = !((Conditionable) condition).isConditionExpression();
+		else if (condition instanceof NamedAttribute){
+			String name = ((NamedAttribute) condition).getName();
+			notCondition = tables.find(name).getDataType() != BasicType.BOOL;
+		} else {
+			System.out.println("Không rõ biểu thức điều kiện: " + condition);
+		}
+		
+		//Nếu chưa là biểu thức điều kiện (2), chuyển thành dạng điều kiện (2 != 0)
+		if (notCondition)
+			condition = new BinaryExpression(
+					condition, 
+					BinaryExpression.NOT_EQUALS, 
+					IDExpression.ZERO);
+		
+		//Chuyển về phủ định 
+		if (not)
+			condition = new UnaryExpression(UnaryExpression.LOGIC_NOT, condition);
+		
+		putConstraint(condition, true);
+	}
+	
+	/**
+	 * Thêm một ràng buộc nâng cao mới
+	 */
+	protected void addConstraint(Expression constraint){
+		putConstraint(constraint, false);
+	}
+	
+	private void putConstraint(Expression constraint, boolean isMain){
 		mConstraints.add(constraint);
 		
 		if (mStmConstraint == null){
@@ -167,9 +202,7 @@ public class BasisPathParser {
 			handleAssignOne((UnaryExpression) expression);
 			break;
 		case Statement.CONDITION:
-			if (stm.getFalse() == next)
-				expression = new UnaryExpression(UnaryExpression.LOGIC_NOT, expression);
-			handleCondition(expression);
+			handleCondition(expression, stm.getFalse() == next);
 			break;
 		case Statement.FUNCTION_CALL:
 			handleFunctionCall((FunctionCallExpression) expression);
@@ -224,11 +257,11 @@ public class BasisPathParser {
 				
 				//Thêm điều kiện các chỉ số phải không âm
 				for (Expression index: array.getIndexes()){
-					addConstrain(new BinaryExpression(
+					addConstraint(new BinaryExpression(
 							tables.fillExpression(index),
 							BinaryExpression.GREATER_EQUALS,
-							new IDExpression(0)
-					), false);
+							IDExpression.ZERO
+					));
 				}
 				
 				//Thêm các biểu thức truy cập biến mảng testcase (scope = 1)
@@ -360,7 +393,6 @@ public class BasisPathParser {
 	 * Xử lý một biểu thức gán 1 bên (x++, --y)
 	 */
 	protected void handleAssignOne(UnaryExpression assign){
-		IDExpression one = new IDExpression(1);
 		Expression name = assign.getSubElement(), right;
 		String op = assign.getOperator();
 		String newOp;
@@ -371,20 +403,20 @@ public class BasisPathParser {
 			newOp = BinaryExpression.MINUS;
 
 		//Chuyển qua dạng biểu thức 2 bên để xử lý tiếp
-		right = new BinaryExpression(name, newOp, one);
+		right = new BinaryExpression(name, newOp, IDExpression.ONE);
 		handleAssign(new BinaryExpression(name, BinaryExpression.ASSIGN, right));
 	}
 	
 	/**
 	 * Xử lý một biểu thức điều kiện
 	 */
-	protected void handleCondition(Expression condition){
+	protected void handleCondition(Expression condition, boolean not){
 		//System.out.printf("\n***table = %s\n%s", tables, condition);
 		
 		//Fill biểu thức bởi các biến testcase, sau đó thêm vào hệ ràng buộc
 		condition = tables.fillExpression(condition);
 		//System.out.printf(" --> %s\n\n", condition);
-		addConstrain(condition, true);
+		addCondition(condition, not);
 	}
 	
 	/**

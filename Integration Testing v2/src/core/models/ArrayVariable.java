@@ -213,6 +213,15 @@ public class ArrayVariable extends Variable {
 	}
 
 	@Override
+	public Type getDataType() {
+		Type data = getType();
+		
+		while (data instanceof ArrayType)
+			data = ((ArrayType)data).getSubType();
+		return data;
+	}
+
+	@Override
 	public void setValue(Expression value) {
 		if (value != null && !(value instanceof ArrayExpression))
 			throw new RuntimeException("The value must be an array expression");

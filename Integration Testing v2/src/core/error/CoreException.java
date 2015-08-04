@@ -17,6 +17,14 @@ public class CoreException extends Exception {
 	}
 	
 	/**
+	 * Tạo một ngoại lệ core với nội dung mô tả 
+	 * @param message nội dung mô tả dẫn đến ngoại lệ
+	 */
+	public CoreException(String message){
+		super(message);
+	}
+	
+	/**
 	 * Tạo một ngoại lệ core từ một ngoại lệ khác
 	 * @param message nội dung ngoại lệ
 	 * @param cause ngoại lệ được đính kém

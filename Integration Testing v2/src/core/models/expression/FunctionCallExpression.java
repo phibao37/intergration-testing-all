@@ -70,4 +70,11 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	public Function getFunction(){
 		return mFunc;
 	}
+
+	@Override
+	public boolean isConstant() {
+		return false;
+	}
+	
+	
 }

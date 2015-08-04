@@ -1,6 +1,7 @@
 package core.solver;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 import core.error.CoreException;
 import core.models.Expression;
@@ -75,7 +76,9 @@ public abstract class Solver {
 		}
 	}
 
-	@Override
+	/**
+	 * Trả về tên của bộ giải hệ, là tên của Class với phần Solver được loại bỏ
+	 */
 	public String toString() {
 		String cls = this.getClass().getSimpleName();
 		return cls.substring(0, cls.length() - 6);
@@ -158,6 +161,26 @@ public abstract class Solver {
 		
 
 		public static final Result DEFAULT = new Result(UNKNOWN, "unknown", null, null);
+	}
+	
+	/**
+	 * Trả về chuỗi tóm tắt các nghiệm sau khi đã giải, dạng
+	 * (name1, name2, ...) = (value1, value2, ...)
+	 */
+	public static String summarySolution(ArrayList<Variable> solution){
+		if (solution.isEmpty())
+			return "";
+		
+		String left ="";
+		String right = "";
+		
+		for (Variable var: solution){
+			left += ", " + var.getName();
+			right += ", " + var.getValueString();
+		}
+		
+		return String.format("(%s) = (%s)",
+				left.substring(2), right.substring(2));
 	}
 
 }

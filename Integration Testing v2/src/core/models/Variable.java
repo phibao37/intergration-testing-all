@@ -53,6 +53,14 @@ public class Variable extends ExpressionGroup implements Graphable {
 	}
 	
 	/**
+	 * Trả về kiểu của dữ liệu mà biến số lưu trữ. Với biến thường, nó chính là kiểu
+	 * của biến số. Đối với biến mảng, nó là kiểu của dữ liệu phần tử mảng
+	 */
+	public Type getDataType(){
+		return getType();
+	}
+	
+	/**
 	 * Thiết đặt giá trị cho biến số
 	 * @param value giá trị mới của biến số
 	 */

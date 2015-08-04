@@ -88,6 +88,24 @@ public abstract class ExpressionVisitor {
 		return PROCESS_CONTINUE;
 	}
 	
+	public void leave(NameExpression name){}
+	
+	public void leave(FunctionCallExpression call){}
+	
+	public void leave(ArrayExpression array){}
+	
+	public void leave(ArrayIndexExpression array){}
+	
+	public void leave(BinaryExpression bin){}
+	
+	public void leave(UnaryExpression unary){}
+	
+	public void leave(DeclareExpression declare){}
+	
+	public void leave(IDExpression id){}
+	
+	public void leave(PlaceHolderExpression place){}
+	
 	/**
 	 * Được gọi khi đang duyệt qua các câu lệnh trong hàm số
 	 * @param statement câu lệnh đang được duyệt qua

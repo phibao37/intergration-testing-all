@@ -16,7 +16,7 @@ import core.models.ExpressionGroup;
  * @author ducvu
  *
  */
-public class UnaryExpression extends ExpressionGroup {
+public class UnaryExpression extends ExpressionGroup implements Conditionable {
 	
 	/** Phép toán lấy dấu dương (3 + (+3))*/
 	public static final String PLUS = "+";
@@ -96,6 +96,11 @@ public class UnaryExpression extends ExpressionGroup {
 	 */
 	public Expression getSubElement(){
 		return g[0];
+	}
+
+	@Override
+	public boolean isConditionExpression() {
+		return getOperator().equals(LOGIC_NOT);
 	}
 }
 

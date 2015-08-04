@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -36,9 +37,12 @@ import javax.swing.SwingConstants;
 
 import java.awt.Font;
 import java.io.File;
+import java.util.Enumeration;
 
 import core.S;
 import core.Utils;
+import core.solver.Solver;
+import core.S.SCREEN;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -50,6 +54,11 @@ public class SettingDialog extends JDialog {
 	private JSpinner spinner_max_loop;
 	private JLabel entry_tmp_dir;
 	private JLabel entry_tmp_size;
+	private JRadioButton entry_solver_z3;
+	private ButtonGroup group_solver;
+	private JSpinner entry_rand_loop;
+	private JSpinner entry_rand_min;
+	private JSpinner entry_rand_max;
 
 	/**
 	 * Launch the application.
@@ -73,6 +82,21 @@ public class SettingDialog extends JDialog {
 		if (S.DIR_TEMP.isDirectory()){
 			setTmpSize(Utils.getFileSize(S.DIR_TEMP));
 		}
+		
+		String solver = S.SOLVER.toString();
+		Enumeration<AbstractButton> iter = group_solver.getElements();
+		while (iter.hasMoreElements()){
+			AbstractButton bt = iter.nextElement();
+			
+			if (bt.getActionCommand().equals(solver)){
+				group_solver.setSelected(bt.getModel(), true);
+				break;
+			}
+		}
+		
+		entry_rand_loop.setValue(S.RAND_LOOP);
+		entry_rand_min.setValue(S.RAND_MIN);
+		entry_rand_max.setValue(S.RAND_MAX);
 	}
 	
 	private void applySettings(){
@@ -80,6 +104,10 @@ public class SettingDialog extends JDialog {
 		
 		S.DIR_Z3_BIN = new File(entry_z3_dir.getText());
 		S.DIR_TEMP = new File(entry_tmp_dir.getText());
+		S.SOLVER = Solver.valueOf(group_solver.getSelection().getActionCommand());
+		S.RAND_LOOP = (int) entry_rand_loop.getValue();
+		S.RAND_MIN = (int) entry_rand_min.getValue();
+		S.RAND_MAX = (int) entry_rand_max.getValue();
 		S.save();
 	}
 	
@@ -215,9 +243,9 @@ public class SettingDialog extends JDialog {
 		scrollPane.setViewportView(panel);
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{30, 107, 217, 87, 30, 0};
-		gbl_panel.rowHeights = new int[]{23, 35, 35, 35, 0};
+		gbl_panel.rowHeights = new int[]{23, 35, 35, 30, 37, 25, 25, 0};
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
 		
 		JLabel lblBGii = new JLabel("Bộ giải");
@@ -239,13 +267,19 @@ public class SettingDialog extends JDialog {
 		panel.add(panel_1, gbc);
 		panel_1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
 		
-		JRadioButton rdbtnZ = new JRadioButton("Z3");
-		rdbtnZ.setSelected(true);
-		panel_1.add(rdbtnZ);
+		entry_solver_z3 = new JRadioButton("Z3");
+		entry_solver_z3.setSelected(true);
+		panel_1.add(entry_solver_z3);
 		contentPanel.setLayout(gl_contentPanel);
 		
-		ButtonGroup group_solver = new ButtonGroup();
-		group_solver.add(rdbtnZ);
+		group_solver = new ButtonGroup();
+		group_solver.add(entry_solver_z3);
+		entry_solver_z3.setActionCommand("Z3");
+		
+		JRadioButton entry_solver_random = new JRadioButton("Random");
+		panel_1.add(entry_solver_random);
+		group_solver.add(entry_solver_random);
+		entry_solver_random.setActionCommand("Random");
 		
 		JLabel lblBGiiZ = new JLabel("Bộ giải Z3");
 		lblBGiiZ.setFont(new Font("Tahoma", Font.BOLD, 11));
@@ -260,7 +294,7 @@ public class SettingDialog extends JDialog {
 		JLabel lblngDn = new JLabel("Đường dẫn");
 		GridBagConstraints gbc_lblngDn = new GridBagConstraints();
 		gbc_lblngDn.anchor = GridBagConstraints.LINE_START;
-		gbc_lblngDn.insets = new Insets(0, 0, 0, 5);
+		gbc_lblngDn.insets = new Insets(0, 0, 5, 5);
 		gbc_lblngDn.gridx = 1;
 		gbc_lblngDn.gridy = 3;
 		panel.add(lblngDn, gbc_lblngDn);
@@ -269,7 +303,7 @@ public class SettingDialog extends JDialog {
 		entry_z3_dir.setPreferredSize(new Dimension(217, 0));
 		GridBagConstraints gbc_entry_z3_dir = new GridBagConstraints();
 		gbc_entry_z3_dir.fill = GridBagConstraints.BOTH;
-		gbc_entry_z3_dir.insets = new Insets(0, 0, 0, 5);
+		gbc_entry_z3_dir.insets = new Insets(0, 0, 5, 5);
 		gbc_entry_z3_dir.gridx = 2;
 		gbc_entry_z3_dir.gridy = 3;
 		panel.add(entry_z3_dir, gbc_entry_z3_dir);
@@ -301,10 +335,73 @@ public class SettingDialog extends JDialog {
 		});
 		GridBagConstraints gbc_btnChn = new GridBagConstraints();
 		gbc_btnChn.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnChn.insets = new Insets(0, 0, 0, 5);
+		gbc_btnChn.insets = new Insets(0, 0, 5, 5);
 		gbc_btnChn.gridx = 3;
 		gbc_btnChn.gridy = 3;
 		panel.add(btnChn, gbc_btnChn);
+		
+		JLabel lblBGiiRandom = new JLabel("Bộ giải Random");
+		lblBGiiRandom.setFont(new Font("Tahoma", Font.BOLD, 11));
+		GridBagConstraints gbc_lblBGiiRandom = new GridBagConstraints();
+		gbc_lblBGiiRandom.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblBGiiRandom.insets = new Insets(0, 0, 5, 5);
+		gbc_lblBGiiRandom.gridx = 1;
+		gbc_lblBGiiRandom.gridy = 4;
+		panel.add(lblBGiiRandom, gbc_lblBGiiRandom);
+		
+		JLabel lblSLnLp = new JLabel("Số lần lặp");
+		GridBagConstraints gbc_lblSLnLp = new GridBagConstraints();
+		gbc_lblSLnLp.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblSLnLp.insets = new Insets(0, 0, 5, 5);
+		gbc_lblSLnLp.gridx = 1;
+		gbc_lblSLnLp.gridy = 5;
+		panel.add(lblSLnLp, gbc_lblSLnLp);
+		
+		entry_rand_loop = new JSpinner();
+		entry_rand_loop.setModel(new SpinnerNumberModel(1, 1, 1000000, 1));
+		GridBagConstraints gbc_entry_random_loop = new GridBagConstraints();
+		gbc_entry_random_loop.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_entry_random_loop.insets = new Insets(0, 5, 5, 5);
+		gbc_entry_random_loop.gridx = 2;
+		gbc_entry_random_loop.gridy = 5;
+		panel.add(entry_rand_loop, gbc_entry_random_loop);
+		
+		JLabel lblCnNguNhin = new JLabel("Cận ngẫu nhiên");
+		GridBagConstraints gbc_lblCnNguNhin = new GridBagConstraints();
+		gbc_lblCnNguNhin.anchor = GridBagConstraints.WEST;
+		gbc_lblCnNguNhin.insets = new Insets(0, 0, 0, 5);
+		gbc_lblCnNguNhin.gridx = 1;
+		gbc_lblCnNguNhin.gridy = 6;
+		panel.add(lblCnNguNhin, gbc_lblCnNguNhin);
+		
+		JPanel panel_2 = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel_2.getLayout();
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		panel_2.setBackground(Color.WHITE);
+		GridBagConstraints gbc_panel_2 = new GridBagConstraints();
+		gbc_panel_2.insets = new Insets(0, 0, 0, 5);
+		gbc_panel_2.fill = GridBagConstraints.BOTH;
+		gbc_panel_2.gridx = 2;
+		gbc_panel_2.gridy = 6;
+		panel.add(panel_2, gbc_panel_2);
+		
+		JLabel lblcnDi = new JLabel("[Cận dưới: ");
+		panel_2.add(lblcnDi);
+		
+		entry_rand_min = new JSpinner();
+		entry_rand_min.setPreferredSize(new Dimension(50, 20));
+		entry_rand_min.setModel(new SpinnerNumberModel(new Integer(0), null, null, new Integer(1)));
+		panel_2.add(entry_rand_min);
+		
+		JLabel lblCnTrn = new JLabel(",   Cận trên: ");
+		panel_2.add(lblCnTrn);
+		
+		entry_rand_max = new JSpinner();
+		entry_rand_max.setPreferredSize(new Dimension(50, 20));
+		panel_2.add(entry_rand_max);
+		
+		JLabel label = new JLabel("]");
+		panel_2.add(label);
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -333,9 +430,8 @@ public class SettingDialog extends JDialog {
 			}
 		}
 		
-		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-	    int x = (int) ((dimension.getWidth() - getWidth()) / 2);
-	    int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+		int x = (SCREEN.WIDTH - getWidth())/2;
+	    int y = (SCREEN.HEIGHT - getHeight())/2;
 	    setLocation(x, y);
 	}
 

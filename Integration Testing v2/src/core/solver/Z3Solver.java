@@ -154,20 +154,7 @@ public class Z3Solver extends Solver {
 			mTestcase = new Variable[testcases.length];
 			mTable.toArray(mTestcase);
 			mSolutionCode = Result.SUCCESS;
-			if (mTable.isEmpty())
-				mSolutionStr = "";
-			else{
-				String left ="";
-				String right = "";
-				
-				for (Variable var: mTable){
-					left += ", " + var.getName();
-					right += ", " + var.getValueString();
-				}
-				
-				mSolutionStr = String.format("(%s) = (%s)",
-						left.substring(2), right.substring(2));
-			}
+			mSolutionStr = summarySolution(mTable);
 			
 		} else if (RESULT_UNSAT.equals(result)){
 			mSolutionCode = Result.ERROR;

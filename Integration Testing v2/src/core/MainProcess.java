@@ -467,6 +467,14 @@ public abstract class MainProcess implements FilenameFilter {
 				result = doTask();
 			} catch (CoreException e) {
 				core = e;
+			} catch (Throwable e){
+				while (e.getCause() != null)
+					e = e.getCause();
+				String msg = e.getMessage();
+				if (msg == null || msg.isEmpty())
+					msg = e.getClass().getSimpleName();
+				
+				core = new CoreException(msg, e);
 			}
 			
 			if (mCallBack != null){
