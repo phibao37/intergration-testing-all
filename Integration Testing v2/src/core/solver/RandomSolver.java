@@ -101,8 +101,14 @@ public class RandomSolver extends Solver {
 									getValue((ArrayIndexExpression) name));
 						}
 					}
-					IDExpression result = SimpleEval.calculate(h.getElement());
-					if (!result.boolValue()){
+					
+					try{
+						IDExpression result = SimpleEval.calculate(h.getElement());
+						if (!result.boolValue()){
+							feasible = false;
+							break;
+						}
+					} catch (ArithmeticException e){
 						feasible = false;
 						break;
 					}
@@ -127,7 +133,11 @@ public class RandomSolver extends Solver {
 				
 				mReturnValue = constraints.getReturnExpression();
 				if (mReturnValue != null)
-					mReturnValue = calculate(mReturnValue);
+					try{
+						mReturnValue = calculate(mReturnValue);
+					} catch (ArithmeticException e){
+						mReturnValue = new IDExpression("Infinity");
+					}
 
 				mSolutionStr = summarySolution(mTable);
 				mSolutionCode = Result.SUCCESS;

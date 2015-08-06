@@ -41,11 +41,14 @@ import java.util.Enumeration;
 
 import core.S;
 import core.Utils;
+import core.graph.GQuery.Filter;
 import core.solver.Solver;
 import core.S.SCREEN;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class SettingDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -59,6 +62,9 @@ public class SettingDialog extends JDialog {
 	private JSpinner entry_rand_loop;
 	private JSpinner entry_rand_min;
 	private JSpinner entry_rand_max;
+	private JTabbedPane tabbed_main;
+	
+	private GQuery $Solver;
 
 	/**
 	 * Launch the application.
@@ -89,7 +95,8 @@ public class SettingDialog extends JDialog {
 			AbstractButton bt = iter.nextElement();
 			
 			if (bt.getActionCommand().equals(solver)){
-				group_solver.setSelected(bt.getModel(), true);
+				bt.doClick();
+				//group_solver.setSelected(bt.getModel(), true);
 				break;
 			}
 		}
@@ -128,19 +135,25 @@ public class SettingDialog extends JDialog {
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbed_main = new JTabbedPane(JTabbedPane.TOP);
+		tabbed_main.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (isVisible())
+					LAST_INDEX = tabbed_main.getSelectedIndex();
+			}
+		});
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(
 			gl_contentPanel.createParallelGroup(Alignment.LEADING)
-				.addComponent(tabbedPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 674, Short.MAX_VALUE)
+				.addComponent(tabbed_main, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 674, Short.MAX_VALUE)
 		);
 		gl_contentPanel.setVerticalGroup(
 			gl_contentPanel.createParallelGroup(Alignment.LEADING)
-				.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 318, Short.MAX_VALUE)
+				.addComponent(tabbed_main, GroupLayout.DEFAULT_SIZE, 318, Short.MAX_VALUE)
 		);
 		{
 			JScrollPane scrollPane = new JScrollPane();
-			tabbedPane.addTab("Cài đặt chung", null, scrollPane, null);
+			tabbed_main.addTab("Cài đặt chung", null, scrollPane, null);
 			{
 				JPanel panel = new JPanel();
 				panel.setBackground(Color.WHITE);
@@ -236,7 +249,7 @@ public class SettingDialog extends JDialog {
 		}
 		
 		JScrollPane scrollPane = new JScrollPane();
-		tabbedPane.addTab("Giải hệ ràng buộc", null, scrollPane, null);
+		tabbed_main.addTab("Giải hệ ràng buộc", null, scrollPane, null);
 		
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.WHITE);
@@ -247,6 +260,7 @@ public class SettingDialog extends JDialog {
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
+		$Solver = GQuery.root(panel);
 		
 		JLabel lblBGii = new JLabel("Bộ giải");
 		GridBagConstraints gbc_lblBGii = new GridBagConstraints();
@@ -340,6 +354,8 @@ public class SettingDialog extends JDialog {
 		gbc_btnChn.gridy = 3;
 		panel.add(btnChn, gbc_btnChn);
 		
+		GQuery.from(entry_z3_dir, btnChn).group("Z3");
+		
 		JLabel lblBGiiRandom = new JLabel("Bộ giải Random");
 		lblBGiiRandom.setFont(new Font("Tahoma", Font.BOLD, 11));
 		GridBagConstraints gbc_lblBGiiRandom = new GridBagConstraints();
@@ -402,6 +418,9 @@ public class SettingDialog extends JDialog {
 		
 		JLabel label = new JLabel("]");
 		panel_2.add(label);
+		
+		GQuery.from(entry_rand_loop, entry_rand_min, entry_rand_max).group("Random");
+		
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -430,10 +449,30 @@ public class SettingDialog extends JDialog {
 			}
 		}
 		
+		Enumeration<AbstractButton> iter = group_solver.getElements();
+		while (iter.hasMoreElements()){
+			iter.nextElement().addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					$Solver.find("." + e.getActionCommand()).enabled(true);
+					$Solver.find(new Filter(){
+
+						@Override
+						public boolean withGroup(String group) {
+							return group != null && !group.equals(e.getActionCommand());
+						}
+						
+					}).enabled(false);
+				}
+			});
+		}
+		
 		int x = (SCREEN.WIDTH - getWidth())/2;
 	    int y = (SCREEN.HEIGHT - getHeight())/2;
 	    setLocation(x, y);
 	}
+	
+	private static int LAST_INDEX = 0;
 
 	@Override
 	public void setVisible(boolean b) {
@@ -444,6 +483,7 @@ public class SettingDialog extends JDialog {
 				javax.swing.JOptionPane.showMessageDialog(this, e.getMessage());
 			}
 		}
+		tabbed_main.setSelectedIndex(LAST_INDEX);
 		super.setVisible(b);
 	}
 }

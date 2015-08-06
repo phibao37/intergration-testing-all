@@ -856,7 +856,7 @@ public class GUIAll extends GUI {
 						lbl_open_c.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
 						lbl_open_c.setOpaque(true);
 						lbl_open_c.setBackground(SystemColor.controlHighlight);
-						lbl_open_c.setText("Mở C...");
+						lbl_open_c.setText("Mở C");
 						lbl_open_c.addMouseListener(new MouseAdapter() {
 							@Override
 							public void mouseClicked(MouseEvent e) {
