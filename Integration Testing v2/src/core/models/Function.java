@@ -123,7 +123,8 @@ public class Function extends Element implements Graphable {
 	 * @param refer hàm được tham chiếu tới
 	 */
 	public void addRefer(Function refer){
-		mRefers.add(refer);
+		if (!mRefers.contains(refer))
+			mRefers.add(refer);
 	}
 	
 	/**

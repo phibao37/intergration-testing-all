@@ -62,6 +62,7 @@ public class RandomSolver extends Solver {
 			
 			//Duyệt qua các điều kiện để tìm các biến cần tạo giá trị
 			for (Expression ep: constraints){
+				//System.out.println(" ? "  + ep);
 				ArrayList<NamedAttribute> ref = new ArrayList<>();
 				
 				ep.accept(new ExpressionVisitor() {
@@ -105,6 +106,7 @@ public class RandomSolver extends Solver {
 					try{
 						IDExpression result = SimpleEval.calculate(h.getElement());
 						if (!result.boolValue()){
+							//System.out.println("False\n");
 							feasible = false;
 							break;
 						}
@@ -125,8 +127,12 @@ public class RandomSolver extends Solver {
 				mTestcase = new Variable[testcases.length];
 				mTable.toArray(mTestcase);
 				for (Variable var: mTestcase)
-					if (!var.isValueSet())
-						var.initValueIfNotSet();
+					if (!var.isValueSet()){
+						if (var instanceof ArrayVariable)
+							var.initValueIfNotSet();
+						else
+							var.setValue(createRandomValue(var));
+					}
 				
 				for (ArrayIndexExpression array: arrays)
 					calculate(array);
@@ -182,9 +188,8 @@ public class RandomSolver extends Solver {
 		if (find.isValueSet())
 			return find.getValue();
 		
-		Object value = RandomGenarator.forType((BasicType) find.getDataType());
-		Expression ep = new IDExpression(value);
-		
+		Expression ep = createRandomValue(find);
+		//System.out.printf("%s = %s\n", find.getName(), ep);
 		find.setValue(ep);
 		return ep;
 	}
@@ -201,11 +206,19 @@ public class RandomSolver extends Solver {
 		if (find.isValueSet(indexes))
 			return find.getValueAt(indexes);
 		
-		Object value = RandomGenarator.forType((BasicType) find.getDataType());
-		Expression ep = new IDExpression(value);
-		
+		Expression ep = createRandomValue(find);
+		//System.out.printf("%s[%s] = %s\n", find.getName(), 
+		//Utils.merge("][", indexes), ep);
 		find.setValueAt(ep, indexes);
 		return ep;
+	}
+	
+	/**
+	 * Tạo giá trị ngẫu nhiên từ một biến số có kiểu nhất định
+	 */
+	private static IDExpression createRandomValue(Variable var){
+		Object value = RandomGenarator.forType((BasicType) var.getDataType());
+		return new IDExpression(value);
 	}
 	
 	/**

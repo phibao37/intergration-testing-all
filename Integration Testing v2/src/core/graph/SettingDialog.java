@@ -374,7 +374,7 @@ public class SettingDialog extends JDialog {
 		panel.add(lblSLnLp, gbc_lblSLnLp);
 		
 		entry_rand_loop = new JSpinner();
-		entry_rand_loop.setModel(new SpinnerNumberModel(1, 1, 1000000, 1));
+		entry_rand_loop.setModel(new SpinnerNumberModel(1, 1, 1000000, 100));
 		GridBagConstraints gbc_entry_random_loop = new GridBagConstraints();
 		gbc_entry_random_loop.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_entry_random_loop.insets = new Insets(0, 5, 5, 5);
