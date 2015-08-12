@@ -155,6 +155,18 @@ public class StatementCanvas extends Canvas {
 		this.repaint();
 	}
 	
+	static int[] getPoint(int x1, int y1, int x2, int y2, boolean left){
+		int d = 38, r = 10;
+		double anpha1 = Math.atan2(y2-y1, x2-x1),
+			   anpha2 = Math.asin(r*1.0/d),
+			   anpha  = anpha1 + anpha2 * (left ? 1 : -1);
+		
+		return new int[]{
+			x1 + (int) (d * Math.cos(anpha)),
+			y1 + (int) (d * Math.sin(anpha))
+		};
+	}
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -182,6 +194,8 @@ public class StatementCanvas extends Canvas {
 					 n1.setBorder(Node.DOUBLE_BORDER);
 				} else {
 					Color color;
+					int[] marks = null;
+					
 					if (n1.hasFlag(isTrue ? 
 							StatementNode.FLAG_SELECT_TRUE_EXTRA
 							: StatementNode.FLAG_SELECT_FALSE_EXTRA))
@@ -224,6 +238,9 @@ public class StatementCanvas extends Canvas {
 							y2 = n2.getY() + n2.getHeight() / 2;
 						} else {
 							g2.drawLine(x1, y1, x1, y1 + gap);
+							if (isCondition)
+								marks = getPoint(x1, y1, x1, y1 + gap, isTrue);
+							
 							int tmp;
 							if (outOfPadding) {
 								tmp = x2 + (n2.getWidth() / 2 + gap) * (rightSide ? -1 : 1);
@@ -241,6 +258,13 @@ public class StatementCanvas extends Canvas {
 						}
 					}
 					drawArrowLine(g2, x1, y1, x2, y2, d, h); 
+					if (isCondition){
+						if (marks == null)
+							marks = getPoint(x1, y1, x2, y2, isTrue);
+						g.drawString(isTrue ? "T" : "F",
+								marks[0] - 3,
+								marks[1] + 5);
+					}
 				 }
 			 }
 			 
