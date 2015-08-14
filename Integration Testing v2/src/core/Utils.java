@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 
 import core.error.ProcessErrorException;
+import core.models.expression.IDExpression;
+import core.models.type.BasicType;
 
 /**
  * Các tiện ích chung
@@ -252,4 +254,32 @@ public class Utils {
 				|| bd.stripTrailingZeros().scale() <= 0;
 	}
 	
+	/**
+	 * Chuyển từ kiểu đơn giản sang cờ hiệu dùng cho IDExpression
+	 */
+	public static int basicTypeToFlag(BasicType type){
+		switch (type.getSize()){
+		case BasicType.BOOL_SIZE:
+			return IDExpression.BOOLEAN;
+		case BasicType.CHAR_SIZE:
+			return IDExpression.CHARACTER;
+		case BasicType.INT_SIZE:
+			return IDExpression.INTEGER;
+		case BasicType.LONG_SIZE:
+			return IDExpression.LONG;
+		case BasicType.FLOAT_SIZE:
+			return IDExpression.FLOAT;
+		case BasicType.DOUBLE_SIZE:
+			return IDExpression.DOUBLE;
+		default:
+			return 0;
+		}
+	}
+	
+	/**
+	 * Đưa một nội dung trong body vào một trang html hoàn chỉnh
+	 */
+	public static String html(String body){
+		return String.format("<html><body>%s</body></html>", body);
+	}
 }

@@ -58,7 +58,7 @@ public class IntegrationPathParser extends BasisPathParser {
 				
 				//Lời gọi hàm này tương ứng với hàm đang được gọi kiểm thử
 				if (link == mCalling){
-					Testcase testcase = link.getTestcaseList().get(mSelectedIndex);
+					Testcase testcase = link.getTestcaseManager().get(mSelectedIndex);
 					Expression[] args = _call.getArguments();
 					Variable[] inputs = testcase.getInputs();
 					

@@ -211,7 +211,12 @@ public class SimpleEval implements Evaluateable {
 			}
 		}
 		
-		return (IDExpression) ex;
+		try{
+			return (IDExpression) ex;
+		} catch (Exception e){
+			System.out.println("Cast error: " + ex);
+			throw new RuntimeException(e);
+		}
 	}
 	
 }

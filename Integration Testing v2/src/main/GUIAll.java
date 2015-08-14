@@ -46,6 +46,7 @@ import core.graph.DragScrollPane;
 import core.graph.FileView;
 import core.graph.LightTabbedPane;
 import core.graph.SettingDialog;
+import core.graph.TestcaseManageDialog;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.canvas.FunctionCanvas;
 import core.graph.canvas.FunctionPairCanvas;
@@ -84,6 +85,9 @@ import java.awt.Dimension;
 import javax.swing.JRadioButton;
 import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Font;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -238,7 +242,7 @@ public class GUIAll extends GUI {
 	private JLabel lbl_loading;
 	private JLabel lbl_status;
 	
-	private Function currentFunction;
+	private Function currentFunction, selectFunction;
 	private boolean isWorking;
 	private boolean shouldOpenSubCondition;
 	
@@ -476,8 +480,9 @@ public class GUIAll extends GUI {
 				});
 			}
 		
-		if (tab_info.getSelectedIndex() > 1)
-			tab_info.setSelectedIndex(0);
+		int selected = tab_info.getSelectedIndex();
+		if (selected < 1 || selected > 2)
+			tab_info.setSelectedIndex(1);
 	}
 
 	@Override
@@ -485,6 +490,25 @@ public class GUIAll extends GUI {
 		return canvas_fn_call.getWidth();
 	}
 	
+	@Override
+	public void openFunctionDetails(Function fn) {
+		selectFunction = fn;
+		lbl_fn_name.setText(Utils.html(fn.getHTMLContent()));
+		lbl_number_of_testcase.setText(fn.getTestcaseManager().size() + "");
+		
+		int count = fn.getRefers().size();
+		lbl_number_of_childs.setText(count == 0 ? "0 (Hàm đơn vị)" : count + "");
+	}
+	
+	
+
+	@Override
+	public void notifyFunctionTestcaseChanged(Function fn, int count) {
+		if (fn == selectFunction){
+			lbl_number_of_testcase.setText(count + "");
+		}
+	}
+
 	@Override
 	public void setStatus(String status, Object... args){
 		if (status == null || status.isEmpty()){
@@ -542,6 +566,75 @@ public class GUIAll extends GUI {
 		tab_info.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		tab_info.setBorder(null);
 		split_details.setRightComponent(tab_info);
+		
+		JPanel panel_function_details = new JPanel();
+		panel_function_details.setBackground(Color.WHITE);
+		tab_info.addTab("Hàm số", null, panel_function_details, null);
+		GridBagLayout gbl_panel_function_details = new GridBagLayout();
+		gbl_panel_function_details.columnWidths = new int[]{23, 137, 283, 227, 0};
+		gbl_panel_function_details.rowHeights = new int[]{50, 37, 35, 0};
+		gbl_panel_function_details.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_function_details.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		panel_function_details.setLayout(gbl_panel_function_details);
+		
+		lbl_fn_name = new JLabel("");
+		lbl_fn_name.setFont(new Font("Tahoma", Font.PLAIN, 22));
+		GridBagConstraints gbc_lbl_fn_name = new GridBagConstraints();
+		gbc_lbl_fn_name.insets = new Insets(0, 0, 5, 0);
+		gbc_lbl_fn_name.gridwidth = 3;
+		gbc_lbl_fn_name.fill = GridBagConstraints.BOTH;
+		gbc_lbl_fn_name.gridx = 1;
+		gbc_lbl_fn_name.gridy = 0;
+		panel_function_details.add(lbl_fn_name, gbc_lbl_fn_name);
+		
+		JLabel lblSTestcase = new JLabel("Số testcase");
+		GridBagConstraints gbc_lblSTestcase = new GridBagConstraints();
+		gbc_lblSTestcase.anchor = GridBagConstraints.WEST;
+		gbc_lblSTestcase.insets = new Insets(0, 0, 5, 5);
+		gbc_lblSTestcase.gridx = 1;
+		gbc_lblSTestcase.gridy = 1;
+		panel_function_details.add(lblSTestcase, gbc_lblSTestcase);
+		
+		lbl_number_of_testcase = new JLabel("0");
+		GridBagConstraints gbc_lbl_number_of_testcase = new GridBagConstraints();
+		gbc_lbl_number_of_testcase.fill = GridBagConstraints.BOTH;
+		gbc_lbl_number_of_testcase.insets = new Insets(0, 0, 5, 5);
+		gbc_lbl_number_of_testcase.gridx = 2;
+		gbc_lbl_number_of_testcase.gridy = 1;
+		panel_function_details.add(lbl_number_of_testcase, gbc_lbl_number_of_testcase);
+		
+		JButton btnQunL = new JButton("Quản lý...");
+		btnQunL.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (selectFunction == null)
+					return;
+				new TestcaseManageDialog(frame_main, 
+						selectFunction.getTestcaseManager())
+					.setVisible(true);
+			}
+		});
+		GridBagConstraints gbc_btnQunL = new GridBagConstraints();
+		gbc_btnQunL.insets = new Insets(0, 0, 5, 0);
+		gbc_btnQunL.anchor = GridBagConstraints.WEST;
+		gbc_btnQunL.gridx = 3;
+		gbc_btnQunL.gridy = 1;
+		panel_function_details.add(btnQunL, gbc_btnQunL);
+		
+		JLabel lblSHmPh = new JLabel("Số hàm phụ thuộc");
+		GridBagConstraints gbc_lblSHmPh = new GridBagConstraints();
+		gbc_lblSHmPh.anchor = GridBagConstraints.WEST;
+		gbc_lblSHmPh.insets = new Insets(0, 0, 0, 5);
+		gbc_lblSHmPh.gridx = 1;
+		gbc_lblSHmPh.gridy = 2;
+		panel_function_details.add(lblSHmPh, gbc_lblSHmPh);
+		
+		lbl_number_of_childs = new JLabel("0");
+		GridBagConstraints gbc_lbl_number_of_childs = new GridBagConstraints();
+		gbc_lbl_number_of_childs.fill = GridBagConstraints.BOTH;
+		gbc_lbl_number_of_childs.insets = new Insets(0, 0, 0, 5);
+		gbc_lbl_number_of_childs.gridx = 2;
+		gbc_lbl_number_of_childs.gridy = 2;
+		panel_function_details.add(lbl_number_of_childs, gbc_lbl_number_of_childs);
 
 		JScrollPane tb_path_details_wrap = new JScrollPane();
 		tb_path_details_wrap.setBorder(null);
@@ -561,10 +654,11 @@ public class GUIAll extends GUI {
 		tb_path_details_wrap.setViewportView(table_path_details);
 		
 		JScrollPane tb_testcase_wrap = new JScrollPane();
-		tab_info.addTab("Testcase", null, tb_testcase_wrap, null);
+		tab_info.addTab("Chi tiết nghiệm", null, tb_testcase_wrap, null);
 		
 		tab_info.setTabCloseableAt(0, false);
 		tab_info.setTabCloseableAt(1, false);
+		tab_info.setTabCloseableAt(2, false);
 		
 		table_testcase = new JTable();
 		table_testcase.setModel(new DefaultTableModel(
@@ -683,6 +777,7 @@ public class GUIAll extends GUI {
 		canvas_loop.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				if (currentFunction == null) return;
 				StatementCanvas canvas = openFuntionView(
 						currentFunction, false).getCanvas();
 				canvas.resetSelectingExtraPath();
@@ -1018,6 +1113,9 @@ public class GUIAll extends GUI {
 	
 	private static final Dimension SIZE_CHOOSER = 
 			new Dimension(SCREEN.WIDTH/2, SCREEN.HEIGHT/2);
+	private JLabel lbl_fn_name;
+	private JLabel lbl_number_of_testcase;
+	private JLabel lbl_number_of_childs;
 	
 	private static class StorePathTable extends JTable{
 		private static final long serialVersionUID = 1L;

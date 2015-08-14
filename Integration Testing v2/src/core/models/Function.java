@@ -3,16 +3,12 @@ package core.models;
 import java.io.File;
 import java.util.ArrayList;
 
-import core.S;
+import core.GUI;
 import core.Utils;
-import core.error.CoreException;
 import core.error.StatementNoRootException;
 import core.graph.Graphable;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
-import core.solver.Solver.Result;
-import core.unit.BasisPath;
-import core.unit.BasisPathParser;
 import core.unit.CFG;
 import core.visitor.BodyFunctionVisitor;
 import core.visitor.ExpressionVisitor;
@@ -37,8 +33,6 @@ public class Function extends Element implements Graphable {
 	private CFG mCFG_3;
 	
 	private ArrayList<Function> mRefers;
-	private ArrayList<Testcase> mTestcases;
-	
 	private File mFile;
 	
 	/**
@@ -168,43 +162,15 @@ public class Function extends Element implements Graphable {
 		}
 	}
 	
+	private TestcaseManager mTestcase;
 	/**
-	 * Thiết đặt danh sách các testcase cho hàm số này
-	 * @param testcases danh sách các testcase cần dùng để kiểm thử hàm số
+	 * Trả về bộ quản lý các testcase úng với hàm số
 	 */
-	public void setTestcaseList(ArrayList<Testcase> testcases){
-		mTestcases = testcases;
-	}
-	
-	/**
-	 * Trả về danh sách các testcase dùng để kiểm thử hàm này. Nếu chưa được gán trước
-	 * đó (sử dụng ), một bộ testcase đơn giản sẽ được tự động tạo ra
-	 */
-	public ArrayList<Testcase> getTestcaseList(){
-		if (mTestcases == null){
-			mTestcases = new ArrayList<>();
-			
-			try{
-			for (BasisPath path: getCFG(false).getBasisPaths()){
-				BasisPathParser parser = BasisPathParser.DEFAULT;
-				parser.parseBasisPath(path, this);
-				Result r = S.SOLVER.solve(parser.getConstrains());
-				
-				if (r.getSolutionCode() == Result.SUCCESS)
-					mTestcases.add(new Testcase(r));
-			}
-			} catch (CoreException e){
-				e.printStackTrace();
-			}
+	public TestcaseManager getTestcaseManager(){
+		if (mTestcase == null){
+			mTestcase = new TestcaseManager();
 		}
-		return mTestcases;
-	}
-	
-	/**
-	 * Trả về số lượng các testcase mà hàm này đang có
-	 */
-	public int getTestcaseCount(){
-		return getTestcaseList().size();
+		return mTestcase;
 	}
 	
 	/**
@@ -252,5 +218,46 @@ public class Function extends Element implements Graphable {
 				mType.getHTMLContent(), 
 				getName(), 
 				b);
+	}
+	
+	public class TestcaseManager extends ArrayList<Testcase>{
+		private static final long serialVersionUID = 1L;
+		
+		private TestcaseManager() {}
+		
+		public Function getFunction(){
+			return Function.this;
+		}
+		
+		/**
+		 * Trả về danh sách tên các biến testcase đầu vào
+		 */
+		public String getSummaryName(){
+			String s = "(";
+			
+			if (mParas.length > 0){
+				s += mParas[0].getName();
+				for (int i = 1; i < mParas.length; i++)
+					s += ", " + mParas[i].getName();
+			}
+			
+			s += ")";
+			return s;
+		}
+
+		@Override
+		public boolean add(Testcase e) {
+			if (contains(e))
+				return false;
+			
+			notifyTestcaseChanged();
+			return super.add(e) | notifyTestcaseChanged();
+		}
+		
+		private boolean notifyTestcaseChanged(){
+			GUI.instance.notifyFunctionTestcaseChanged(getFunction(), size());
+			return true;
+		}
+		
 	}
 }

@@ -45,6 +45,11 @@ public class S {
 	public static int CANVAS_MARGIN_Y = 70;
 	
 	/**
+	 * Mặc định mở toolbar khi tạo một canvas mới
+	 */
+	public static boolean CANVAS_SHOW_TOOLBAR = true;
+	
+	/**
 	 * Kích thước văn bản bên trong nút đồ thị
 	 */
 	public static int NODE_FONT_SIZE = 12;

@@ -86,7 +86,7 @@ public class Canvas extends JPanel implements MouseListener {
 		
 		toolbar = new Toolbar();
 		toolbar.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-		toolbar.setVisible(false);
+		toolbar.setVisible(S.CANVAS_SHOW_TOOLBAR);
 		toolbar.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		toolbar.setBounds(356, 246, 84, 35);
 		add(toolbar);

@@ -13,7 +13,9 @@ import core.inte.FunctionPair;
 import core.inte.IntegrationPathParser;
 import core.models.Expression;
 import core.models.Function;
+import core.models.Function.TestcaseManager;
 import core.models.Statement;
+import core.models.Testcase;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.FunctionCallExpression;
@@ -267,12 +269,29 @@ public abstract class MainProcess implements FilenameFilter {
 					GUI.instance.setStatus("Đang phân tích %d/%d", i++, length);
 					mIntePathParser.setCalling(calling);
 					
-					int count = calling.getTestcaseCount(), j = 0;
+					TestcaseManager tm = calling.getTestcaseManager();
+					int j = 0;
 					
-					System.out.println("Number of testcase: " + count);
-					for (; j < count; j++){
+					//Chưa có testcase nào, tự động tạo một bộ đơn giản
+					if (tm.size() == 0){
+						try{
+						for (BasisPath path: calling.getCFG(false).getBasisPaths()){
+							BasisPathParser parser = BasisPathParser.DEFAULT;
+							parser.parseBasisPath(path, calling);
+							Result r = S.SOLVER.solve(parser.getConstrains());
+							
+							if (r.getSolutionCode() == Result.SUCCESS)
+								tm.add(new Testcase(r));
+						}
+						} catch (CoreException e){
+							e.printStackTrace();
+						}
+					}
+					
+					System.out.println("Number of testcase: " + tm.size());
+					for (; j < tm.size(); j++){
 						System.out.printf("Testcase %s\n", Utils.merge(", ", 
-								calling.getTestcaseList().get(j).getInputs()));
+								tm.get(j).getInputs()));
 						
 						mIntePathParser.setSelectedIndex(j);
 						mIntePathParser.parseBasisPath(basis, caller);
@@ -287,7 +306,7 @@ public abstract class MainProcess implements FilenameFilter {
 						}
 					}
 					
-					if (j == count){
+					if (j == tm.size()){
 						basis.setSolveResult(new Result(Result.ERROR, 
 							"No testcase match", null, null));
 					}

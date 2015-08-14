@@ -32,6 +32,7 @@ public class FunctionNode extends Node {
 		this.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				GUI.instance.openFunctionDetails(fn);
 				if (e.getClickCount() == 2){
 					beginTest();
 				}

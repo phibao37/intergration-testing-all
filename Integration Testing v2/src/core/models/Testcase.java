@@ -74,4 +74,18 @@ public class Testcase {
 	public Expression getReturnOutput(){
 		return mOutput;
 	}
+	
+	/**
+	 * Trả về chuỗi danh sách các giá trị đầu vào
+	 */
+	public String getSummaryInput(){
+		String s = "(";
+		if (listInput.length > 0){
+			s += listInput[0].getValueString();
+			for (int i = 1; i < listInput.length; i++)
+				s += ", " + listInput[i].getValueString();
+		}
+		return s + ")";
+	}
+	
 }

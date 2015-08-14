@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
+//TODO bỏ qua các listener con không cần thiết trong fnPairNode, LoopNode
 public class FunctionPairCanvas extends JPanel {
 	private static final long serialVersionUID = 1L;
 	

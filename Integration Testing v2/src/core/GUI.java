@@ -32,6 +32,20 @@ public class GUI {
 	}
 	
 	/**
+	 * Xem chi tiết một hàm số: số lượng testcase, số hàm con, ...
+	 */
+	public void openFunctionDetails(Function fn){
+		throw new RuntimeException();
+	}
+	
+	/**
+	 * Thông báo cho GUI biết số lượng testcase đã bị thay đổi
+	 */
+	public void notifyFunctionTestcaseChanged(Function fn, int count){
+		throw new RuntimeException();
+	}
+	
+	/**
 	 * Mở đồ thị CFG của một hàm trong chương trình để xem
 	 * @param fn hàm trong chương trình
 	 * @param subCondition đồ thị phủ các điều kiện con ?
