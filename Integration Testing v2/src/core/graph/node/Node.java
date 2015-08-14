@@ -17,7 +17,6 @@ import javax.swing.border.LineBorder;
 
 import core.S;
 import core.graph.Graphable;
-import core.graph.canvas.Canvas;
 
 /**
  * Một nút biểu thị một phần tử được hiển thị ra dưới dạng đồ họa.<br/>
@@ -46,7 +45,6 @@ public class Node extends JLabel {
 	
 	protected Graphable mElement;
 	private Node[] mRefers;
-	private Canvas mCanvas;
 	private int x, y;
 	private int mFlags = 0;
 	
@@ -87,7 +85,7 @@ public class Node extends JLabel {
 				newX = Math.max(newX, 0);
 				newY = Math.max(newY, 0);
 				setLocation(newX, newY);
-				mCanvas.repaint();
+				getParent().repaint();
 			}
 		});
 		this.addMouseListener(new MouseAdapter() {
@@ -131,7 +129,7 @@ public class Node extends JLabel {
 						setLocation(x, y + delta);
 						break;
 					}
-					mCanvas.repaint();
+					getParent().repaint();
 				}
 			}
 		});
@@ -206,11 +204,6 @@ public class Node extends JLabel {
 	 */
 	public boolean hasFlag(int flag){
 		return (mFlags & flag) != 0;
-	}
-	
-	/** Thiết đặt canvas chứa nút*/
-	public void setCanvas(Canvas canvas){
-		mCanvas = canvas;
 	}
 	
 	public String toString(){

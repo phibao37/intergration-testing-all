@@ -240,7 +240,7 @@ public class Utils {
 	/**
 	 * Kiểm tra một tập chỉ thị có chứa 1 chỉ thị cụ thể hay không
 	 */
-	public static boolean hasFlag(int flags, int flag){
+	public static boolean hasFlag(long flags, long flag){
 		return (flags & flag) != 0;
 	}
 	

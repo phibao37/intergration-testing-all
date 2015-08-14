@@ -2,7 +2,8 @@ package core.graph.canvas;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import core.S;
@@ -10,6 +11,7 @@ import core.graph.adapter.FunctionAdapter;
 import core.graph.node.FunctionNode;
 import core.graph.node.Node;
 import core.inte.FunctionPair;
+import core.models.Function;
 
 /**
  * Lớp đồ họa giúp hiển thị các nút đồ thị biểu diễn quan hệ giữa các hàm
@@ -22,7 +24,10 @@ public class FunctionCanvas extends Canvas {
 	public static final Color SELECTED = Color.RED;
 	
 	private FunctionAdapter mAdapter;
-	private ArrayList<FunctionNode> fnNodeList = new ArrayList<FunctionNode>();
+	private ArrayList<FunctionNode> fnNodeList = new ArrayList<>();
+	
+	private ArrayList<Rectangle> rectList = new ArrayList<>();
+	private Function source, target;
 
 	@Override
 	protected void resetAll(boolean repaint) {
@@ -92,25 +97,44 @@ public class FunctionCanvas extends Canvas {
 			node.clearAllSelectedRefer();
 		this.repaint();
 	}
+	
+	private Rectangle add(int x1, int y1, int x2, int y2){
+		Rectangle r = new Rectangle(x1, y1, x2, y2, 1.2, source, target);
+		rectList.add(r);
+		return r;
+	}
+	
+	@Override
+	public void mousePressed(MouseEvent e) {
+		for (Rectangle r: rectList)
+			if (r.contains(e.getX(), e.getY())){
+				System.out.println(r);
+				break;
+			}
+		super.mousePressed(e);
+	}
+
 
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		rectList.clear();
+		
 		int x1, y1, x2, y2, xs, ys;
 		 Node[] refer;
 		 int d = 12, h = 5, gap = 25;
-		 Graphics2D g2 = (Graphics2D) g;
 		 boolean rightSide;
 	     
-	     g2.setStroke(NORMAL_STROKE);
 		 for (FunctionNode n1: fnNodeList){
 			 refer = n1.getRefers();
 			 xs = n1.getX() + n1.getWidth()/2;
 			 ys = n1.getY() + n1.getHeight();
+			 source = n1.getFunction();
 			 
 			 int i = 0;
 			 for (Node n2: refer){
-				 g2.setColor(n1.isSelectedRefer(i++) ? SELECTED : DEFAULT);
+				 target = (Function) n2.getElement();
+				 g.setColor(n1.isSelectedRefer(i++) ? SELECTED : DEFAULT);
 				 
 				 //Recurse
 				 if (n2 == n1){
@@ -143,7 +167,7 @@ public class FunctionCanvas extends Canvas {
 							x2 = n2.getX() + (rightSide ? 0 : n2.getWidth());
 							y2 = n2.getY() + n2.getHeight() / 2;
 						} else {
-							g2.drawLine(x1, y1, x1, y1 + gap);
+							g.fillPolygon(add(x1, y1, x1, y1 + gap));
 							int tmp;
 							if (outOfPadding) {
 								tmp = x2 + (n2.getWidth() / 2 + gap) * (rightSide ? -1 : 1);
@@ -151,21 +175,50 @@ public class FunctionCanvas extends Canvas {
 								tmp = n2.getX()
 										+ (rightSide ? n2.getWidth() + gap : -gap);
 							}
-							g2.drawLine(x1, y1 + gap, tmp, y1 + gap);
+							g.fillPolygon(add(x1, y1 + gap, tmp, y1 + gap));
 							x1 = tmp;
 							y2 = y2 + n2.getHeight() / 2;
-							g2.drawLine(x1, y1 + gap, x1, y2);
+							g.fillPolygon(add(x1, y1 + gap, x1, y2));
 							y1 = y2;
 							x2 = n2.getX()
 									+ (rightSide ^ outOfPadding ? n2.getWidth() : 0);
 						}
 					}
-					drawArrowLine(g2, x1, y1, x2, y2, d, h); 
+					drawArrow(g, x1, y1, x2, y2, d, h);
+					g.fillPolygon(add(x1, y1, x2, y2));
 				 }
 			 }
 		 }
 		 
-		 super.postPaintComponent(g2);
+		 super.postPaintComponent(g);
+	}
+	
+	static class Rectangle extends Polygon{
+		private static final long serialVersionUID = 1L;
+		
+		private Function source, target;
+		
+		public Rectangle(int x1, int y1, int x2, int y2, double r, 
+				Function source, Function target){
+			this.source = source;
+			this.target = target;
+			int dx = x2 - x1, dy = y2 - y1;
+			double d = Math.sqrt((dx*dx+dy*dy)/2.0);
+			int m = (int)(r*(dx+dy)/d), 
+				n = (int)(r*(dx-dy)/d);
+			
+			addPoint(x1 - m, y1 + n);
+			addPoint(x1 - n, y1 - m);
+			addPoint(x2 + m, y2 - n);
+			addPoint(x2 + n, y2 + m);
+		}
+
+		@Override
+		public String toString() {
+			return source.getName() + " -> " + target.getName();
+		}
+		
+		
 	}
 
 }

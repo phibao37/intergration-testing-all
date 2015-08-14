@@ -145,7 +145,6 @@ public class GUIBeta {
 		
 		canvas = new StatementCanvas();
 		canvas.setBackground(Color.WHITE);
-		canvas.setParent(scrollPane);
 		scrollPane.setViewportView(canvas);
 		frame.getContentPane().setLayout(groupLayout);
 		

@@ -1,38 +1,52 @@
 package core.graph.canvas;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
-import java.awt.Color;
-
-import javax.swing.JLabel;
-import javax.swing.ImageIcon;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import core.S;
-import core.graph.LightLabel;
+import core.Utils;
+import core.graph.DragScrollPane;
 import core.graph.node.Node;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.SystemColor;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.LineBorder;
+
+import java.awt.FlowLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.ComponentOrientation;
 
 /**
  * Lớp đồ họa giúp hiển thị các nút đồ thị biểu diễn quan hệ giữa các đối tượng C
  * @author ducvu
  *
  */
-public class Canvas extends JPanel {
+public class Canvas extends JPanel implements MouseListener {
 	private static final long serialVersionUID = -1276708527830335706L;
 	
 	/** Khoảng cách giữa lề bên trái và nút trái nhất */
@@ -46,66 +60,62 @@ public class Canvas extends JPanel {
 			new BasicStroke(1.5f, BasicStroke.CAP_BUTT, 
 			BasicStroke.JOIN_MITER, 10.0f, new float[]{3f}, 0.0f);
 	
-	private JPanel navigator;
-	private JScrollPane parent;
-	
 	protected ArrayList<Node> defaultNodeList = new ArrayList<Node>();
+	protected boolean fullscreen;
+	private JViewport parent;
+	private JScrollPane parentWrap;
+	protected JPanel toolbar;
 	
 	/**
 	 * Tạo một canvas hiển thị mới
 	 */
 	public Canvas(){
 		super();
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if (Utils.hasFlag(e.getChangeFlags(), HierarchyEvent.PARENT_CHANGED)){
+					parent = (JViewport) getParent();
+				}
+			}
+		});
+		
 		this.setLayout(null);
 		this.setFocusable(true);
+		this.setBackground(Color.WHITE);
+		this.addMouseListener(this);
 		
-		navigator = new JPanel();
-		navigator.setBackground(Color.WHITE);
-		//navigator.setBackground(new Color(255,0 ,0, 128));
-		navigator.setBounds(353, 249, 87, 40);
-		add(navigator);
-		navigator.setLayout(null);
+		toolbar = new Toolbar();
+		toolbar.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		toolbar.setVisible(false);
+		toolbar.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
+		toolbar.setBounds(356, 246, 84, 35);
+		add(toolbar);
+		toolbar.setLayout(new FlowLayout(FlowLayout.RIGHT, 
+				Toolbar.PADDING_X, Toolbar.PADDING_Y));
 		
-//		JLabel lbl_clear = new LightLabel();
-//		lbl_clear.addMouseListener(new MouseAdapter() {
-//			@Override
-//			public void mouseClicked(MouseEvent e) {
-//				resetAll(true);
-//			}
-//		});
-//		lbl_clear.setIcon(new ImageIcon(Canvas.class.getResource("/image/clear.png")));
-//		lbl_clear.setBounds(5, 5, 30, 30);
-//		navigator.add(lbl_clear);
-		
-		JLabel lbl_fullscreen = new LightLabel();
-		lbl_fullscreen.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
+		JButton button_1 = new JButton("");
+		button_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 				if (fullscreen)
 					exitFullScreen();
 				else
 					goFullScreen();
 			}
 		});
-		lbl_fullscreen.setIcon(new ImageIcon(
-			Canvas.class.getResource("/image/fullscreen.png")));
-		lbl_fullscreen.setBounds(40, 5, 40, 30);
-		navigator.add(lbl_fullscreen);
 		
-		this.addMouseListener(new MouseAdapter() {
-            @Override
-			public void mousePressed(MouseEvent e) {
-                requestFocusInWindow();
-                if (e.isPopupTrigger())
-                	openMenu(e);
+		JButton button = new JButton("");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				toolbar.setVisible(false);
 			}
-			
-			@Override
-			public void mouseReleased(MouseEvent e){
-				if (e.isPopupTrigger())
-					openMenu(e);
-			}
-        });
+		});
+		button.setToolTipText("Đóng (Double-Click)");
+		button.setIcon(new ImageIcon(Canvas.class.getResource("/image/close.png")));
+		toolbar.add(button);
+		button_1.setToolTipText("Toàn màn hình");
+		button_1.setIcon(new ImageIcon(Canvas.class.getResource("/image/fullscreen.png")));
+		toolbar.add(button_1);
+		
 		this.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -151,7 +161,6 @@ public class Canvas extends JPanel {
 			return;
 		int minX = defaultNodeList.get(0).getX();
 		for (Node n: defaultNodeList){
-			n.setCanvas(this);
 			this.add(n);
 			if (n.getX() < minX)
 				minX = n.getX();
@@ -174,17 +183,12 @@ public class Canvas extends JPanel {
 		defaultNodeList.clear();
 
 		//Re-config
-		this.add(navigator);
+		this.add(toolbar);
 		if (repaint){
 			this.repaint();
 		}
 	}
-	@Override
-	protected void paintComponent(Graphics g){
-		super.paintComponent(g);
-		postPaintComponent(g);
-	}
-	
+
 	protected void postPaintComponent(Graphics g) {
 		if (!defaultNodeList.isEmpty()) {
 			int maxX = 0, maxY = 0, x, y;
@@ -203,17 +207,10 @@ public class Canvas extends JPanel {
 			this.setPreferredSize(new Dimension());
 		}
 
-		int margin = 5;
-		JScrollBar hScrollBar = parent.getHorizontalScrollBar();
-		JScrollBar vScrollBar = parent.getVerticalScrollBar();
-		int nx = parent.getWidth() - navigator.getWidth()
-				+ hScrollBar.getValue()
-				- (vScrollBar.isVisible() ? vScrollBar.getWidth() : 0) - margin;
-		int ny = parent.getHeight() - navigator.getHeight()
-				+ vScrollBar.getValue()
-				- (hScrollBar.isVisible() ? hScrollBar.getHeight() : 0)
-				- margin;
-		navigator.setLocation(nx, ny);
+		Point p = parent.getViewPosition();
+		int x = (int)p.getX() + parent.getWidth() - toolbar.getWidth() - 5;
+		int y = (int)p.getY() + parent.getHeight() - toolbar.getHeight() - 5;
+		toolbar.setLocation(x, y);
 		this.revalidate();
 	}
 	/**
@@ -244,7 +241,7 @@ public class Canvas extends JPanel {
 		 g.drawLine(x1, y1, x2, y2);
 	 }
 
-	private void drawArrow(Graphics g, int x1, int y1, int x2, int y2, int d, int h) {
+	protected void drawArrow(Graphics g, int x1, int y1, int x2, int y2, int d, int h) {
 		int dx = x2 - x1, dy = y2 - y1;
 		double D = Math.sqrt(dx * dx + dy * dy);
 		double xm = D - d, xn = xm, ym = h, yn = -h, x;
@@ -263,20 +260,9 @@ public class Canvas extends JPanel {
 
 		g.fillPolygon(xpoints, ypoints, 3);
 	}
-	 
-	 /**
-	  * Thiết đặt đối tượng bao ngoài của canvas
-	  */
-	 public void setParent(JScrollPane js){
-		 parent = js;
-	 }
-	 
-
-	protected boolean fullscreen;
-	private JScrollPane backupParent;
 	
 	/** Mở chế độ toàn màn hình*/
-	private void goFullScreen() {
+	void goFullScreen() {
 		if (fullscreen)
 			return;
 		fullscreen = true;
@@ -291,14 +277,13 @@ public class Canvas extends JPanel {
 	}
 	
 	/** Thoát chế độ toàn màn hình*/
-	private void exitFullScreen() {
+	void exitFullScreen() {
 		if (!fullscreen)
 			return;
 		fullscreen = false;
 		SwingUtilities.windowForComponent(this).dispose();
 
-		this.parent = this.backupParent;
-		this.parent.setViewportView(this);
+		this.parentWrap.setViewportView(this);
 		this.revalidate();
 		this.repaint();
 	}
@@ -306,10 +291,8 @@ public class Canvas extends JPanel {
 	/** Trả về đối tượng canvas được lưu trữ trong nền
 	 * @throws Exception  */
 	private JScrollPane getClonePane() {
-		JScrollPane scrollPane = new JScrollPane();
-		this.backupParent = this.parent;
-		this.parent = scrollPane;
-
+		JScrollPane scrollPane = new DragScrollPane();
+		this.parentWrap = (JScrollPane) parent.getParent();
 		scrollPane.setViewportView(this);
 		scrollPane.getViewport().addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -323,4 +306,79 @@ public class Canvas extends JPanel {
 	
 	/** Phương thức giúp mở bảng tùy chỉnh khi có sự kiện truyền vào thích hợp*/
 	protected void openMenu(MouseEvent e) {}
+
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		requestFocusInWindow();
+		if (e.getClickCount() == 2)
+			toolbar.setVisible(!toolbar.isVisible());
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+        if (e.isPopupTrigger())
+        	openMenu(e);
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if (e.isPopupTrigger())
+        	openMenu(e);
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {}
+
+	@Override
+	public void mouseExited(MouseEvent e) {}
+	
+	static class Toolbar extends JPanel implements MouseListener{
+		private static final long serialVersionUID = 1L;
+		private static final Color BG = SystemColor.inactiveCaptionBorder;
+		private static final LineBorder LINE = new LineBorder(
+				SystemColor.activeCaption);
+		private static final LineBorder NONE = new LineBorder(BG);
+		public static final int PADDING_X = 5;
+		public static final int PADDING_Y = 5;
+		
+		public Toolbar(){
+			addMouseListener(new MouseAdapter() {});
+		}
+		
+		protected void addImpl(Component comp, Object constraints, int index){
+			super.addImpl(comp, constraints, index);
+			comp.addMouseListener(this);
+			((JComponent)comp).setBorder(NONE);
+			
+			int w = PADDING_X, h = 0;
+			for (Component c: getComponents()){
+				Dimension d = c.getPreferredSize();
+				w += d.width + PADDING_X + 2;
+				if (d.height > h)
+					h = d.height;
+			}
+			setSize(w, h + 2 + 2*PADDING_Y);
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			((JComponent)e.getComponent()).setBorder(LINE);
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+			((JComponent)e.getComponent()).setBorder(NONE);
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {}
+
+		@Override
+		public void mousePressed(MouseEvent e) {}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {}
+
+	}
 }

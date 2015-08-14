@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
+import javax.swing.JCheckBox;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -23,7 +24,6 @@ import core.models.Statement;
 /**
  * Lớp đồ họa giúp hiển thị các nút câu lệnh
  * @author ducvu
- * <br/>TODO bật/tắt thứ tự câu lệnh, hiện kí hiệu T/F trên đồ thị, thiết kế lại toobar
  */
 public class StatementCanvas extends Canvas {
 	public static final Color DEFAULT = Color.BLACK;
@@ -38,13 +38,24 @@ public class StatementCanvas extends Canvas {
 	private Function mFunc;
 	private StatementAdapter mAdapter;
 	private ArrayList<StatementNode> smtNodeList = new ArrayList<StatementNode>();
+	JCheckBox mShowLabel;
 	
 	/** Tạo một đồ thị tương ứng với một hàm */
 	public StatementCanvas(Function fn){
 		this.mFunc = fn;
+		mShowLabel = new JCheckBox("Hiện thứ tự", true);
+		mShowLabel.setToolTipText("Hiện thứ tự các câu lệnh trên đường đi");
+		mShowLabel.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				repaint();
+			}
+		});
+		toolbar.add(mShowLabel);
 	}
 	
 	public StatementCanvas() {}
+	
 	public void setFunction(Function fn){
 		this.mFunc = fn;
 		setAdapter(new StatementAdapter(fn.getCFG(true)));
@@ -268,7 +279,7 @@ public class StatementCanvas extends Canvas {
 				 }
 			 }
 			 
-			 if (!n1.getLabel().isEmpty()) {
+			 if (mShowLabel.isSelected() && !n1.getLabel().isEmpty()) {
 					int x = n1.getX() + n1.getWidth();
 					int y = n1.getY();
 					String str = n1.getLabel();

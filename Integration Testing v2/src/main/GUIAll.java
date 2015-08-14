@@ -1,9 +1,7 @@
 package main;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.EventQueue;
-import java.awt.SystemColor;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -24,9 +22,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.JViewport;
 import javax.swing.SwingConstants;
-import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -46,6 +42,7 @@ import core.Utils;
 import core.error.CoreException;
 import core.error.MainNotFoundException;
 import core.graph.CFGView;
+import core.graph.DragScrollPane;
 import core.graph.FileView;
 import core.graph.LightTabbedPane;
 import core.graph.SettingDialog;
@@ -85,6 +82,8 @@ import jdt.JMainProcess;
 import java.awt.Dimension;
 
 import javax.swing.JRadioButton;
+import java.awt.Insets;
+import java.awt.Toolkit;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -523,6 +522,7 @@ public class GUIAll extends GUI {
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		frame_main = new JFrame();
+		frame_main.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIAll.class.getResource("/image/testing.png")));
 		frame_main.setTitle("Kiểm thử tích hơp");
 		frame_main.setBounds(50, 50, 1266, 630);
 		frame_main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
@@ -848,63 +848,48 @@ public class GUIAll extends GUI {
 		
 				JPanel panel_toolbar_left = new JPanel();
 				
-						JLabel lbl_open_c = new JLabel();
-						lbl_open_c.setPreferredSize(new Dimension(80, 30));
-						lbl_open_c.setHorizontalAlignment(SwingConstants.CENTER);
-						lbl_open_c.setToolTipText("Mở tập tin C/thư mục");
-						lbl_open_c.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-						lbl_open_c.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-						lbl_open_c.setOpaque(true);
-						lbl_open_c.setBackground(SystemColor.controlHighlight);
-						lbl_open_c.setText("Mở C");
-						lbl_open_c.addMouseListener(new MouseAdapter() {
+						JButton btn_open_c = new JButton();
+						btn_open_c.setMargin(new Insets(2, 5, 2, 5));
+						btn_open_c.setPreferredSize(new Dimension(90, 30));
+						btn_open_c.setToolTipText("Mở tập tin C/thư mục");
+						btn_open_c.setText("Mở C");
+						btn_open_c.addActionListener(new ActionListener() {
 							@Override
-							public void mouseClicked(MouseEvent e) {
+							public void actionPerformed(ActionEvent e) {
 								openCFiles();
 							}
 						});
-						lbl_open_c.setIcon(new ImageIcon(GUIAll.class
-								.getResource("/image/file.png")));
-						//tabbedCanvas.setTabCloseableAt(1, false);
+						btn_open_c.setIcon(new ImageIcon(GUIAll.class.getResource("/image/c.png")));
 
-						JLabel lbl_set_root = new JLabel();
-						lbl_set_root.setPreferredSize(new Dimension(100, 30));
-						lbl_set_root.addMouseListener(new MouseAdapter() {
+						JButton btn_set_root = new JButton();
+						btn_set_root.setMargin(new Insets(2, 5, 2, 5));
+						btn_set_root.setPreferredSize(new Dimension(100, 30));
+						btn_set_root.addActionListener(new ActionListener() {
 							@Override
-							public void mouseClicked(MouseEvent e) {
+							public void actionPerformed(ActionEvent e) {
 								openSelectFunction();
 							}
 						});
-						lbl_set_root.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-						lbl_set_root.setHorizontalAlignment(SwingConstants.CENTER);
-						lbl_set_root.setIcon(new ImageIcon(GUIAll.class
-								.getResource("/image/root.png")));
-						lbl_set_root.setToolTipText("Đặt hàm số gốc tùy chỉnh");
-						lbl_set_root.setText("Đặt gốc...");
-						lbl_set_root.setOpaque(true);
-						lbl_set_root.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-						lbl_set_root.setBackground(SystemColor.controlHighlight);
+						btn_set_root.setIcon(new ImageIcon(GUIAll.class.getResource("/image/root.png")));
+						btn_set_root.setToolTipText("Đặt hàm số gốc tùy chỉnh");
+						btn_set_root.setText("Đặt gốc");
 						panel_toolbar_left.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-						panel_toolbar_left.add(lbl_open_c);
+						panel_toolbar_left.add(btn_open_c);
 						
-						JLabel lbl_open_j = new JLabel();
-						lbl_open_j.setPreferredSize(new Dimension(100, 30));
-						lbl_open_j.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-						lbl_open_j.setIcon(new ImageIcon(GUIAll.class.getResource("/image/file.png")));
-						lbl_open_j.addMouseListener(new MouseAdapter() {
+						JButton btn_open_j = new JButton();
+						btn_open_j.setMargin(new Insets(2, 5, 2, 5));
+						btn_open_j.setPreferredSize(new Dimension(100, 30));
+						btn_open_j.setIcon(new ImageIcon(GUIAll.class.getResource("/image/java.png")));
+						btn_open_j.addActionListener(new ActionListener() {
 							@Override
-							public void mouseClicked(MouseEvent e) {
+							public void actionPerformed(ActionEvent e) {
 								openJavaFiles();
 							}
 						});
-						lbl_open_j.setToolTipText("Mở tập tin C/thư mục");
-						lbl_open_j.setText("Mở Java");
-						lbl_open_j.setOpaque(true);
-						lbl_open_j.setHorizontalAlignment(SwingConstants.CENTER);
-						lbl_open_j.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-						lbl_open_j.setBackground(SystemColor.controlHighlight);
-						panel_toolbar_left.add(lbl_open_j);
-						panel_toolbar_left.add(lbl_set_root);
+						btn_open_j.setToolTipText("Mở tập tin C/thư mục");
+						btn_open_j.setText("Mở Java");
+						panel_toolbar_left.add(btn_open_j);
+						panel_toolbar_left.add(btn_set_root);
 						
 						JPanel panel_toolbar_right = new JPanel();
 						GroupLayout gl_panel_toolbar = new GroupLayout(panel_toolbar);
@@ -923,8 +908,9 @@ public class GUIAll extends GUI {
 						panel_toolbar_right.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 						
 						JButton btn_setting = new JButton("Cài đặt");
+						btn_setting.setMargin(new Insets(2, 5, 2, 5));
 						btn_setting.setIcon(new ImageIcon(GUIAll.class.getResource("/image/setting.png")));
-						btn_setting.setPreferredSize(new Dimension(100, 30));
+						btn_setting.setPreferredSize(new Dimension(90, 30));
 						btn_setting.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
 								new SettingDialog(frame_main).setVisible(true);
@@ -958,21 +944,12 @@ public class GUIAll extends GUI {
 		tab_canvas.setBorder(null);
 		split_main.setLeftComponent(tab_canvas);
 
-		JScrollPane cv_fn_call_wrap = new JScrollPane();
+		JScrollPane cv_fn_call_wrap = new DragScrollPane();
 		cv_fn_call_wrap.setBorder(null);
 
 		canvas_fn_call = new FunctionCanvas();
 		canvas_fn_call.setBorder(null);
-		canvas_fn_call.setBackground(Color.WHITE);
-		canvas_fn_call.setParent(cv_fn_call_wrap);
 		cv_fn_call_wrap.setViewportView(canvas_fn_call);
-
-		cv_fn_call_wrap.getViewport().addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JViewport v = (JViewport) e.getSource();
-				v.repaint();
-			}
-		});
 		tab_canvas.addTab("Đồ thị gọi hàm", null, cv_fn_call_wrap, null);
 		
 //		JScrollPane vGraphWrap = new JScrollPane();
