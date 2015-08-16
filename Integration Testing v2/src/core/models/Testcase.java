@@ -1,9 +1,12 @@
 package core.models;
 
+import java.util.Arrays;
+
 import core.solver.Solver.Result;
 
 /**
- * Một testcase giúp xác định một thành phần của ứng dụng hoạt động đúng hay không. <br/>
+ * Một testcase giúp xác định một thành phần của ứng dụng hoạt động đúng hay không. 
+ * <br/>
  * Đối với việc kiểm thử đơn vị, nó thường bao gồm: hàm được kiểm thử 
  * (unit-under-test), các dữ liệu đầu vào, đầu ra ứng với đầu vào khi chạy, đầu ra 
  * mong muốn,... 
@@ -75,6 +78,16 @@ public class Testcase {
 		return mOutput;
 	}
 	
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this) return true;
+		if (obj == null || obj.getClass() != getClass()) return false;
+		Testcase t = (Testcase) obj;
+		
+		return Arrays.deepEquals(listInput, t.listInput);
+	}
+
 	/**
 	 * Trả về chuỗi danh sách các giá trị đầu vào
 	 */

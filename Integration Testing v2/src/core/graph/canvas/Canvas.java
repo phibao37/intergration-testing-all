@@ -5,12 +5,15 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -21,6 +24,7 @@ import javax.swing.SwingUtilities;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import core.S;
 import core.Utils;
@@ -34,8 +38,11 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 
 import java.awt.FlowLayout;
+
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -115,6 +122,16 @@ public class Canvas extends JPanel implements MouseListener {
 		button_1.setToolTipText("Toàn màn hình");
 		button_1.setIcon(new ImageIcon(Canvas.class.getResource("/image/fullscreen.png")));
 		toolbar.add(button_1);
+		
+		JButton button_2 = new JButton("");
+		button_2.setToolTipText("Lưu hình ảnh");
+		button_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				exportToImage();
+			}
+		});
+		button_2.setIcon(new ImageIcon(Canvas.class.getResource("/image/export.png")));
+		toolbar.add(button_2);
 		
 		this.addKeyListener(new KeyAdapter() {
 			@Override
@@ -311,8 +328,9 @@ public class Canvas extends JPanel implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		requestFocusInWindow();
-		if (e.getClickCount() == 2)
+		if (e.getClickCount() == 2){
 			toolbar.setVisible(!toolbar.isVisible());
+		}
 	}
 
 	@Override
@@ -332,6 +350,44 @@ public class Canvas extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseExited(MouseEvent e) {}
+	
+	private static JFileChooser export;
+	FileNameExtensionFilter exportExt;
+	
+	void exportToImage(){
+		if (export == null){
+			export = new JFileChooser();
+			exportExt = new FileNameExtensionFilter(
+					"Hình ảnh (JPG, PNG)", new String[]{"jpg", "png"});
+			export.setFileFilter(exportExt);
+		}
+		
+		if (export.showDialog(this.getTopLevelAncestor(), 
+				"Lưu hình ảnh") != JFileChooser.APPROVE_OPTION)
+			return;
+		
+		File choose = export.getSelectedFile();
+		if (!exportExt.accept(choose)){
+			choose = new File(choose.getAbsolutePath() + ".jpg");
+		}
+		
+		int w = getWidth();
+		int h = getHeight();
+		BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = bi.createGraphics();
+		boolean showToolbar = toolbar.isVisible();
+		
+		toolbar.setVisible(false);
+		print(g);
+		toolbar.setVisible(showToolbar);
+		
+		try {
+			choose.delete();
+			ImageIO.write(bi, Utils.getExtension(choose), choose);
+		} catch (Exception e) {
+			javax.swing.JOptionPane.showMessageDialog(this, e);
+		}
+	}
 	
 	static class Toolbar extends JPanel implements MouseListener{
 		private static final long serialVersionUID = 1L;

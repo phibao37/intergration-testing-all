@@ -179,7 +179,7 @@ public class AboutDialog extends JDialog {
 		contentPanel.setLayout(gl_contentPanel);
 		{
 			JPanel buttonPane = new JPanel();
-			FlowLayout fl_buttonPane = new FlowLayout(FlowLayout.RIGHT);
+			FlowLayout fl_buttonPane = new FlowLayout(FlowLayout.CENTER);
 			fl_buttonPane.setVgap(10);
 			fl_buttonPane.setHgap(10);
 			buttonPane.setLayout(fl_buttonPane);

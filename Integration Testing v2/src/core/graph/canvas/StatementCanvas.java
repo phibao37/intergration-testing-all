@@ -335,24 +335,25 @@ public class StatementCanvas extends Canvas {
 	private static class PopupMenu extends JPopupMenu {
 		private static final long serialVersionUID = 1L;
 		private StatementCanvas canvas;
-		private JMenuItem viewSource, seePath;
 
 		private PopupMenu() {
-			viewSource = new JMenuItem("Xem nguồn");
-			viewSource.addActionListener(new ActionListener() {
+			JMenuItem item;
+			
+			item = new JMenuItem("Xem nguồn");
+			item.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					canvas.openViewSource();
 				}
 			});
-			this.add(viewSource);
+			this.add(item);
 			
-			seePath = new JMenuItem("Kiểm thử đơn vị");
-			seePath.addActionListener(new ActionListener() {
+			item = new JMenuItem("Kiểm thử đơn vị");
+			item.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					canvas.openViewPath();
 				}
 			});
-			this.add(seePath);
+			this.add(item);
 		}
 
 		private void openPopupNode(StatementCanvas n, MouseEvent e) {

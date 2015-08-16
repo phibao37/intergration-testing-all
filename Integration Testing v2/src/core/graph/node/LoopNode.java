@@ -53,12 +53,6 @@ public class LoopNode extends JPanel {
 		childs = new ArrayList<LoopNode>();
 		mLoop = loop;
 		
-		MouseAdapter onMouseClick = new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				requestFocusInWindow();
-			}
-		};
 		FocusAdapter onFocus = new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -70,7 +64,12 @@ public class LoopNode extends JPanel {
 			}
 		};
 		
-		addMouseListener(onMouseClick);
+		addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				requestFocusInWindow();
+			}
+		});
 		addFocusListener(onFocus);
 		setBackground(Color.WHITE);
 		setBorder(WHITE);
@@ -78,14 +77,12 @@ public class LoopNode extends JPanel {
 		
 		JLabel lblI = new JLabel(loop == null ? 
 				"Condition" : loop.getCondition().getContent());
-		lblI.addMouseListener(onMouseClick);
 		lblI.setBounds(10, 9, 160, 32);
 		lblI.setPreferredSize(new Dimension(160, 32));
 		lblI.setOpaque(true);
 		lblI.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		JPanel panel = new JPanel();
-		panel.addMouseListener(onMouseClick);
 		panel.setBounds(10, 46, 160, 30);
 		panel.setPreferredSize(new Dimension(160, 30));
 		panel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));

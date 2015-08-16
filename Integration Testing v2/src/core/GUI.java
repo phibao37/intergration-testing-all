@@ -14,7 +14,7 @@ public class GUI {
 	/**
 	 * Đối tượng GUI đang mở, dùng để tương tác với các tác vụ đồ họa 
 	 */
-	public static GUI instance;
+	public static GUI instance = new GUI();
 	
 	/**
 	 * Tạo một đối tượng GUI mới
@@ -27,23 +27,17 @@ public class GUI {
 	 * Mở nội dung một tập tin để xem. Lớp con cần overide để sử dụng
 	 * @param file tập tin muốn mở
 	 */
-	public void openFileView(File file){
-		throw new RuntimeException();
-	}
+	public void openFileView(File file){}
 	
 	/**
 	 * Xem chi tiết một hàm số: số lượng testcase, số hàm con, ...
 	 */
-	public void openFunctionDetails(Function fn){
-		throw new RuntimeException();
-	}
+	public void openFunctionDetails(Function fn){}
 	
 	/**
 	 * Thông báo cho GUI biết số lượng testcase đã bị thay đổi
 	 */
-	public void notifyFunctionTestcaseChanged(Function fn, int count){
-		throw new RuntimeException();
-	}
+	public void notifyFunctionTestcaseChanged(Function fn, int count){}
 	
 	/**
 	 * Mở đồ thị CFG của một hàm trong chương trình để xem
@@ -52,16 +46,18 @@ public class GUI {
 	 * @return 
 	 */
 	public CFGView openFuntionView(Function fn, boolean subCondition){
-		throw new RuntimeException();
+		return null;
 	}
+	
+	public void openFunctionTestcaseManager(Function fn) {}
 	
 	/**
 	 * Bắt đầu quá trình kiểm thử một đơn vị
 	 * @param func hàm cần kiểm thử
 	 */
-	public void beginTestFunction(Function func){
-		throw new RuntimeException();
-	}
+	public void beginTestFunction(Function func){}
+	
+	public void functionPairClicked(Function source, Function target){}
 	
 	/**
 	 * Trả về độ rộng của một canvas hiển thị chính trong ứng dụng.<br/>

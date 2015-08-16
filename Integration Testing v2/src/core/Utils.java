@@ -277,6 +277,19 @@ public class Utils {
 	}
 	
 	/**
+	 * Trả về định dạng của tệp tin, là chuỗi sau dấu "." cuối cùng của tên tập tin
+	 */
+	public static String getExtension(File file){
+		String extension = "", fileName = file.getAbsolutePath();
+
+		int i = fileName.lastIndexOf('.');
+		if (i > 0) {
+		    extension = fileName.substring(i+1);
+		}
+		return extension;
+	}
+	
+	/**
 	 * Đưa một nội dung trong body vào một trang html hoàn chỉnh
 	 */
 	public static String html(String body){

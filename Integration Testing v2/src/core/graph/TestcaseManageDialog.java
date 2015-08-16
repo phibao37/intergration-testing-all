@@ -12,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 
 import core.S.SCREEN;
 import core.Utils;
+import core.error.CoreException;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
@@ -25,11 +26,15 @@ import core.models.type.BasicType;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import java.awt.Component;
+
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -56,6 +61,7 @@ public class TestcaseManageDialog extends JDialog {
 	private JTextField[] list_value;
 	private core.models.Type rtnType;
 	private TestcaseManager tm;
+	private int currentEdit = -1;
 
 	private boolean isVoid(){
 		return rtnType == BasicType.VOID;
@@ -182,12 +188,6 @@ public class TestcaseManageDialog extends JDialog {
 		panel_current = new JPanel();
 		panel_current.setBackground(Color.WHITE);
 		scrollPane.setViewportView(panel_current);
-		
-		/*----------------------------------------------*/
-		
-		updateByTestcaseManager(tm);
-		
-		/*----------------------------------------------*/
 		
 		GridBagLayout gbl_panel = new GridBagLayout();
 		gbl_panel.columnWidths = new int[]{25, 180, 120, 200, 25, 0};
@@ -338,19 +338,42 @@ public class TestcaseManageDialog extends JDialog {
 		panel.add(panel_1, gbc_panel_1);
 		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
-		JButton btnChnhSa = new JButton("Chỉnh sửa");
-		btnChnhSa.setEnabled(false);
-		panel_1.add(btnChnhSa);
+		btn_edit = new JButton("Chỉnh sửa");
+		btn_edit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					performEdit(currentEdit);
+				} catch (Exception e1) {
+					alert(e1.getMessage());
+				}
+			}
+		});
+		btn_edit.setEnabled(false);
+		panel_1.add(btn_edit);
 		
 		JButton btnThmMi = new JButton("Thêm mới");
 		btnThmMi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				addNewTestcase();
+				try {
+					addNewTestcase();
+				} catch (Exception e1) {
+					alert(e1.getMessage());
+				}
 			}
 		});
 		panel_1.add(btnThmMi);
 		
 		JButton btnXaB = new JButton("Xóa bỏ");
+		btnXaB.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JTextField t: list_value)
+					t.setText(null);
+				txt_return_value.setText(null);
+				setCurrentEdit(-1);
+				if (list_value.length > 0)
+					list_value[0].requestFocusInWindow();
+			}
+		});
 		panel_1.add(btnXaB);
 		
 		contentPanel.setLayout(gl_contentPanel);
@@ -374,6 +397,8 @@ public class TestcaseManageDialog extends JDialog {
 				getRootPane().setDefaultButton(okButton);
 			}
 		}
+		
+		updateByTestcaseManager(tm, false);
 
 	    setSize(SCREEN.WIDTH * 3/5, SCREEN.HEIGHT * 4/5);
 		int x = (SCREEN.WIDTH - getWidth())/2;
@@ -381,7 +406,7 @@ public class TestcaseManageDialog extends JDialog {
 	    setLocation(x, y);
 	}
 	
-	private void addNewTestcase() {
+	private Testcase generateTestcase() throws Exception{
 		Variable[] inputs = new Variable[mParas.length];
 		Expression rtnEp = null;
 		
@@ -403,8 +428,8 @@ public class TestcaseManageDialog extends JDialog {
 				}
 			} else {
 				if (txt.isEmpty()){
-					alert("Chưa nhập giá trị đầu vào: " + (i+1));
-					return;
+					throw new RuntimeException("Chưa nhập giá trị đầu vào: " 
+							+ source.getName());
 				}
 				inputs[i] = new Variable(source.getName(), type, 
 						parseExpression(txt, type));
@@ -415,29 +440,32 @@ public class TestcaseManageDialog extends JDialog {
 		if (!isVoid()){
 			String txt = txt_return_value.getText();
 			if (txt.isEmpty()){
-				alert("Chưa nhập giá trị trả về");
-				return;
+				throw new RuntimeException("Chưa nhập giá trị trả về");
 			}
 			rtnEp = parseExpression(txt, rtnType);
 		}
 		
-		Testcase t = new Testcase(inputs, rtnEp);
+		return new Testcase(inputs, rtnEp);
+	}
+	
+	private void addNewTestcase() throws Exception {
+		Testcase t = generateTestcase();
+		
 		if (tm.add(t)){
-			updateByTestcaseManager(tm);
-			revalidate();
-			repaint();
+			updateByTestcaseManager(tm, true);
 		} else {
-			alert("Testcase đã có sẵn");
+			alert("Testcase "+ t.getSummaryInput() +" đã có sẵn");
 		}
 	}
 
-	private void updateByTestcaseManager(TestcaseManager tm) {
+	private void updateByTestcaseManager(TestcaseManager tm, boolean repaint) {
+		setCurrentEdit(-1);
 		panel_current.removeAll();
 		int len = tm.size();
 		
 		gbl_current = new GridBagLayout();
-		gbl_current.columnWidths = new int[]{300, 100, 150, 0};
-		gbl_current.columnWeights = new double[]{1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_current.columnWidths = new int[]{300, 100, 50, 25, 25, 50, 0};
+		gbl_current.columnWeights = new double[]{1, 0, 0, 0, 0, 0, Double.MIN_VALUE};
 		
 		gbl_current.rowHeights = new int[len+1];
 		Arrays.fill(gbl_current.rowHeights, 0, len, 25);
@@ -447,6 +475,7 @@ public class TestcaseManageDialog extends JDialog {
 		
 		for (int i = 0; i < len; i++){
 			Testcase t = tm.get(i);
+			int x = i;
 			
 			JLabel label = new JLabel(t.getSummaryInput());
 			GridBagConstraints gbc_label = new GridBagConstraints();
@@ -461,7 +490,103 @@ public class TestcaseManageDialog extends JDialog {
 			gbc_label_1.gridx = 1;
 			gbc_label_1.gridy = i;
 			panel_current.add(label_1, gbc_label_1);
+			
+			JButton btn_edit = new JButton("");
+			btn_edit.setToolTipText("Chỉnh sửa");
+			btn_edit.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					editPosition(x);
+				}
+			});
+			btn_edit.setIcon(new ImageIcon(
+					getClass().getResource("/image/edit.png")));
+			btn_edit.setBorder(null);
+			GridBagConstraints gbc_edit = new GridBagConstraints();
+			gbc_edit.insets = new Insets(0, 0, 5, 5);
+			gbc_edit.gridx = 3;
+			gbc_edit.gridy = i;
+			panel_current.add(btn_edit, gbc_edit);
+			
+			JButton btn_delete = new JButton("");
+			btn_delete.setToolTipText("Xoá");
+			btn_delete.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					deletePosition(x);
+				}
+			});
+			btn_delete.setIcon(new ImageIcon(
+					getClass().getResource("/image/delete.png")));
+			btn_delete.setBorder(null);
+			GridBagConstraints gbc_delete = new GridBagConstraints();
+			gbc_delete.insets = new Insets(0, 0, 5, 5);
+			gbc_delete.gridx = 4;
+			gbc_delete.gridy = i;
+			panel_current.add(btn_delete, gbc_delete);
 		}
+		
+		if (repaint){
+			revalidate();
+			repaint();
+		}
+	}
+	
+	private void editPosition(int position){
+		Testcase t = tm.get(position);
+		Variable[] inputs = t.getInputs();
+		
+		for (int i = 0; i < inputs.length; i++){
+			if (inputs[i] instanceof ArrayVariable){
+				String value = "";
+				HashMap<int[], Expression> valueMap = 
+						((ArrayVariable)inputs[i]).getAllValue();
+				
+				for (int[] indexs: valueMap.keySet()){
+					value += ", ";
+					for (int index: indexs)
+						value +=index + " ";
+					value += "=> " + valueMap.get(indexs);
+				}
+				if (!value.isEmpty())
+					value = value.substring(2);
+				list_value[i].setText(value);
+			} else {
+				list_value[i].setText(inputs[i].getValue().getContent());
+			}
+		}
+		if (!isVoid())
+			txt_return_value.setText(t.getReturnOutput().getContent());
+		
+		if (list_value.length > 0){
+			list_value[0].requestFocusInWindow();
+			list_value[0].selectAll();
+		}
+		setCurrentEdit(position);
+	}
+	
+	private void performEdit(int position) throws Exception{
+		tm.set(currentEdit, generateTestcase());
+		updateByTestcaseManager(tm, true);
+	}
+	
+	private void setCurrentEdit(int position){
+		if (currentEdit != -1)
+			setRowColor(currentEdit, null);
+		currentEdit = position;
+		
+		btn_edit.setEnabled(position >= 0);
+		if (position >= 0)
+		setRowColor(currentEdit, Color.RED);
+	}
+	
+	private void setRowColor(int row, Color color){
+		Component[] c = panel_current.getComponents();
+		c[4*row].setForeground(color);
+		c[4*row+1].setForeground(color);
+	}
+
+	private void deletePosition(int position){
+		tm.remove(position);
+		updateByTestcaseManager(tm, true);
 	}
 	
 	/**
@@ -481,8 +606,15 @@ public class TestcaseManageDialog extends JDialog {
 		return map;
 	}
 	
-	private static Expression parseExpression(String content, core.models.Type type){
-		return new IDExpression(content, Utils.basicTypeToFlag((BasicType) type));
+	private static Expression parseExpression(String content, core.models.Type type)
+			throws CoreException{
+		IDExpression r = new IDExpression(content, 
+				Utils.basicTypeToFlag((BasicType) type));
+		
+		if (r.getType() != type)
+			throw new CoreException("\"%s\" không phải là định dạng kiểu %s",
+					content, type);
+		return r;
 	}
 	
 	private void alert(String error){
@@ -492,4 +624,5 @@ public class TestcaseManageDialog extends JDialog {
 
 	private static Color BG_INPUT = new Color(250, 250, 250);
 	private JPanel panel_current;
+	private JButton btn_edit;
 }

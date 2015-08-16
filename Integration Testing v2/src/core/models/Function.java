@@ -247,13 +247,28 @@ public class Function extends Element implements Graphable {
 
 		@Override
 		public boolean add(Testcase e) {
-			if (contains(e))
-				return false;
-			
-			notifyTestcaseChanged();
-			return super.add(e) | notifyTestcaseChanged();
+			return contains(e) ? false : super.add(e) | notifyTestcaseChanged();
 		}
 		
+		/**
+		 * @throws RuntimeException testcase bị trùng với testcase khác
+		 */
+		@Override
+		public Testcase set(int index, Testcase element) throws RuntimeException {
+			int i = indexOf(element);
+			
+			if (i >= 0 && i != index)
+				throw new RuntimeException(element.getSummaryInput()
+						+ " bị trùng với testcase số " + i);
+			return super.set(index, element);
+		}
+
+		@Override
+		public Testcase remove(int index) {
+			notifyTestcaseChanged();
+			return super.remove(index);
+		}
+
 		private boolean notifyTestcaseChanged(){
 			GUI.instance.notifyFunctionTestcaseChanged(getFunction(), size());
 			return true;

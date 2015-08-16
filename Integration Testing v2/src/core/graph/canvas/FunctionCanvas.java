@@ -2,10 +2,12 @@ package core.graph.canvas;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Polygon;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
+import core.GUI;
 import core.S;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.node.FunctionNode;
@@ -26,7 +28,7 @@ public class FunctionCanvas extends Canvas {
 	private FunctionAdapter mAdapter;
 	private ArrayList<FunctionNode> fnNodeList = new ArrayList<>();
 	
-	private ArrayList<Rectangle> rectList = new ArrayList<>();
+	private ArrayList<Line> listLine = new ArrayList<>();
 	private Function source, target;
 
 	@Override
@@ -98,17 +100,18 @@ public class FunctionCanvas extends Canvas {
 		this.repaint();
 	}
 	
-	private Rectangle add(int x1, int y1, int x2, int y2){
-		Rectangle r = new Rectangle(x1, y1, x2, y2, 1.2, source, target);
-		rectList.add(r);
+	private Line add(int x1, int y1, int x2, int y2){
+		Line r = new Line(x1, y1, x2, y2, source, target);
+		listLine.add(r);
 		return r;
 	}
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		for (Rectangle r: rectList)
-			if (r.contains(e.getX(), e.getY())){
-				System.out.println(r);
+		int D = 7, x = e.getX(), y = e.getY();
+		for (Line r: listLine)
+			if (r.intersects(x-D, y-D, 2*D, 2*D)){
+				GUI.instance.functionPairClicked(r.source, r.target);
 				break;
 			}
 		super.mousePressed(e);
@@ -118,7 +121,11 @@ public class FunctionCanvas extends Canvas {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		rectList.clear();
+		
+		Graphics2D g2 = (Graphics2D) g;
+		g2.setStroke(NORMAL_STROKE);
+		
+		listLine.clear();
 		
 		int x1, y1, x2, y2, xs, ys;
 		 Node[] refer;
@@ -167,7 +174,7 @@ public class FunctionCanvas extends Canvas {
 							x2 = n2.getX() + (rightSide ? 0 : n2.getWidth());
 							y2 = n2.getY() + n2.getHeight() / 2;
 						} else {
-							g.fillPolygon(add(x1, y1, x1, y1 + gap));
+							g2.draw(add(x1, y1, x1, y1 + gap));
 							int tmp;
 							if (outOfPadding) {
 								tmp = x2 + (n2.getWidth() / 2 + gap) * (rightSide ? -1 : 1);
@@ -175,17 +182,19 @@ public class FunctionCanvas extends Canvas {
 								tmp = n2.getX()
 										+ (rightSide ? n2.getWidth() + gap : -gap);
 							}
-							g.fillPolygon(add(x1, y1 + gap, tmp, y1 + gap));
+							g2.draw(add(x1, y1 + gap, tmp, y1 + gap));
 							x1 = tmp;
 							y2 = y2 + n2.getHeight() / 2;
-							g.fillPolygon(add(x1, y1 + gap, x1, y2));
+							g2.draw(add(x1, y1 + gap, x1, y2));
 							y1 = y2;
 							x2 = n2.getX()
 									+ (rightSide ^ outOfPadding ? n2.getWidth() : 0);
 						}
 					}
 					drawArrow(g, x1, y1, x2, y2, d, h);
-					g.fillPolygon(add(x1, y1, x2, y2));
+					
+					
+					g2.draw(add(x1, y1, x2, y2));
 				 }
 			 }
 		 }
@@ -193,32 +202,46 @@ public class FunctionCanvas extends Canvas {
 		 super.postPaintComponent(g);
 	}
 	
-	static class Rectangle extends Polygon{
-		private static final long serialVersionUID = 1L;
-		
-		private Function source, target;
-		
-		public Rectangle(int x1, int y1, int x2, int y2, double r, 
-				Function source, Function target){
-			this.source = source;
-			this.target = target;
-			int dx = x2 - x1, dy = y2 - y1;
-			double d = Math.sqrt((dx*dx+dy*dy)/2.0);
-			int m = (int)(r*(dx+dy)/d), 
-				n = (int)(r*(dx-dy)/d);
-			
-			addPoint(x1 - m, y1 + n);
-			addPoint(x1 - n, y1 - m);
-			addPoint(x2 + m, y2 - n);
-			addPoint(x2 + n, y2 + m);
-		}
-
-		@Override
-		public String toString() {
-			return source.getName() + " -> " + target.getName();
-		}
-		
-		
+	static class Line extends Line2D.Double{
+	private static final long serialVersionUID = 1L;
+	
+	private Function source, target;
+	
+	public Line(int x1, int y1, int x2, int y2, Function source, Function target){
+		super(x1, y1, x2, y2);
+		this.source = source;
+		this.target = target;
 	}
+	
+	
+}
+	
+//	static class Rectangle extends Polygon{
+//		private static final long serialVersionUID = 1L;
+//		
+//		private Function source, target;
+//		
+//		public Rectangle(int x1, int y1, int x2, int y2, double r, 
+//				Function source, Function target){
+//			this.source = source;
+//			this.target = target;
+//			int dx = x2 - x1, dy = y2 - y1;
+//			double d = Math.sqrt((dx*dx+dy*dy)/2.0);
+//			int m = (int)(r*(dx+dy)/d), 
+//				n = (int)(r*(dx-dy)/d);
+//			
+//			addPoint(x1 - m, y1 + n);
+//			addPoint(x1 - n, y1 - m);
+//			addPoint(x2 + m, y2 - n);
+//			addPoint(x2 + n, y2 + m);
+//		}
+//
+//		@Override
+//		public String toString() {
+//			return source.getName() + " -> " + target.getName();
+//		}
+//		
+//		
+//	}
 
 }

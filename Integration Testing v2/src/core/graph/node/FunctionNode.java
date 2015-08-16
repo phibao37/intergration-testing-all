@@ -34,7 +34,7 @@ public class FunctionNode extends Node {
 			public void mouseClicked(MouseEvent e) {
 				GUI.instance.openFunctionDetails(fn);
 				if (e.getClickCount() == 2){
-					beginTest();
+					openTestcaseManager();
 				}
 			}
 		});
@@ -65,7 +65,9 @@ public class FunctionNode extends Node {
 		GUI.instance.beginTestFunction(getFunction());
 	}
 	
-	
+	protected void openTestcaseManager(){
+		GUI.instance.openFunctionTestcaseManager(getFunction());
+	}
 	
 	@Override
 	public void setRefers(Node[] refers) {
@@ -103,40 +105,49 @@ public class FunctionNode extends Node {
 	private static class PopupMenu extends JPopupMenu {
 		private static final long serialVersionUID = 1L;
 		private FunctionNode node;
-		private JMenuItem viewSource, viewCFG, viewCFG3, seePath;
 
 		private PopupMenu() {
-			viewSource = new JMenuItem("Xem nguồn");
-			viewSource.addActionListener(new ActionListener() {
+			JMenuItem item;
+			
+			item = new JMenuItem("Xem nguồn");
+			item.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					node.openViewSource();
 				}
 			});
-			this.add(viewSource);
+			this.add(item);
 
-			viewCFG = new JMenuItem("Xem đồ thị CFG");
-			viewCFG.addActionListener(new ActionListener() {
+			item = new JMenuItem("Xem đồ thị CFG");
+			item.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					node.openViewCFG();
 				}
 			});
-			this.add(viewCFG);
+			this.add(item);
 
-			viewCFG3 = new JMenuItem("Xem đồ thị CFG3");
-			viewCFG3.addActionListener(new ActionListener() {
+			item = new JMenuItem("Xem đồ thị CFG3");
+			item.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					node.openViewCFG3();
 				}
 			});
-			this.add(viewCFG3);
+			this.add(item);
 
-			seePath = new JMenuItem("Kiểm thử đơn vị");
-			seePath.addActionListener(new ActionListener() {
+			item = new JMenuItem("Kiểm thử đơn vị");
+			item.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					node.beginTest();
 				}
 			});
-			this.add(seePath);
+			this.add(item);
+			
+			item = new JMenuItem("Quán lý testcase");
+			item.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					node.openTestcaseManager();
+				}
+			});
+			this.add(item);
 		}
 
 		private void openPopupNode(FunctionNode n, MouseEvent e) {

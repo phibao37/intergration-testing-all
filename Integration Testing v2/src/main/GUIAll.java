@@ -508,6 +508,18 @@ public class GUIAll extends GUI {
 			lbl_number_of_testcase.setText(count + "");
 		}
 	}
+	
+	@Override
+	public void openFunctionTestcaseManager(Function fn) {
+		new TestcaseManageDialog(frame_main, fn.getTestcaseManager())
+			.setVisible(true);
+	}
+
+	@Override
+	public void functionPairClicked(Function source, Function target) {
+		tab_table.setSelectedIndex(5);
+		panel_function_pair.selectPair(source, target);
+	}
 
 	@Override
 	public void setStatus(String status, Object... args){
@@ -608,9 +620,7 @@ public class GUIAll extends GUI {
 			public void actionPerformed(ActionEvent e) {
 				if (selectFunction == null)
 					return;
-				new TestcaseManageDialog(frame_main, 
-						selectFunction.getTestcaseManager())
-					.setVisible(true);
+				openFunctionTestcaseManager(selectFunction);
 			}
 		});
 		GridBagConstraints gbc_btnQunL = new GridBagConstraints();
@@ -684,7 +694,7 @@ public class GUIAll extends GUI {
 			table_path_details.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
 		}
 		
-		JTabbedPane tab_table = new JTabbedPane(JTabbedPane.TOP);
+		tab_table = new JTabbedPane(JTabbedPane.TOP);
 		tab_table.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JTabbedPane tab = (JTabbedPane) e.getSource();
@@ -898,6 +908,14 @@ public class GUIAll extends GUI {
 				if (dbClick)
 					beginTestFunctionPair(node.getFunctionPair());
 			}
+		});
+		panel_function_pair.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				canvas_fn_call.clearAllSelectedFunctionPair();
+			}
+			
 		});
 		pn_function_pair_wrap.setViewportView(panel_function_pair);
 		panel_inte_type.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
@@ -1116,6 +1134,7 @@ public class GUIAll extends GUI {
 	private JLabel lbl_fn_name;
 	private JLabel lbl_number_of_testcase;
 	private JLabel lbl_number_of_childs;
+	private JTabbedPane tab_table;
 	
 	private static class StorePathTable extends JTable{
 		private static final long serialVersionUID = 1L;
