@@ -45,8 +45,6 @@ import core.graph.CFGView;
 import core.graph.DragScrollPane;
 import core.graph.FileView;
 import core.graph.LightTabbedPane;
-import core.graph.SettingDialog;
-import core.graph.TestcaseManageDialog;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.canvas.FunctionCanvas;
 import core.graph.canvas.FunctionPairCanvas;
@@ -500,8 +498,6 @@ public class GUIAll extends GUI {
 		lbl_number_of_childs.setText(count == 0 ? "0 (Hàm đơn vị)" : count + "");
 	}
 	
-	
-
 	@Override
 	public void notifyFunctionTestcaseChanged(Function fn, int count) {
 		if (fn == selectFunction){
@@ -516,9 +512,13 @@ public class GUIAll extends GUI {
 	}
 
 	@Override
-	public void functionPairClicked(Function source, Function target) {
+	public void functionPairClicked(Function source, Function target, boolean dbClick) {
 		tab_table.setSelectedIndex(5);
-		panel_function_pair.selectPair(source, target);
+		FunctionPair p = panel_function_pair.selectPair(source, target);
+		
+		if (dbClick){
+			beginTestFunctionPair(p);
+		}
 	}
 
 	@Override

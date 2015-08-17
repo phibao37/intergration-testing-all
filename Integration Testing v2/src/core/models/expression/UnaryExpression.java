@@ -3,6 +3,8 @@ package core.models.expression;
 import core.Utils;
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.models.Type;
+import core.models.type.BasicType;
 /**
  * Biểu thức một bên, bao gồm một phép toán và một biểu thức con ở bên trái hoặc
  * bên phải phép toán
@@ -101,6 +103,16 @@ public class UnaryExpression extends ExpressionGroup implements Conditionable {
 	@Override
 	public boolean isConditionExpression() {
 		return getOperator().equals(LOGIC_NOT);
+	}
+
+	/**
+	 * Nếu là biểu thức logic phủ định (!(x < y)), kiểu trả về là BOOL, nếu không kiểu
+	 * trả về trùng với kiểu của biểu thức con
+	 */
+	@Override
+	public Type getType() {
+		return isConditionExpression() ? BasicType.BOOL : 
+			getSubElement().getSource().getType();
 	}
 }
 

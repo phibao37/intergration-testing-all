@@ -107,14 +107,20 @@ public class FunctionCanvas extends Canvas {
 	}
 	
 	@Override
-	public void mousePressed(MouseEvent e) {
+	public void mouseClicked(MouseEvent e) {
 		int D = 7, x = e.getX(), y = e.getY();
+		boolean notFound = true;
+		
 		for (Line r: listLine)
 			if (r.intersects(x-D, y-D, 2*D, 2*D)){
-				GUI.instance.functionPairClicked(r.source, r.target);
+				GUI.instance.functionPairClicked(r.source, r.target, 
+						e.getClickCount() == 2);
+				notFound = false;
 				break;
 			}
-		super.mousePressed(e);
+		
+		if (notFound)
+			super.mouseClicked(e);
 	}
 
 

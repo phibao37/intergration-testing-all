@@ -89,6 +89,9 @@ public class VariableTable extends ArrayList<Variable> {
 
 	/**
 	 * Thay thế các biến trong bảng có mặt trong biểu thức bằng giá trị của các biến đó 
+	 * <br/>
+	 * Đồng thời, các biểu thức có tham chiểu tên (x, y[2]) sẽ được gán kiểu ứng với
+	 * biến số tương ứng
 	 * @param expression biểu thức cần thay thế
 	 * @return biểu thức đã được thay thế
 	 */
@@ -107,6 +110,8 @@ public class VariableTable extends ArrayList<Variable> {
 					//System.out.println("Will not replace all array content");
 				}
 				else if (find != null) {
+					name.setType(find.getType());
+					
 					if (find.isValueSet()){
 						Expression clone = find.getValue()
 								.clone()
@@ -126,6 +131,10 @@ public class VariableTable extends ArrayList<Variable> {
 				ArrayVariable find = (ArrayVariable) find(array.getName());
 
 				if (find != null) {
+					
+					//Truy cập mảng toàn bộ, int a[][][], chưa hỗ trợ a[1][2]
+					array.setType(find.getDataType());
+					
 					Expression[] indexes = array.getIndexes().clone();
 					for (int i = 0; i < indexes.length; i++)
 						indexes[i] = evalExpression(indexes[i]);

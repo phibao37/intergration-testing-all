@@ -57,7 +57,7 @@ public class GUI {
 	 */
 	public void beginTestFunction(Function func){}
 	
-	public void functionPairClicked(Function source, Function target){}
+	public void functionPairClicked(Function source, Function target, boolean dbClick){}
 	
 	/**
 	 * Trả về độ rộng của một canvas hiển thị chính trong ứng dụng.<br/>

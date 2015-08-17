@@ -2,6 +2,8 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.models.Type;
+import core.models.type.ArrayType;
 
 /**
  * Mô tả một biểu thức mảng, thường ở dưới dạng: {a1, a2,..., an}<br/>
@@ -53,6 +55,15 @@ public class ArrayExpression extends ExpressionGroup {
 		for (int i = 1; i < g.length; i++)
 			content += ", " + g[i];
 		return content + "}";
+	}
+
+
+	@Override
+	public Type getType() {
+		int len = length();
+		if (len > 0)
+			return new ArrayType(getElement(0).getSource().getType(), len);
+		return null;
 	}
 
 }

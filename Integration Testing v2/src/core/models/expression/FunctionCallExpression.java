@@ -3,6 +3,7 @@ package core.models.expression;
 import core.models.Expression;
 import core.models.ExpressionGroup;
 import core.models.Function;
+import core.models.Type;
 
 /**
  * Mô tả biểu thức gọi hàm, bao gồm tên của hàm cần gọi và một danh sách các
@@ -74,6 +75,19 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	@Override
 	public boolean isConstant() {
 		return false;
+	}
+
+	/**
+	 * Không hỗ trợ, lấy từ hàm tương ứng
+	 */
+	@Override
+	public void setType(Type type) {}
+
+	@Override
+	public Type getType() {
+		if (mFunc != null)
+			return mFunc.getReturnType();
+		return null;
 	}
 	
 	

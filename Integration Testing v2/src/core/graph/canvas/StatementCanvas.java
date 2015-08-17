@@ -28,7 +28,7 @@ import core.models.Statement;
 public class StatementCanvas extends Canvas {
 	public static final Color DEFAULT = Color.BLACK;
 	public static final Color TRUE = Color.BLUE;
-	public static final Color FALSE = Color.GREEN;
+	public static final Color FALSE = new Color(0, 153, 51);
 	public static final Color SELECTED = Color.RED;
 	public static final Color SELECTED_EXTRA = Color.ORANGE;
 	
@@ -166,15 +166,21 @@ public class StatementCanvas extends Canvas {
 		this.repaint();
 	}
 	
+	/** Math.asin(10.0/38) */
+	static double DELTA = 0.26629401711818285;
+	
 	static int[] getPoint(int x1, int y1, int x2, int y2, boolean left){
-		int d = 38, r = 10;
-		double anpha1 = Math.atan2(y2-y1, x2-x1),
-			   anpha2 = Math.asin(r*1.0/d),
-			   anpha  = anpha1 + anpha2 * (left ? 1 : -1);
+		double anpha = Math.atan2(y2-y1, x2-x1),
+			   anph6 = anpha * 6 / Math.PI;
+		
+		if ((left && 5 > anph6) || (!left && 0 < anph6 && anph6 <= 1))
+			anpha += DELTA;
+		else
+			anpha -= DELTA;
 		
 		return new int[]{
-			x1 + (int) (d * Math.cos(anpha)),
-			y1 + (int) (d * Math.sin(anpha))
+			x1 + (int) (38 * Math.cos(anpha)),
+			y1 + (int) (38 * Math.sin(anpha))
 		};
 	}
 	

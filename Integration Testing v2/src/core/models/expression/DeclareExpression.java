@@ -37,7 +37,7 @@ public class DeclareExpression extends ExpressionGroup {
 	/**
 	 * Trả về kiểu của khai báo
 	 */
-	public Type getDeclareType(){
+	public Type getType(){
 		return mType;
 	}
 	
@@ -50,7 +50,7 @@ public class DeclareExpression extends ExpressionGroup {
 	
 	@Override
 	protected String generateContent() {
-		String content = getDeclareType() + " " + g[0];
+		String content = getType() + " " + g[0];
 		
 		for (int i = 1; i < g.length; i++)
 			content += ", " + g[i];

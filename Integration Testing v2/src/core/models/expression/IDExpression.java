@@ -282,6 +282,7 @@ public class IDExpression extends Expression implements Conditionable {
 	/**
 	 * Trả về kiểu của biểu thức hằng
 	 */
+	@Override
 	public BasicType getType(){
 		return mType;
 	}

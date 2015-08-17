@@ -298,7 +298,10 @@ public class Z3Solver extends Solver {
 			else if (op.equals(BinaryExpression.MOD))
 				return String.format("(rem %s %s)", op1, op2);
 			
-			//TODO chuyển / sang div nếu kiểu của 2 vế đều là int!!!!!!!!!!!! 
+			//Chuyển / sang div nếu phép chia là phép chia nguyên (3/2 = 1)
+			else if (op.equals(BinaryExpression.DIV) 
+					&& bin.getType().getSize() <= BasicType.INT_SIZE)
+				return String.format("(div %s %s)", op1, op2);
 			
 			//Các dấu bình thường như +, -, >, <, ... để nguyên
 			else 

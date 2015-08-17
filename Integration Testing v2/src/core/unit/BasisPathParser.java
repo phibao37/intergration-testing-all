@@ -287,7 +287,7 @@ public class BasisPathParser {
 	 * Xử lý một biểu thức khai báo
 	 */
 	protected void handleDeclare(DeclareExpression declare){
-		Type type = declare.getDeclareType();
+		Type type = declare.getType();
 		
 		for (Expression dc: declare.getDeclares()){
 			Expression left = dc, value = null;

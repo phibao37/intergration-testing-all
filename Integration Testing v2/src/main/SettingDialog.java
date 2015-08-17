@@ -1,4 +1,4 @@
-package core.graph;
+package main;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog;
@@ -41,6 +41,7 @@ import java.util.Enumeration;
 
 import core.S;
 import core.Utils;
+import core.graph.GQuery;
 import core.graph.GQuery.Filter;
 import core.solver.Solver;
 import core.S.SCREEN;
@@ -49,6 +50,7 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.JCheckBox;
 
 public class SettingDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -81,9 +83,7 @@ public class SettingDialog extends JDialog {
 	
 	private void loadSettings(){
 		spinner_max_loop.setValue(S.MAX_LOOP_TEST);
-		
 		entry_z3_dir.setText(S.DIR_Z3_BIN.getAbsolutePath());
-		
 		entry_tmp_dir.setText(S.DIR_TEMP.getPath());
 		if (S.DIR_TEMP.isDirectory()){
 			setTmpSize(Utils.getFileSize(S.DIR_TEMP));
@@ -104,6 +104,8 @@ public class SettingDialog extends JDialog {
 		entry_rand_loop.setValue(S.RAND_LOOP);
 		entry_rand_min.setValue(S.RAND_MIN);
 		entry_rand_max.setValue(S.RAND_MAX);
+		
+		entry_show_canvas_toolbar.setSelected(S.CANVAS_SHOW_TOOLBAR);
 	}
 	
 	private void applySettings(){
@@ -115,6 +117,9 @@ public class SettingDialog extends JDialog {
 		S.RAND_LOOP = (int) entry_rand_loop.getValue();
 		S.RAND_MIN = (int) entry_rand_min.getValue();
 		S.RAND_MAX = (int) entry_rand_max.getValue();
+		
+		S.CANVAS_SHOW_TOOLBAR = entry_show_canvas_toolbar.isSelected();
+		
 		S.save();
 	}
 	
@@ -421,6 +426,27 @@ public class SettingDialog extends JDialog {
 		
 		GQuery.from(entry_rand_loop, entry_rand_min, entry_rand_max).group("Random");
 		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		tabbed_main.addTab("Cài đặt khác", null, scrollPane_1, null);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBackground(Color.WHITE);
+		scrollPane_1.setViewportView(panel_3);
+		GridBagLayout gbl_panel_3 = new GridBagLayout();
+		gbl_panel_3.columnWidths = new int[]{30, 216, 100, 30, 0};
+		gbl_panel_3.rowHeights = new int[]{25, 25, 0};
+		gbl_panel_3.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		panel_3.setLayout(gbl_panel_3);
+		
+		entry_show_canvas_toolbar = new JCheckBox("Hiện toobar trong canvas");
+		GridBagConstraints gbc_entry_show_canvas_toolbar = new GridBagConstraints();
+		gbc_entry_show_canvas_toolbar.anchor = GridBagConstraints.WEST;
+		gbc_entry_show_canvas_toolbar.insets = new Insets(0, 0, 0, 5);
+		gbc_entry_show_canvas_toolbar.gridx = 1;
+		gbc_entry_show_canvas_toolbar.gridy = 1;
+		panel_3.add(entry_show_canvas_toolbar, gbc_entry_show_canvas_toolbar);
+		
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -473,6 +499,7 @@ public class SettingDialog extends JDialog {
 	}
 	
 	private static int LAST_INDEX = 0;
+	private JCheckBox entry_show_canvas_toolbar;
 
 	@Override
 	public void setVisible(boolean b) {

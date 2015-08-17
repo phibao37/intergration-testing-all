@@ -97,7 +97,7 @@ public class FunctionPairCanvas extends JPanel {
 		mOnItemSelected = listener;
 	}
 	
-	public void selectPair(Function source, Function target){
+	public FunctionPair selectPair(Function source, Function target){
 		for (Component c: getComponents()){
 			if (c instanceof FunctionPairNode){
 				FunctionPairNode n = (FunctionPairNode) c;
@@ -105,10 +105,11 @@ public class FunctionPairCanvas extends JPanel {
 				if (p.getCaller() == source && p.getCalling() == target){
 					mOnItemSelected.selected(n, false);
 					selectItem(n, true);
-					break;
+					return p;
 				}
 			}
 		}
+		return null;
 	}
 	
 	public static interface OnItemSelected{

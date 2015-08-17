@@ -2,6 +2,7 @@ package core.models.expression;
 
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.models.Type;
 
 /**
  * Mô tả một biểu thức truy cập phần tử mảng, bao gồm tên của biến mảng, 
@@ -18,6 +19,7 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	
 	private String mName;
 	private boolean mDeclare;
+	private Type mType;
 	
 	/**
 	 * Tạo một biểu thức truy cập mảng từ tên mảng và danh sách chỉ số
@@ -99,5 +101,17 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 		for (int i = 0; i < arr.length; i++)
 			arr[i] = new IDExpression(indexes[i]);
 		return arr;
+	}
+
+	@Override
+	public void setType(Type type) {
+		mType = type;
+		if (isCloneExpression())
+			((ArrayIndexExpression)getSource()).setType(type);
+	}
+
+	@Override
+	public Type getType() {
+		return mType;
 	}
 }

@@ -74,6 +74,20 @@ public abstract class Expression extends Element {
 	}
 	
 	/**
+	 * Trả về nguồn đầu tiên của biểu thức
+	 */
+	public final Expression getSource(){
+		return mSource;
+	}
+	
+	/**
+	 * Kiểm tra đây là biểu thức được sao chép ra từ biểu thức khác
+	 */
+	public final boolean isCloneExpression(){
+		return mSource != this;
+	}
+	
+	/**
 	 * Đánh dấu một biểu thức có được phép thay thế hay không
 	 * (xem {@link ExpressionGroup#replace(Expression, Expression)})
 	 * @param block <b>true</b>: không cho phép thay thế chính nó và các biểu thức
@@ -188,6 +202,11 @@ public abstract class Expression extends Element {
 	 * Trả về <i>false</i> nếu trong biểu thức tồn tại các tham số, biến,...
 	 */
 	public abstract boolean isConstant();
+	
+	/**
+	 * Trả về kiểu của dữ liệu được liên kết với biểu thức
+	 */
+	public abstract Type getType();
 	
 	/**
 	 * In cây quan hệ

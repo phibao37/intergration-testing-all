@@ -3,6 +3,8 @@ package core.models.expression;
 import core.Utils;
 import core.models.Expression;
 import core.models.ExpressionGroup;
+import core.models.Type;
+import core.models.type.BasicType;
 
 /**
  * Mô tả một biểu thức nhị phân, bao gồm một dấu phép toán và hai
@@ -135,5 +137,24 @@ public class BinaryExpression extends ExpressionGroup implements Conditionable {
 	@Override
 	public boolean isConditionExpression() {
 		return Utils.find(CONDITIONS, getOperator());
+	}
+
+	/**
+	 * Với biểu thức logic, kiểu trả về là BOOL<br/>
+	 * Với biểu thức gán, kiểu trả về là kiểu của biểu thức bên trái<br/>
+	 * Các trường hợp còn lại (phép toán +,-,*,/,%), kiểu trả về là kiểu có cỡ 
+	 * lớn hơn trong 2 kiểu của 2 biểu thức 2 bên
+	 */
+	@Override
+	public Type getType() {
+		if (isConditionExpression())
+			return BasicType.BOOL;
+		
+		Type left = getLeft().getSource().getType(),
+			right = getRight().getSource().getType();
+		
+		if (isAssignOperator())
+			return left;
+		return left.compareTo(right) > 0 ? left : right;
 	}
 }
