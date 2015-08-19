@@ -1,6 +1,7 @@
 package core.solver;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -188,7 +189,7 @@ public class Z3Solver extends Solver {
 		while (str.matches("\\(.*\\)"))
 			str = str.substring(1, str.length() - 1);
 		
-		//Là một phép chia
+		//Là một phép chia /
 		if (str.matches("/ [\\d\\.]+ [\\d\\.]+")){
 			String[] part = str.split(" ");
 			BigDecimal d1 = new BigDecimal(part[1]);
@@ -203,6 +204,19 @@ public class Z3Solver extends Solver {
 					str = d1.divide(d2, 10, BigDecimal.ROUND_HALF_DOWN).toString();
 					extra = d1.longValue() + "/" + d2.longValue();
 				}
+			}
+		} 
+		
+		//Phép chia nguyên div
+		else if (str.matches("div \\d+ \\d+")){
+			String[] part = str.split(" ");
+			BigInteger d1 = new BigInteger(part[1]);
+			BigInteger d2 = new BigInteger(part[2]);
+			
+			try{
+				str = d1.divide(d2).toString();
+			} catch (Exception e){
+				str = "Infinity";
 			}
 		}
 		

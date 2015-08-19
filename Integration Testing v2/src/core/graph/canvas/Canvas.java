@@ -40,6 +40,7 @@ import javax.swing.border.LineBorder;
 import java.awt.FlowLayout;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -116,7 +117,7 @@ public class Canvas extends JPanel implements MouseListener {
 				toolbar.setVisible(false);
 			}
 		});
-		button.setToolTipText("Đóng (Double-Click)");
+		button.setToolTipText("Đóng [Double-Click Canvas]");
 		button.setIcon(new ImageIcon(Canvas.class.getResource("/image/close.png")));
 		toolbar.add(button);
 		button_1.setToolTipText("Toàn màn hình");
@@ -406,6 +407,9 @@ public class Canvas extends JPanel implements MouseListener {
 			super.addImpl(comp, constraints, index);
 			comp.addMouseListener(this);
 			((JComponent)comp).setBorder(NONE);
+			if (comp instanceof AbstractButton){
+				((AbstractButton) comp).setContentAreaFilled(false);
+			}
 			
 			int w = PADDING_X, h = 0;
 			for (Component c: getComponents()){

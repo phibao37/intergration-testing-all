@@ -265,8 +265,9 @@ public class Function extends Element implements Graphable {
 
 		@Override
 		public Testcase remove(int index) {
+			Testcase t = super.remove(index);
 			notifyTestcaseChanged();
-			return super.remove(index);
+			return t;
 		}
 
 		private boolean notifyTestcaseChanged(){

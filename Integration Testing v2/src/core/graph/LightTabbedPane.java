@@ -32,7 +32,7 @@ public class LightTabbedPane extends JTabbedPane {
 		private LightTabbedPane tab;
 		private JLabel lTitle, closeButton, gap;
 		private boolean changed = false;
-		private boolean closeable = true;
+		private boolean closeable = false;
 		
 		public Panel(LightTabbedPane tabPane, String title){
 			setOpaque(false);
@@ -76,6 +76,8 @@ public class LightTabbedPane extends JTabbedPane {
 		    		Panel.this.repaint();
 		    	}
 			});
+			
+			setCloseable(closeable);
 		}
 		
 		private void setCloseable(boolean closeable){
@@ -170,6 +172,7 @@ public class LightTabbedPane extends JTabbedPane {
 			try {
 				c = (Component) constructType.newInstance(construct);
 				addTab(title, icon, c, tip);
+				setTabCloseableAt(c, true);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -200,13 +203,20 @@ public class LightTabbedPane extends JTabbedPane {
 	/**
 	 * Thiết đặt chế độ đóng tab cho từng tab
 	 * @param index vị trí tab
-	 * @param closeable <i>Mặc định</i>: <b>true</b> khi đối tượng được tạo<br/> 
+	 * @param closeable <i>Mặc định</i>: <b>false</b> khi đối tượng được tạo<br/> 
 	 * &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-	 * &nbsp;&nbsp;&nbsp;đổi thành <b>false</b> nếu muốn tab trở thành không đóng được
+	 * &nbsp;&nbsp;&nbsp;đổi thành <b>true</b> nếu muốn tab trở thành không đóng được
 	 */
 	public void setTabCloseableAt(int index, boolean closeable){
 		Panel panel = (Panel) this.getTabComponentAt(index);
 		panel.setCloseable(closeable);
+	}
+	
+	/**
+	 * @see #setTabCloseableAt(Component, boolean)
+	 */
+	public void setTabCloseableAt(Component c, boolean closeable){
+		setTabCloseableAt(indexOfComponent(c), closeable);
 	}
 	
 	/**

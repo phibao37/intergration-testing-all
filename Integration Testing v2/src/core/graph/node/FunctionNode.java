@@ -2,13 +2,17 @@ package core.graph.node;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
 
 import core.GUI;
+import core.Utils;
 import core.models.Function;
 
 /**
@@ -18,13 +22,14 @@ public class FunctionNode extends Node {
 	private static final long serialVersionUID = -4883719306522826155L;
 	
 	private boolean[] referSelected;
+	private JTextField mStub;
 	
 	/**
 	 * Tạo một nút đồ họa từ hàm tương ứng
 	 */
 	public FunctionNode(Function fn){
 		super(fn);
-		
+	
 		this.setToolTipText(
 			String.format("<html><body>%s<br/>File: %s</body></html>",
 				fn.getHTMLContent(), 
@@ -38,6 +43,15 @@ public class FunctionNode extends Node {
 				}
 			}
 		});
+		
+		addHierarchyListener(new HierarchyListener() {
+			@Override
+			public void hierarchyChanged(HierarchyEvent e) {
+				if (getParent() != null && Utils.hasFlag(
+						e.getChangeFlags(), HierarchyEvent.PARENT_CHANGED))
+					getParent().add(mStub);
+			}
+		});
 	}
 	
 	/**
@@ -45,6 +59,40 @@ public class FunctionNode extends Node {
 	 */
 	protected void openViewSource(){
 		GUI.instance.openFileView(getFunction().getSourceFile());
+	}
+	
+	@Override
+	public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x, y, width, height);
+        if (mStub == null){
+        	mStub = new JTextField();
+        	mStub.setHorizontalAlignment(JTextField.CENTER);
+        	mStub.setVisible(false);
+        }
+        mStub.setBounds(x, y + height, width+1, height);
+    }
+	
+	/**
+	 * Ẩn hoặc hiện ô nhập Stub, giá trị trước sẽ bị xóa
+	 */
+	public void setStubFieldVisible(boolean visible, boolean clear, boolean focus){
+		mStub.setVisible(visible);
+		if (clear)
+			mStub.setText(null);
+		
+		if (visible){
+			if (focus){
+				mStub.requestFocusInWindow();
+				mStub.selectAll();
+			}
+		}
+	}
+	
+	/**
+	 * Trả về nội dung ô nhập Stub
+	 */
+	public String getStubString(){
+		return mStub.getText();
 	}
 	
 	/**

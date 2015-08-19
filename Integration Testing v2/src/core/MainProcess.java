@@ -293,7 +293,7 @@ public abstract class MainProcess implements FilenameFilter {
 						System.out.printf("Testcase %s\n", Utils.merge(", ", 
 								tm.get(j).getInputs()));
 						
-						mIntePathParser.setSelectedIndex(j);
+						mIntePathParser.setCallingTestcase(tm.get(j));
 						mIntePathParser.parseBasisPath(basis, caller);
 						
 						ConstraintEquations ce = mIntePathParser.getConstrains();

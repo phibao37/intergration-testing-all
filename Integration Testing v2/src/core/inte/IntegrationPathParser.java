@@ -1,5 +1,6 @@
 package core.inte;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
@@ -22,7 +23,8 @@ import core.visitor.ExpressionVisitor;
 public class IntegrationPathParser extends BasisPathParser {
 	
 	private Function mCalling;
-	private int mSelectedIndex;
+	private Testcase mCallingTestcase;
+	private ArrayList<Expression> mBaseConstraint;
 	
 	/**
 	 * Thiết đặt hàm số con được xét là đang được xét kiểm thử
@@ -32,11 +34,11 @@ public class IntegrationPathParser extends BasisPathParser {
 	}
 	
 	/**
-	 * Chọn vị trí testcase trong danh sách các testcase của hàm con sẽ được chọn
+	 * Chọn testcase trong danh sách các testcase của hàm con sẽ được chọn
 	 * để phân tích 
 	 */
-	public void setSelectedIndex(int index){
-		mSelectedIndex = index;
+	public void setCallingTestcase(Testcase testcase){
+		mCallingTestcase = testcase;
 	}
 
 	@Override
@@ -58,7 +60,7 @@ public class IntegrationPathParser extends BasisPathParser {
 				
 				//Lời gọi hàm này tương ứng với hàm đang được gọi kiểm thử
 				if (link == mCalling){
-					Testcase testcase = link.getTestcaseManager().get(mSelectedIndex);
+					Testcase testcase = mCallingTestcase;
 					Expression[] args = _call.getArguments();
 					Variable[] inputs = testcase.getInputs();
 					
@@ -84,6 +86,28 @@ public class IntegrationPathParser extends BasisPathParser {
 			}
 			
 		});
+	}
+	
+	/**
+	 * Trả về danh sách các ràng buộc cơ bản được liên kết với lời gọi hàm
+	 * <pre>
+	 * int test1(int x, int y, int z) {}
+	 * int test2(int a){
+	 * if (a < 0 || a > 10)
+	 *  test1(a+2, 3, a);
+	 * }
+	 * </pre>
+	 * Các ràng buộc được lọc ra là: 
+	 * <code>
+	 * y == 3,
+	 * z < 0 || z > 10
+	 * </code>
+	 * , chưa có thuật toán để suy diễn a < 0 || a > 10 => x < 2 || x > 12
+	 */
+	public ArrayList<Expression> getBaseCallConstraint(){
+		mBaseConstraint = new ArrayList<>();
+		//
+		return mBaseConstraint;
 	}
 	
 	/**

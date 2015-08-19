@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -96,17 +97,36 @@ public class GUIAll extends GUI {
 
 	private JFrame frame_main;
 	private FunctionCanvas canvas_fn_call;
-	//private VCanvas vGraph;
 	private JFileChooser fileChooserC, fileChooserJ;
+	private JLabel lbl_loading;
+	private JLabel lbl_status;
+	private StoreLoopTable table_loop_path;
+	private StorePathTable table_loop_result;
+	private FunctionPairCanvas panel_function_pair;
+	private ButtonGroup group_inte_type;
+	private StorePathTable table_test_pair;
+	private JTable table_testcase;
+	private JTable table_path_details;
+	private DefaultTableCellRenderer centerRenderer;
+	private JLabel lbl_fn_name;
+	private JLabel lbl_number_of_testcase;
+	private JLabel lbl_number_of_childs;
+	
 	private LightTabbedPane tab_info;
 	private LightTabbedPane tab_canvas;
+	private JTabbedPane tab_table;
 
-	private Function preRoot;
-	private DefaultTableCellRenderer centerRenderer;
+	private ArrayList<StorePathTable> listTable;
+	private static enum ListTable{
+		STATEMENT, CONDITION, SUBCONDITION;
+	}
 	
 	/** Tiến trình chính của ứng dụng */
 	private MainProcess main;
-
+	private Function preRoot;
+	private Function currentFunction, selectFunction;
+	private boolean isWorking;
+	
 	/**
 	 * Chạy ứng dụng
 	 */
@@ -123,12 +143,14 @@ public class GUIAll extends GUI {
 		});
 	}
 
-	/** Mở hộp thoại để chọn tập tin */
+	/**
+	 * Mở hộp thoại chọn tập tin C/C++
+	 */
 	private void openCFiles() {
 		int status = fileChooserC.showDialog(frame_main, "Mở tập tin C/thư mục");
 
 		if (status == JFileChooser.APPROVE_OPTION) {
-			tab_canvas.setSelectedIndex(0);
+			tab_canvas.setSelectedComponent(cv_fn_call_wrap);
 			try {
 				main = new CMainProcess();
 				main.setWorkingFiles(fileChooserC.getSelectedFiles(), true);
@@ -158,12 +180,14 @@ public class GUIAll extends GUI {
 		}
 	}
 	
-	/** Mở hộp thoại để chọn tập tin */
+	/**
+	 * Mở hộp thoại chọn tập tin Java
+	 */
 	private void openJavaFiles() {
 		int status = fileChooserJ.showDialog(frame_main, "Mở tập tin Java");
 
 		if (status == JFileChooser.APPROVE_OPTION) {
-			tab_canvas.setSelectedIndex(0);
+			tab_canvas.setSelectedComponent(cv_fn_call_wrap);
 			try {
 				main = new JMainProcess();
 				main.setWorkingFiles(fileChooserJ.getSelectedFiles(), true);
@@ -193,7 +217,9 @@ public class GUIAll extends GUI {
 		}
 	}
 	
-	/** Mở hộp thoại để chọn hàm gốc */
+	/**
+	 * Mở hộp thoại để chọn hàm gốc
+	 */
 	private void openSelectFunction() {
 		if (main == null || main.isEmptyFunction())
 			return;
@@ -211,11 +237,9 @@ public class GUIAll extends GUI {
 		setIntegration();
 	}
 
-	/**
-	 * Mở ra một tab mới hoặc chuyển sang tab chứa nội dung của tập tin chỉ định
-	 * 
-	 * @param file tập tin muốn mở
-	 */
+	/*-------------- BASE GUI IMPLEMENT -------------*/
+	
+	@Override
 	public void openFileView(File file) {
 		try {
 			tab_info.openTab(file.getName(), null, file.getAbsolutePath(), 
@@ -236,22 +260,6 @@ public class GUIAll extends GUI {
 			return null;
 		}
 	}
-	
-	private JLabel lbl_loading;
-	private JLabel lbl_status;
-	
-	private Function currentFunction, selectFunction;
-	private boolean isWorking;
-	private boolean shouldOpenSubCondition;
-	
-	private ArrayList<StorePathTable> listTable;
-	private StoreLoopTable table_loop_path;
-	private StorePathTable table_loop_result;
-	private FunctionPairCanvas panel_function_pair;
-	private ButtonGroup group_inte_type;
-	private StorePathTable table_test_pair;
-	private JTable table_testcase;
-	private JTable table_path_details;
 
 	@Override
 	public void beginTestFunction(Function func) {
@@ -320,7 +328,7 @@ public class GUIAll extends GUI {
 				}
 				
 				openFileView(func.getSourceFile());
-				openFuntionView(func, shouldOpenSubCondition);
+				openFuntionView(func, shouldOpenSubCondition());
 				
 				setStatus(null);
 				isWorking = false;
@@ -328,6 +336,59 @@ public class GUIAll extends GUI {
 		});
 	
 	}
+	
+	@Override
+	public int getDefaultCanvasWidth() {
+		return canvas_fn_call.getWidth();
+	}
+	
+	@Override
+	public void openFunctionDetails(Function fn) {
+		selectFunction = fn;
+		lbl_fn_name.setText(Utils.html(fn.getHTMLContent()));
+		lbl_number_of_testcase.setText(fn.getTestcaseManager().size() + "");
+		
+		int count = fn.getRefers().size();
+		lbl_number_of_childs.setText(count == 0 ? "0 (Hàm đơn vị)" : count + "");
+	}
+	
+	@Override
+	public void notifyFunctionTestcaseChanged(Function fn, int count) {
+		if (fn == selectFunction){
+			lbl_number_of_testcase.setText(count + "");
+		}
+	}
+	
+	@Override
+	public void openFunctionTestcaseManager(Function fn) {
+		new TestcaseManageDialog(frame_main, fn.getTestcaseManager())
+			.setVisible(true);
+	}
+
+	@Override
+	public void functionPairClicked(Function source, Function target, boolean dbClick) {
+		tab_table.setSelectedComponent(panel_inte);
+		FunctionPair p = panel_function_pair.selectPair(source, target);
+		
+		if (dbClick){
+			beginTestFunctionPair(p);
+		}
+	}
+
+	@Override
+	public void setStatus(String status, Object... args){
+		if (status == null || status.isEmpty()){
+			lbl_loading.setVisible(false);
+			lbl_status.setVisible(false);
+		}
+		else {
+			lbl_loading.setVisible(true);
+			lbl_status.setVisible(true);
+			lbl_status.setText(String.format(status, args));
+		}
+	}
+	
+	/*-------------- ----------------- -------------*/
 	
 	private void beginTestLoop(LoopablePath path, ArrayList<Integer> indexes) {
 		if (isWorking){
@@ -425,9 +486,15 @@ public class GUIAll extends GUI {
 	 * Có sự thay đổi các tab table
 	 */
 	private void tableTabChanged(int index){
-		shouldOpenSubCondition = index == 2;
 		if (currentFunction == null) return;
-		openFuntionView(currentFunction, shouldOpenSubCondition);
+		openFuntionView(currentFunction, shouldOpenSubCondition());
+	}
+	
+	private boolean shouldOpenSubCondition(){
+		return tab_table.getSelectedComponent() == listTable
+				.get(ListTable.SUBCONDITION.ordinal())
+				.getParent()
+				.getParent();
 	}
 	
 	/**
@@ -478,70 +545,10 @@ public class GUIAll extends GUI {
 				});
 			}
 		
-		int selected = tab_info.getSelectedIndex();
-		if (selected < 1 || selected > 2)
-			tab_info.setSelectedIndex(1);
-	}
-
-	@Override
-	public int getDefaultCanvasWidth() {
-		return canvas_fn_call.getWidth();
-	}
-	
-	@Override
-	public void openFunctionDetails(Function fn) {
-		selectFunction = fn;
-		lbl_fn_name.setText(Utils.html(fn.getHTMLContent()));
-		lbl_number_of_testcase.setText(fn.getTestcaseManager().size() + "");
+		Component c = tab_info.getSelectedComponent();
 		
-		int count = fn.getRefers().size();
-		lbl_number_of_childs.setText(count == 0 ? "0 (Hàm đơn vị)" : count + "");
-	}
-	
-	@Override
-	public void notifyFunctionTestcaseChanged(Function fn, int count) {
-		if (fn == selectFunction){
-			lbl_number_of_testcase.setText(count + "");
-		}
-	}
-	
-	@Override
-	public void openFunctionTestcaseManager(Function fn) {
-		new TestcaseManageDialog(frame_main, fn.getTestcaseManager())
-			.setVisible(true);
-	}
-
-	@Override
-	public void functionPairClicked(Function source, Function target, boolean dbClick) {
-		tab_table.setSelectedIndex(5);
-		FunctionPair p = panel_function_pair.selectPair(source, target);
-		
-		if (dbClick){
-			beginTestFunctionPair(p);
-		}
-	}
-
-	@Override
-	public void setStatus(String status, Object... args){
-		if (status == null || status.isEmpty()){
-			lbl_loading.setVisible(false);
-			lbl_status.setVisible(false);
-		}
-		else {
-			lbl_loading.setVisible(true);
-			lbl_status.setVisible(true);
-			lbl_status.setText(String.format(status, args));
-		}
-	}
-	
-	/**
-	 * Xóa hết các ô trong một bảng
-	 */
-	private static void removeTableModel(JTable table){
-		DefaultTableModel model = (DefaultTableModel) table.getModel();
-		
-		for (int j = model.getRowCount()-1;j>=0;j--)
-			model.removeRow(j);
+		if (c != tb_path_details_wrap && c != tb_testcase_wrap)
+			tab_info.setSelectedComponent(tb_path_details_wrap);
 	}
 
 	public GUIAll() {
@@ -552,7 +559,6 @@ public class GUIAll extends GUI {
 	 * Khởi tạo nội dung của khung ứng dụng.
 	 */
 	private void initialize() {
-		//main = new CMainProcess();
 		listTable = new ArrayList<StorePathTable>();
 		centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
@@ -579,7 +585,7 @@ public class GUIAll extends GUI {
 		tab_info.setBorder(null);
 		split_details.setRightComponent(tab_info);
 		
-		JPanel panel_function_details = new JPanel();
+		panel_function_details = new JPanel();
 		panel_function_details.setBackground(Color.WHITE);
 		tab_info.addTab("Hàm số", null, panel_function_details, null);
 		GridBagLayout gbl_panel_function_details = new GridBagLayout();
@@ -646,7 +652,7 @@ public class GUIAll extends GUI {
 		gbc_lbl_number_of_childs.gridy = 2;
 		panel_function_details.add(lbl_number_of_childs, gbc_lbl_number_of_childs);
 
-		JScrollPane tb_path_details_wrap = new JScrollPane();
+		tb_path_details_wrap = new JScrollPane();
 		tb_path_details_wrap.setBorder(null);
 		tab_info.addTab("Chi tiết đường đi", null, tb_path_details_wrap, null);
 		
@@ -663,12 +669,8 @@ public class GUIAll extends GUI {
 		table_path_details.getColumnModel().getColumn(0).setMaxWidth(30);
 		tb_path_details_wrap.setViewportView(table_path_details);
 		
-		JScrollPane tb_testcase_wrap = new JScrollPane();
+		tb_testcase_wrap = new JScrollPane();
 		tab_info.addTab("Chi tiết nghiệm", null, tb_testcase_wrap, null);
-		
-		tab_info.setTabCloseableAt(0, false);
-		tab_info.setTabCloseableAt(1, false);
-		tab_info.setTabCloseableAt(2, false);
 		
 		table_testcase = new JTable();
 		table_testcase.setModel(new DefaultTableModel(
@@ -850,7 +852,7 @@ public class GUIAll extends GUI {
 		
 		panel_loop.setLayout(gl_panel_loop);
 		
-		JPanel panel_inte = new JPanel();
+		panel_inte = new JPanel();
 		panel_inte.setBackground(Color.WHITE);
 		tab_table.addTab("Tích hợp", null, panel_inte, null);
 		
@@ -904,7 +906,7 @@ public class GUIAll extends GUI {
 			@Override
 			public void selected(FunctionPairNode node, boolean dbClick) {
 				canvas_fn_call.setSelectFunctionPair(node.getFunctionPair());
-				tab_canvas.setSelectedIndex(0);
+				tab_canvas.setSelectedComponent(cv_fn_call_wrap);
 				if (dbClick)
 					beginTestFunctionPair(node.getFunctionPair());
 			}
@@ -1057,31 +1059,19 @@ public class GUIAll extends GUI {
 		tab_canvas.setBorder(null);
 		split_main.setLeftComponent(tab_canvas);
 
-		JScrollPane cv_fn_call_wrap = new DragScrollPane();
+		cv_fn_call_wrap = new DragScrollPane();
 		cv_fn_call_wrap.setBorder(null);
 
 		canvas_fn_call = new FunctionCanvas();
 		canvas_fn_call.setBorder(null);
 		cv_fn_call_wrap.setViewportView(canvas_fn_call);
 		tab_canvas.addTab("Đồ thị gọi hàm", null, cv_fn_call_wrap, null);
-		
-//		JScrollPane vGraphWrap = new JScrollPane();
-//		vGraphWrap.setBorder(null);
-//		tabbedCanvas.addTab("Global Variable", null, vGraphWrap, null);
-//		
-//		vGraph = new VCanvas();
-//		vGraph.setBackground(Color.WHITE);
-//		vGraph.setBorder(null);
-//		vGraph.setParent(vGraphWrap);
-//		vGraphWrap.setViewportView(vGraph);
-		tab_canvas.setTabCloseableAt(0, false);
 		frame_main.getContentPane().setLayout(groupLayout);
 
 		fileChooserC = new JFileChooser();
 		FileNameExtensionFilter cFilter = new FileNameExtensionFilter(
 				"Mã nguồn C (*.c; *.cpp)", new String[] { "C", "CPP" });
 		fileChooserC.setMultiSelectionEnabled(true);
-		// fileChooser.setFileHidingEnabled(false);
 		fileChooserC.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooserC.setPreferredSize(SIZE_CHOOSER);
 		fileChooserC.setFileFilter(cFilter);
@@ -1090,7 +1080,6 @@ public class GUIAll extends GUI {
 		FileNameExtensionFilter jFilter = new FileNameExtensionFilter(
 				"Mã nguồn Java (*.java)", new String[] { "JAVA" });
 		fileChooserJ.setMultiSelectionEnabled(true);
-		// fileChooser.setFileHidingEnabled(false);
 		fileChooserJ.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooserJ.setPreferredSize(SIZE_CHOOSER);
 		fileChooserJ.setFileFilter(jFilter);
@@ -1129,12 +1118,23 @@ public class GUIAll extends GUI {
 		
 	}
 	
+	/**
+	 * Xóa hết các ô trong một bảng
+	 */
+	private static void removeTableModel(JTable table){
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		
+		for (int j = model.getRowCount()-1;j>=0;j--)
+			model.removeRow(j);
+	}
+	
 	private static final Dimension SIZE_CHOOSER = 
 			new Dimension(SCREEN.WIDTH/2, SCREEN.HEIGHT/2);
-	private JLabel lbl_fn_name;
-	private JLabel lbl_number_of_testcase;
-	private JLabel lbl_number_of_childs;
-	private JTabbedPane tab_table;
+	private JScrollPane cv_fn_call_wrap;
+	private JPanel panel_function_details;
+	private JScrollPane tb_path_details_wrap;
+	private JScrollPane tb_testcase_wrap;
+	private JPanel panel_inte;
 	
 	private static class StorePathTable extends JTable{
 		private static final long serialVersionUID = 1L;

@@ -360,6 +360,14 @@ public class StatementCanvas extends Canvas {
 				}
 			});
 			this.add(item);
+			
+			item = new JMenuItem("Quản lý testcase");
+			item.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					GUI.instance.openFunctionTestcaseManager(canvas.getFunction());
+				}
+			});
+			this.add(item);
 		}
 
 		private void openPopupNode(StatementCanvas n, MouseEvent e) {

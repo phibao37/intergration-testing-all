@@ -37,6 +37,11 @@ public class BasisPathParser {
 	protected VariableTable tables;
 	private BasisPath mPath;
 	
+	/**
+	 * Cho phép ngắt quãng việc phân tích giữa chừng
+	 */
+	protected boolean shouldContinue;
+	
 	private ArrayList<UnaryExpression> postFix = new ArrayList<UnaryExpression>();
 	
 	private ArrayList<Pair<Statement, ArrayList<Expression>>> mAnalyzic;
@@ -133,6 +138,7 @@ public class BasisPathParser {
 	 */
 	public void parseBasisPath(BasisPath path, Function func) 
 			throws StatementNoRootException{
+		shouldContinue = true;
 		mPath = path;
 		mConstraints = new ConstraintEquations(func.getParameters());
 		tables = new VariableTable();
@@ -148,7 +154,7 @@ public class BasisPathParser {
 			tables.add(para.clone());
 		
 		//Duyệt qua các câu lệnh trong đường thi hành
-		for (int i = 0; i < path.size(); i++){
+		for (int i = 0; shouldContinue && i < path.size(); i++){
 			mStatement = path.get(i);
 			
 			//Các câu lệnh nhãn như BEGIN, END: bỏ qua

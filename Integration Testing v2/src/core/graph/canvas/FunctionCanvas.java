@@ -3,12 +3,18 @@ package core.graph.canvas;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+
 import core.GUI;
 import core.S;
+import core.Utils;
 import core.graph.adapter.FunctionAdapter;
 import core.graph.node.FunctionNode;
 import core.graph.node.Node;
@@ -30,7 +36,27 @@ public class FunctionCanvas extends Canvas {
 	
 	private ArrayList<Line> listLine = new ArrayList<>();
 	private Function source, target;
+	private boolean mShowStub = false;
 
+	public FunctionCanvas() {
+		JButton stub = new JButton(new ImageIcon(
+				Canvas.class.getResource("/image/stub.png")));
+		stub.setToolTipText(Utils.html(
+				"Thêm Stub<br/>[Ctrl+Click]: Xóa ô nhập"));
+		stub.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int i = 0;
+				mShowStub = !mShowStub;
+				for (FunctionNode n: fnNodeList)
+					n.setStubFieldVisible(mShowStub, 
+							Utils.hasFlag(e.getModifiers(), ActionEvent.CTRL_MASK),
+					i++ == 0);
+			}
+		});
+		toolbar.add(stub);
+	}
+	
 	@Override
 	protected void resetAll(boolean repaint) {
 		fnNodeList.clear();
