@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import core.error.ProcessErrorException;
@@ -295,4 +296,22 @@ public class Utils {
 	public static String html(String body){
 		return String.format("<html><body>%s</body></html>", body);
 	}
+	
+	/**
+	 * Trả về ánh xạ giữa chỉ số và chuỗi giá trị của phần tử
+	 */
+	public static LinkedHashMap<int[], String> getValueMap(String arrayValue){
+		LinkedHashMap<int[], String> map = new LinkedHashMap<>();
+		for (String elm: arrayValue.split(", ?")){
+			String[] part = elm.split(" ?=> ?");
+			String[] index = part[0].split(" ");
+			int[] indexes = new int[index.length];
+			
+			for (int i = 0; i < index.length; i++)
+				indexes[i] = Integer.valueOf(index[i]);
+			map.put(indexes, part[1]);
+		}
+		return map;
+	}
+	
 }

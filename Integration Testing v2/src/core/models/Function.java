@@ -137,11 +137,11 @@ public class Function extends Element implements Graphable {
 	 * câu lệnh được duyệt vào
 	 * @throws NullPointerException chưa có đồ thị CFG
 	 */
-	public void accept(ExpressionVisitor visitor) 
+	public void accept(ExpressionVisitor visitor, boolean subCondition) 
 			throws NullPointerException{
 		int process;
 		
-		for (Statement stm: getCFG(false).getStatements()){
+		for (Statement stm: getCFG(subCondition).getStatements()){
 			process = visitor.visit(stm);
 			
 			if (process == ExpressionVisitor.PROCESS_ABORT)
@@ -220,6 +220,13 @@ public class Function extends Element implements Graphable {
 				b);
 	}
 	
+	/**
+	 * Kiểm tra hàm này phụ thuộc vào các hàm khác
+	 */
+	public boolean isDependence(){
+		return !getRefers().isEmpty();
+	}
+
 	public class TestcaseManager extends ArrayList<Testcase>{
 		private static final long serialVersionUID = 1L;
 		

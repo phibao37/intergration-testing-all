@@ -7,12 +7,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -27,6 +29,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -57,6 +61,7 @@ import core.graph.node.FunctionPairNode;
 import core.graph.node.LoopNode;
 import core.inte.FunctionCallGraph;
 import core.inte.FunctionPair;
+import core.inte.StubSuite;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Statement;
@@ -87,6 +92,9 @@ import java.awt.Toolkit;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Font;
+import javax.swing.JList;
+import javax.swing.border.LineBorder;
+import javax.swing.JTextField;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -95,6 +103,12 @@ import java.awt.Font;
  */
 public class GUIAll extends GUI {
 
+	/** Tiến trình chính của ứng dụng */
+	private MainProcess main;
+	private Function preRoot;
+	private Function currentFunction, selectFunction;
+	private boolean isWorking;
+	
 	private JFrame frame_main;
 	private FunctionCanvas canvas_fn_call;
 	private JFileChooser fileChooserC, fileChooserJ;
@@ -118,14 +132,31 @@ public class GUIAll extends GUI {
 
 	private ArrayList<StorePathTable> listTable;
 	private static enum ListTable{
-		STATEMENT, CONDITION, SUBCONDITION;
+		STATEMENT ("Phủ câu lệnh"), 
+		CONDITION ("Phủ nhánh"), 
+		SUBCONDITION ("Phủ điều kiện con"),
+		ALLPATH ("Tất cả nhánh");
+		
+		private final String mValue;
+		private Component mComponent;
+		
+		private ListTable(String value){ mValue = value; }
+		public String toString() { return mValue; }
+		
+		public void setComponent(Component c){ mComponent = c; }
+		public Component getComponent(){ return mComponent; }
 	}
-	
-	/** Tiến trình chính của ứng dụng */
-	private MainProcess main;
-	private Function preRoot;
-	private Function currentFunction, selectFunction;
-	private boolean isWorking;
+
+	private static final Dimension SIZE_CHOOSER = 
+			new Dimension(SCREEN.WIDTH/2, SCREEN.HEIGHT/2);
+	private JScrollPane cv_fn_call_wrap;
+	private JScrollPane tb_path_details_wrap;
+	private JScrollPane tb_testcase_wrap;
+	private JPanel panel_inte;
+	private JPanel panel_stub_content;
+	private GridBagLayout gbl_panel_stub_content;
+	private JTextField txt_stub_name;
+	private DefaultListModel<StubSuite> list_stub_model;
 	
 	/**
 	 * Chạy ứng dụng
@@ -376,6 +407,12 @@ public class GUIAll extends GUI {
 	}
 
 	@Override
+	public void requestNewStubSuite(ArrayList<Pair<Function, String>> strMap)
+			throws Exception{
+		main.requestNewStubSuite(strMap);
+	}
+
+	@Override
 	public void setStatus(String status, Object... args){
 		if (status == null || status.isEmpty()){
 			lbl_loading.setVisible(false);
@@ -439,6 +476,9 @@ public class GUIAll extends GUI {
 		FunctionCallGraph fcg = main.getFunctionCallGraph();
 		int type = Integer.valueOf(group_inte_type.getSelection().getActionCommand());
 		panel_function_pair.setFunctionPairList(fcg.getList(type));
+		
+		createStubContent(fcg);
+		
 	}
 	
 	private void beginTestFunctionPair(FunctionPair pair){
@@ -491,10 +531,8 @@ public class GUIAll extends GUI {
 	}
 	
 	private boolean shouldOpenSubCondition(){
-		return tab_table.getSelectedComponent() == listTable
-				.get(ListTable.SUBCONDITION.ordinal())
-				.getParent()
-				.getParent();
+		return tab_table.getSelectedComponent() == 
+				ListTable.SUBCONDITION.getComponent();
 	}
 	
 	/**
@@ -550,6 +588,57 @@ public class GUIAll extends GUI {
 		if (c != tb_path_details_wrap && c != tb_testcase_wrap)
 			tab_info.setSelectedComponent(tb_path_details_wrap);
 	}
+	
+	/**
+	 * Khởi tạo các ô nhập Stub
+	 */
+	private void createStubContent(ArrayList<Function> fnList){
+		panel_stub_content.removeAll();
+		int len = fnList.size(), arr[];
+		
+		gbl_panel_stub_content.rowHeights = arr = new int[len + 2];
+		arr[0] = 15;
+		Arrays.fill(arr, 1, len + 1, 32);
+		
+		gbl_panel_stub_content.rowWeights = new double[len + 2];
+		gbl_panel_stub_content.rowWeights[len + 1] = Double.MIN_VALUE;
+		
+		for (int i = 0; i < len; i++){
+			JLabel lbl_fn_name = new JLabel(fnList.get(i).getName());
+			GridBagConstraints gbc_lblMinarr = new GridBagConstraints();
+			gbc_lblMinarr.insets = new Insets(0, 0, 5, 5);
+			gbc_lblMinarr.gridx = 1;
+			gbc_lblMinarr.gridy = i+1;
+			panel_stub_content.add(lbl_fn_name, gbc_lblMinarr);
+			
+			JLabel lbl_fn_type = new JLabel(fnList.get(i)
+					.getReturnType().getContent());
+			GridBagConstraints gbl_lbl_fn_type = new GridBagConstraints();
+			gbl_lbl_fn_type.insets = new Insets(0, 0, 5, 5);
+			gbl_lbl_fn_type.gridx = 2;
+			gbl_lbl_fn_type.gridy = i+1;
+			panel_stub_content.add(lbl_fn_type, gbl_lbl_fn_type);
+			
+			JTextField txt_fn_stub = new JTextField();
+			txt_fn_stub.setBorder(null);
+			txt_fn_stub.setHorizontalAlignment(SwingConstants.CENTER);
+			txt_fn_stub.setBackground(new Color(250, 250, 250));
+			
+			GridBagConstraints gbc_textField = new GridBagConstraints();
+			gbc_textField.insets = new Insets(0, 0, 5, 5);
+			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
+			gbc_textField.gridx = 3;
+			gbc_textField.gridy = i+1;
+			panel_stub_content.add(txt_fn_stub, gbc_textField);
+		}
+		
+		panel_stub_content.setLayout(gbl_panel_stub_content);
+		panel_stub_content.revalidate();
+		panel_stub_content.repaint();
+		
+		list_stub_model.removeAllElements();
+		main.getStubManager().setListListener(list_stub_model);
+	}
 
 	public GUIAll() {
 		initialize();
@@ -585,7 +674,7 @@ public class GUIAll extends GUI {
 		tab_info.setBorder(null);
 		split_details.setRightComponent(tab_info);
 		
-		panel_function_details = new JPanel();
+		JPanel panel_function_details = new JPanel();
 		panel_function_details.setBackground(Color.WHITE);
 		tab_info.addTab("Hàm số", null, panel_function_details, null);
 		GridBagLayout gbl_panel_function_details = new GridBagLayout();
@@ -707,10 +796,9 @@ public class GUIAll extends GUI {
 		
 		/*---------BEGIN ADD TABLES-----------*/
 		
-		String[] tab_names = {"Phủ câu lệnh", "Phủ nhánh", "Phủ điều kiện con", 
-				"Tất cả nhánh"};
+		
 		int index = 0;
-		for (String tab_name: tab_names){
+		for (ListTable entry: ListTable.values()){
 			JScrollPane extraWrap = new JScrollPane();
 			extraWrap.setBorder(null);
 			
@@ -730,7 +818,8 @@ public class GUIAll extends GUI {
 			extraWrap.setViewportView(table);
 			extraWrap.getViewport().setBackground(Color.WHITE);
 			
-			tab_table.add(tab_name, extraWrap);
+			tab_table.add(entry.toString(), extraWrap);
+			entry.setComponent(extraWrap);
 			listTable.add(table);
 		}
 		
@@ -935,6 +1024,117 @@ public class GUIAll extends GUI {
 		group_inte_type = new ButtonGroup();
 		group_inte_type.add(rd_bottom_up);
 		group_inte_type.add(rd_top_down);
+		
+		JPanel panel_stub = new JPanel();
+		panel_stub.setBackground(Color.WHITE);
+		tab_table.addTab("Quản lý Stub", null, panel_stub, null);
+		
+		JList<StubSuite> list_stub = new JList<>();
+		list_stub.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting()){
+					main.getStubManager().setSelectedSuite(
+							list_stub.getSelectedIndex());
+				}
+			}
+		});
+		list_stub.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
+		
+		list_stub_model = new DefaultListModel<>();
+		list_stub_model.addListDataListener(new ListDataListener() {
+			
+			@Override
+			public void intervalRemoved(ListDataEvent e) {}
+			
+			@Override
+			public void intervalAdded(ListDataEvent e) {
+				if (list_stub.getSelectedIndex() == -1)
+					list_stub.setSelectedIndex(0);
+			}
+			
+			@Override
+			public void contentsChanged(ListDataEvent e) {}
+		});
+		list_stub.setModel(list_stub_model);
+		
+		JScrollPane pn_stub_content_wrap = new JScrollPane();
+		pn_stub_content_wrap.setBorder(null);
+		pn_stub_content_wrap.getViewport().setBackground(Color.WHITE);
+		
+		JPanel panel_stub_tool = new JPanel();
+		panel_stub_tool.setBackground(Color.WHITE);
+		GroupLayout gl_panel_stub = new GroupLayout(panel_stub);
+		gl_panel_stub.setHorizontalGroup(
+			gl_panel_stub.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_stub.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(list_stub, GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(pn_stub_content_wrap, GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(panel_stub_tool, GroupLayout.PREFERRED_SIZE, 186, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap())
+		);
+		gl_panel_stub.setVerticalGroup(
+			gl_panel_stub.createParallelGroup(Alignment.TRAILING)
+				.addGroup(Alignment.LEADING, gl_panel_stub.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panel_stub.createParallelGroup(Alignment.LEADING)
+						.addComponent(pn_stub_content_wrap, GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+						.addComponent(list_stub, GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+						.addComponent(panel_stub_tool, GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE))
+					.addContainerGap())
+		);
+		panel_stub_tool.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		
+		JLabel label_1 = new JLabel("");
+		label_1.setPreferredSize(new Dimension(150, 30));
+		panel_stub_tool.add(label_1);
+		
+		JLabel lblTnStub = new JLabel("Tên bộ Stub");
+		panel_stub_tool.add(lblTnStub);
+		
+		txt_stub_name = new JTextField();
+		txt_stub_name.setPreferredSize(new Dimension(170, 30));
+		txt_stub_name.setHorizontalAlignment(SwingConstants.CENTER);
+		panel_stub_tool.add(txt_stub_name);
+		
+		JLabel label_2 = new JLabel("");
+		label_2.setPreferredSize(new Dimension(150, 30));
+		panel_stub_tool.add(label_2);
+		
+		JButton btn_add_stub = new JButton("Thêm mới");
+		btn_add_stub.setEnabled(false);
+		btn_add_stub.setPreferredSize(new Dimension(100, 23));
+		panel_stub_tool.add(btn_add_stub);
+		
+		JButton btnChnhSa = new JButton("Chỉnh sửa");
+		btnChnhSa.setEnabled(false);
+		btnChnhSa.setPreferredSize(new Dimension(100, 23));
+		panel_stub_tool.add(btnChnhSa);
+		
+		JLabel label = new JLabel("");
+		label.setPreferredSize(new Dimension(150, 30));
+		panel_stub_tool.add(label);
+		
+		JButton btnXaStub = new JButton("Xóa stub");
+		btnXaStub.setPreferredSize(new Dimension(100, 23));
+		panel_stub_tool.add(btnXaStub);
+		
+		JButton btnXaNhp = new JButton("Xóa ô nhập");
+		btnXaNhp.setPreferredSize(new Dimension(100, 23));
+		panel_stub_tool.add(btnXaNhp);
+		
+		panel_stub_content = new JPanel();
+		panel_stub_content.setBackground(Color.WHITE);
+		pn_stub_content_wrap.setViewportView(panel_stub_content);
+		gbl_panel_stub_content = new GridBagLayout();
+		gbl_panel_stub_content.columnWidths = new int[]{15, 100, 75, 120, 15, 0};
+		gbl_panel_stub_content.rowHeights = new int[]{0};
+		gbl_panel_stub_content.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_stub_content.rowWeights = new double[]{Double.MIN_VALUE};
+		panel_stub_content.setLayout(gbl_panel_stub_content);
+		panel_stub.setLayout(gl_panel_stub);
 
 		split_details.setDividerLocation(400);
 		split_main.setDividerLocation(600);
@@ -1127,14 +1327,6 @@ public class GUIAll extends GUI {
 		for (int j = model.getRowCount()-1;j>=0;j--)
 			model.removeRow(j);
 	}
-	
-	private static final Dimension SIZE_CHOOSER = 
-			new Dimension(SCREEN.WIDTH/2, SCREEN.HEIGHT/2);
-	private JScrollPane cv_fn_call_wrap;
-	private JPanel panel_function_details;
-	private JScrollPane tb_path_details_wrap;
-	private JScrollPane tb_testcase_wrap;
-	private JPanel panel_inte;
 	
 	private static class StorePathTable extends JTable{
 		private static final long serialVersionUID = 1L;

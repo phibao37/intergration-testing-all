@@ -1,7 +1,9 @@
 package core.models.expression;
 
 import core.Utils;
+import core.error.CoreException;
 import core.models.Expression;
+import core.models.Type;
 import core.models.type.BasicType;
 
 /**
@@ -316,6 +318,24 @@ public class IDExpression extends Expression implements Conditionable {
 	@Override
 	public boolean isConditionExpression() {
 		return getType() == BasicType.BOOL;
+	}
+	
+	/**
+	 * Tạo một biểu thức hằng từ nội dung và kiểu của nó
+	 * @param content nội dung dạng chuỗi của biểu thức
+	 * @param type kiểu của biểu thức
+	 * @return biểu thức hằng tương ứng
+	 * @throws CoreException định dạng biểu thức không đúng với kiểu
+	 */
+	public static IDExpression parse(String content, Type type)
+			throws CoreException{
+		IDExpression r = new IDExpression(content, 
+				Utils.basicTypeToFlag((BasicType) type));
+		
+		if (r.getType() != type)
+			throw new CoreException("\"%s\" không phải là định dạng kiểu %s",
+					content, type);
+		return r;
 	}
 	
 }

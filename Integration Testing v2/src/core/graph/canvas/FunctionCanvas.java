@@ -20,6 +20,8 @@ import core.graph.node.FunctionNode;
 import core.graph.node.Node;
 import core.inte.FunctionPair;
 import core.models.Function;
+import core.models.type.BasicType;
+import javafx.util.Pair;
 
 /**
  * Lớp đồ họa giúp hiển thị các nút đồ thị biểu diễn quan hệ giữa các hàm
@@ -52,6 +54,8 @@ public class FunctionCanvas extends Canvas {
 					n.setStubFieldVisible(mShowStub, 
 							Utils.hasFlag(e.getModifiers(), ActionEvent.CTRL_MASK),
 					i++ == 0);
+				if (!mShowStub)
+					createNewStubSuite();
 			}
 		});
 		toolbar.add(stub);
@@ -232,6 +236,35 @@ public class FunctionCanvas extends Canvas {
 		 }
 		 
 		 super.postPaintComponent(g);
+	}
+	
+	private void createNewStubSuite(){
+		int all = 0;
+		ArrayList<Pair<Function, String>> map = new ArrayList<>();
+		
+		for (FunctionNode n: fnNodeList){
+			Function f = n.getFunction();
+			if (f.getReturnType() == BasicType.VOID) continue;
+			
+			all++;
+			String s = n.getStubString();
+			
+			if (s == null || s.isEmpty()) continue;
+			map.add(new Pair<Function, String>(f, s));
+		}
+		
+		//Chưa điền ô nào, không làm gì cả
+		if (map.isEmpty()) return;
+		
+		try{
+			if (map.size() < all)
+				throw new RuntimeException("Chưa nhập đủ Stub");
+			GUI.instance.requestNewStubSuite(map);
+			
+		} catch (Exception e){
+			javax.swing.JOptionPane.showMessageDialog(
+					getTopLevelAncestor(), e.getMessage());;
+		}
 	}
 	
 	static class Line extends Line2D.Double{

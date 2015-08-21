@@ -79,7 +79,7 @@ public class IntegrationPathParser extends BasisPathParser {
 				
 				//Hàm được gọi không là hàm đang xét kiểm thử
 				else {
-					//Chạy dùng trình biên dịch, ?????
+					holder.replace(call, handleFunctionCall(call));
 				}
 				
 				return PROCESS_SKIP;

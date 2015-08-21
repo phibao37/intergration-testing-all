@@ -12,7 +12,6 @@ import javax.swing.border.EmptyBorder;
 
 import core.S.SCREEN;
 import core.Utils;
-import core.error.CoreException;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
@@ -27,7 +26,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
@@ -422,8 +420,8 @@ public class TestcaseManageDialog extends JDialog {
 				if (txt.isEmpty()) continue;
 				core.models.Type dataType = array.getDataType();
 				
-				for (Entry<int[], String> entry: getValueMap(txt).entrySet()){
-					array.setValueAt(parseExpression(entry.getValue(), dataType), 
+				for (Entry<int[], String> entry: Utils.getValueMap(txt).entrySet()){
+					array.setValueAt(IDExpression.parse(entry.getValue(), dataType), 
 									entry.getKey());
 				}
 			} else {
@@ -432,7 +430,7 @@ public class TestcaseManageDialog extends JDialog {
 							+ source.getName());
 				}
 				inputs[i] = new Variable(source.getName(), type, 
-						parseExpression(txt, type));
+						IDExpression.parse(txt, type));
 			}
 			
 		}
@@ -442,7 +440,7 @@ public class TestcaseManageDialog extends JDialog {
 			if (txt.isEmpty()){
 				throw new RuntimeException("Chưa nhập giá trị trả về");
 			}
-			rtnEp = parseExpression(txt, rtnType);
+			rtnEp = IDExpression.parse(txt, rtnType);
 		}
 		
 		return new Testcase(inputs, rtnEp);
@@ -587,34 +585,6 @@ public class TestcaseManageDialog extends JDialog {
 	private void deletePosition(int position){
 		tm.remove(position);
 		updateByTestcaseManager(tm, true);
-	}
-	
-	/**
-	 * Trả về ánh xạ giữa chỉ số và chuỗi giá trị của phần tử
-	 */
-	private static LinkedHashMap<int[], String> getValueMap(String arrayValue){
-		LinkedHashMap<int[], String> map = new LinkedHashMap<>();
-		for (String elm: arrayValue.split(", ?")){
-			String[] part = elm.split(" ?=> ?");
-			String[] index = part[0].split(" ");
-			int[] indexes = new int[index.length];
-			
-			for (int i = 0; i < index.length; i++)
-				indexes[i] = Integer.valueOf(index[i]);
-			map.put(indexes, part[1]);
-		}
-		return map;
-	}
-	
-	private static Expression parseExpression(String content, core.models.Type type)
-			throws CoreException{
-		IDExpression r = new IDExpression(content, 
-				Utils.basicTypeToFlag((BasicType) type));
-		
-		if (r.getType() != type)
-			throw new CoreException("\"%s\" không phải là định dạng kiểu %s",
-					content, type);
-		return r;
 	}
 	
 	private void alert(String error){

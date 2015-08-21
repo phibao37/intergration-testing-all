@@ -3,6 +3,7 @@ package core.unit;
 import java.util.ArrayList;
 
 import core.error.StatementNoRootException;
+import core.inte.StubSuite;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
@@ -47,6 +48,7 @@ public class BasisPathParser {
 	private ArrayList<Pair<Statement, ArrayList<Expression>>> mAnalyzic;
 	private Statement mStatement;
 	private ArrayList<Expression> mStmConstraint;
+	protected StubSuite mStubSuite;
 	
 	/**
 	 * Thêm một điều kiện ràng buộc chính (điều kiện quyết định nhánh)
@@ -130,16 +132,18 @@ public class BasisPathParser {
 	/**
 	 * Phân tích một đường thi hành để tìm các ràng buộc testcase
 	 * @param path đường thi hành cần phân tích
-	 * @param func hàm chứa đường thi hành, dùng để lấy các biến tham số 
+	 * @param func hàm chứa đường thi hành, dùng để lấy các biến tham số
+	 * @param stub bộ stub dùng để thay thế các hàm bằng các giá trị cứng
 	 * @return hệ phương trình ràng buộc. Khi hệ này được thỏa mãn, chương trình
 	 * được thực thi sẽ đi qua đường thi hành này
 	 * @throws StatementNoRootException trong đường thi hành có câu lệnh chưa được
 	 * đặt biểu thức gốc
 	 */
-	public void parseBasisPath(BasisPath path, Function func) 
+	public void parseBasisPath(BasisPath path, Function func, StubSuite stub) 
 			throws StatementNoRootException{
 		shouldContinue = true;
 		mPath = path;
+		mStubSuite = stub;
 		mConstraints = new ConstraintEquations(func.getParameters());
 		tables = new VariableTable();
 		mAnalyzic = new ArrayList<>();
@@ -210,9 +214,7 @@ public class BasisPathParser {
 		case Statement.CONDITION:
 			handleCondition(expression, stm.getFalse() == next);
 			break;
-		case Statement.FUNCTION_CALL:
-			handleFunctionCall((FunctionCallExpression) expression);
-			break;
+		
 		case Statement.RETURN:
 			handleReturn((ReturnExpression) expression);
 			break;
@@ -228,7 +230,6 @@ public class BasisPathParser {
 	 */
 	protected void preVisitRoot(Expression root){
 		PlaceHolderExpression holder = new PlaceHolderExpression(root);
-		
 		holder.accept(new ExpressionVisitor() {
 			
 			@Override
@@ -284,6 +285,17 @@ public class BasisPathParser {
 				}
 					
 				return PROCESS_CONTINUE;
+			}
+			
+		});
+		
+		//Thay thế các lời gọi hàm bằng giá trị stub
+		holder.accept(new ExpressionVisitor() {
+
+			@Override
+			public int visit(FunctionCallExpression call) {
+				holder.replace(call, handleFunctionCall(call));
+				return PROCESS_SKIP;
 			}
 			
 		});
@@ -438,8 +450,7 @@ public class BasisPathParser {
 	 * </ul>
 	 */
 	protected Expression handleFunctionCall(FunctionCallExpression call){
-		
-		return null;
+		return mStubSuite.get(call.getFunction());
 	}
 	
 	/**
