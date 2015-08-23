@@ -289,12 +289,16 @@ public class BasisPathParser {
 			
 		});
 		
+		preVisitRootWithCall(holder);
+	}
+	
+	protected void preVisitRootWithCall(PlaceHolderExpression h){
 		//Thay thế các lời gọi hàm bằng giá trị stub
-		holder.accept(new ExpressionVisitor() {
+		h.accept(new ExpressionVisitor() {
 
 			@Override
 			public int visit(FunctionCallExpression call) {
-				holder.replace(call, handleFunctionCall(call));
+				h.replace(call, handleFunctionCall(call));
 				return PROCESS_SKIP;
 			}
 			

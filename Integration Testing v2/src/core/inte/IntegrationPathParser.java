@@ -40,14 +40,11 @@ public class IntegrationPathParser extends BasisPathParser {
 	public void setCallingTestcase(Testcase testcase){
 		mCallingTestcase = testcase;
 	}
-
+	
 	@Override
-	protected void preVisitRoot(Expression root) {
-		super.preVisitRoot(root);
-		PlaceHolderExpression holder = new PlaceHolderExpression(root);
-		
+	protected void preVisitRootWithCall(PlaceHolderExpression h) {
 		//Quét qua biểu thức gốc để tìm các lời gọi hàm 
-		holder.accept(new ExpressionVisitor() {
+		h.accept(new ExpressionVisitor() {
 
 			@Override
 			public int visit(FunctionCallExpression call) {
@@ -74,12 +71,12 @@ public class IntegrationPathParser extends BasisPathParser {
 					System.out.println();
 					
 					//Thay thế biểu thức bằng kết quả output của testcase
-					holder.replace(call, testcase.getReturnOutput());
+					h.replace(call, testcase.getReturnOutput());
 				}
 				
 				//Hàm được gọi không là hàm đang xét kiểm thử
 				else {
-					holder.replace(call, handleFunctionCall(call));
+					h.replace(call, handleFunctionCall(call));
 				}
 				
 				return PROCESS_SKIP;
