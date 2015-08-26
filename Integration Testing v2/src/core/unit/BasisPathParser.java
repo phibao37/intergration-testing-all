@@ -2,7 +2,7 @@ package core.unit;
 
 import java.util.ArrayList;
 
-import core.error.StatementNoRootException;
+import core.error.CoreException;
 import core.inte.StubSuite;
 import core.models.ArrayVariable;
 import core.models.Expression;
@@ -49,6 +49,7 @@ public class BasisPathParser {
 	private Statement mStatement;
 	private ArrayList<Expression> mStmConstraint;
 	protected StubSuite mStubSuite;
+	protected CoreException mError;
 	
 	/**
 	 * Thêm một điều kiện ràng buộc chính (điều kiện quyết định nhánh)
@@ -136,14 +137,14 @@ public class BasisPathParser {
 	 * @param stub bộ stub dùng để thay thế các hàm bằng các giá trị cứng
 	 * @return hệ phương trình ràng buộc. Khi hệ này được thỏa mãn, chương trình
 	 * được thực thi sẽ đi qua đường thi hành này
-	 * @throws StatementNoRootException trong đường thi hành có câu lệnh chưa được
-	 * đặt biểu thức gốc
+	 * @throws CoreException các lỗi làm cho việc phân tích không thực hiện được
 	 */
 	public void parseBasisPath(BasisPath path, Function func, StubSuite stub) 
-			throws StatementNoRootException{
+			throws CoreException{
+		mError = null;
+		mStubSuite = stub;
 		shouldContinue = true;
 		mPath = path;
-		mStubSuite = stub;
 		mConstraints = new ConstraintEquations(func.getParameters());
 		tables = new VariableTable();
 		mAnalyzic = new ArrayList<>();
@@ -228,7 +229,7 @@ public class BasisPathParser {
 	 * Thí dụ: biểu thức (++i == 3) cần được xủ lý i = i + 1 trước, sau đó thay thế
 	 * biểu thức thành (i == 3)
 	 */
-	protected void preVisitRoot(Expression root){
+	protected void preVisitRoot(Expression root) throws CoreException{
 		PlaceHolderExpression holder = new PlaceHolderExpression(root);
 		holder.accept(new ExpressionVisitor() {
 			
@@ -289,20 +290,27 @@ public class BasisPathParser {
 			
 		});
 		
-		preVisitRootWithCall(holder);
-	}
-	
-	protected void preVisitRootWithCall(PlaceHolderExpression h){
 		//Thay thế các lời gọi hàm bằng giá trị stub
-		h.accept(new ExpressionVisitor() {
+		holder.accept(new ExpressionVisitor() {
 
 			@Override
-			public int visit(FunctionCallExpression call) {
-				h.replace(call, handleFunctionCall(call));
-				return PROCESS_SKIP;
+			public boolean preVisit(Expression expression) {
+				return mError == null;
+			}
+
+			@Override
+			public void leave(FunctionCallExpression call) {
+				try {
+					holder.replace(call, handleFunctionCall(call));
+				} catch (CoreException e) {
+					mError = e;
+				}
 			}
 			
 		});
+		
+		if (mError != null)
+			throw mError;
 	}
 	
 	/**
@@ -353,9 +361,6 @@ public class BasisPathParser {
 				}
 				var = new ArrayVariable(array.getName(), (ArrayType) arrayType);
 			}
-			
-//			if (value != null)
-//				var.setValue(tables.fillExpression(value));
 			
 			//Thêm biến vào bảng biến
 			tables.add(var);
@@ -452,9 +457,16 @@ public class BasisPathParser {
 	 * nếu hỗ trợ
 	 * </li>
 	 * </ul>
+	 * @throws CoreException chưa có bộ stub kiểm thử
 	 */
-	protected Expression handleFunctionCall(FunctionCallExpression call){
-		return mStubSuite.get(call.getFunction());
+	protected Expression handleFunctionCall(FunctionCallExpression call) 
+			throws CoreException{
+		try{
+			//assert mStubSuite.containsKey(call.getFunction());
+			return mStubSuite.get(call.getFunction());
+		} catch (Exception e){
+			throw new CoreException("Cần có bộ stub và hàm tương ứng để kiểm thử");
+		}
 	}
 	
 	/**

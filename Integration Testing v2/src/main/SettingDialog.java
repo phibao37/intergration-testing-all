@@ -106,6 +106,7 @@ public class SettingDialog extends JDialog {
 		entry_rand_max.setValue(S.RAND_MAX);
 		
 		entry_show_canvas_toolbar.setSelected(S.CANVAS_SHOW_TOOLBAR);
+		entry_draw_topdown.setSelected(S.CANVAS_DRAW_TOPDOWN);
 	}
 	
 	private void applySettings(){
@@ -119,6 +120,7 @@ public class SettingDialog extends JDialog {
 		S.RAND_MAX = (int) entry_rand_max.getValue();
 		
 		S.CANVAS_SHOW_TOOLBAR = entry_show_canvas_toolbar.isSelected();
+		S.CANVAS_DRAW_TOPDOWN = entry_draw_topdown.isSelected();
 		
 		S.save();
 	}
@@ -434,18 +436,26 @@ public class SettingDialog extends JDialog {
 		scrollPane_1.setViewportView(panel_3);
 		GridBagLayout gbl_panel_3 = new GridBagLayout();
 		gbl_panel_3.columnWidths = new int[]{30, 216, 100, 30, 0};
-		gbl_panel_3.rowHeights = new int[]{25, 25, 0};
+		gbl_panel_3.rowHeights = new int[]{25, 25, 25, 0};
 		gbl_panel_3.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_3.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_3.setLayout(gbl_panel_3);
 		
 		entry_show_canvas_toolbar = new JCheckBox("Hiện toobar trong canvas");
 		GridBagConstraints gbc_entry_show_canvas_toolbar = new GridBagConstraints();
 		gbc_entry_show_canvas_toolbar.anchor = GridBagConstraints.WEST;
-		gbc_entry_show_canvas_toolbar.insets = new Insets(0, 0, 0, 5);
+		gbc_entry_show_canvas_toolbar.insets = new Insets(0, 0, 5, 5);
 		gbc_entry_show_canvas_toolbar.gridx = 1;
 		gbc_entry_show_canvas_toolbar.gridy = 1;
 		panel_3.add(entry_show_canvas_toolbar, gbc_entry_show_canvas_toolbar);
+		
+		entry_draw_topdown = new JCheckBox("Vẽ nút theo cấp độ cha con");
+		GridBagConstraints gbc_entry_draw_topdown = new GridBagConstraints();
+		gbc_entry_draw_topdown.anchor = GridBagConstraints.WEST;
+		gbc_entry_draw_topdown.insets = new Insets(0, 0, 0, 5);
+		gbc_entry_draw_topdown.gridx = 1;
+		gbc_entry_draw_topdown.gridy = 2;
+		panel_3.add(entry_draw_topdown, gbc_entry_draw_topdown);
 		
 		{
 			JPanel buttonPane = new JPanel();
@@ -500,6 +510,7 @@ public class SettingDialog extends JDialog {
 	
 	private static int LAST_INDEX = 0;
 	private JCheckBox entry_show_canvas_toolbar;
+	private JCheckBox entry_draw_topdown;
 
 	@Override
 	public void setVisible(boolean b) {

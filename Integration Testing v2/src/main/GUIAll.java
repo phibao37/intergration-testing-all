@@ -9,6 +9,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -26,6 +28,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -66,8 +69,10 @@ import core.models.Expression;
 import core.models.Function;
 import core.models.Statement;
 import core.models.Variable;
+import core.models.expression.IDExpression;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
+import core.models.type.BasicType;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.LoopablePath;
@@ -108,6 +113,7 @@ public class GUIAll extends GUI {
 	private Function preRoot;
 	private Function currentFunction, selectFunction;
 	private boolean isWorking;
+	private Timer timer;
 	
 	private JFrame frame_main;
 	private FunctionCanvas canvas_fn_call;
@@ -125,12 +131,19 @@ public class GUIAll extends GUI {
 	private JLabel lbl_fn_name;
 	private JLabel lbl_number_of_testcase;
 	private JLabel lbl_number_of_childs;
-	
+
+	private ArrayList<StorePathTable> listTable;
 	private LightTabbedPane tab_info;
 	private LightTabbedPane tab_canvas;
 	private JTabbedPane tab_table;
-
-	private ArrayList<StorePathTable> listTable;
+	
+	private int tab_flags;
+	private HashMap<Function, JTextField> map_stub;
+	
+	private static final int TAB_UNIT = 1;
+	private static final int TAB_UNIT_SUB = 2;
+	private static final int TAB_INTE = 3;
+	
 	private static enum ListTable{
 		STATEMENT ("Phủ câu lệnh"), 
 		CONDITION ("Phủ nhánh"), 
@@ -146,9 +159,9 @@ public class GUIAll extends GUI {
 		public void setComponent(Component c){ mComponent = c; }
 		public Component getComponent(){ return mComponent; }
 	}
-
 	private static final Dimension SIZE_CHOOSER = 
 			new Dimension(SCREEN.WIDTH/2, SCREEN.HEIGHT/2);
+	
 	private JScrollPane cv_fn_call_wrap;
 	private JScrollPane tb_path_details_wrap;
 	private JScrollPane tb_testcase_wrap;
@@ -157,6 +170,7 @@ public class GUIAll extends GUI {
 	private GridBagLayout gbl_panel_stub_content;
 	private JTextField txt_stub_name;
 	private DefaultListModel<StubSuite> list_stub_model;
+	private JPanel panel_stub;
 	
 	/**
 	 * Chạy ứng dụng
@@ -281,6 +295,7 @@ public class GUIAll extends GUI {
 	@Override
 	public CFGView openFuntionView(Function fn, boolean subCondition){
 		try {
+			if (fn == null) return null;
 			return (CFGView) tab_canvas.openTab(
 					fn.getName() + (subCondition ? "-3" : "-1,2"),
 					null, 
@@ -359,7 +374,9 @@ public class GUIAll extends GUI {
 				}
 				
 				openFileView(func.getSourceFile());
-				openFuntionView(func, shouldOpenSubCondition());
+				if (tab_flags != TAB_UNIT && tab_flags != TAB_UNIT_SUB)
+					tab_table.setSelectedComponent(ListTable.STATEMENT.getComponent());
+				openFuntionView(func, tab_flags == TAB_UNIT_SUB);
 				
 				setStatus(null);
 				isWorking = false;
@@ -414,6 +431,9 @@ public class GUIAll extends GUI {
 
 	@Override
 	public void setStatus(String status, Object... args){
+		if (timer.isRunning()){
+			timer.stop();
+		}
 		if (status == null || status.isEmpty()){
 			lbl_loading.setVisible(false);
 			lbl_status.setVisible(false);
@@ -425,8 +445,21 @@ public class GUIAll extends GUI {
 		}
 	}
 	
+	@Override
+	public void setStatus(int second, String status, Object... args) {
+		lbl_loading.setVisible(false);
+		lbl_status.setVisible(true);
+		lbl_status.setText(String.format(status, args));
+		
+		if (timer.isRunning())
+			timer.stop();
+		timer.setInitialDelay(second * 1000);
+		timer.start();
+	}
+	
 	/*-------------- ----------------- -------------*/
 	
+
 	private void beginTestLoop(LoopablePath path, ArrayList<Integer> indexes) {
 		if (isWorking){
 			alertError("Việc xử lý chưa hoàn thành");
@@ -525,14 +558,20 @@ public class GUIAll extends GUI {
 	/**
 	 * Có sự thay đổi các tab table
 	 */
-	private void tableTabChanged(int index){
-		if (currentFunction == null) return;
-		openFuntionView(currentFunction, shouldOpenSubCondition());
-	}
-	
-	private boolean shouldOpenSubCondition(){
-		return tab_table.getSelectedComponent() == 
-				ListTable.SUBCONDITION.getComponent();
+	private void tableTabChanged(Component c){
+		if (c == panel_inte || c == panel_stub){
+			tab_flags = TAB_INTE;
+			tab_canvas.setSelectedComponent(cv_fn_call_wrap);
+		}
+		else {
+			if (c == ListTable.SUBCONDITION.getComponent()){
+				tab_flags = TAB_UNIT_SUB;
+				openFuntionView(currentFunction, true);
+			} else {
+				tab_flags = TAB_UNIT;
+				openFuntionView(currentFunction, false);
+			}
+		}
 	}
 	
 	/**
@@ -595,6 +634,7 @@ public class GUIAll extends GUI {
 	private void createStubContent(ArrayList<Function> fnList){
 		panel_stub_content.removeAll();
 		int len = fnList.size(), arr[];
+		map_stub = new HashMap<>(len);
 		
 		gbl_panel_stub_content.rowHeights = arr = new int[len + 2];
 		arr[0] = 15;
@@ -604,15 +644,16 @@ public class GUIAll extends GUI {
 		gbl_panel_stub_content.rowWeights[len + 1] = Double.MIN_VALUE;
 		
 		for (int i = 0; i < len; i++){
-			JLabel lbl_fn_name = new JLabel(fnList.get(i).getName());
+			Function f = fnList.get(i);
+			
+			JLabel lbl_fn_name = new JLabel(f.getName());
 			GridBagConstraints gbc_lblMinarr = new GridBagConstraints();
 			gbc_lblMinarr.insets = new Insets(0, 0, 5, 5);
 			gbc_lblMinarr.gridx = 1;
 			gbc_lblMinarr.gridy = i+1;
 			panel_stub_content.add(lbl_fn_name, gbc_lblMinarr);
 			
-			JLabel lbl_fn_type = new JLabel(fnList.get(i)
-					.getReturnType().getContent());
+			JLabel lbl_fn_type = new JLabel(f.getReturnType().getContent());
 			GridBagConstraints gbl_lbl_fn_type = new GridBagConstraints();
 			gbl_lbl_fn_type.insets = new Insets(0, 0, 5, 5);
 			gbl_lbl_fn_type.gridx = 2;
@@ -623,6 +664,7 @@ public class GUIAll extends GUI {
 			txt_fn_stub.setBorder(null);
 			txt_fn_stub.setHorizontalAlignment(SwingConstants.CENTER);
 			txt_fn_stub.setBackground(new Color(250, 250, 250));
+			map_stub.put(f, txt_fn_stub);
 			
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.insets = new Insets(0, 0, 5, 5);
@@ -639,7 +681,43 @@ public class GUIAll extends GUI {
 		list_stub_model.removeAllElements();
 		main.getStubManager().setListListener(list_stub_model);
 	}
-
+	
+	private void fillStubWithContent(StubSuite s) {
+		for (Entry<Function, JTextField> entry: map_stub.entrySet()){
+			entry.getValue().setText(s.containsKey(
+					entry.getKey()) ? s.get(entry.getKey()).getContent() : null);
+		}
+	}
+	
+	private StubSuite generateStubFromContent() throws CoreException {
+		if (map_stub == null) return null;
+		StubSuite s = new StubSuite();
+		int all = 0;
+		
+		for (Entry<Function, JTextField> entry: map_stub.entrySet()){
+			Function f = entry.getKey();
+			
+			if (f.getReturnType() == BasicType.VOID) continue;
+			all++;
+			
+			String t = entry.getValue().getText();
+			if (t == null || t.isEmpty()) continue;
+			s.put(f, IDExpression.parse(t, f.getReturnType()));
+		}
+		
+		if (s.size() < all)
+			throw new CoreException("Chưa nhập đủ Stub");
+		s.setName(txt_stub_name.getText());
+		return s;
+	}
+	
+	private void deleteStubContent(){
+		txt_stub_name.setText(null);
+		if (map_stub != null)
+		for (Entry<Function, JTextField> entry: map_stub.entrySet())
+			entry.getValue().setText(null);
+	}
+	
 	public GUIAll() {
 		initialize();
 	}
@@ -651,6 +729,13 @@ public class GUIAll extends GUI {
 		listTable = new ArrayList<StorePathTable>();
 		centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+		timer = new Timer(0, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setStatus(null);
+			}
+		});
+		timer.setRepeats(false);
 		
 		frame_main = new JFrame();
 		frame_main.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIAll.class.getResource("/image/testing.png")));
@@ -678,7 +763,7 @@ public class GUIAll extends GUI {
 		panel_function_details.setBackground(Color.WHITE);
 		tab_info.addTab("Hàm số", null, panel_function_details, null);
 		GridBagLayout gbl_panel_function_details = new GridBagLayout();
-		gbl_panel_function_details.columnWidths = new int[]{23, 137, 283, 227, 0};
+		gbl_panel_function_details.columnWidths = new int[]{23, 137, 0, 227, 0};
 		gbl_panel_function_details.rowHeights = new int[]{50, 37, 35, 0};
 		gbl_panel_function_details.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_function_details.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
@@ -710,7 +795,8 @@ public class GUIAll extends GUI {
 		gbc_lbl_number_of_testcase.gridy = 1;
 		panel_function_details.add(lbl_number_of_testcase, gbc_lbl_number_of_testcase);
 		
-		JButton btnQunL = new JButton("Quản lý...");
+		JButton btnQunL = new JButton("Quản lý testcase");
+		btnQunL.setPreferredSize(new Dimension(135, 23));
 		btnQunL.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (selectFunction == null)
@@ -740,6 +826,21 @@ public class GUIAll extends GUI {
 		gbc_lbl_number_of_childs.gridx = 2;
 		gbc_lbl_number_of_childs.gridy = 2;
 		panel_function_details.add(lbl_number_of_childs, gbc_lbl_number_of_childs);
+		
+		JButton btnKimThon = new JButton("Kiểm thử đon vị");
+		btnKimThon.setPreferredSize(new Dimension(135, 23));
+		btnKimThon.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (selectFunction == null)
+					return;
+				beginTestFunction(selectFunction);
+			}
+		});
+		GridBagConstraints gbc_btnKimThon = new GridBagConstraints();
+		gbc_btnKimThon.anchor = GridBagConstraints.WEST;
+		gbc_btnKimThon.gridx = 3;
+		gbc_btnKimThon.gridy = 2;
+		panel_function_details.add(btnKimThon, gbc_btnKimThon);
 
 		tb_path_details_wrap = new JScrollPane();
 		tb_path_details_wrap.setBorder(null);
@@ -789,7 +890,7 @@ public class GUIAll extends GUI {
 		tab_table.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JTabbedPane tab = (JTabbedPane) e.getSource();
-				tableTabChanged(tab.getSelectedIndex());
+				tableTabChanged(tab.getSelectedComponent());
 			}
 		});
 		split_details.setLeftComponent(tab_table);
@@ -1025,17 +1126,19 @@ public class GUIAll extends GUI {
 		group_inte_type.add(rd_bottom_up);
 		group_inte_type.add(rd_top_down);
 		
-		JPanel panel_stub = new JPanel();
+		panel_stub = new JPanel();
 		panel_stub.setBackground(Color.WHITE);
 		tab_table.addTab("Quản lý Stub", null, panel_stub, null);
 		
 		JList<StubSuite> list_stub = new JList<>();
 		list_stub.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()){
-					main.getStubManager().setSelectedSuite(
-							list_stub.getSelectedIndex());
-				}
+				if (e.getValueIsAdjusting()) return;
+				StubSuite s = list_stub.getSelectedValue();
+				
+				main.getStubManager().setSelectedSuite(s);
+				if (s != null)
+					fillStubWithContent(s);
 			}
 		});
 		list_stub.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
@@ -1044,16 +1147,22 @@ public class GUIAll extends GUI {
 		list_stub_model.addListDataListener(new ListDataListener() {
 			
 			@Override
-			public void intervalRemoved(ListDataEvent e) {}
-			
-			@Override
-			public void intervalAdded(ListDataEvent e) {
-				if (list_stub.getSelectedIndex() == -1)
+			public void intervalRemoved(ListDataEvent e) {
+				if (list_stub.isSelectionEmpty() && list_stub.getModel().getSize() > 0)
 					list_stub.setSelectedIndex(0);
 			}
 			
 			@Override
-			public void contentsChanged(ListDataEvent e) {}
+			public void intervalAdded(ListDataEvent e) {
+				if (list_stub.isSelectionEmpty())
+					list_stub.setSelectedIndex(0);
+			}
+			
+			@Override
+			public void contentsChanged(ListDataEvent e) {
+				if (list_stub.isSelectionEmpty() && list_stub.getModel().getSize() > 0)
+					list_stub.setSelectedIndex(0);
+			}
 		});
 		list_stub.setModel(list_stub_model);
 		
@@ -1068,7 +1177,7 @@ public class GUIAll extends GUI {
 			gl_panel_stub.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_stub.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(list_stub, GroupLayout.DEFAULT_SIZE, 163, Short.MAX_VALUE)
+					.addComponent(list_stub, GroupLayout.PREFERRED_SIZE, 163, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(pn_stub_content_wrap, GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
@@ -1076,8 +1185,8 @@ public class GUIAll extends GUI {
 					.addContainerGap())
 		);
 		gl_panel_stub.setVerticalGroup(
-			gl_panel_stub.createParallelGroup(Alignment.TRAILING)
-				.addGroup(Alignment.LEADING, gl_panel_stub.createSequentialGroup()
+			gl_panel_stub.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_stub.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panel_stub.createParallelGroup(Alignment.LEADING)
 						.addComponent(pn_stub_content_wrap, GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
@@ -1104,12 +1213,38 @@ public class GUIAll extends GUI {
 		panel_stub_tool.add(label_2);
 		
 		JButton btn_add_stub = new JButton("Thêm mới");
-		btn_add_stub.setEnabled(false);
+		btn_add_stub.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					StubSuite s = generateStubFromContent();
+					if (s == null || s.isEmpty()) return;
+					main.getStubManager().add(s);
+				} catch (CoreException e1) {
+					alertError(e1.getMessage());
+				}
+			}
+		});
 		btn_add_stub.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btn_add_stub);
 		
 		JButton btnChnhSa = new JButton("Chỉnh sửa");
-		btnChnhSa.setEnabled(false);
+		btnChnhSa.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int selected = list_stub.getSelectedIndex();
+				if (selected == -1) return;
+				
+				try {
+					StubSuite s = generateStubFromContent();
+					if (s == null || s.isEmpty()) return;
+					
+					if (s.getName().isEmpty())
+						s.setName(list_stub.getSelectedValue().getName());
+					main.getStubManager().set(selected, s);
+				} catch (CoreException e1) {
+					alertError(e1.getMessage());
+				}
+			}
+		});
 		btnChnhSa.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btnChnhSa);
 		
@@ -1118,10 +1253,22 @@ public class GUIAll extends GUI {
 		panel_stub_tool.add(label);
 		
 		JButton btnXaStub = new JButton("Xóa stub");
+		btnXaStub.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				main.getStubManager().removeAll(
+						list_stub.getSelectedIndices());
+				deleteStubContent();
+			}
+		});
 		btnXaStub.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btnXaStub);
 		
 		JButton btnXaNhp = new JButton("Xóa ô nhập");
+		btnXaNhp.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				deleteStubContent();
+			}
+		});
 		btnXaNhp.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btnXaNhp);
 		
@@ -1129,7 +1276,7 @@ public class GUIAll extends GUI {
 		panel_stub_content.setBackground(Color.WHITE);
 		pn_stub_content_wrap.setViewportView(panel_stub_content);
 		gbl_panel_stub_content = new GridBagLayout();
-		gbl_panel_stub_content.columnWidths = new int[]{15, 100, 75, 120, 15, 0};
+		gbl_panel_stub_content.columnWidths = new int[]{15, 5, 75, 6, 15, 0};
 		gbl_panel_stub_content.rowHeights = new int[]{0};
 		gbl_panel_stub_content.columnWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
 		gbl_panel_stub_content.rowWeights = new double[]{Double.MIN_VALUE};
@@ -1317,7 +1464,7 @@ public class GUIAll extends GUI {
 		
 		
 	}
-	
+
 	/**
 	 * Xóa hết các ô trong một bảng
 	 */

@@ -37,17 +37,22 @@ public class S {
 	/**
 	 * Khoảng cách chiều ngang giữa hai nút kề nhau trong đồ thị
 	 */
-	public static int CANVAS_MARGIN_X = 120;
+	public static int CANVAS_MARGIN_X = 150;
 	
 	/**
 	 * Khoảng cách chiều dọc giữa hai nút kề nhau trong đồ thị
 	 */
-	public static int CANVAS_MARGIN_Y = 70;
+	public static int CANVAS_MARGIN_Y = 90;
 	
 	/**
 	 * Mặc định mở toolbar khi tạo một canvas mới
 	 */
 	public static boolean CANVAS_SHOW_TOOLBAR = true;
+	
+	/**
+	 * Chế độ vẽ các nút theo cấp bậc cha/con
+	 */
+	public static boolean CANVAS_DRAW_TOPDOWN = true;
 	
 	/**
 	 * Kích thước văn bản bên trong nút đồ thị
@@ -111,7 +116,7 @@ public class S {
 	/**
 	 * Phiên bản ứng dụng
 	 */
-	public static final String VERSION = "2.0.4";
+	public static final String VERSION = "2.0.5";
 	
 	/**
 	 * Chế độ debug ứng dụng

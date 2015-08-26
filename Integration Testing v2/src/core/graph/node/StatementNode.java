@@ -84,9 +84,4 @@ public class StatementNode extends Node {
 		return mLabel;
 	}
 	
-	/** Kiểm tra nút này đã được đặt vị trí*/
-	public boolean isLocationSet(){
-		return this.getX() != 0 || this.getY() != 0;
-	}
-	
 }

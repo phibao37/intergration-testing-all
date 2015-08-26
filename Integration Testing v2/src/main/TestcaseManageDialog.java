@@ -11,13 +11,13 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import core.S.SCREEN;
-import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Function.TestcaseManager;
 import core.models.Testcase;
 import core.models.Variable;
+import core.models.expression.ArrayExpression;
 import core.models.expression.IDExpression;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
@@ -26,7 +26,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map.Entry;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import java.awt.Component;
@@ -355,6 +354,7 @@ public class TestcaseManageDialog extends JDialog {
 				try {
 					addNewTestcase();
 				} catch (Exception e1) {
+					e1.printStackTrace();
 					alert(e1.getMessage());
 				}
 			}
@@ -414,16 +414,9 @@ public class TestcaseManageDialog extends JDialog {
 			core.models.Type type = source.getType();
 			
 			if (type.isArrayType()){
-				ArrayVariable array = new ArrayVariable(
-						source.getName(), (ArrayType) type);
-				inputs[i] = array;
-				if (txt.isEmpty()) continue;
-				core.models.Type dataType = array.getDataType();
-				
-				for (Entry<int[], String> entry: Utils.getValueMap(txt).entrySet()){
-					array.setValueAt(IDExpression.parse(entry.getValue(), dataType), 
-									entry.getKey());
-				}
+				inputs[i] = new ArrayVariable(
+						source.getName(), (ArrayType) type, 
+						(ArrayExpression) IDExpression.parse(txt, type));
 			} else {
 				if (txt.isEmpty()){
 					throw new RuntimeException("Chưa nhập giá trị đầu vào: " 

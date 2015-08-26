@@ -178,6 +178,11 @@ public class Node extends JLabel {
 		return mRefers;
 	}
 	
+	/** Kiểm tra nút này đã được đặt vị trí*/
+	public boolean isLocationSet(){
+		return this.getX() != 0 || this.getY() != 0;
+	}
+	
 	/**
 	 * Xóa tất cả các đính kèm
 	 */

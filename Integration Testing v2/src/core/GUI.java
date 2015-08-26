@@ -80,4 +80,9 @@ public class GUI {
 	 * Đặt thông báo trạng thái cho ứng dụng
 	 */
 	public void setStatus(String status, Object... args) {}
+	
+	/**
+	 * Đặt thông báo trạng thái cho ứng dụng, hiển thị trong một khoảng thời gian
+	 */
+	public void setStatus(int second, String status, Object... args) {}
 }

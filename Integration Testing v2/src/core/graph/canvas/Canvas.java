@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 
@@ -26,6 +27,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import core.GUI;
 import core.S;
 import core.Utils;
 import core.graph.DragScrollPane;
@@ -102,6 +104,7 @@ public class Canvas extends JPanel implements MouseListener {
 				Toolbar.PADDING_X, Toolbar.PADDING_Y));
 		
 		JButton button_1 = new JButton("");
+		button_1.setSelected(true);
 		button_1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (fullscreen)
@@ -353,14 +356,30 @@ public class Canvas extends JPanel implements MouseListener {
 	public void mouseExited(MouseEvent e) {}
 	
 	private static JFileChooser export;
-	FileNameExtensionFilter exportExt;
+	private static FileNameExtensionFilter exportExt;
 	
 	void exportToImage(){
+		if (getComponentCount() < 2){
+			GUI.instance.setStatus(1, "Không có dữ liệu để lưu");
+			return;
+		}
 		if (export == null){
 			export = new JFileChooser();
 			exportExt = new FileNameExtensionFilter(
 					"Hình ảnh (JPG, PNG)", new String[]{"jpg", "png"});
 			export.setFileFilter(exportExt);
+		}
+		
+		try{
+			Component c = parent.getParent();
+			JTabbedPane t = (JTabbedPane) c.getParent();
+			String title = t.getTitleAt(t.indexOfComponent(c));
+			
+			export.setSelectedFile(new File(
+					export.getSelectedFile(), title + ".png"));
+		} catch (Exception e){
+			export.setSelectedFile(new File(
+					export.getSelectedFile(), "Canvas.png"));
 		}
 		
 		if (export.showDialog(this.getTopLevelAncestor(), 
@@ -385,6 +404,7 @@ public class Canvas extends JPanel implements MouseListener {
 		try {
 			choose.delete();
 			ImageIO.write(bi, Utils.getExtension(choose), choose);
+			GUI.instance.setStatus(2, "Lưu %s thành công", choose.getName());
 		} catch (Exception e) {
 			javax.swing.JOptionPane.showMessageDialog(this, e);
 		}
@@ -396,6 +416,7 @@ public class Canvas extends JPanel implements MouseListener {
 		private static final LineBorder LINE = new LineBorder(
 				SystemColor.activeCaption);
 		private static final LineBorder NONE = new LineBorder(BG);
+		private static final Color ACTIVE = new Color(153, 180, 209);
 		public static final int PADDING_X = 5;
 		public static final int PADDING_Y = 5;
 		
@@ -408,7 +429,18 @@ public class Canvas extends JPanel implements MouseListener {
 			comp.addMouseListener(this);
 			((JComponent)comp).setBorder(NONE);
 			if (comp instanceof AbstractButton){
-				((AbstractButton) comp).setContentAreaFilled(false);
+				AbstractButton b = (AbstractButton) comp;
+				b.setContentAreaFilled(false);
+				if (b.isSelected()){
+					b.setBackground(ACTIVE);
+					b.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							AbstractButton a = (AbstractButton) e.getSource();
+							a.setContentAreaFilled(!a.isContentAreaFilled());
+						}
+					});
+				}
 			}
 			
 			int w = PADDING_X, h = 0;

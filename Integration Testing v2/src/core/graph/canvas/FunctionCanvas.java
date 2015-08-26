@@ -58,6 +58,7 @@ public class FunctionCanvas extends Canvas {
 					createNewStubSuite();
 			}
 		});
+		stub.setSelected(true);
 		toolbar.add(stub);
 	}
 	
@@ -83,32 +84,75 @@ public class FunctionCanvas extends Canvas {
 		mAdapter = adapter;
 		
 		int centerX = this.getWidth()/2, leftCX, leftX;
-		int currentY = paddingY;
-		ArrayList<FunctionNode> rowNode = new ArrayList<FunctionNode>();
+		int currentY = paddingY, k = 0;
+		ArrayList<Node> rowNode = new ArrayList<Node>();
 		
-		for (FunctionNode n: adapter){
-			if (n != null){
-				rowNode.add(n);
-				fnNodeList.add(n);
-			} else {
-				//Position all node in this row
-				leftCX = centerX - S.CANVAS_MARGIN_X * (rowNode.size()-1)/2;
-				FunctionNode node = rowNode.get(0);
-				leftX = leftCX - node.getWidth()/2;
-				node.setLocation(leftX, currentY);
-				for (int i = 1; i < rowNode.size(); i++){
-					leftCX += S.CANVAS_MARGIN_X;
-					node = rowNode.get(i);
-					node.setLocation(leftCX - node.getWidth()/2, currentY);
-				}
+		if (S.CANVAS_DRAW_TOPDOWN){
+			adapter.get(0).setLocation(centerX - adapter.get(0).getWidth()/2, currentY);
+			for (FunctionNode n: adapter){
+				k++;
 				
-				currentY = currentY + S.CANVAS_MARGIN_Y;
+				if (n == null) continue;
+				fnNodeList.add(n);
+				
+				Node[] refer = n.getRefers();
+				if (refer == null) continue;
+				
 				rowNode.clear();
+				for (Node r: refer)
+					if (notFoundOnNextNode(r, k))
+						rowNode.add(r);
+				
+				//Position all node in this row
+				currentY = n.getY() + S.CANVAS_MARGIN_Y;
+				leftCX = n.getX() + n.getWidth()/2
+						- S.CANVAS_MARGIN_X * (rowNode.size()-1)/2;
+				
+				for (Node r: rowNode){
+					r.setLocation(leftCX - r.getWidth()/2, currentY);
+					leftCX += S.CANVAS_MARGIN_X;
+				}
+			}
+		} else {
+			for (FunctionNode n: adapter){
+				if (n != null){
+					rowNode.add(n);
+					fnNodeList.add(n);
+				} else {
+					//Position all node in this row
+					leftCX = centerX - S.CANVAS_MARGIN_X * (rowNode.size()-1)/2;
+					Node node = rowNode.get(0);
+					leftX = leftCX - node.getWidth()/2;
+					node.setLocation(leftX, currentY);
+					for (int i = 1; i < rowNode.size(); i++){
+						leftCX += S.CANVAS_MARGIN_X;
+						node = rowNode.get(i);
+						node.setLocation(leftCX - node.getWidth()/2, currentY);
+					}
+					
+					currentY = currentY + S.CANVAS_MARGIN_Y;
+					rowNode.clear();
+				}
 			}
 		}
 		
 		defaultNodeList.addAll(fnNodeList);
 		postSetAdapter();
+	}
+	
+	/**
+	 * Không tìm thấy nút trong các refer của các nút đằng sau
+	 */
+	private boolean notFoundOnNextNode(Node node, int index){
+		for (index++; index < mAdapter.size(); index++){
+			Node n1 = mAdapter.get(index);
+			if (n1 == null || n1.getRefers() == null) continue;
+			
+			for (Node n2: n1.getRefers())
+				if (n2 == node)
+					return false;
+		}
+		return true;
 	}
 	
 	/**
@@ -250,7 +294,7 @@ public class FunctionCanvas extends Canvas {
 			String s = n.getStubString();
 			
 			if (s == null || s.isEmpty()) continue;
-			map.add(new Pair<Function, String>(f, s));
+			map.add(new Pair<>(f, s));
 		}
 		
 		//Chưa điền ô nào, không làm gì cả
@@ -262,6 +306,7 @@ public class FunctionCanvas extends Canvas {
 			GUI.instance.requestNewStubSuite(map);
 			
 		} catch (Exception e){
+			e.printStackTrace();
 			javax.swing.JOptionPane.showMessageDialog(
 					getTopLevelAncestor(), e.getMessage());;
 		}

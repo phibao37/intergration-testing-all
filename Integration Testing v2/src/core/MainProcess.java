@@ -4,17 +4,13 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map.Entry;
-
 import core.error.CoreException;
 import core.error.FunctionNotFoundException;
-import core.error.StatementNoRootException;
 import core.inte.FunctionCallGraph;
 import core.inte.FunctionPair;
 import core.inte.IntegrationPathParser;
 import core.inte.StubSuite;
 import core.inte.StubSuiteManager;
-import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Function.TestcaseManager;
@@ -22,11 +18,9 @@ import core.models.Statement;
 import core.models.Testcase;
 import core.models.Type;
 import core.models.Variable;
-import core.models.expression.ArrayExpression;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
-import core.models.type.ArrayType;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.BasisPathParser;
@@ -143,10 +137,6 @@ public abstract class MainProcess implements FilenameFilter {
 			
 			@Override
 			protected Void doTask() throws CoreException {
-				StubSuite stub = mStubMgr.getSelectedStubSuite();
-				if (func.isDependence() && stub == null)
-					throw new CoreException("Chưa có bộ Stub để kiểm thử");
-				
 				GUI.instance.setStatus("Đang phân tích các đường thi hành");
 				ArrayList<BasisPath> paths = new ArrayList<BasisPath>();
 				
@@ -157,13 +147,8 @@ public abstract class MainProcess implements FilenameFilter {
 				
 				try {
 					for (BasisPath path : paths) {
-						try {
-							mUnitPathParser.parseBasisPath(path, func, stub);
-						} catch (StatementNoRootException e1) {
-							System.out.println(" !!! " + e1.getMessage());
-							continue;
-						}
-
+						mUnitPathParser.parseBasisPath(path, func, 
+								mStubMgr.getSelectedStubSuite());
 						ConstraintEquations ce = mUnitPathParser.getConstrains();
 						path.setConstraint(ce);
 
@@ -200,10 +185,6 @@ public abstract class MainProcess implements FilenameFilter {
 		new RunThread<ArrayList<BasisPath>>(listener) {
 			@Override
 			protected ArrayList<BasisPath> doTask() throws CoreException {
-				StubSuite stub = mStubMgr.getSelectedStubSuite();
-				if (current.isDependence() && stub == null)
-					throw new CoreException("Chưa có bộ Stub để kiểm thử");
-				
 				ArrayList<ArrayList<Statement>> paths = new ArrayList<>();
 				ArrayList<BasisPath> basisPath = new ArrayList<BasisPath>();
 				
@@ -212,19 +193,15 @@ public abstract class MainProcess implements FilenameFilter {
 				path.joinLoopStatement(paths, indexes.iterator());
 				int i = 1, length = paths.size();
 				
+				try{
 				for (ArrayList<Statement> path: paths){
 					BasisPath basis = new BasisPath();
 					
 					basis.addAll(path);
 					basisPath.add(basis);
 					
-					try {
-						mUnitPathParser.parseBasisPath(basis, current, stub);
-					} catch (StatementNoRootException e1) {
-						System.out.println(" !!! " + e1.getMessage());
-						continue;
-					}
-
+					mUnitPathParser.parseBasisPath(basis, current, 
+							mStubMgr.getSelectedStubSuite());
 					ConstraintEquations ce = mUnitPathParser.getConstrains();
 					basis.setConstraint(ce);
 
@@ -232,8 +209,10 @@ public abstract class MainProcess implements FilenameFilter {
 					Result result = S.SOLVER.solve(ce);
 					basis.setSolveResult(result);
 				}
+				} finally {
+					GUI.instance.setStatus(null);
+				}
 				
-				GUI.instance.setStatus(null);
 				return basisPath;
 			}
 		}.start();
@@ -285,6 +264,8 @@ public abstract class MainProcess implements FilenameFilter {
 				}
 				
 				int i = 1, length = paths.size();
+				
+				try {
 				for (BasisPath basis: paths){
 					basis.setAnalyzic(null);
 					GUI.instance.setStatus("Đang phân tích %d/%d", i++, length);
@@ -296,8 +277,6 @@ public abstract class MainProcess implements FilenameFilter {
 					//Chưa có testcase nào, tự động tạo một bộ đơn giản
 					if (tm.size() == 0){
 						try{
-							if (calling.isDependence() && stub == null)
-								throw new CoreException("Chưa có bộ Stub để kiểm thử");
 							
 						for (BasisPath path: calling.getCFG(false).getBasisPaths()){
 							BasisPathParser parser = BasisPathParser.DEFAULT;
@@ -318,8 +297,6 @@ public abstract class MainProcess implements FilenameFilter {
 								tm.get(j).getInputs()));
 						
 						mIntePathParser.setCallingTestcase(tm.get(j));
-						if (stub == null)
-							throw new CoreException("Cần có một bộ stub để kiểm thử");
 						mIntePathParser.parseBasisPath(basis, caller, stub);
 						
 						ConstraintEquations ce = mIntePathParser.getConstrains();
@@ -337,14 +314,15 @@ public abstract class MainProcess implements FilenameFilter {
 							"No testcase match", null, null));
 					}
 				}
+				} finally {
+					GUI.instance.setStatus(null);
+				}
 				
-				GUI.instance.setStatus(null);
 				return paths;
 			}
 		}.start();
 	}
 		
-	
 	public void beginTestFunctionBeta(Function func){
 		int feasible = 0;
 		
@@ -361,7 +339,7 @@ public abstract class MainProcess implements FilenameFilter {
 			try {
 				mUnitPathParser.parseBasisPath(path, func,
 						mStubMgr.getSelectedStubSuite());
-			} catch (StatementNoRootException e1) {
+			} catch (CoreException e1) {
 				System.out.println(" !!! " + e1.getMessage());
 				continue;
 			}
@@ -506,24 +484,7 @@ public abstract class MainProcess implements FilenameFilter {
 			Function f = p.getKey();
 			String stub = p.getValue();
 			Type t = f.getReturnType();
-			Expression e = null;
-			
-			if (t.isArrayType()){
-				ArrayVariable arr = new ArrayVariable(null, 
-						(ArrayType) t, new ArrayExpression());
-				
-				if (!stub.isEmpty()){
-					Type data = arr.getDataType();
-					for (Entry<int[], String> entry: 
-						Utils.getValueMap(stub).entrySet()){
-						arr.setValueAt(IDExpression.parse(entry.getValue(), data), 
-										entry.getKey());
-					}
-				}
-				e = arr.getValue();
-			} else {
-				e = IDExpression.parse(stub, t);
-			}
+			Expression e = IDExpression.parse(stub, t);
 			
 			s.put(f, e);
 		}

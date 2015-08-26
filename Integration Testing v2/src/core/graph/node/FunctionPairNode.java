@@ -15,6 +15,7 @@ import core.inte.FunctionPair;
 
 import java.awt.Color;
 import javax.swing.border.LineBorder;
+import javax.swing.ImageIcon;
 
 public class FunctionPairNode extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -48,7 +49,8 @@ public class FunctionPairNode extends JPanel {
 		lblL.setPreferredSize(new Dimension(100, 40));
 		add(lblL);
 		
-		JLabel label = new JLabel("->");
+		JLabel label = new JLabel("");
+		label.setIcon(new ImageIcon(FunctionPairNode.class.getResource("/image/next.png")));
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setPreferredSize(new Dimension(20, 40));
 		label.setFont(new Font("Tahoma", Font.BOLD, 12));

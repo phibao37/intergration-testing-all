@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
 
+import core.error.CoreException;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
@@ -13,9 +14,7 @@ import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
-import core.models.expression.PlaceHolderExpression;
 import core.unit.BasisPathParser;
-import core.visitor.ExpressionVisitor;
 
 /**
  * Xử lý các câu lệnh gọi hàm trong các đường đi để phục vụ cho việc tích hợp
@@ -40,51 +39,7 @@ public class IntegrationPathParser extends BasisPathParser {
 	public void setCallingTestcase(Testcase testcase){
 		mCallingTestcase = testcase;
 	}
-	
-	@Override
-	protected void preVisitRootWithCall(PlaceHolderExpression h) {
-		//Quét qua biểu thức gốc để tìm các lời gọi hàm 
-		h.accept(new ExpressionVisitor() {
 
-			@Override
-			public int visit(FunctionCallExpression call) {
-				Function link = call.getFunction();
-				
-				//Tạo bản sao, sau đó fill giá trị cho các tham số
-				FunctionCallExpression _call = (FunctionCallExpression) call.clone();
-				for (Expression arg: _call.getArguments())
-					_call.replace(arg, tables.fillExpression(arg));
-				
-				//Lời gọi hàm này tương ứng với hàm đang được gọi kiểm thử
-				if (link == mCalling){
-					Testcase testcase = mCallingTestcase;
-					Expression[] args = _call.getArguments();
-					Variable[] inputs = testcase.getInputs();
-					
-					//Thêm ràng buộc các giá trị tham số phải giống các đầu vào testcase
-					System.out.println("Lời gọi hàm: " + _call);
-					for (int i = 0; i < args.length; i++){
-						addConstraintArgument(args[i], inputs[i]);
-						System.out.printf("Khớp %s với %s\n", 
-								args[i], inputs[i].getValue());
-					}
-					System.out.println();
-					
-					//Thay thế biểu thức bằng kết quả output của testcase
-					h.replace(call, testcase.getReturnOutput());
-				}
-				
-				//Hàm được gọi không là hàm đang xét kiểm thử
-				else {
-					h.replace(call, handleFunctionCall(call));
-				}
-				
-				return PROCESS_SKIP;
-			}
-			
-		});
-	}
-	
 	/**
 	 * Trả về danh sách các ràng buộc cơ bản được liên kết với lời gọi hàm
 	 * <pre>
@@ -169,9 +124,38 @@ public class IntegrationPathParser extends BasisPathParser {
 	}
 
 	@Override
-	protected Expression handleFunctionCall(FunctionCallExpression call) {
+	protected Expression handleFunctionCall(FunctionCallExpression call) 
+			throws CoreException {
+		Function link = call.getFunction();
 		
-		return super.handleFunctionCall(call);
+		//Tạo bản sao, sau đó fill giá trị cho các tham số
+		FunctionCallExpression _call = (FunctionCallExpression) call.clone();
+		for (Expression arg: _call.getArguments())
+			_call.replace(arg, tables.fillExpression(arg));
+		
+		//Lời gọi hàm này tương ứng với hàm đang được gọi kiểm thử
+		if (link == mCalling){
+			Testcase testcase = mCallingTestcase;
+			Expression[] args = _call.getArguments();
+			Variable[] inputs = testcase.getInputs();
+			
+			//Thêm ràng buộc các giá trị tham số phải giống các đầu vào testcase
+			System.out.println("Lời gọi hàm: " + _call);
+			for (int i = 0; i < args.length; i++){
+				addConstraintArgument(args[i], inputs[i]);
+				System.out.printf("Khớp %s với %s\n", 
+						args[i], inputs[i].getValue());
+			}
+			System.out.println();
+			
+			//Thay thế biểu thức bằng kết quả output của testcase
+			return testcase.getReturnOutput();
+		}
+		
+		//Hàm được gọi không là hàm đang xét kiểm thử
+		else {
+			return super.handleFunctionCall(call);
+		}
 	}
 
 	/**

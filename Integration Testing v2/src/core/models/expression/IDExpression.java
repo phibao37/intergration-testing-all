@@ -1,9 +1,13 @@
 package core.models.expression;
 
+import java.util.Map.Entry;
+
 import core.Utils;
 import core.error.CoreException;
+import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Type;
+import core.models.type.ArrayType;
 import core.models.type.BasicType;
 
 /**
@@ -320,17 +324,9 @@ public class IDExpression extends Expression implements Conditionable {
 		return getType() == BasicType.BOOL;
 	}
 	
-	/**
-	 * Tạo một biểu thức hằng từ nội dung và kiểu của nó
-	 * @param content nội dung dạng chuỗi của biểu thức
-	 * @param type kiểu của biểu thức
-	 * @return biểu thức hằng tương ứng
-	 * @throws CoreException định dạng biểu thức không đúng với kiểu
-	 */
-	public static IDExpression parse(String content, Type type)
+	private static IDExpression parse(String content, BasicType type)
 			throws CoreException{
-		IDExpression r = new IDExpression(content, 
-				Utils.basicTypeToFlag((BasicType) type));
+		IDExpression r = new IDExpression(content, Utils.basicTypeToFlag(type));
 		
 		if (r.getType() != type)
 			throw new CoreException("\"%s\" không phải là định dạng kiểu %s",
@@ -338,4 +334,34 @@ public class IDExpression extends Expression implements Conditionable {
 		return r;
 	}
 	
+	/**
+	 * Tạo một biểu thức hằng (hoặc mảng hằng) từ nội dung và kiểu của nó
+	 * @param content nội dung dạng chuỗi của biểu thức
+	 * @param type kiểu của biểu thức, là các kiểu cơ bản (không phải kiểu mảng)
+	 * @return biểu thức hằng tương ứng
+	 * @throws CoreException định dạng biểu thức không đúng với kiểu
+	 */
+	public static Expression parse(String content, Type type)
+			throws CoreException{
+		Expression e = null;
+		
+		if (type.isArrayType()){
+			ArrayVariable arr = new ArrayVariable(null, 
+					(ArrayType) type, new ArrayExpression());
+			
+			if (!content.isEmpty()){
+				Type data = arr.getDataType();
+				for (Entry<int[], String> entry: 
+					Utils.getValueMap(content).entrySet()){
+					arr.setValueAt(parse(entry.getValue(), (BasicType) data), 
+									entry.getKey());
+				}
+			}
+			e = arr.getValue();
+		} else {
+			e = parse(content, (BasicType) type);
+		}
+		
+		return e;
+	}
 }

@@ -50,6 +50,7 @@ public class ArrayExpression extends ExpressionGroup {
 	
 	@Override
 	protected String generateContent() {
+		if (g.length == 0) return "{}";
 		String content = "{" + g[0];
 		
 		for (int i = 1; i < g.length; i++)
