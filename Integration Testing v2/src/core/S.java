@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
@@ -28,6 +29,8 @@ import core.solver.Solver;
  * {@link java.math.BigInteger#BigInteger(String)}, 
  * {@link java.io.File#File(String)}, ...
  * </li>
+ * <li>hoặc là mảng của một trong các kiểu biến thỏa mãn một trong các điều kiện
+ * trên, chỉ hỗ trợ mảng một chiều</li>
  * </ul>
  * @author ducvu
  *
@@ -75,11 +78,6 @@ public class S {
 	public static int MAX_LOOP_TEST = 8;
 	
 	/**
-	 * Bộ giải hệ ràng buộc mặc định
-	 */
-	public static Solver SOLVER = Solver.valueOf("Z3");
-	
-	/**
 	 * Thư mục chứa bộ biên dịch GCC
 	 */
 	public static File DIR_GCC = new File("D:\\App\\Library\\Cygwin\\bin");
@@ -100,6 +98,10 @@ public class S {
 	 */
 	public static int RAND_MAX = 50;
 	
+	/**
+	 * Danh sách các bộ giải được dùng để giải hệ ràng buộc
+	 */
+	public static Solver[] SOLVE_LIST = Solver.BASE_LIST;
 
 	/*---------------------------------------------------------------------*/
 	
@@ -158,8 +160,8 @@ public class S {
 		
 		static {
 			Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
-			WIDTH = (int) size.getWidth();
-			HEIGHT = (int) size.getHeight();
+			WIDTH = size.width;
+			HEIGHT = size.height;
 		}
 	}
 	
@@ -186,39 +188,56 @@ public class S {
 
 		if (prop_file.exists())
 		try {
-			
+
 			FileInputStream file = new FileInputStream(prop_file);
 			prop.load(file);
 			file.close();
-			
-			for (String key: prop.stringPropertyNames()){
+
+			for (String key : prop.stringPropertyNames()) {
 				Field field = prop_map.get(key);
-				Class<?> cls = field.getType();
-				Object value = prop.getProperty(key);
-				
-				if (cls.isPrimitive())
-					cls = Utils.toWrapper(cls);
-				try {
-					value = cls.getMethod("valueOf", String.class)
-							.invoke(null, value);
-					} catch (NoSuchMethodException e1) {
-						if (cls == Character.class)
-							value = cls.getConstructor(char.class)
-							.newInstance(((String)value).charAt(0));
-						else
-							value = cls.getConstructor(String.class)
-								.newInstance(value);
-					}
-					field.set(null, value);
-				}
-			
-		} 
-		
+				field.set(null, inflateValue(field.getType(), prop.getProperty(key)));
+			}
+
+		}
+
 		catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+	
 		postSetting();
+	}
+	
+	/**
+	 * Tạo đối tượng từ kiểu và chuỗi giá trị tương ứng
+	 */
+	private static Object inflateValue(Class<?> cls, String value) throws Exception{
+		if (cls.isArray()){
+			Class<?> itemCls = cls.getComponentType();
+			if (value.isEmpty())
+				return Array.newInstance(itemCls, 0);
+			
+			String[] values = value.split(", ?");
+			Object r = Array.newInstance(itemCls, values.length);
+			
+			for (int i = 0; i < values.length; i++){
+				Object item = inflateValue(itemCls, values[i]);
+				Array.set(r, i, item);
+			}
+			
+			return r;
+		}
+		
+		if (cls.isPrimitive())
+			cls = Utils.toWrapper(cls);
+		try {
+			return cls.getMethod("valueOf", String.class).invoke(null, value);
+		} catch (NoSuchMethodException e1) {
+			if (cls == Character.class)
+				return cls.getConstructor(char.class)
+				.newInstance(((String) value).charAt(0));
+			else
+				return cls.getConstructor(String.class).newInstance(value);
+		}
 	}
 	
 	/**
@@ -229,7 +248,7 @@ public class S {
 			for (Entry<String, Field> entry: prop_map.entrySet())
 				prop.setProperty(
 						entry.getKey(), 
-						String.valueOf(entry.getValue().get(null))
+						pushValue(entry.getValue().get(null))
 				);
 			prop_file.getParentFile().mkdirs();
 			FileOutputStream file = new FileOutputStream(prop_file);
@@ -239,6 +258,23 @@ public class S {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static String pushValue(Object value){
+		if (value.getClass().isArray()){
+			String r = "";
+			int l = Array.getLength(value);
+			
+			if (l > 0){
+				r = pushValue(Array.get(value, 0));
+				for (int i = 1; i < l; i++)
+					r += ", " + pushValue(Array.get(value, i));
+			}
+			
+			return r;
+		}
+		else
+			return String.valueOf(value);
 	}
 	
 }

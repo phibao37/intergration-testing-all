@@ -428,8 +428,8 @@ public class Canvas extends JPanel implements MouseListener {
 			super.addImpl(comp, constraints, index);
 			comp.addMouseListener(this);
 			((JComponent)comp).setBorder(NONE);
-			if (comp instanceof AbstractButton){
-				AbstractButton b = (AbstractButton) comp;
+			if (comp instanceof JButton){
+				JButton b = (JButton) comp;
 				b.setContentAreaFilled(false);
 				if (b.isSelected()){
 					b.setBackground(ACTIVE);

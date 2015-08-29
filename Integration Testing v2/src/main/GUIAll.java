@@ -367,10 +367,11 @@ public class GUIAll extends GUI {
 							j++,
 							path.toStringSkipMarkdown(),
 							r.getSolutionMessage(),
-							r.getReturnValue()
+							r.getReturnValue(),
+							r.getSolver()
 						});
 					}
-					pathModel.addRow(new Object[]{null, null, null, null});
+					pathModel.addRow(new Object[]{null, null, null, null, null});
 				}
 				
 				openFileView(func.getSourceFile());
@@ -441,7 +442,7 @@ public class GUIAll extends GUI {
 		else {
 			lbl_loading.setVisible(true);
 			lbl_status.setVisible(true);
-			lbl_status.setText(String.format(status, args));
+			lbl_status.setText(Utils.format(status, args));
 		}
 	}
 	
@@ -449,7 +450,7 @@ public class GUIAll extends GUI {
 	public void setStatus(int second, String status, Object... args) {
 		lbl_loading.setVisible(false);
 		lbl_status.setVisible(true);
-		lbl_status.setText(String.format(status, args));
+		lbl_status.setText(Utils.format(status, args));
 		
 		if (timer.isRunning())
 			timer.stop();
@@ -490,10 +491,11 @@ public class GUIAll extends GUI {
 						j++,
 						path.toStringSkipMarkdown(),
 						r.getSolutionMessage(),
-						r.getReturnValue()
+						r.getReturnValue(),
+						r.getSolver()
 					});
 				}
-				pathModel.addRow(new Object[]{null, null, null, null});
+				pathModel.addRow(new Object[]{null, null, null, null, null});
 				isWorking = false;
 			}
 		});
@@ -546,10 +548,11 @@ public class GUIAll extends GUI {
 						j++,
 						path.toStringSkipMarkdown(),
 						r.getSolutionMessage(),
-						r.getReturnValue()
+						r.getReturnValue(),
+						r.getSolver()
 					});
 				}
-				pathModel.addRow(new Object[]{null, null, null, null});
+				pathModel.addRow(new Object[]{null, null, null, null, null});
 				isWorking = false;
 			}
 		});
@@ -908,7 +911,7 @@ public class GUIAll extends GUI {
 				new Object[][] {
 				},
 				new String[] {
-					"STT", "\u0110\u01B0\u1EDDng d\u1EABn", "Testcases", "Return"
+					"STT", "Đường dẫn", "Testcases", "Return", "Bộ giải"
 				}
 			));
 			table.getColumnModel().getColumn(0).setPreferredWidth(30);
@@ -916,6 +919,7 @@ public class GUIAll extends GUI {
 			table.getColumnModel().getColumn(0).setMaxWidth(30);
 			table.getColumnModel().getColumn(3).setPreferredWidth(70);
 			table.getColumnModel().getColumn(3).setMaxWidth(70);
+			table.getColumnModel().getColumn(4).setMaxWidth(60);
 			extraWrap.setViewportView(table);
 			extraWrap.getViewport().setBackground(Color.WHITE);
 			
@@ -963,7 +967,7 @@ public class GUIAll extends GUI {
 				new Object[][] {
 				},
 				new String[] {
-					"STT", "\u0110\u01B0\u1EDDng d\u1EABn", "Testcases", "Return"
+					"STT", "Đường dẫn", "Testcases", "Return", "Bộ giải"
 				}
 			));
 		table_loop_result.getColumnModel().getColumn(0).setPreferredWidth(30);
@@ -971,6 +975,7 @@ public class GUIAll extends GUI {
 		table_loop_result.getColumnModel().getColumn(0).setMaxWidth(30);
 		table_loop_result.getColumnModel().getColumn(3).setPreferredWidth(70);
 		table_loop_result.getColumnModel().getColumn(3).setMaxWidth(70);
+		table_loop_result.getColumnModel().getColumn(4).setMaxWidth(60);
 		tb_loop_result_wrap.setViewportView(table_loop_result);
 		
 		tb_loop_result_wrap.getViewport().setBackground(Color.WHITE);
@@ -1079,7 +1084,7 @@ public class GUIAll extends GUI {
 				new Object[][] {
 				},
 				new String[] {
-					"STT", "\u0110\u01B0\u1EDDng d\u1EABn", "Testcases", "Return"
+					"STT", "Đường dẫn", "Testcases", "Return", "Bộ giải"
 				}
 			));
 		table_test_pair.getColumnModel().getColumn(0).setPreferredWidth(30);
@@ -1087,6 +1092,7 @@ public class GUIAll extends GUI {
 		table_test_pair.getColumnModel().getColumn(0).setMaxWidth(30);
 		table_test_pair.getColumnModel().getColumn(3).setPreferredWidth(70);
 		table_test_pair.getColumnModel().getColumn(3).setMaxWidth(70);
+		table_test_pair.getColumnModel().getColumn(4).setMaxWidth(60);
 		tb_test_pair_wrap.setViewportView(table_test_pair);
 		
 		listTable.add(table_test_pair);

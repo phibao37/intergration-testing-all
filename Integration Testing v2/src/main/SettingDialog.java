@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
 
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -32,17 +30,14 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 
-import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 
 import java.awt.Font;
 import java.io.File;
-import java.util.Enumeration;
-
 import core.S;
 import core.Utils;
 import core.graph.GQuery;
-import core.graph.GQuery.Filter;
+import core.graph.SelectList;
 import core.solver.Solver;
 import core.S.SCREEN;
 
@@ -59,8 +54,6 @@ public class SettingDialog extends JDialog {
 	private JSpinner spinner_max_loop;
 	private JLabel entry_tmp_dir;
 	private JLabel entry_tmp_size;
-	private JRadioButton entry_solver_z3;
-	private ButtonGroup group_solver;
 	private JSpinner entry_rand_loop;
 	private JSpinner entry_rand_min;
 	private JSpinner entry_rand_max;
@@ -89,24 +82,13 @@ public class SettingDialog extends JDialog {
 			setTmpSize(Utils.getFileSize(S.DIR_TEMP));
 		}
 		
-		String solver = S.SOLVER.toString();
-		Enumeration<AbstractButton> iter = group_solver.getElements();
-		while (iter.hasMoreElements()){
-			AbstractButton bt = iter.nextElement();
-			
-			if (bt.getActionCommand().equals(solver)){
-				bt.doClick();
-				//group_solver.setSelected(bt.getModel(), true);
-				break;
-			}
-		}
-		
 		entry_rand_loop.setValue(S.RAND_LOOP);
 		entry_rand_min.setValue(S.RAND_MIN);
 		entry_rand_max.setValue(S.RAND_MAX);
 		
 		entry_show_canvas_toolbar.setSelected(S.CANVAS_SHOW_TOOLBAR);
 		entry_draw_topdown.setSelected(S.CANVAS_DRAW_TOPDOWN);
+		entry_solve_list.setModel(Solver.BASE_LIST, S.SOLVE_LIST);
 	}
 	
 	private void applySettings(){
@@ -114,7 +96,6 @@ public class SettingDialog extends JDialog {
 		
 		S.DIR_Z3_BIN = new File(entry_z3_dir.getText());
 		S.DIR_TEMP = new File(entry_tmp_dir.getText());
-		S.SOLVER = Solver.valueOf(group_solver.getSelection().getActionCommand());
 		S.RAND_LOOP = (int) entry_rand_loop.getValue();
 		S.RAND_MIN = (int) entry_rand_min.getValue();
 		S.RAND_MAX = (int) entry_rand_max.getValue();
@@ -122,6 +103,7 @@ public class SettingDialog extends JDialog {
 		S.CANVAS_SHOW_TOOLBAR = entry_show_canvas_toolbar.isSelected();
 		S.CANVAS_DRAW_TOPDOWN = entry_draw_topdown.isSelected();
 		
+		S.SOLVE_LIST = entry_solve_list.getSelectList().toArray(new Solver[0]);
 		S.save();
 	}
 	
@@ -267,6 +249,7 @@ public class SettingDialog extends JDialog {
 		gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
 		gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel.setLayout(gbl_panel);
+		
 		$Solver = GQuery.root(panel);
 		
 		JLabel lblBGii = new JLabel("Bộ giải");
@@ -277,30 +260,25 @@ public class SettingDialog extends JDialog {
 		gbc_lblBGii.gridy = 1;
 		panel.add(lblBGii, gbc_lblBGii);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setOpaque(false);
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.gridwidth = 2;
-		gbc.insets = new Insets(0, 0, 5, 5);
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridx = 2;
-		gbc.gridy = 1;
-		panel.add(panel_1, gbc);
-		panel_1.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
-		
-		entry_solver_z3 = new JRadioButton("Z3");
-		entry_solver_z3.setSelected(true);
-		panel_1.add(entry_solver_z3);
 		contentPanel.setLayout(gl_contentPanel);
 		
-		group_solver = new ButtonGroup();
-		group_solver.add(entry_solver_z3);
-		entry_solver_z3.setActionCommand("Z3");
+		entry_solve_list = new SelectList<Solver>();
+		entry_solve_list.setHeight(30);
+		entry_solve_list.setItemStateChangeListener(
+				new SelectList.OnItemStateChange<Solver>() {
+			@Override
+			public void stateChanged(Solver item, boolean enable) {
+				$Solver.find("." + item.toString()).enabled(enable);
+			}
+		});
 		
-		JRadioButton entry_solver_random = new JRadioButton("Random");
-		panel_1.add(entry_solver_random);
-		group_solver.add(entry_solver_random);
-		entry_solver_random.setActionCommand("Random");
+		GridBagConstraints gbc_entry_solve_list = new GridBagConstraints();
+		gbc_entry_solve_list.anchor = GridBagConstraints.WEST;
+		gbc_entry_solve_list.insets = new Insets(0, 0, 5, 5);
+		gbc_entry_solve_list.fill = GridBagConstraints.VERTICAL;
+		gbc_entry_solve_list.gridx = 2;
+		gbc_entry_solve_list.gridy = 1;
+		panel.add(entry_solve_list, gbc_entry_solve_list);
 		
 		JLabel lblBGiiZ = new JLabel("Bộ giải Z3");
 		lblBGiiZ.setFont(new Font("Tahoma", Font.BOLD, 11));
@@ -485,24 +463,6 @@ public class SettingDialog extends JDialog {
 			}
 		}
 		
-		Enumeration<AbstractButton> iter = group_solver.getElements();
-		while (iter.hasMoreElements()){
-			iter.nextElement().addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					$Solver.find("." + e.getActionCommand()).enabled(true);
-					$Solver.find(new Filter(){
-
-						@Override
-						public boolean withGroup(String group) {
-							return group != null && !group.equals(e.getActionCommand());
-						}
-						
-					}).enabled(false);
-				}
-			});
-		}
-		
 		int x = (SCREEN.WIDTH - getWidth())/2;
 	    int y = (SCREEN.HEIGHT - getHeight())/2;
 	    setLocation(x, y);
@@ -511,6 +471,7 @@ public class SettingDialog extends JDialog {
 	private static int LAST_INDEX = 0;
 	private JCheckBox entry_show_canvas_toolbar;
 	private JCheckBox entry_draw_topdown;
+	private SelectList<Solver> entry_solve_list;
 
 	@Override
 	public void setVisible(boolean b) {

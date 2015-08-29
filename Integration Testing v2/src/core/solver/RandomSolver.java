@@ -151,7 +151,7 @@ public class RandomSolver extends Solver {
 			
 		}
 		
-		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue);
+		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue, this);
 	}
 	
 	/**

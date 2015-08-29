@@ -163,6 +163,13 @@ public class Utils {
 	}
 	
 	/**
+	 * Định dạng chuỗi theo các tham số
+	 */
+	public static String format(String format, Object... args){
+		return args.length == 0 ? format : String.format(format, args);
+	}
+	
+	/**
 	 * Nhân mỗi phần tử của danh sách bên trái với mỗi phân tử của danh sách bên phải
 	 * @param list1 danh sách bên trái
 	 * @param list2 danh sách bên phải

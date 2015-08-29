@@ -16,11 +16,11 @@ import core.models.Function;
 import core.models.Function.TestcaseManager;
 import core.models.Statement;
 import core.models.Testcase;
-import core.models.Type;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
+import core.solver.Solver;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.BasisPathParser;
@@ -154,7 +154,7 @@ public abstract class MainProcess implements FilenameFilter {
 
 						GUI.instance.setStatus("Đang giải hệ %d/%d", i++,
 								length);
-						Result result = S.SOLVER.solve(ce);
+						Result result = Solver.solveByList(ce);
 						path.setSolveResult(result);
 					}
 				} finally{
@@ -206,7 +206,7 @@ public abstract class MainProcess implements FilenameFilter {
 					basis.setConstraint(ce);
 
 					GUI.instance.setStatus("Đang giải hệ %d/%d", i++, length);
-					Result result = S.SOLVER.solve(ce);
+					Result result = Solver.solveByList(ce);
 					basis.setSolveResult(result);
 				}
 				} finally {
@@ -276,18 +276,18 @@ public abstract class MainProcess implements FilenameFilter {
 					
 					//Chưa có testcase nào, tự động tạo một bộ đơn giản
 					if (tm.size() == 0){
-						try{
-							
 						for (BasisPath path: calling.getCFG(false).getBasisPaths()){
 							BasisPathParser parser = BasisPathParser.DEFAULT;
 							parser.parseBasisPath(path, calling, stub);
-							Result r = S.SOLVER.solve(parser.getConstrains());
 							
-							if (r.getSolutionCode() == Result.SUCCESS)
-								tm.add(new Testcase(r));
-						}
-						} catch (CoreException e){
-							e.printStackTrace();
+							for (Solver solver: S.SOLVE_LIST)
+								try {
+									Result r = solver.solve(parser.getConstrains());
+									if (r.getSolutionCode() == Result.SUCCESS)
+										tm.add(new Testcase(r));
+								} catch (CoreException e) {
+									GUI.instance.setStatus(1, e.getMessage());
+								}
 						}
 					}
 					
@@ -300,7 +300,7 @@ public abstract class MainProcess implements FilenameFilter {
 						mIntePathParser.parseBasisPath(basis, caller, stub);
 						
 						ConstraintEquations ce = mIntePathParser.getConstrains();
-						Result result = S.SOLVER.solve(ce);
+						Result result = Solver.solveByList(ce);
 						
 						if (result.getSolutionCode() == Result.SUCCESS){
 							basis.setConstraint(ce);
@@ -310,8 +310,10 @@ public abstract class MainProcess implements FilenameFilter {
 					}
 					
 					if (j == tm.size()){
-						basis.setSolveResult(new Result(Result.ERROR, 
-							"No testcase match", null, null));
+						basis.setSolveResult(new Result(
+								Result.ERROR, caller.getRefers().size() > 0 ? 
+									"No testcase match" : "No testcase needed", 
+								null, null, null));
 					}
 				}
 				} finally {
@@ -352,7 +354,7 @@ public abstract class MainProcess implements FilenameFilter {
 			
 			Result result = Result.DEFAULT;
 			try {
-				result = S.SOLVER.solve(ce);
+				result = Solver.solveByList(ce);
 			} catch (CoreException e1) {
 				e1.printStackTrace();
 			}
@@ -482,13 +484,11 @@ public abstract class MainProcess implements FilenameFilter {
 		StubSuite s = new StubSuite();
 		for (Pair<Function, String> p: strMap){
 			Function f = p.getKey();
-			String stub = p.getValue();
-			Type t = f.getReturnType();
-			Expression e = IDExpression.parse(stub, t);
-			
+			Expression e = IDExpression.parse(p.getValue(), f.getReturnType());
 			s.put(f, e);
 		}
 		mStubMgr.add(s);
+		GUI.instance.setStatus(2, "Đã thêm bộ stub \"%s\" thành công", s.getName());
 	}
 	
 	/**

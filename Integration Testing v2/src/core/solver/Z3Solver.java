@@ -162,7 +162,7 @@ public class Z3Solver extends Solver {
 			mSolutionStr = RESULT_UNSAT; //+ Why?
 		} 
 		
-		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue);
+		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue, this);
 	}
 	
 	/**

@@ -3,6 +3,7 @@ package core.solver;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+import core.S;
 import core.error.CoreException;
 import core.models.Expression;
 import core.models.Variable;
@@ -83,6 +84,54 @@ public abstract class Solver {
 		String cls = this.getClass().getSimpleName();
 		return cls.substring(0, cls.length() - 6);
 	}
+	
+	/**
+	 * Danh sách các bộ giải mặc định được dùng để giải hệ
+	 */
+	public static final Solver[] BASE_LIST = new Solver[]{
+			Z3Solver.DEFAULT,
+			RandomSolver.DEFAULT
+	};
+	
+	/**
+	 * Lần lượt dùng các bộ giải để giải hệ ràng buộc được cung cấp. Việc giải được
+	 * dừng lại khi có một bộ giải ra được nghiệm. Khi tất cả các bộ đều không giải
+	 * được, kết quả có độ tin cậy cao nhất sẽ được lấy
+	 * @param constraints hệ ràng buộc cần giải, xem {@link #solve(ConstraintEquations)}
+	 * @return kết quả tốt nhất từ các bộ giải
+	 * @throws CoreException khi toàn bộ các bộ giải đều gây ra lỗi, lỗi cuối cùng sẽ
+	 * được ném ra
+	 */
+	public static Result solveByList(ConstraintEquations constraints)
+			throws CoreException{
+		Result r = Result.DEFAULT, r2;
+		CoreException e = null;
+		int errorCount = 0;
+		
+		for (Solver s: S.SOLVE_LIST){
+			try{
+				r2 = s.solve(constraints);
+				
+				//Có 1 bộ giải ra được nghiệm
+				if (r2.getSolutionCode() == Result.SUCCESS){
+					r = r2;
+					break;
+				}
+				
+				//Nếu kết quả có độ tin cậy cao hơn kết quả hiện tại, lấy kết quả này
+				else if (r2.getSolutionCode() > r.getSolutionCode())
+					r = r2;
+				
+			} catch (CoreException ex){
+				e = ex;
+				errorCount++;
+			}
+		}
+		
+		if (errorCount > 0 && errorCount == S.SOLVE_LIST.length)
+			throw e;
+		return r;
+	}
 
 	/**
 	 * Kết quả sau khi giải một hệ ràng buộc
@@ -93,6 +142,7 @@ public abstract class Solver {
 		private String mMessage;
 		private Variable[] mSolution;
 		private Expression mReturnValue;
+		private Solver mSolver;
 		
 		/**
 		 * Tạo một kết quả sau khi đã giải xong các ràng buộc
@@ -102,11 +152,12 @@ public abstract class Solver {
 		 * @param returnValue xem {@link #getReturnValue()}
 		 */
 		public Result(int code, String message, Variable[] solution, 
-				Expression returnValue){
+				Expression returnValue, Solver solver){
 			mCode = code;
 			mMessage = message;
 			mSolution = solution;
 			mReturnValue = returnValue;
+			mSolver = solver;
 		}
 		
 		/**
@@ -145,6 +196,13 @@ public abstract class Solver {
 		}
 		
 		/**
+		 * Trả về bộ giải hệ được dùng để tạo ra kết quả này
+		 */
+		public Solver getSolver(){
+			return mSolver;
+		}
+		
+		/**
 		 * Hệ giải ra nghiệm thành công
 		 */
 		public static final int SUCCESS = 1;
@@ -160,7 +218,8 @@ public abstract class Solver {
 		public static final int UNKNOWN = -1;
 		
 
-		public static final Result DEFAULT = new Result(UNKNOWN, "unknown", null, null);
+		public static final Result DEFAULT = new Result(UNKNOWN, "unknown", 
+				null, null, null);
 	}
 	
 	/**
