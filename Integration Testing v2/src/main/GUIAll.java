@@ -68,6 +68,7 @@ import core.inte.StubSuite;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Statement;
+import core.models.TestResult;
 import core.models.Variable;
 import core.models.expression.IDExpression;
 import core.models.statement.FlagStatement;
@@ -161,6 +162,10 @@ public class GUIAll extends GUI {
 	}
 	private static final Dimension SIZE_CHOOSER = 
 			new Dimension(SCREEN.WIDTH/2, SCREEN.HEIGHT/2);
+	private static final ImageIcon ICON_TRUE = new ImageIcon(
+			GUIAll.class.getResource("/image/testcase_true.png"));
+	private static final ImageIcon ICON_FALSE = new ImageIcon(
+			GUIAll.class.getResource("/image/testcase_false.png"));
 	
 	private JScrollPane cv_fn_call_wrap;
 	private JScrollPane tb_path_details_wrap;
@@ -171,6 +176,10 @@ public class GUIAll extends GUI {
 	private JTextField txt_stub_name;
 	private DefaultListModel<StubSuite> list_stub_model;
 	private JPanel panel_stub;
+	private JScrollPane pn_result_wrap;
+	private JLabel lbl_return_value;
+	private JButton btn_testcase_status;
+	private JLabel lbl_return_expected;
 	
 	/**
 	 * Chạy ứng dụng
@@ -625,9 +634,20 @@ public class GUIAll extends GUI {
 				});
 			}
 		
-		Component c = tab_info.getSelectedComponent();
+		lbl_return_value.setText(Utils.toString(r.getReturnValue(), null));
+		TestResult tr = currentFunction.getTestcaseManager().test(r);
+		if (tr.isTestcaseFound()){
+			lbl_return_expected.setText(Utils.toString(
+					tr.getTestcase().getReturnOutput(), null));
+			btn_testcase_status.setIcon(tr.isMatch() ? ICON_TRUE : ICON_FALSE);
+		}
+		else {
+			lbl_return_expected.setText(null);
+			btn_testcase_status.setIcon(null);
+		}
 		
-		if (c != tb_path_details_wrap && c != tb_testcase_wrap)
+		Component c = tab_info.getSelectedComponent();
+		if (c != tb_path_details_wrap && c != tb_testcase_wrap && c != pn_result_wrap)
 			tab_info.setSelectedComponent(tb_path_details_wrap);
 	}
 	
@@ -882,6 +902,61 @@ public class GUIAll extends GUI {
 			table_testcase.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
 		}
 		tb_testcase_wrap.setViewportView(table_testcase);
+		
+		pn_result_wrap = new JScrollPane();
+		tab_info.addTab("Kết quả", null, pn_result_wrap, null);
+		
+		JPanel panel_result = new JPanel();
+		panel_result.setBackground(Color.WHITE);
+		pn_result_wrap.setViewportView(panel_result);
+		GridBagLayout gbl_panel_result = new GridBagLayout();
+		gbl_panel_result.columnWidths = new int[]{15, 120, 0, 0, 15, 0};
+		gbl_panel_result.rowHeights = new int[]{25, 25, 25, 0};
+		gbl_panel_result.columnWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_result.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+		panel_result.setLayout(gbl_panel_result);
+		
+		JLabel lblGiTrTr = new JLabel("Giá trị trả về");
+		GridBagConstraints gbc_lblGiTrTr = new GridBagConstraints();
+		gbc_lblGiTrTr.anchor = GridBagConstraints.WEST;
+		gbc_lblGiTrTr.insets = new Insets(0, 0, 5, 5);
+		gbc_lblGiTrTr.gridx = 1;
+		gbc_lblGiTrTr.gridy = 1;
+		panel_result.add(lblGiTrTr, gbc_lblGiTrTr);
+		
+		lbl_return_value = new JLabel("");
+		GridBagConstraints gbc_lbl_return_value = new GridBagConstraints();
+		gbc_lbl_return_value.gridwidth = 2;
+		gbc_lbl_return_value.anchor = GridBagConstraints.WEST;
+		gbc_lbl_return_value.insets = new Insets(0, 0, 5, 5);
+		gbc_lbl_return_value.gridx = 2;
+		gbc_lbl_return_value.gridy = 1;
+		panel_result.add(lbl_return_value, gbc_lbl_return_value);
+		
+		JLabel lblGiTrMong = new JLabel("Giá trị mong muốn");
+		GridBagConstraints gbc_lblGiTrMong = new GridBagConstraints();
+		gbc_lblGiTrMong.anchor = GridBagConstraints.WEST;
+		gbc_lblGiTrMong.insets = new Insets(0, 0, 0, 5);
+		gbc_lblGiTrMong.gridx = 1;
+		gbc_lblGiTrMong.gridy = 2;
+		panel_result.add(lblGiTrMong, gbc_lblGiTrMong);
+		
+		lbl_return_expected = new JLabel("");
+		GridBagConstraints gbc_lbl_return_expected = new GridBagConstraints();
+		gbc_lbl_return_expected.insets = new Insets(0, 0, 0, 5);
+		gbc_lbl_return_expected.gridx = 2;
+		gbc_lbl_return_expected.gridy = 2;
+		panel_result.add(lbl_return_expected, gbc_lbl_return_expected);
+		
+		btn_testcase_status = new JButton("");
+		btn_testcase_status.setContentAreaFilled(false);
+		btn_testcase_status.setBorder(null);
+		GridBagConstraints gbc_btn_testcase_status = new GridBagConstraints();
+		gbc_btn_testcase_status.anchor = GridBagConstraints.WEST;
+		gbc_btn_testcase_status.insets = new Insets(0, 0, 0, 5);
+		gbc_btn_testcase_status.gridx = 3;
+		gbc_btn_testcase_status.gridy = 2;
+		panel_result.add(btn_testcase_status, gbc_btn_testcase_status);
 		tb_testcase_wrap.getViewport().setBackground(Color.WHITE);
 		tb_path_details_wrap.getViewport().setBackground(Color.WHITE);
 		

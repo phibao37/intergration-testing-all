@@ -170,6 +170,13 @@ public class Utils {
 	}
 	
 	/**
+	 * Trả về nội dung hiển thị của chuỗi, hoặc ifNull nếu đối tượng là null
+	 */
+	public static String toString(Object o, String ifNull){
+		return o == null ? ifNull : o.toString();
+	}
+	
+	/**
 	 * Nhân mỗi phần tử của danh sách bên trái với mỗi phân tử của danh sách bên phải
 	 * @param list1 danh sách bên trái
 	 * @param list2 danh sách bên phải

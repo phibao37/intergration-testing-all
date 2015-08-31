@@ -1,6 +1,7 @@
 package core.models;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import core.solver.Solver.Result;
 
@@ -51,6 +52,24 @@ public class Testcase {
 		
 		listInput = result.getSolution();
 		mOutput = result.getReturnValue();
+	}
+	
+	/**
+	 * Kiểm tra xem đầu vào của testcase có khớp với kết quả giải hệ ràng buộc hay không
+	 * <br/> Thứ tự các biến đầu vào phải khớp nhau (theo thứ tự trong mã nguồn)
+	 */
+	public boolean isMatchResult(Result result){
+		if (result.getSolutionCode() != Result.SUCCESS)
+			return false;
+		Variable[] solution = result.getSolution();
+		if (solution.length != listInput.length)
+			return false;
+		
+		for (int i = 0; i < solution.length; i++)
+			if (!Objects.equals(solution[i], listInput[i]))
+				return false;
+		
+		return true;
 	}
 	
 	/**

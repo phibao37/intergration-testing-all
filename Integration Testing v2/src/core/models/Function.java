@@ -2,6 +2,7 @@ package core.models;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import core.GUI;
 import core.Utils;
@@ -9,6 +10,7 @@ import core.error.StatementNoRootException;
 import core.graph.Graphable;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
+import core.solver.Solver.Result;
 import core.unit.CFG;
 import core.visitor.BodyFunctionVisitor;
 import core.visitor.ExpressionVisitor;
@@ -231,6 +233,25 @@ public class Function extends Element implements Graphable {
 		private static final long serialVersionUID = 1L;
 		
 		private TestcaseManager() {}
+		
+		/**
+		 * Kiểm tra xem kết quả tính toán được do giải hệ có khớp với testcase mong
+		 * muốn hay không
+		 */
+		public TestResult test(Result result){
+			Testcase test = null;
+			boolean match = false;
+			
+			for (Testcase t: this)
+				if (t.isMatchResult(result)){
+					test = t;
+					match = Objects.equals(
+							t.getReturnOutput(), result.getReturnValue());
+					break;
+				}
+			
+			return new TestResult(getFunction(), test, result, match);
+		}
 		
 		public Function getFunction(){
 			return Function.this;

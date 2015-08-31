@@ -17,14 +17,12 @@ import core.models.Function.TestcaseManager;
 import core.models.Statement;
 import core.models.Testcase;
 import core.models.Variable;
-import core.models.expression.ArrayIndexExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
 import core.solver.Solver;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.BasisPathParser;
-import core.unit.CFG;
 import core.unit.ConstraintEquations;
 import core.unit.LoopablePath;
 import core.visitor.BodyFunctionVisitor;
@@ -278,7 +276,13 @@ public abstract class MainProcess implements FilenameFilter {
 					if (tm.size() == 0){
 						for (BasisPath path: calling.getCFG(false).getBasisPaths()){
 							BasisPathParser parser = BasisPathParser.DEFAULT;
-							parser.parseBasisPath(path, calling, stub);
+							
+							try{
+								parser.parseBasisPath(path, calling, stub);
+							} catch (CoreException e){
+								GUI.instance.setStatus(1, e.getMessage());
+								continue;
+							}
 							
 							for (Solver solver: S.SOLVE_LIST)
 								try {
@@ -323,52 +327,6 @@ public abstract class MainProcess implements FilenameFilter {
 				return paths;
 			}
 		}.start();
-	}
-		
-	public void beginTestFunctionBeta(Function func){
-		int feasible = 0;
-		
-		//CFG cfg_12 = func.getCFG(false);
-		CFG cfg_3 = func.getCFG(true);
-		
-		//cfg_12.getBasisPaths();
-		//cfg_3.getBasisPaths();
-		
-		for (BasisPath path: cfg_3.getBasisPaths()){
-			System.out.println("\n" + path);
-			System.out.println("Loop: " + new LoopablePath(path));
-			
-			try {
-				mUnitPathParser.parseBasisPath(path, func,
-						mStubMgr.getSelectedStubSuite());
-			} catch (CoreException e1) {
-				System.out.println(" !!! " + e1.getMessage());
-				continue;
-			}
-			ConstraintEquations ce = mUnitPathParser.getConstrains();
-			
-			for (Expression e: ce)
-				System.out.println(" ? " + e);
-			for (ArrayIndexExpression e: ce.getArrayAccesses())
-				System.out.println(" & " + e);
-			
-			Result result = Result.DEFAULT;
-			try {
-				result = Solver.solveByList(ce);
-			} catch (CoreException e1) {
-				e1.printStackTrace();
-			}
-			if (result.getSolutionCode() == Result.SUCCESS){
-				for (Variable sol: result.getSolution())
-					System.out.println(" ==> " + sol);
-				feasible++;
-				System.out.println(" RETURN " + result.getReturnValue());
-			}
-			else
-				System.out.println(" ==> " + result.getSolutionMessage());
-		}
-		System.out.printf("\n *** Feasible: %d, Unsat: %d\n\n", feasible, 
-				cfg_3.getBasisPaths().size() - feasible);
 	}
 	
 	/**
