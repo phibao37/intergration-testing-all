@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import core.S;
 import core.error.CoreException;
+import core.models.Contentable;
 import core.models.Expression;
 import core.models.Variable;
 import core.unit.ConstraintEquations;
@@ -14,7 +15,7 @@ import core.unit.ConstraintEquations;
  * @author ducvu
  *
  */
-public abstract class Solver {
+public abstract class Solver implements Contentable {
 	
 	/**
 	 * Bắt đầu quá trình giải hệ ràng buộc, một bộ ràng buộc được truyền vào, cung cấp
@@ -132,7 +133,13 @@ public abstract class Solver {
 			throw e;
 		return r;
 	}
-
+	
+	/**
+	 * Chuỗi miêu tả về bộ giải hệ
+	 */
+	@Override
+	public abstract String getContent();
+	
 	/**
 	 * Kết quả sau khi giải một hệ ràng buộc
 	 */

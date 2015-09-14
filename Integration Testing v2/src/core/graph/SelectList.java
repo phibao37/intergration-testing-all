@@ -13,6 +13,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
+import core.Utils;
+import core.models.Contentable;
+
 public class SelectList<T> extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static final Cursor MOVE = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
@@ -156,6 +159,8 @@ public class SelectList<T> extends JPanel {
 			setOpaque(true);
 			setBackground(mItemColor);
 			setCursor(MOVE);
+			if (item instanceof Contentable)
+				setToolTipText(Utils.html(((Contentable) item).getContent()));
 			
 			MouseAdapter adapter = new MouseAdapter() {
 				

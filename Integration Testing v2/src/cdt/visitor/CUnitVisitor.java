@@ -28,7 +28,7 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
+import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
 import org.eclipse.cdt.core.index.IIndex;
 import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.core.parser.DefaultLogService;
@@ -239,7 +239,8 @@ public class CUnitVisitor implements UnitVisitor {
 		IParserLogService log = new DefaultLogService();
 		
 		try {
-			return GPPLanguage.getDefault().getASTTranslationUnit(
+			//GCCLanguage
+			return GCCLanguage.getDefault().getASTTranslationUnit(
 					reader, scanInfo, fileCreator, index, options, log);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -250,7 +251,7 @@ public class CUnitVisitor implements UnitVisitor {
 	
 	public static void main(String[] args) {
 		try {
-			String filePath = "D:\\Documents\\delta.c";
+			String filePath = "D:\\Documents\\unit\\delta2.c";
 			File f = new File(filePath);
 			String source = Utils.getContentFile(f);
 			
@@ -288,7 +289,7 @@ public class CUnitVisitor implements UnitVisitor {
 	static void printAllNode(String source){
 		IASTTranslationUnit u = getIASTTranslationUnit("", source.toCharArray());
 		
-		handle(u);
+		//handle(u);
 		printTree(u, " | ");
 	}
 	

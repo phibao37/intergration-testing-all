@@ -288,7 +288,10 @@ public class Function extends Element implements Graphable {
 			if (i >= 0 && i != index)
 				throw new RuntimeException(element.getSummaryInput()
 						+ " bị trùng với testcase số " + i);
-			return super.set(index, element);
+			
+			Testcase c = super.set(index, element);
+			notifyTestcaseChanged();
+			return c;
 		}
 
 		@Override

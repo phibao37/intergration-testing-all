@@ -215,7 +215,8 @@ public class BasisPathParser {
 		case Statement.CONDITION:
 			handleCondition(expression, stm.getFalse() == next);
 			break;
-		
+		case Statement.FUNCTION_CALL:
+			break;
 		case Statement.RETURN:
 			handleReturn((ReturnExpression) expression);
 			break;

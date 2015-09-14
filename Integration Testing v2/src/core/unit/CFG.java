@@ -17,7 +17,7 @@ public class CFG{
 	private ArrayList<BasisPath> mPaths;
 	
 	/**
-	 * Khởi tạo một đồ thị từ câu lệnh gốc của chương trình
+	 * Khởi tạo một đồ thị từ danh sách các câu lệnh
 	 * @param statementList danh sách các câu lệnh đã được liên kết
 	 * bởi chương trình
 	 */

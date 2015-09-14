@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import core.S.SCREEN;
+import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
@@ -475,7 +476,7 @@ public class TestcaseManageDialog extends JDialog {
 			gbc_label.gridy = i;
 			panel_current.add(label, gbc_label);
 
-			JLabel label_1 = new JLabel(t.getReturnOutput().getContent());
+			JLabel label_1 = new JLabel(Utils.toString(t.getReturnOutput(), null));
 			GridBagConstraints gbc_label_1 = new GridBagConstraints();
 			gbc_label_1.insets = new Insets(0, 0, 5, 5);
 			gbc_label_1.gridx = 1;

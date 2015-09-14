@@ -113,6 +113,8 @@ public class GUIAll extends GUI {
 	private MainProcess main;
 	private Function preRoot;
 	private Function currentFunction, selectFunction;
+	private Result currentResult;
+	private TestResult currentTestResult;
 	private boolean isWorking;
 	private Timer timer;
 	
@@ -166,6 +168,8 @@ public class GUIAll extends GUI {
 			GUIAll.class.getResource("/image/testcase_true.png"));
 	private static final ImageIcon ICON_FALSE = new ImageIcon(
 			GUIAll.class.getResource("/image/testcase_false.png"));
+	private static final ImageIcon ICON_ADD = new ImageIcon(
+			GUIAll.class.getResource("/image/testcase_add.png"));
 	
 	private JScrollPane cv_fn_call_wrap;
 	private JScrollPane tb_path_details_wrap;
@@ -415,6 +419,10 @@ public class GUIAll extends GUI {
 		if (fn == selectFunction){
 			lbl_number_of_testcase.setText(count + "");
 		}
+		if (fn == currentFunction){
+			if (currentResult != null)
+				syncTestResult(currentFunction, currentResult);
+		}
 	}
 	
 	@Override
@@ -624,6 +632,7 @@ public class GUIAll extends GUI {
 		}
 		
 		Result r = path.getSolveResult();
+		currentResult = r;
 		
 		if (r.getSolutionCode() == Result.SUCCESS)
 			for (Variable testcase: r.getSolution()){
@@ -635,20 +644,26 @@ public class GUIAll extends GUI {
 			}
 		
 		lbl_return_value.setText(Utils.toString(r.getReturnValue(), null));
-		TestResult tr = currentFunction.getTestcaseManager().test(r);
-		if (tr.isTestcaseFound()){
-			lbl_return_expected.setText(Utils.toString(
-					tr.getTestcase().getReturnOutput(), null));
-			btn_testcase_status.setIcon(tr.isMatch() ? ICON_TRUE : ICON_FALSE);
-		}
-		else {
-			lbl_return_expected.setText(null);
-			btn_testcase_status.setIcon(null);
-		}
+		syncTestResult(currentFunction, r);
 		
 		Component c = tab_info.getSelectedComponent();
 		if (c != tb_path_details_wrap && c != tb_testcase_wrap && c != pn_result_wrap)
 			tab_info.setSelectedComponent(tb_path_details_wrap);
+	}
+	
+	private void syncTestResult(Function current, Result r){
+		TestResult tr = current.getTestcaseManager().test(r);
+		if (tr.isTestcaseFound()){
+			lbl_return_expected.setText(Utils.toString(
+					tr.getTestcase().getReturnOutput(), null));
+			btn_testcase_status.setIcon(tr.isMatch() ? ICON_TRUE : ICON_FALSE);
+			currentTestResult = null;
+		}
+		else {			
+			lbl_return_expected.setText(null);
+			btn_testcase_status.setIcon(ICON_ADD);
+			currentTestResult = tr;
+		}
 	}
 	
 	/**
@@ -951,6 +966,13 @@ public class GUIAll extends GUI {
 		btn_testcase_status = new JButton("");
 		btn_testcase_status.setContentAreaFilled(false);
 		btn_testcase_status.setBorder(null);
+		btn_testcase_status.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (currentTestResult == null) return;
+				
+			}
+		});
 		GridBagConstraints gbc_btn_testcase_status = new GridBagConstraints();
 		gbc_btn_testcase_status.anchor = GridBagConstraints.WEST;
 		gbc_btn_testcase_status.insets = new Insets(0, 0, 0, 5);

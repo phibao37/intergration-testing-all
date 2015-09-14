@@ -248,5 +248,11 @@ public class RandomSolver extends Solver {
 		
 		return noSolution; 
 	}
+
+	@Override
+	public String getContent() {
+		return "Tạo giá trị ngẫu nhiên trong khoảng nhất định cho tất cả các biến số"
+				+ "<br/> đến khi tất cả các ràng buộc đều thỏa mãn";
+	}
 	
 }

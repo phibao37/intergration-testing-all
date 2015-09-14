@@ -376,4 +376,9 @@ public class Z3Solver extends Solver {
 		return t.getContent();
 	}
 
+	@Override
+	public String getContent() {
+		return "Dùng chương trình giải ràng buộc Z3 (Microsoft)";
+	}
+
 }
