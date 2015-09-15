@@ -17,7 +17,14 @@ public class NodeAdapter<T extends Node> extends ArrayList<T> {
 	 * Tìm nút trong danh sách có phần tử chỉ định
 	 */
 	protected T getNodeByElement(Graphable element){
-		for (T item: this)
+		return getNodeByElement(element, this);
+	}
+	
+	/**
+	 * Tìm nút trong danh sách có phần tử chỉ định, trong một danh sách chỉ định
+	 */
+	protected T getNodeByElement(Graphable element, Iterable<T> iter){
+		for (T item: iter)
 			if (item != null && item.getElement() == element)
 				return item;
 		return null;

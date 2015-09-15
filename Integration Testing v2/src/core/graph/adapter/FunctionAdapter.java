@@ -51,6 +51,8 @@ public class FunctionAdapter extends NodeAdapter<FunctionNode> {
 			
 			for (Function f: refer){
 				rNode = getNodeByElement(f);
+				if (rNode == null)
+					rNode = getNodeByElement(f, queue);
 				if (rNode == null){
 					rNode = new FunctionNode(f);
 					queue.add(rNode);
