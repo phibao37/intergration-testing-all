@@ -1,21 +1,11 @@
 package core;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import core.error.ProcessErrorException;
 import core.models.expression.IDExpression;
 import core.models.type.BasicType;
+
+import java.io.*;
+import java.util.*;
 
 /**
  * Các tiện ích chung
@@ -39,15 +29,11 @@ public class Utils {
 	 */
 	public static String getContentStream(InputStream stream) throws IOException{
 		StringBuilder content = new StringBuilder();
-		BufferedReader br = new BufferedReader(new InputStreamReader(stream));
 		String line;
-		
-		try {
+
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
 			while ((line = br.readLine()) != null)
 				content.append(line).append('\n');
-		}
-		finally {
-			br.close();
 		}
 		
 		return content.toString();
@@ -58,7 +44,7 @@ public class Utils {
 	 */
 	public static boolean find(Object[] arr, Object find){
 		for (Object o: arr)
-			if ((o == null && find == o) || o.equals(find))
+			if ((o == null && find == null) || (o != null && o.equals(find)))
 				return true;
 		return false;
 	}
@@ -68,7 +54,7 @@ public class Utils {
 	 */
 	public static boolean find(Iterable<?> list, Object find){
 		for (Object o: list)
-			if ((o == null && find == o) || o.equals(find))
+			if ((o == null && find == null) || (o != null && o.equals(find)))
 				return true;
 		return false;
 	}
@@ -113,7 +99,7 @@ public class Utils {
 	 * Chuyển từ mảng sang danh sách
 	 */
 	public static <T> ArrayList<T> toList(T[] array){
-		return new ArrayList<T>(Arrays.asList(array));
+		return new ArrayList<>(Arrays.asList(array));
 	}
 	
 	/**
@@ -147,20 +133,20 @@ public class Utils {
 	 * @return danh sách kết quả, mỗi phần tử là một danh sách bao gồm 
 	 * 1 phần tử của danh sách bên trái ghép với 1 phần tử của danh sách bên phải
 	 */
-	public static <T extends Collection<V>, V> ArrayList<ArrayList<V>> multiply(
-			List<T> list1, List<T> list2){
-		ArrayList<ArrayList<V>> lists = new ArrayList<ArrayList<V>>();
-		
-		for (T item1: list1)
-			for (T item2: list2){
-				ArrayList<V> list = new ArrayList<V>();
-				list.addAll(item1);
-				list.addAll(item2);
-				lists.add(list);
-			}
-		
-		return lists;
-	}
+//	public static <T extends Collection<V>, V> ArrayList<ArrayList<V>> multiply(
+//			List<T> list1, List<T> list2){
+//		ArrayList<ArrayList<V>> lists = new ArrayList<>();
+//
+//		for (T item1: list1)
+//			for (T item2: list2){
+//				ArrayList<V> list = new ArrayList<V>();
+//				list.addAll(item1);
+//				list.addAll(item2);
+//				lists.add(list);
+//			}
+//
+//		return lists;
+//	}
 	
 	/**
 	 * Định dạng chuỗi theo các tham số
@@ -183,12 +169,12 @@ public class Utils {
 	 */
 	public static <T extends Collection<V>, V> void addMultiply(
 			List<ArrayList<V>> list1, List<T> list2){
-		List<ArrayList<V>> lists = new ArrayList<ArrayList<V>>(list1);
+		List<ArrayList<V>> lists = new ArrayList<>(list1);
 		list1.clear();
 		
 		for (ArrayList<V> item1: lists)
 			for (T item2: list2){
-				ArrayList<V> list = new ArrayList<V>();
+				ArrayList<V> list = new ArrayList<>();
 				list.addAll(item1);
 				list.addAll(item2);
 				list1.add(list);
@@ -233,9 +219,13 @@ public class Utils {
 	public static long getFileSize(File file){
 		long size = 0;
 		
-		if (file.isDirectory())
-			for (File child: file.listFiles())
+		if (file.isDirectory()) {
+			File[] childs = file.listFiles();
+			assert childs != null;
+
+			for (File child : childs)
 				size += getFileSize(child);
+		}
 		else
 			size += file.length();
 		
@@ -247,7 +237,9 @@ public class Utils {
 	 */
 	public static void deleteFile(File file){
 		if (file.isDirectory()){
-			for (File child: file.listFiles())
+			File[] childs = file.listFiles();
+			assert childs != null;
+			for (File child: childs)
 				deleteFile(child);
 		}
 		
@@ -264,11 +256,11 @@ public class Utils {
 	/**
 	 * Kiểm tra một số thực có thể rút gọn lại thành số nguyên: 2; 1.00; ...
 	 */
-	public static boolean isIntegerValue(BigDecimal bd) {
-		return bd.signum() == 0 || bd.scale() <= 0 
-				|| bd.stripTrailingZeros().scale() <= 0;
-	}
-	
+//	public static boolean isIntegerValue(BigDecimal bd) {
+//		return bd.signum() == 0 || bd.scale() <= 0
+//				|| bd.stripTrailingZeros().scale() <= 0;
+//	}
+
 	/**
 	 * Chuyển từ kiểu đơn giản sang cờ hiệu dùng cho IDExpression
 	 */

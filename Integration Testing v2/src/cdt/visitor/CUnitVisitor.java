@@ -1,43 +1,5 @@
 package cdt.visitor;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.eclipse.cdt.core.dom.ast.ASTNodeProperty;
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
-import org.eclipse.cdt.core.dom.ast.IASTArrayDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTArrayModifier;
-import org.eclipse.cdt.core.dom.ast.IASTComment;
-import org.eclipse.cdt.core.dom.ast.IASTCompoundStatement;
-import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
-import org.eclipse.cdt.core.dom.ast.IASTExpression;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTInitializer;
-import org.eclipse.cdt.core.dom.ast.IASTInitializerClause;
-import org.eclipse.cdt.core.dom.ast.IASTInitializerList;
-import org.eclipse.cdt.core.dom.ast.IASTNode;
-import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
-import org.eclipse.cdt.core.dom.ast.IASTStatement;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
-import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
-import org.eclipse.cdt.core.index.IIndex;
-import org.eclipse.cdt.core.model.ILanguage;
-import org.eclipse.cdt.core.parser.DefaultLogService;
-import org.eclipse.cdt.core.parser.FileContent;
-import org.eclipse.cdt.core.parser.IParserLogService;
-import org.eclipse.cdt.core.parser.IScannerInfo;
-import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
-import org.eclipse.cdt.core.parser.ScannerInfo;
-
 import cdt.models.CFunction;
 import cdt.models.CType;
 import core.Utils;
@@ -47,6 +9,15 @@ import core.models.Type;
 import core.models.Variable;
 import core.models.type.ArrayType;
 import core.visitor.UnitVisitor;
+import org.eclipse.cdt.core.dom.ast.*;
+import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
+import org.eclipse.cdt.core.model.ILanguage;
+import org.eclipse.cdt.core.parser.*;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Bộ phân tích danh sách hàm và biến toàn cục trong ngôn ngữ C
@@ -141,7 +112,7 @@ public class CUnitVisitor implements UnitVisitor {
 	public static ArrayList<Variable> parseVariableDeclaration(
 			IASTSimpleDeclaration declare){
 		IASTDeclSpecifier spec = declare.getDeclSpecifier();
-		ArrayList<Variable> gVarList = new ArrayList<Variable>();
+		ArrayList<Variable> gVarList = new ArrayList<>();
 		
 		for (IASTDeclarator dc: declare.getDeclarators()){
 			gVarList.add(parseVariable(dc, spec));
@@ -161,14 +132,13 @@ public class CUnitVisitor implements UnitVisitor {
 	 * Trả về biến tham số từ một khái báo biến
 	 * @param declare nội dung khai báo: a = 2, b[] = {1, 2}
 	 * @param spec kiểu của biến khai báo: int, float
-	 * @return
 	 */
 	private static Variable parseVariable(IASTDeclarator declare, 
 			IASTDeclSpecifier spec){
 		Type type = CType.parse(spec.getRawSignature());
 		String name = declare.getName().getRawSignature();
 		IASTInitializer init = declare.getInitializer();
-		Variable var = null;
+		Variable var;
 
 		//Đây là một khai báo biến mảng
 		if (declare instanceof IASTArrayDeclarator) {
@@ -191,7 +161,8 @@ public class CUnitVisitor implements UnitVisitor {
 				}
 				type = new ArrayType(type, capacity);
 			}
-			
+
+			assert type instanceof ArrayType;
 			var = new ArrayVariable(name, (ArrayType) type);
 			
 			//Có biểu thức khởi tạo mảng, gán giá trị này cho biến mảng
@@ -229,19 +200,18 @@ public class CUnitVisitor implements UnitVisitor {
 	 */
 	static IASTTranslationUnit getIASTTranslationUnit(String filePath, char[] code) {
 		FileContent reader = FileContent.create(filePath, code);
-		Map<String, String> macroDefinitions = new HashMap<String, String>();
+		Map<String, String> macroDefinitions = new HashMap<>();
 		String[] includeSearchPaths = new String[0];
 		IScannerInfo scanInfo = new ScannerInfo(macroDefinitions, includeSearchPaths);
 		IncludeFileContentProvider fileCreator = 
 				IncludeFileContentProvider.getEmptyFilesProvider();
-		IIndex index = null;
 		int options = ILanguage.OPTION_IS_SOURCE_UNIT;
 		IParserLogService log = new DefaultLogService();
 		
 		try {
 			//GCCLanguage
 			return GCCLanguage.getDefault().getASTTranslationUnit(
-					reader, scanInfo, fileCreator, index, options, log);
+					reader, scanInfo, fileCreator, null, options, log);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -293,38 +263,38 @@ public class CUnitVisitor implements UnitVisitor {
 		printTree(u, " | ");
 	}
 	
-	static void handle(IASTTranslationUnit unit){
-		unit.accept(new ASTVisitor() {
-			{ shouldVisitDeclarations = true; }
-
-			@Override
-			public int visit(IASTDeclaration declaration) {
-				
-				if (declaration instanceof IASTFunctionDefinition) {
-					IASTFunctionDefinition fnDefine = 
-							(IASTFunctionDefinition) declaration;
-					IASTFunctionDeclarator fnDeclare = fnDefine.getDeclarator();
-					
-					System.out.printf("Function: %s, type: %s, comment: %s\n",
-							fnDeclare.getName().getRawSignature(),
-							fnDefine.getDeclSpecifier().getRawSignature(),
-							"Somehow get the comment above function define???"
-							);
-				}
-				return PROCESS_SKIP;
-			}
-
-			@Override
-			public int visit(IASTComment comment) {
-				System.out.println("Comment: " + comment.getRawSignature());
-				return PROCESS_CONTINUE;
-			}
-			
-		});
-		
-		for (IASTComment cmt: unit.getComments())
-			System.out.println("Comment: " + cmt.getRawSignature());
-	}
+//	static void handle(IASTTranslationUnit unit){
+//		unit.accept(new ASTVisitor() {
+//			{ shouldVisitDeclarations = true; }
+//
+//			@Override
+//			public int visit(IASTDeclaration declaration) {
+//
+//				if (declaration instanceof IASTFunctionDefinition) {
+//					IASTFunctionDefinition fnDefine =
+//							(IASTFunctionDefinition) declaration;
+//					IASTFunctionDeclarator fnDeclare = fnDefine.getDeclarator();
+//
+//					System.out.printf("Function: %s, type: %s, comment: %s\n",
+//							fnDeclare.getName().getRawSignature(),
+//							fnDefine.getDeclSpecifier().getRawSignature(),
+//							"Somehow get the comment above function define???"
+//							);
+//				}
+//				return PROCESS_SKIP;
+//			}
+//
+//			@Override
+//			public int visit(IASTComment comment) {
+//				System.out.println("Comment: " + comment.getRawSignature());
+//				return PROCESS_CONTINUE;
+//			}
+//
+//		});
+//
+//		for (IASTComment cmt: unit.getComments())
+//			System.out.println("Comment: " + cmt.getRawSignature());
+//	}
 }
 
 

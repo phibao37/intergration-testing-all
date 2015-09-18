@@ -1,33 +1,14 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Rectangle;
-import java.awt.SystemColor;
-
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.Enumeration;
-
-import javax.swing.JScrollPane;
-import javax.swing.JRadioButton;
-
 import core.models.Function;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
 /**
  * Hộp thoại giúp người dùng chọn một hàm làm hàm gốc
@@ -83,11 +64,9 @@ public class SelectFunction extends JDialog {
 			});*/
 		}
 	}
-	private final JPanel contentPanel = new JPanel();
 
 	private Function func;
 	private ButtonGroup group;
-	private JScrollPane scrollPane;
 	private int scrollY;
 
 	/**
@@ -104,11 +83,12 @@ public class SelectFunction extends JDialog {
 		
 		setBounds(100, 100, 450, 300);
 		getContentPane().setLayout(new BorderLayout());
+		JPanel contentPanel = new JPanel();
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(null);
-		
-		scrollPane = new JScrollPane();
+
+		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(0, 0, 444, 238);
 		contentPanel.add(scrollPane);
 		
@@ -152,24 +132,18 @@ public class SelectFunction extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("OK");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						applyFunction();
-					}
-				});
+				okButton.addActionListener(e -> applyFunction());
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
 				JButton cancelButton = new JButton("Hủy bỏ");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						func = null;
-						setVisible(false);
-						dispose();
-					}
-				});
+				cancelButton.addActionListener(e -> {
+                    func = null;
+                    setVisible(false);
+                    dispose();
+                });
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}

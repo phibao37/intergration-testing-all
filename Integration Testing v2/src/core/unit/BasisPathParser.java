@@ -36,14 +36,14 @@ public class BasisPathParser {
 	
 	private ConstraintEquations mConstraints;
 	protected VariableTable tables;
-	private BasisPath mPath;
+	//private BasisPath mPath;
 	
 	/**
 	 * Cho phép ngắt quãng việc phân tích giữa chừng
 	 */
 	protected boolean shouldContinue;
 	
-	private ArrayList<UnaryExpression> postFix = new ArrayList<UnaryExpression>();
+	private ArrayList<UnaryExpression> postFix = new ArrayList<>();
 	
 	private ArrayList<Pair<Statement, ArrayList<Expression>>> mAnalyzic;
 	private Statement mStatement;
@@ -126,17 +126,15 @@ public class BasisPathParser {
 	/**
 	 * Trả về đường thi hành đang được phân tích
 	 */
-	public BasisPath getPath(){
-		return mPath;
-	}
+//	public BasisPath getPath(){
+//		return mPath;
+//	}
 	
 	/**
 	 * Phân tích một đường thi hành để tìm các ràng buộc testcase
 	 * @param path đường thi hành cần phân tích
 	 * @param func hàm chứa đường thi hành, dùng để lấy các biến tham số
 	 * @param stub bộ stub dùng để thay thế các hàm bằng các giá trị cứng
-	 * @return hệ phương trình ràng buộc. Khi hệ này được thỏa mãn, chương trình
-	 * được thực thi sẽ đi qua đường thi hành này
 	 * @throws CoreException các lỗi làm cho việc phân tích không thực hiện được
 	 */
 	public void parseBasisPath(BasisPath path, Function func, StubSuite stub) 
@@ -144,7 +142,7 @@ public class BasisPathParser {
 		mError = null;
 		mStubSuite = stub;
 		shouldContinue = true;
-		mPath = path;
+		//mPath = path;
 		mConstraints = new ConstraintEquations(func.getParameters());
 		tables = new VariableTable();
 		mAnalyzic = new ArrayList<>();
@@ -191,8 +189,7 @@ public class BasisPathParser {
 				//Thực hiện tăng các biểu thức x++, y-- sau khi đã thực hiện xong
 				//TODO chưa thực sự đúng vì có thể có nhiều biểu thức trong 1 lệnh
 
-				for (UnaryExpression unary: postFix)
-					handleAssignOne(unary);
+				postFix.forEach(this::handleAssignOne);
 			}
 		}
 	}
@@ -322,8 +319,8 @@ public class BasisPathParser {
 		
 		for (Expression dc: declare.getDeclares()){
 			Expression left = dc, value = null;
-			Variable var = null;
-			NameExpression name = null;
+			Variable var;
+			NameExpression name;
 			
 			//Có khởi tạo giá trị khi khai báo: int a = 2, a[] = {1, 2};
 			if (dc instanceof BinaryExpression){

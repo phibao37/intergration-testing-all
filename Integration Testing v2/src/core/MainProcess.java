@@ -1,22 +1,13 @@
 package core;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
 import core.error.CoreException;
 import core.error.FunctionNotFoundException;
-import core.inte.FunctionCallGraph;
-import core.inte.FunctionPair;
-import core.inte.IntegrationPathParser;
-import core.inte.StubSuite;
-import core.inte.StubSuiteManager;
+import core.inte.*;
 import core.models.Expression;
 import core.models.Function;
 import core.models.Function.TestcaseManager;
 import core.models.Statement;
 import core.models.Testcase;
-import core.models.Variable;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
 import core.solver.Solver;
@@ -30,6 +21,12 @@ import core.visitor.ExpressionVisitor;
 import core.visitor.UnitVisitor;
 import javafx.util.Pair;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+
 /**
  * Các công việc cho việc kiểm thử
  * @author ducvu
@@ -40,7 +37,7 @@ public abstract class MainProcess implements FilenameFilter {
 	private ArrayList<File> mFiles = new ArrayList<>();
 	
 	private FunctionCallGraph mFunctions = new FunctionCallGraph();
-	private ArrayList<Variable> mVariables = new ArrayList<>();
+	//private ArrayList<Variable> mVariables = new ArrayList<>();
 	
 	private UnitVisitor mUnitVisitor;
 	private BodyFunctionVisitor mBodyVisitor;
@@ -55,7 +52,7 @@ public abstract class MainProcess implements FilenameFilter {
 	public void loadFunctionFromFiles(){
 		//Xóa dữ liệu cũ
 		mFunctions.clear();
-		mVariables.clear();
+		//mVariables.clear();
 		
 		//Duyệt các tập tin đang làm việc, thêm các hàm và biến tìm được 
 		//vào danh sách
@@ -136,7 +133,7 @@ public abstract class MainProcess implements FilenameFilter {
 			@Override
 			protected Void doTask() throws CoreException {
 				GUI.instance.setStatus("Đang phân tích các đường thi hành");
-				ArrayList<BasisPath> paths = new ArrayList<BasisPath>();
+				ArrayList<BasisPath> paths = new ArrayList<>();
 				
 				paths.addAll(func.getCFG(false).getBasisPaths());
 				paths.addAll(func.getCFG(true).getBasisPaths());
@@ -175,7 +172,6 @@ public abstract class MainProcess implements FilenameFilter {
 	 * (duyệt cha -> duyệt lần lượt các vòng lặp con)
 	 * @param listener công việc cần thực hiện khi việc kiểm thử đã xong. Một danh sách
 	 * các đường thi hành đã đính kèm nghiệm testcase sẽ được truyền vào
-	 * @throws ThreadStateException tiến trình trước chưa chạy xong
 	 */
 	public void beginTestLoopPath(LoopablePath path, ArrayList<Integer> indexes, 
 			Function current, Return<ArrayList<BasisPath>> listener) {
@@ -184,9 +180,9 @@ public abstract class MainProcess implements FilenameFilter {
 			@Override
 			protected ArrayList<BasisPath> doTask() throws CoreException {
 				ArrayList<ArrayList<Statement>> paths = new ArrayList<>();
-				ArrayList<BasisPath> basisPath = new ArrayList<BasisPath>();
+				ArrayList<BasisPath> basisPath = new ArrayList<>();
 				
-				paths.add(new ArrayList<Statement>());
+				paths.add(new ArrayList<>());
 				GUI.instance.setStatus("Đang phân tích các vòng lặp");
 				path.joinLoopStatement(paths, indexes.iterator());
 				int i = 1, length = paths.size();
@@ -347,9 +343,9 @@ public abstract class MainProcess implements FilenameFilter {
 	 * Đặt bộ phân tích một đường thi hành để tìm ra hệ ràng buộc trên một 
 	 * đơn vị kiểm thử
 	 */
-	public void setUnitPathParser(BasisPathParser parser){
-		mUnitPathParser = parser;
-	}
+//	public void setUnitPathParser(BasisPathParser parser){
+//		mUnitPathParser = parser;
+//	}
 	
 	/**
 	 * Duyệt qua một tập tin và lấy ra các đối tượng như hàm, biến toàn cục
@@ -366,7 +362,7 @@ public abstract class MainProcess implements FilenameFilter {
 		mUnitVisitor.parseSource(source, file, args);
 		
 		mFunctions.addAll(mUnitVisitor.getFunctionList());
-		mVariables.addAll(mUnitVisitor.getGlobalVariableList());
+		//mVariables.addAll(mUnitVisitor.getGlobalVariableList());
 	}
 	
 	/**
@@ -385,13 +381,15 @@ public abstract class MainProcess implements FilenameFilter {
 				if (recur)
 					recurAddFile(file);
 				else
-					for (File f_dir: file.listFiles(this))
-						mFiles.add(f_dir);
+					Collections.addAll(mFiles, file.listFiles(this));
 			}
 	}
 	
 	private void recurAddFile(File dir){
-		for (File file: dir.listFiles())
+		File[] files = dir.listFiles();
+		assert files != null;
+
+		for (File file: files)
 			if (file.isFile()){
 				if (accept(file.getParentFile(), file.getName()))
 					mFiles.add(file);
@@ -422,9 +420,9 @@ public abstract class MainProcess implements FilenameFilter {
 	/**
 	 * Trả về danh sách các biến toàn cục được khai báo
 	 */
-	public ArrayList<Variable> getGlobalVariables(){
-		return mVariables;
-	}
+//	public ArrayList<Variable> getGlobalVariables(){
+//		return mVariables;
+//	}
 	
 	/**
 	 * Trả về bộ quản lý stub cho các hàm số
@@ -450,8 +448,7 @@ public abstract class MainProcess implements FilenameFilter {
 	}
 	
 	/**
-	 * Thread dùng để chạy các công việc cần xử lý<br/>
-	 * Cần sử dụng {@link #ensureStart()} thay vì {@link #start()}
+	 * Thread dùng để chạy các công việc cần xử lý
 	 * @param <R> listener cho kết quả
 	 */
 	protected static abstract class RunThread<R> extends Thread{
@@ -505,19 +502,19 @@ public abstract class MainProcess implements FilenameFilter {
 	 * Mô tả một listener dùng để truyền vào các thread để lấy kết quả
 	 * @param <R> kiểu kết quả mong đợi
 	 */
-	public static interface Return<R>{
+	public interface Return<R>{
 		
 		/**
 		 * Phương thức sẽ được gọi khi tiến trình hoàn thành công việc
 		 * @param result kết quả của công việc
 		 */
-		public void receive(R result);
+		void receive(R result);
 		
 		/**
 		 * Phương thức sẽ được gọi khi tiến trình có ngoại lệ xảy ra
 		 * @param e ngoại lệ trong việc xử lý
 		 */
-		public default void error(CoreException e){
+		default void error(CoreException e){
 			e.printStackTrace();
 		}
 	}

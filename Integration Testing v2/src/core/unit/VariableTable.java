@@ -107,7 +107,7 @@ public class VariableTable extends ArrayList<Variable> {
 				Variable find = find(name.getName());
 				
 				if (find instanceof ArrayVariable){
-					//System.out.println("Will not replace all array content");
+					System.out.println("Will not replace all array content");
 				}
 				else if (find != null) {
 					name.setType(find.getType());
@@ -212,7 +212,7 @@ public class VariableTable extends ArrayList<Variable> {
 	 * Thiết đặt bộ tính toán giá trị mặc định
 	 * @param eval bộ tính toán giá trị biểu thức
 	 */
-	public static void setDefaultEval(Evaluateable eval){
-		DEFAULT_EVAL = eval;
-	}
+//	public static void setDefaultEval(Evaluateable eval){
+//		DEFAULT_EVAL = eval;
+//	}
 }

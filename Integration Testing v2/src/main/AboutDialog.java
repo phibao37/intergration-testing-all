@@ -1,35 +1,17 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
 import core.S;
 import core.S.SCREEN;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.GroupLayout;
+import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import java.awt.Font;
-import java.awt.SystemColor;
-import java.awt.Toolkit;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.SwingConstants;
-import java.awt.Color;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import java.awt.*;
 
 public class AboutDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
-	private final JPanel contentPanel = new JPanel();
 
 	/**
 	 * Launch the application.
@@ -55,6 +37,7 @@ public class AboutDialog extends JDialog {
 		
 		setBounds(100, 100, 700, 400);
 		getContentPane().setLayout(new BorderLayout());
+		JPanel contentPanel = new JPanel();
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
@@ -186,11 +169,7 @@ public class AboutDialog extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("Đồng ý");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				});
+				okButton.addActionListener(e -> dispose());
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);

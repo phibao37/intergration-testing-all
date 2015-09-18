@@ -1,45 +1,5 @@
 package main;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.EventQueue;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map.Entry;
-
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.AbstractButton;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.SwingConstants;
-import javax.swing.Timer;
-import javax.swing.border.MatteBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-
 import cdt.CMainProcess;
 import core.GUI;
 import core.MainProcess;
@@ -57,19 +17,11 @@ import core.graph.adapter.FunctionAdapter;
 import core.graph.canvas.FunctionCanvas;
 import core.graph.canvas.FunctionPairCanvas;
 import core.graph.canvas.LoopCanvas;
-import core.graph.canvas.LoopCanvas.OnApplyValue;
-import core.graph.canvas.LoopCanvas.OnNodeSelect;
 import core.graph.canvas.StatementCanvas;
-import core.graph.node.FunctionPairNode;
-import core.graph.node.LoopNode;
 import core.inte.FunctionCallGraph;
 import core.inte.FunctionPair;
 import core.inte.StubSuite;
-import core.models.Expression;
-import core.models.Function;
-import core.models.Statement;
-import core.models.TestResult;
-import core.models.Variable;
+import core.models.*;
 import core.models.expression.IDExpression;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
@@ -78,29 +30,27 @@ import core.solver.Solver.Result;
 import core.unit.BasisPath;
 import core.unit.LoopablePath;
 import javafx.util.Pair;
-
-import javax.swing.LayoutStyle.ComponentPlacement;
-
-import java.awt.FlowLayout;
-
-import javax.swing.JButton;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
 import jdt.JMainProcess;
 
-import java.awt.Dimension;
-
-import javax.swing.JRadioButton;
-import java.awt.Insets;
-import java.awt.Toolkit;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Font;
-import javax.swing.JList;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.LineBorder;
-import javax.swing.JTextField;
+import javax.swing.border.MatteBorder;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 /**
  * Lớp giao diện hiển thị của ứng dụng
@@ -114,7 +64,7 @@ public class GUIAll extends GUI {
 	private Function preRoot;
 	private Function currentFunction, selectFunction;
 	private Result currentResult;
-	private TestResult currentTestResult;
+	protected TestResult currentTestResult;
 	private boolean isWorking;
 	private Timer timer;
 	
@@ -130,7 +80,6 @@ public class GUIAll extends GUI {
 	private StorePathTable table_test_pair;
 	private JTable table_testcase;
 	private JTable table_path_details;
-	private DefaultTableCellRenderer centerRenderer;
 	private JLabel lbl_fn_name;
 	private JLabel lbl_number_of_testcase;
 	private JLabel lbl_number_of_childs;
@@ -147,7 +96,7 @@ public class GUIAll extends GUI {
 	private static final int TAB_UNIT_SUB = 2;
 	private static final int TAB_INTE = 3;
 	
-	private static enum ListTable{
+	private enum ListTable{
 		STATEMENT ("Phủ câu lệnh"), 
 		CONDITION ("Phủ nhánh"), 
 		SUBCONDITION ("Phủ điều kiện con"),
@@ -156,7 +105,7 @@ public class GUIAll extends GUI {
 		private final String mValue;
 		private Component mComponent;
 		
-		private ListTable(String value){ mValue = value; }
+		ListTable(String value){ mValue = value; }
 		public String toString() { return mValue; }
 		
 		public void setComponent(Component c){ mComponent = c; }
@@ -189,16 +138,14 @@ public class GUIAll extends GUI {
 	 * Chạy ứng dụng
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					GUIAll window = new GUIAll();
-					window.frame_main.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		EventQueue.invokeLater(() -> {
+            try {
+                GUIAll window = new GUIAll();
+                window.frame_main.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 	}
 
 	/**
@@ -300,9 +247,9 @@ public class GUIAll extends GUI {
 	@Override
 	public void openFileView(File file) {
 		try {
-			tab_info.openTab(file.getName(), null, file.getAbsolutePath(), 
+			tab_info.openTab(file.getName(), null, file.getAbsolutePath(),
 					FileView.class.getConstructor(File.class), file);
-		} catch (Exception e) {}
+		} catch (Exception ignored) {}
 	}
 	
 	@Override
@@ -764,15 +711,10 @@ public class GUIAll extends GUI {
 	 * Khởi tạo nội dung của khung ứng dụng.
 	 */
 	private void initialize() {
-		listTable = new ArrayList<StorePathTable>();
-		centerRenderer = new DefaultTableCellRenderer();
+		listTable = new ArrayList<>();
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-		timer = new Timer(0, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setStatus(null);
-			}
-		});
+		timer = new Timer(0, e -> setStatus(null));
 		timer.setRepeats(false);
 		
 		frame_main = new JFrame();
@@ -780,7 +722,7 @@ public class GUIAll extends GUI {
 		frame_main.setTitle("Kiểm thử tích hơp");
 		frame_main.setBounds(50, 50, 1266, 630);
 		frame_main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-		frame_main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame_main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 		JSplitPane split_main = new JSplitPane();
 		split_main.setBorder(null);
@@ -835,13 +777,11 @@ public class GUIAll extends GUI {
 		
 		JButton btnQunL = new JButton("Quản lý testcase");
 		btnQunL.setPreferredSize(new Dimension(135, 23));
-		btnQunL.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (selectFunction == null)
-					return;
-				openFunctionTestcaseManager(selectFunction);
-			}
-		});
+		btnQunL.addActionListener(e -> {
+            if (selectFunction == null)
+                return;
+            openFunctionTestcaseManager(selectFunction);
+        });
 		GridBagConstraints gbc_btnQunL = new GridBagConstraints();
 		gbc_btnQunL.insets = new Insets(0, 0, 5, 0);
 		gbc_btnQunL.anchor = GridBagConstraints.WEST;
@@ -867,13 +807,11 @@ public class GUIAll extends GUI {
 		
 		JButton btnKimThon = new JButton("Kiểm thử đon vị");
 		btnKimThon.setPreferredSize(new Dimension(135, 23));
-		btnKimThon.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (selectFunction == null)
-					return;
-				beginTestFunction(selectFunction);
-			}
-		});
+		btnKimThon.addActionListener(e -> {
+            if (selectFunction == null)
+                return;
+            beginTestFunction(selectFunction);
+        });
 		GridBagConstraints gbc_btnKimThon = new GridBagConstraints();
 		gbc_btnKimThon.anchor = GridBagConstraints.WEST;
 		gbc_btnKimThon.gridx = 3;
@@ -966,13 +904,9 @@ public class GUIAll extends GUI {
 		btn_testcase_status = new JButton("");
 		btn_testcase_status.setContentAreaFilled(false);
 		btn_testcase_status.setBorder(null);
-		btn_testcase_status.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (currentTestResult == null) return;
-				
-			}
-		});
+		btn_testcase_status.addActionListener(e -> {
+            //if (currentTestResult == null) return;
+        });
 		GridBagConstraints gbc_btn_testcase_status = new GridBagConstraints();
 		gbc_btn_testcase_status.anchor = GridBagConstraints.WEST;
 		gbc_btn_testcase_status.insets = new Insets(0, 0, 0, 5);
@@ -987,12 +921,10 @@ public class GUIAll extends GUI {
 		}
 		
 		tab_table = new JTabbedPane(JTabbedPane.TOP);
-		tab_table.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JTabbedPane tab = (JTabbedPane) e.getSource();
-				tableTabChanged(tab.getSelectedComponent());
-			}
-		});
+		tab_table.addChangeListener(e -> {
+            JTabbedPane tab = (JTabbedPane) e.getSource();
+            tableTabChanged(tab.getSelectedComponent());
+        });
 		split_details.setLeftComponent(tab_table);
 		
 		/*---------BEGIN ADD TABLES-----------*/
@@ -1090,21 +1022,13 @@ public class GUIAll extends GUI {
 		canvas_loop.setBackground(Color.WHITE);
 		cv_loop_wrap.setViewportView(canvas_loop);
 		
-		canvas_loop.setOnNodeSelect(new OnNodeSelect() {
-			@Override
-			public void selected(LoopNode node) {
-				StatementCanvas canvas = openFuntionView(
-						currentFunction, false
-						).getCanvas();
-				canvas.setSelectedExtraPath(node.getStatement().getOriginList());
-			}
-		});
-		canvas_loop.setOnApplyValue(new OnApplyValue() {
-			@Override
-			public void applied(ArrayList<Integer> indexes, LoopablePath path) {
-				beginTestLoop(path, indexes);
-			}
-		});
+		canvas_loop.setOnNodeSelect(node -> {
+            StatementCanvas canvas = openFuntionView(
+                    currentFunction, false
+                    ).getCanvas();
+            canvas.setSelectedExtraPath(node.getStatement().getOriginList());
+        });
+		canvas_loop.setOnApplyValue((indexes, path) -> beginTestLoop(path, indexes));
 		
 		table_loop_path = new StoreLoopTable();
 		table_loop_path.setModel(new DefaultTableModel(
@@ -1121,26 +1045,22 @@ public class GUIAll extends GUI {
 		
 		listTable.add(table_loop_path);
 		listTable.add(table_loop_result);
-		table_loop_path.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-			
-			@Override
-			public void valueChanged(ListSelectionEvent e) {
-				StoreLoopTable table = (StoreLoopTable) table_loop_path;
-				if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
-					return;
-				openFuntionView(
-						currentFunction, false
-						).getCanvas().resetSelectingExtraPath();
-				removeTableModel(table_loop_result);
-				
-				Object index = table.getValueAt(table.getSelectedRow(), 0);
-				
-				if (index != null){
-					int i = Integer.valueOf(index + "") - 1;
-					canvas_loop.setLoopPath(table.getLoopPaths().get(i));
-				}
-			}
-		});
+		table_loop_path.getSelectionModel().addListSelectionListener(e -> {
+            StoreLoopTable table = table_loop_path;
+            if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
+                return;
+            openFuntionView(
+                    currentFunction, false
+                    ).getCanvas().resetSelectingExtraPath();
+            removeTableModel(table_loop_result);
+
+            Object index1 = table.getValueAt(table.getSelectedRow(), 0);
+
+            if (index1 != null){
+                int i = Integer.valueOf(index1 + "") - 1;
+                canvas_loop.setLoopPath(table.getLoopPaths().get(i));
+            }
+        });
 		
 		panel_loop.setLayout(gl_panel_loop);
 		
@@ -1195,15 +1115,12 @@ public class GUIAll extends GUI {
 		listTable.add(table_test_pair);
 		
 		panel_function_pair = new FunctionPairCanvas();
-		panel_function_pair.setOnItemSelected(new FunctionPairCanvas.OnItemSelected() {
-			@Override
-			public void selected(FunctionPairNode node, boolean dbClick) {
-				canvas_fn_call.setSelectFunctionPair(node.getFunctionPair());
-				tab_canvas.setSelectedComponent(cv_fn_call_wrap);
-				if (dbClick)
-					beginTestFunctionPair(node.getFunctionPair());
-			}
-		});
+		panel_function_pair.setOnItemSelected((node, dbClick) -> {
+            canvas_fn_call.setSelectFunctionPair(node.getFunctionPair());
+            tab_canvas.setSelectedComponent(cv_fn_call_wrap);
+            if (dbClick)
+                beginTestFunctionPair(node.getFunctionPair());
+        });
 		panel_function_pair.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -1234,16 +1151,14 @@ public class GUIAll extends GUI {
 		tab_table.addTab("Quản lý Stub", null, panel_stub, null);
 		
 		JList<StubSuite> list_stub = new JList<>();
-		list_stub.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if (e.getValueIsAdjusting()) return;
-				StubSuite s = list_stub.getSelectedValue();
-				
-				main.getStubManager().setSelectedSuite(s);
-				if (s != null)
-					fillStubWithContent(s);
-			}
-		});
+		list_stub.addListSelectionListener(e -> {
+            if (e.getValueIsAdjusting()) return;
+            StubSuite s = list_stub.getSelectedValue();
+
+            main.getStubManager().setSelectedSuite(s);
+            if (s != null)
+                fillStubWithContent(s);
+        });
 		list_stub.setBorder(new LineBorder(new Color(0, 0, 0), 1, true));
 		
 		list_stub_model = new DefaultListModel<>();
@@ -1316,38 +1231,34 @@ public class GUIAll extends GUI {
 		panel_stub_tool.add(label_2);
 		
 		JButton btn_add_stub = new JButton("Thêm mới");
-		btn_add_stub.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					StubSuite s = generateStubFromContent();
-					if (s == null || s.isEmpty()) return;
-					main.getStubManager().add(s);
-				} catch (CoreException e1) {
-					alertError(e1.getMessage());
-				}
-			}
-		});
+		btn_add_stub.addActionListener(e -> {
+            try {
+                StubSuite s = generateStubFromContent();
+                if (s == null || s.isEmpty()) return;
+                main.getStubManager().add(s);
+            } catch (CoreException e1) {
+                alertError(e1.getMessage());
+            }
+        });
 		btn_add_stub.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btn_add_stub);
 		
 		JButton btnChnhSa = new JButton("Chỉnh sửa");
-		btnChnhSa.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int selected = list_stub.getSelectedIndex();
-				if (selected == -1) return;
-				
-				try {
-					StubSuite s = generateStubFromContent();
-					if (s == null || s.isEmpty()) return;
-					
-					if (s.getName().isEmpty())
-						s.setName(list_stub.getSelectedValue().getName());
-					main.getStubManager().set(selected, s);
-				} catch (CoreException e1) {
-					alertError(e1.getMessage());
-				}
-			}
-		});
+		btnChnhSa.addActionListener(e -> {
+            int selected = list_stub.getSelectedIndex();
+            if (selected == -1) return;
+
+            try {
+                StubSuite s = generateStubFromContent();
+                if (s == null || s.isEmpty()) return;
+
+                if (s.getName().isEmpty())
+                    s.setName(list_stub.getSelectedValue().getName());
+                main.getStubManager().set(selected, s);
+            } catch (CoreException e1) {
+                alertError(e1.getMessage());
+            }
+        });
 		btnChnhSa.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btnChnhSa);
 		
@@ -1356,22 +1267,16 @@ public class GUIAll extends GUI {
 		panel_stub_tool.add(label);
 		
 		JButton btnXaStub = new JButton("Xóa stub");
-		btnXaStub.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				main.getStubManager().removeAll(
-						list_stub.getSelectedIndices());
-				deleteStubContent();
-			}
-		});
+		btnXaStub.addActionListener(e -> {
+            main.getStubManager().removeAll(
+                    list_stub.getSelectedIndices());
+            deleteStubContent();
+        });
 		btnXaStub.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btnXaStub);
 		
 		JButton btnXaNhp = new JButton("Xóa ô nhập");
-		btnXaNhp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				deleteStubContent();
-			}
-		});
+		btnXaNhp.addActionListener(e -> deleteStubContent());
 		btnXaNhp.setPreferredSize(new Dimension(100, 23));
 		panel_stub_tool.add(btnXaNhp);
 		
@@ -1409,7 +1314,7 @@ public class GUIAll extends GUI {
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panel_tray, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE))
 		);
-		panel_toolbar.setBorder(new MatteBorder(0, 0, 1, 0, (Color) Color.LIGHT_GRAY));
+		panel_toolbar.setBorder(new MatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
 		
 				JPanel panel_toolbar_left = new JPanel();
 				
@@ -1418,23 +1323,13 @@ public class GUIAll extends GUI {
 						btn_open_c.setPreferredSize(new Dimension(90, 30));
 						btn_open_c.setToolTipText("Mở tập tin C/thư mục");
 						btn_open_c.setText("Mở C");
-						btn_open_c.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								openCFiles();
-							}
-						});
+						btn_open_c.addActionListener(e -> openCFiles());
 						btn_open_c.setIcon(new ImageIcon(GUIAll.class.getResource("/image/c.png")));
 
 						JButton btn_set_root = new JButton();
 						btn_set_root.setMargin(new Insets(2, 5, 2, 5));
 						btn_set_root.setPreferredSize(new Dimension(100, 30));
-						btn_set_root.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								openSelectFunction();
-							}
-						});
+						btn_set_root.addActionListener(e -> openSelectFunction());
 						btn_set_root.setIcon(new ImageIcon(GUIAll.class.getResource("/image/root.png")));
 						btn_set_root.setToolTipText("Đặt hàm số gốc tùy chỉnh");
 						btn_set_root.setText("Đặt gốc");
@@ -1445,12 +1340,7 @@ public class GUIAll extends GUI {
 						btn_open_j.setMargin(new Insets(2, 5, 2, 5));
 						btn_open_j.setPreferredSize(new Dimension(100, 30));
 						btn_open_j.setIcon(new ImageIcon(GUIAll.class.getResource("/image/java.png")));
-						btn_open_j.addActionListener(new ActionListener() {
-							@Override
-							public void actionPerformed(ActionEvent e) {
-								openJavaFiles();
-							}
-						});
+						btn_open_j.addActionListener(e -> openJavaFiles());
 						btn_open_j.setToolTipText("Mở tập tin C/thư mục");
 						btn_open_j.setText("Mở Java");
 						panel_toolbar_left.add(btn_open_j);
@@ -1476,19 +1366,11 @@ public class GUIAll extends GUI {
 						btn_setting.setMargin(new Insets(2, 5, 2, 5));
 						btn_setting.setIcon(new ImageIcon(GUIAll.class.getResource("/image/setting.png")));
 						btn_setting.setPreferredSize(new Dimension(90, 30));
-						btn_setting.addActionListener(new ActionListener() {
-							public void actionPerformed(ActionEvent e) {
-								new SettingDialog(frame_main).setVisible(true);
-							}
-						});
+						btn_setting.addActionListener(e -> new SettingDialog(frame_main).setVisible(true));
 						panel_toolbar_right.add(btn_setting);
 						
 						JButton btn_about = new JButton("");
-						btn_about.addActionListener(new ActionListener() {
-							public void actionPerformed(ActionEvent e) {
-								new AboutDialog(frame_main).setVisible(true);
-							}
-						});
+						btn_about.addActionListener(e -> new AboutDialog(frame_main).setVisible(true));
 						btn_about.setIcon(new ImageIcon(GUIAll.class.getResource("/image/info.png")));
 						btn_about.setHorizontalTextPosition(SwingConstants.LEFT);
 						btn_about.setPreferredSize(new Dimension(30, 30));
@@ -1520,7 +1402,7 @@ public class GUIAll extends GUI {
 
 		fileChooserC = new JFileChooser();
 		FileNameExtensionFilter cFilter = new FileNameExtensionFilter(
-				"Mã nguồn C (*.c; *.cpp)", new String[] { "C", "CPP" });
+				"Mã nguồn C (*.c; *.cpp)", "C", "CPP");
 		fileChooserC.setMultiSelectionEnabled(true);
 		fileChooserC.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooserC.setPreferredSize(SIZE_CHOOSER);
@@ -1528,7 +1410,7 @@ public class GUIAll extends GUI {
 		
 		fileChooserJ = new JFileChooser();
 		FileNameExtensionFilter jFilter = new FileNameExtensionFilter(
-				"Mã nguồn Java (*.java)", new String[] { "JAVA" });
+				"Mã nguồn Java (*.java)", "JAVA");
 		fileChooserJ.setMultiSelectionEnabled(true);
 		fileChooserJ.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooserJ.setPreferredSize(SIZE_CHOOSER);
@@ -1538,32 +1420,23 @@ public class GUIAll extends GUI {
 			for (int x = 0; x < table.getColumnCount(); x++) {
 				table.getColumnModel().getColumn(x).setCellRenderer(centerRenderer);
 			}
-			table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-				
-				@Override
-				public void valueChanged(ListSelectionEvent e) {
-					if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
-						return;
-					Object index = table.getValueAt(table.getSelectedRow(), 0);
-					
-					if (index == null)
-						displayPathDetails(null, table.isSubCondition());
-					else{
-						int i = Integer.valueOf(index + "") - 1;
-						displayPathDetails(table.getBasisPaths().get(i), table.isSubCondition());
-					}
-				}
-			});
+			table.getSelectionModel().addListSelectionListener(e -> {
+                if (e.getValueIsAdjusting() || table.getSelectedRow() == -1)
+                    return;
+                Object index1 = table.getValueAt(table.getSelectedRow(), 0);
+
+                if (index1 == null)
+                    displayPathDetails(null, table.isSubCondition());
+                else{
+                    int i = Integer.valueOf(index1 + "") - 1;
+                    displayPathDetails(table.getBasisPaths().get(i), table.isSubCondition());
+                }
+            });
 		}
 		
 		Enumeration<AbstractButton> iter = group_inte_type.getElements();
 		while (iter.hasMoreElements())
-			iter.nextElement().addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					setIntegration();
-				}
-			});
+			iter.nextElement().addActionListener(e -> setIntegration());
 		
 		
 	}

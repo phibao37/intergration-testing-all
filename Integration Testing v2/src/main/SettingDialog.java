@@ -1,55 +1,22 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileFilter;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JTabbedPane;
-import javax.swing.JScrollPane;
-
-import java.awt.Color;
-
-import javax.swing.JLabel;
-
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-
-import javax.swing.SwingConstants;
-
-import java.awt.Font;
-import java.io.File;
 import core.S;
+import core.S.SCREEN;
 import core.Utils;
 import core.graph.GQuery;
 import core.graph.SelectList;
 import core.solver.Solver;
-import core.S.SCREEN;
 
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.JCheckBox;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
 
 public class SettingDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
-	private final JPanel contentPanel = new JPanel();
 	private JLabel entry_z3_dir;
 	private JSpinner spinner_max_loop;
 	private JLabel entry_tmp_dir;
@@ -102,8 +69,9 @@ public class SettingDialog extends JDialog {
 		
 		S.CANVAS_SHOW_TOOLBAR = entry_show_canvas_toolbar.isSelected();
 		S.CANVAS_DRAW_TOPDOWN = entry_draw_topdown.isSelected();
-		
-		S.SOLVE_LIST = entry_solve_list.getSelectList().toArray(new Solver[0]);
+
+		ArrayList<Solver> select = entry_solve_list.getSelectList();
+		S.SOLVE_LIST = select.toArray(new Solver[select.size()]);
 		S.save();
 	}
 	
@@ -121,16 +89,15 @@ public class SettingDialog extends JDialog {
 		
 		setBounds(100, 100, 700, 400);
 		getContentPane().setLayout(new BorderLayout());
+		JPanel contentPanel = new JPanel();
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		
 		tabbed_main = new JTabbedPane(JTabbedPane.TOP);
-		tabbed_main.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if (isVisible())
-					LAST_INDEX = tabbed_main.getSelectedIndex();
-			}
-		});
+		tabbed_main.addChangeListener(e -> {
+            if (isVisible())
+                LAST_INDEX = tabbed_main.getSelectedIndex();
+        });
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(
 			gl_contentPanel.createParallelGroup(Alignment.LEADING)
@@ -174,16 +141,14 @@ public class SettingDialog extends JDialog {
 				panel.add(entry_tmp_dir, gbc_entry_tmp_dir);
 				
 				JButton btnChn_1 = new JButton("Chọn...");
-				btnChn_1.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						JFileChooser chooser = new JFileChooser(S.DIR_TEMP);
-						chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-						int status = chooser.showDialog(getContentPane(), "Chọn thư mục");
-						if (status == JFileChooser.APPROVE_OPTION) {
-							entry_tmp_dir.setText(chooser.getSelectedFile().getPath());
-						}
-					}
-				});
+				btnChn_1.addActionListener(e -> {
+                    JFileChooser chooser = new JFileChooser(S.DIR_TEMP);
+                    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    int status = chooser.showDialog(getContentPane(), "Chọn thư mục");
+                    if (status == JFileChooser.APPROVE_OPTION) {
+                        entry_tmp_dir.setText(chooser.getSelectedFile().getPath());
+                    }
+                });
 				GridBagConstraints gbc_btnChn_1 = new GridBagConstraints();
 				gbc_btnChn_1.anchor = GridBagConstraints.SOUTHWEST;
 				gbc_btnChn_1.insets = new Insets(0, 0, 5, 5);
@@ -200,15 +165,16 @@ public class SettingDialog extends JDialog {
 				panel.add(entry_tmp_size, gbc_entry_tmp_size);
 				
 				JButton btnXa = new JButton("Xóa");
-				btnXa.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						if (S.DIR_TEMP.isDirectory()){
-							for (File f: S.DIR_TEMP.listFiles())
-								Utils.deleteFile(f);
-							setTmpSize(Utils.getFileSize(S.DIR_TEMP));
-						}
-					}
-				});
+				btnXa.addActionListener(e -> {
+                    if (S.DIR_TEMP.isDirectory()){
+                        File[] childs = S.DIR_TEMP.listFiles();
+                        assert childs != null;
+
+                        for (File f: childs)
+                            Utils.deleteFile(f);
+                        setTmpSize(Utils.getFileSize(S.DIR_TEMP));
+                    }
+                });
 				GridBagConstraints gbc_btnXa = new GridBagConstraints();
 				gbc_btnXa.fill = GridBagConstraints.HORIZONTAL;
 				gbc_btnXa.insets = new Insets(0, 0, 5, 5);
@@ -225,7 +191,7 @@ public class SettingDialog extends JDialog {
 				panel.add(lblSLnKim, gbc_lblSLnKim);
 				
 				spinner_max_loop = new JSpinner();
-				spinner_max_loop.setModel(new SpinnerNumberModel(new Integer(1), new Integer(1), null, new Integer(1)));
+				spinner_max_loop.setModel(new SpinnerNumberModel(1, 1, null, 1));
 				spinner_max_loop.setPreferredSize(new Dimension(40, 20));
 				GridBagConstraints gbc_spinner_max_loop = new GridBagConstraints();
 				gbc_spinner_max_loop.gridwidth = 2;
@@ -262,15 +228,10 @@ public class SettingDialog extends JDialog {
 		
 		contentPanel.setLayout(gl_contentPanel);
 		
-		entry_solve_list = new SelectList<Solver>();
+		entry_solve_list = new SelectList<>();
 		entry_solve_list.setHeight(30);
 		entry_solve_list.setItemStateChangeListener(
-				new SelectList.OnItemStateChange<Solver>() {
-			@Override
-			public void stateChanged(Solver item, boolean enable) {
-				$Solver.find("." + item.toString()).enabled(enable);
-			}
-		});
+				(item, enable) -> $Solver.find("." + item.toString()).enabled(enable));
 		
 		GridBagConstraints gbc_entry_solve_list = new GridBagConstraints();
 		gbc_entry_solve_list.anchor = GridBagConstraints.WEST;
@@ -308,30 +269,26 @@ public class SettingDialog extends JDialog {
 		panel.add(entry_z3_dir, gbc_entry_z3_dir);
 		
 		JButton btnChn = new JButton("Chọn...");
-		btnChn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JFileChooser chooser = new JFileChooser(S.DIR_Z3_BIN);
-				chooser.setFileFilter(new FileFilter() {
-					@Override
-					public String getDescription() {
-						return "Tập tin thực thi (z3.exe)";
-					}
-					
-					@Override
-					public boolean accept(File f) {
-						if (f.isDirectory())
-							return true;
-						return f.getName().equals("z3.exe")
-								&& f.getParentFile().getName().equals("bin");
-					}
-				});
+		btnChn.addActionListener(e -> {
+            JFileChooser chooser = new JFileChooser(S.DIR_Z3_BIN);
+            chooser.setFileFilter(new FileFilter() {
+                @Override
+                public String getDescription() {
+                    return "Tập tin thực thi (z3.exe)";
+                }
 
-				int status = chooser.showDialog(getContentPane(), "Chọn tập tin");
-				if (status == JFileChooser.APPROVE_OPTION) {
-					entry_z3_dir.setText(chooser.getSelectedFile().getParent());
-				}
-			}
-		});
+                @Override
+                public boolean accept(File f) {
+                    return f.isDirectory() ||
+                            f.getName().equals("z3.exe") && f.getParentFile().getName().equals("bin");
+                }
+            });
+
+            int status = chooser.showDialog(getContentPane(), "Chọn tập tin");
+            if (status == JFileChooser.APPROVE_OPTION) {
+                entry_z3_dir.setText(chooser.getSelectedFile().getParent());
+            }
+        });
 		GridBagConstraints gbc_btnChn = new GridBagConstraints();
 		gbc_btnChn.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnChn.insets = new Insets(0, 0, 5, 5);
@@ -391,7 +348,7 @@ public class SettingDialog extends JDialog {
 		
 		entry_rand_min = new JSpinner();
 		entry_rand_min.setPreferredSize(new Dimension(50, 20));
-		entry_rand_min.setModel(new SpinnerNumberModel(new Integer(0), null, null, new Integer(1)));
+		entry_rand_min.setModel(new SpinnerNumberModel(0, null, null, 1));
 		panel_2.add(entry_rand_min);
 		
 		JLabel lblCnTrn = new JLabel(",   Cận trên: ");
@@ -441,23 +398,17 @@ public class SettingDialog extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("OK");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						applySettings();
-						dispose();
-					}
-				});
+				okButton.addActionListener(e -> {
+                    applySettings();
+                    dispose();
+                });
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
 				JButton cancelButton = new JButton("Hủy bỏ");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				});
+				cancelButton.addActionListener(e -> dispose());
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}

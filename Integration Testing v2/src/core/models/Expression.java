@@ -212,15 +212,15 @@ public abstract class Expression extends Element {
 	 * In cây quan hệ
 	 * @param margin khoảng cách đầu dòng
 	 */
-	public void printTree(String margin){
-		System.out.println(margin + this + ", " + this.getClass().getSimpleName());
-		if (this instanceof ExpressionGroup){
-			Expression[] g = ((ExpressionGroup)this).g;
-			for (Expression ep: g)
-				if (ep == null)
-					System.out.println(margin + "   NULL");
-				else
-					ep.printTree(margin + "   ");
-		}
-	}
+//	public void printTree(String margin){
+//		System.out.println(margin + this + ", " + this.getClass().getSimpleName());
+//		if (this instanceof ExpressionGroup){
+//			Expression[] g = ((ExpressionGroup)this).g;
+//			for (Expression ep: g)
+//				if (ep == null)
+//					System.out.println(margin + "   NULL");
+//				else
+//					ep.printTree(margin + "   ");
+//		}
+//	}
 }

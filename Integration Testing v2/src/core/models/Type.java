@@ -1,5 +1,6 @@
 package core.models;
 
+import com.sun.istack.internal.NotNull;
 import core.graph.Graphable;
 import core.models.type.ArrayType;
 
@@ -53,5 +54,5 @@ public abstract class Type extends Element implements Graphable, Comparable<Type
 				HTML_COLOR, getContent());
 	}
 
-	private static String HTML_COLOR = "blue";
+	public static String HTML_COLOR = "blue";
 }

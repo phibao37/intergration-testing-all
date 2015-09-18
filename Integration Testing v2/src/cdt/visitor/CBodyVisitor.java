@@ -26,7 +26,6 @@ import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.visitor.BodyFunctionVisitor;
-import core.visitor.BodyFunctionVisitor.ForwardStatement;
 
 /**
  * Bộ duyệt các câu lệnh trong thân hàm của ngôn ngữ C
@@ -34,14 +33,14 @@ import core.visitor.BodyFunctionVisitor.ForwardStatement;
  *
  */
 public class CBodyVisitor implements BodyFunctionVisitor {
-	
-	private Statement BEGIN, END;
+
+	private Statement END;
 	private ArrayList<Statement> stmList = new ArrayList<>();
 	private boolean mSubCondition;
 	
 	@Override
 	public Statement[] parseBody(Object body, boolean subCondition) {
-		BEGIN = FlagStatement.newBeginFlag();
+		Statement BEGIN = FlagStatement.newBeginFlag();
 		END = FlagStatement.newEndFlag();
 		mSubCondition = subCondition;
 		
@@ -270,7 +269,7 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 		ArrayList<IASTCaseStatement> cases = new ArrayList<>();
 
 		IASTStatement[] childs = body.getStatements();
-		Statement defaultPoint = null, before = new ForwardStatement(), after = null;
+		Statement defaultPoint = null, before = new ForwardStatement(), after;
 		int i = 0;
 		
 		while (i < childs.length){

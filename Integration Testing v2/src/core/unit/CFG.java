@@ -51,7 +51,7 @@ public class CFG{
 	public ArrayList<BasisPath> getCoverStatementPaths(){
 		
 		//Tạo bản sao danh sách các đường thi hành
-		ArrayList<BasisPath> copy = new ArrayList<BasisPath>(getBasisPaths());
+		ArrayList<BasisPath> copy = new ArrayList<>(getBasisPaths());
 		
 		//Duyệt lần lượt các đường thi hành
 		for (int i = copy.size() - 1; i >= 0; i--){
@@ -90,10 +90,10 @@ public class CFG{
 	 */
 	public ArrayList<BasisPath> getCoverBranchPaths(){
 		//Tạo bản sao danh sách các đường thi hành
-		ArrayList<BasisPath> copy = new ArrayList<BasisPath>(getBasisPaths());
+		ArrayList<BasisPath> copy = new ArrayList<>(getBasisPaths());
 		
 		//Tập các cạnh trong đồ thị
-		HashSet<Edge> edgeList = new HashSet<Edge>();
+		HashSet<Edge> edgeList = new HashSet<>();
 		
 		//Duyệt các cạnh trong đồ thị để đếm tổng
 		for (Statement stm: mList){
@@ -137,7 +137,7 @@ public class CFG{
 	 * là một đường đi duy nhất qua các câu lệnh để đi hết chương trình
 	 */
 	protected ArrayList<BasisPath> parseBasisPaths(Statement[] statementList){
-		mPaths = new ArrayList<BasisPath>();
+		mPaths = new ArrayList<>();
 		travel(new BasisPath(), statementList[0]);
 		return mPaths;
 	}

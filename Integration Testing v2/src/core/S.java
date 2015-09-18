@@ -136,10 +136,10 @@ public class S {
 	/**
 	 * In ra một chuỗi và xuống dòng, và chỉ in khi {@link #DEBUG} đang được bật
 	 */
-	public static void p(String string){
-		if (DEBUG)
-			System.out.println(string);
-	}
+//	public static void p(String string){
+//		if (DEBUG)
+//			System.out.println(string);
+//	}
 	
 	/*---------------------------INNER CLASS-------------------------------*/
 	
@@ -169,7 +169,7 @@ public class S {
 	
 	private static Properties prop = new Properties();
 	private static File prop_file = new File("integration/setting.properties");
-	private static HashMap<String, Field> prop_map = new HashMap<String, Field>();
+	private static HashMap<String, Field> prop_map = new HashMap<>();
 	
 	static{
 		prop_map.clear();
@@ -234,7 +234,7 @@ public class S {
 		} catch (NoSuchMethodException e1) {
 			if (cls == Character.class)
 				return cls.getConstructor(char.class)
-				.newInstance(((String) value).charAt(0));
+				.newInstance(value.charAt(0));
 			else
 				return cls.getConstructor(String.class).newInstance(value);
 		}

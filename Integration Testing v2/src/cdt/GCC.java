@@ -60,9 +60,7 @@ public class GCC {
 	
 	/**
 	 * Chạy một biểu thức và trả về kết quả dạng chuỗi
-	 * @param type kiểu của biểu thức
 	 * @param expression nội dung biểu thức
-	 * @param args các tham số tùy chọn
 	 * @return chuỗi kết quả
 	 * @throws IOException lỗi tương tác tập tin
 	 * @throws InterruptedException 

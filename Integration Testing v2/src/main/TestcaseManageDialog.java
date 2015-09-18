@@ -1,61 +1,28 @@
 package main;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.FlowLayout;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-
 import core.S.SCREEN;
 import core.Utils;
-import core.models.ArrayVariable;
-import core.models.Expression;
-import core.models.Function;
+import core.models.*;
 import core.models.Function.TestcaseManager;
-import core.models.Testcase;
-import core.models.Variable;
 import core.models.expression.ArrayExpression;
 import core.models.expression.IDExpression;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
 
-import java.awt.Toolkit;
-import java.awt.event.ActionListener;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.awt.event.ActionEvent;
-import java.awt.Color;
-import java.awt.Component;
-
-import javax.swing.GroupLayout;
-import javax.swing.ImageIcon;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-
-import java.awt.Font;
-import javax.swing.JScrollPane;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.SwingConstants;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import javax.swing.JTextField;
-import javax.swing.JSeparator;
-import java.awt.Dimension;
-import javax.swing.border.EtchedBorder;
 
 public class TestcaseManageDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
-	private final JPanel contentPanel = new JPanel();
-	
+
 	private Variable[] mParas;
 	private JTextField txt_return_value;
-	private GridBagLayout gbl_current;
 	private JTextField[] list_value;
 	private core.models.Type rtnType;
 	private TestcaseManager tm;
@@ -95,6 +62,7 @@ public class TestcaseManageDialog extends JDialog {
 		setIconImage(Toolkit.getDefaultToolkit().getImage(TestcaseManageDialog.class.getResource("/image/testcase.png")));
 		setBounds(100, 100, 800, 500);
 		getContentPane().setLayout(new BorderLayout());
+		JPanel contentPanel = new JPanel();
 		contentPanel.setBackground(Color.WHITE);
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -337,42 +305,36 @@ public class TestcaseManageDialog extends JDialog {
 		panel_1.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		btn_edit = new JButton("Chỉnh sửa");
-		btn_edit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					performEdit(currentEdit);
-				} catch (Exception e1) {
-					alert(e1.getMessage());
-				}
-			}
-		});
+		btn_edit.addActionListener(e -> {
+            try {
+                performEdit();
+            } catch (Exception e1) {
+                alert(e1.getMessage());
+            }
+        });
 		btn_edit.setEnabled(false);
 		panel_1.add(btn_edit);
 		
 		JButton btnThmMi = new JButton("Thêm mới");
-		btnThmMi.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					addNewTestcase();
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					alert(e1.getMessage());
-				}
-			}
-		});
+		btnThmMi.addActionListener(e -> {
+            try {
+                addNewTestcase();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+                alert(e1.getMessage());
+            }
+        });
 		panel_1.add(btnThmMi);
 		
 		JButton btnXaB = new JButton("Xóa bỏ");
-		btnXaB.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				for (JTextField t: list_value)
-					t.setText(null);
-				txt_return_value.setText(null);
-				setCurrentEdit(-1);
-				if (list_value.length > 0)
-					list_value[0].requestFocusInWindow();
-			}
-		});
+		btnXaB.addActionListener(e -> {
+            for (JTextField t: list_value)
+                t.setText(null);
+            txt_return_value.setText(null);
+            setCurrentEdit(-1);
+            if (list_value.length > 0)
+                list_value[0].requestFocusInWindow();
+        });
 		panel_1.add(btnXaB);
 		
 		contentPanel.setLayout(gl_contentPanel);
@@ -386,11 +348,7 @@ public class TestcaseManageDialog extends JDialog {
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
 				JButton okButton = new JButton("Hoàn tất");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						dispose();
-					}
-				});
+				okButton.addActionListener(e -> dispose());
 				okButton.setActionCommand("OK");
 				buttonPane.add(okButton);
 				getRootPane().setDefaultButton(okButton);
@@ -454,8 +412,8 @@ public class TestcaseManageDialog extends JDialog {
 		setCurrentEdit(-1);
 		panel_current.removeAll();
 		int len = tm.size();
-		
-		gbl_current = new GridBagLayout();
+
+		GridBagLayout gbl_current = new GridBagLayout();
 		gbl_current.columnWidths = new int[]{300, 100, 50, 25, 25, 50, 0};
 		gbl_current.columnWeights = new double[]{1, 0, 0, 0, 0, 0, Double.MIN_VALUE};
 		
@@ -485,11 +443,7 @@ public class TestcaseManageDialog extends JDialog {
 			
 			JButton btn_edit = new JButton("");
 			btn_edit.setToolTipText("Chỉnh sửa");
-			btn_edit.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					editPosition(x);
-				}
-			});
+			btn_edit.addActionListener(e -> editPosition(x));
 			btn_edit.setIcon(new ImageIcon(
 					getClass().getResource("/image/edit.png")));
 			btn_edit.setBorder(null);
@@ -501,11 +455,7 @@ public class TestcaseManageDialog extends JDialog {
 			
 			JButton btn_delete = new JButton("");
 			btn_delete.setToolTipText("Xoá");
-			btn_delete.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					deletePosition(x);
-				}
-			});
+			btn_delete.addActionListener(e -> deletePosition(x));
 			btn_delete.setIcon(new ImageIcon(
 					getClass().getResource("/image/delete.png")));
 			btn_delete.setBorder(null);
@@ -555,7 +505,7 @@ public class TestcaseManageDialog extends JDialog {
 		setCurrentEdit(position);
 	}
 	
-	private void performEdit(int position) throws Exception{
+	private void performEdit() throws Exception{
 		tm.set(currentEdit, generateTestcase());
 		updateByTestcaseManager(tm, true);
 	}

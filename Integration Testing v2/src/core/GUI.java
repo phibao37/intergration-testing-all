@@ -45,7 +45,6 @@ public class GUI {
 	 * Mở đồ thị CFG của một hàm trong chương trình để xem
 	 * @param fn hàm trong chương trình
 	 * @param subCondition đồ thị phủ các điều kiện con ?
-	 * @return 
 	 */
 	public CFGView openFuntionView(Function fn, boolean subCondition){
 		return null;

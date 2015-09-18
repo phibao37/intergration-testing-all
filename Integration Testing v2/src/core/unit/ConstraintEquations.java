@@ -32,7 +32,7 @@ public class ConstraintEquations extends ArrayList<Expression> {
 	 */
 	public ConstraintEquations(Variable[] testcases){
 		mTestcases = testcases;
-		mArray = new ArrayList<ArrayIndexExpression>();
+		mArray = new ArrayList<>();
 	}
 	
 	/**
