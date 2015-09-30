@@ -1,55 +1,22 @@
 package core.graph.canvas;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JViewport;
-import javax.swing.SwingUtilities;
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
 import core.GUI;
 import core.S;
 import core.Utils;
 import core.graph.DragScrollPane;
 import core.graph.node.Node;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
-import java.awt.SystemColor;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.LineBorder;
-
-import java.awt.FlowLayout;
 
 import javax.imageio.ImageIO;
-import javax.swing.AbstractButton;
-import javax.swing.ImageIcon;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.ComponentOrientation;
+import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.LineBorder;
+import javax.swing.border.SoftBevelBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
 
 /**
  * Lớp đồ họa giúp hiển thị các nút đồ thị biểu diễn quan hệ giữa các đối tượng C
@@ -70,7 +37,7 @@ public class Canvas extends JPanel implements MouseListener {
 			new BasicStroke(1.5f, BasicStroke.CAP_BUTT, 
 			BasicStroke.JOIN_MITER, 10.0f, new float[]{3f}, 0.0f);
 	
-	protected ArrayList<Node> defaultNodeList = new ArrayList<Node>();
+	protected ArrayList<Node> defaultNodeList = new ArrayList<>();
 	protected boolean fullscreen;
 	private JViewport parent;
 	private JScrollPane parentWrap;
@@ -81,13 +48,11 @@ public class Canvas extends JPanel implements MouseListener {
 	 */
 	public Canvas(){
 		super();
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if (Utils.hasFlag(e.getChangeFlags(), HierarchyEvent.PARENT_CHANGED)){
-					parent = (JViewport) getParent();
-				}
-			}
-		});
+		addHierarchyListener(e -> {
+            if (Utils.hasFlag(e.getChangeFlags(), HierarchyEvent.PARENT_CHANGED)){
+                parent = (JViewport) getParent();
+            }
+        });
 		
 		this.setLayout(null);
 		this.setFocusable(true);
@@ -105,21 +70,15 @@ public class Canvas extends JPanel implements MouseListener {
 		
 		JButton button_1 = new JButton("");
 		button_1.setSelected(true);
-		button_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (fullscreen)
-					exitFullScreen();
-				else
-					goFullScreen();
-			}
-		});
+		button_1.addActionListener(e -> {
+            if (fullscreen)
+                exitFullScreen();
+            else
+                goFullScreen();
+        });
 		
 		JButton button = new JButton("");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				toolbar.setVisible(false);
-			}
-		});
+		button.addActionListener(e -> toolbar.setVisible(false));
 		button.setToolTipText("Đóng [Double-Click Canvas]");
 		button.setIcon(new ImageIcon(Canvas.class.getResource("/image/close.png")));
 		toolbar.add(button);
@@ -129,11 +88,7 @@ public class Canvas extends JPanel implements MouseListener {
 		
 		JButton button_2 = new JButton("");
 		button_2.setToolTipText("Lưu hình ảnh");
-		button_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				exportToImage();
-			}
-		});
+		button_2.addActionListener(e -> exportToImage());
 		button_2.setIcon(new ImageIcon(Canvas.class.getResource("/image/export.png")));
 		toolbar.add(button_2);
 		
@@ -163,11 +118,8 @@ public class Canvas extends JPanel implements MouseListener {
 				}
 				else if (code == 107 || code == 109){
 					Node.addFontSize(code == 107 ? 1 : -1);
-					
-					if (code == 107 || code == 109){
-						for (Node n: defaultNodeList)
-							n.reApplyFont();
-					}
+
+					defaultNodeList.forEach(core.graph.node.Node::reApplyFont);
 					S.save();
 					Canvas.this.repaint();
 				}
@@ -309,18 +261,15 @@ public class Canvas extends JPanel implements MouseListener {
 		this.repaint();
 	}
 	
-	/** Trả về đối tượng canvas được lưu trữ trong nền
-	 * @throws Exception  */
+	/** Trả về đối tượng canvas được lưu trữ trong nền  */
 	private JScrollPane getClonePane() {
 		JScrollPane scrollPane = new DragScrollPane();
 		this.parentWrap = (JScrollPane) parent.getParent();
 		scrollPane.setViewportView(this);
-		scrollPane.getViewport().addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JViewport v = (JViewport) e.getSource();
-				v.repaint();
-			}
-		});
+		scrollPane.getViewport().addChangeListener(e -> {
+            JViewport v = (JViewport) e.getSource();
+            v.repaint();
+        });
 
 		return scrollPane;
 	}
@@ -366,7 +315,7 @@ public class Canvas extends JPanel implements MouseListener {
 		if (export == null){
 			export = new JFileChooser();
 			exportExt = new FileNameExtensionFilter(
-					"Hình ảnh (JPG, PNG)", new String[]{"jpg", "png"});
+					"Hình ảnh (JPG, PNG)", "jpg", "png");
 			export.setFileFilter(exportExt);
 		}
 		
@@ -433,13 +382,10 @@ public class Canvas extends JPanel implements MouseListener {
 				b.setContentAreaFilled(false);
 				if (b.isSelected()){
 					b.setBackground(ACTIVE);
-					b.addActionListener(new ActionListener() {
-						@Override
-						public void actionPerformed(ActionEvent e) {
-							AbstractButton a = (AbstractButton) e.getSource();
-							a.setContentAreaFilled(!a.isContentAreaFilled());
-						}
-					});
+					b.addActionListener(e -> {
+                        AbstractButton a = (AbstractButton) e.getSource();
+                        a.setContentAreaFilled(!a.isContentAreaFilled());
+                    });
 				}
 			}
 			

@@ -1,6 +1,5 @@
 package core.models;
 
-import com.sun.istack.internal.NotNull;
 import core.graph.Graphable;
 import core.models.type.ArrayType;
 

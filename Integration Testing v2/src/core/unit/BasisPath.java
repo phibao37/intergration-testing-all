@@ -28,12 +28,11 @@ public class BasisPath extends ArrayList<Statement> {
 	 * Tạo ra bản sao đường thi hành
 	 */
 	public BasisPath clone(){
-		BasisPath clone = (BasisPath) super.clone();
 		
 		/*for (int i = 0; i < size(); i++)
 			clone.set(i, (Statement) get(i).clone());*/
 		
-		return clone;
+		return (BasisPath) super.clone();
 	}
 	
 	public String toString(){
@@ -133,9 +132,9 @@ public class BasisPath extends ArrayList<Statement> {
 	 * Kiểm tra đường thi hành này là không khả thi, không thế thực hiện được
 	 * @return true nếu đã được gán kết quả giải hệ và kết quả là vô nghiệm
 	 */
-	public boolean isUnreachable(){
-		return mResult != null && mResult.getSolutionCode() == Result.ERROR;
-	}
+//	public boolean isUnreachable(){
+//		return mResult != null && mResult.getSolutionCode() == Result.ERROR;
+//	}
 
 	/**
 	 * Trả về danh sách các cặp câu lệnh - tập ràng buộc ứng với đường thi hành

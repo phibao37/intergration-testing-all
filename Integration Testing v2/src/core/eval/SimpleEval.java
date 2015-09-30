@@ -38,26 +38,26 @@ public class SimpleEval implements Evaluateable {
 			String op = unary.getOperator();
 			
 			//Phép toán phủ định: !
-			if (op.equals(UnaryExpression.LOGIC_NOT))
-				return new IDExpression(!sub.boolValue());	
-			
-			//Phép toán +(-4), không cần xử lý
-			else if (op.equals(UnaryExpression.PLUS))
-				return sub;
-			
-			//Phép toán -(-4), cần xử lý => 4
-			else {
-				switch (sub.getType().getSize()){
-				case BasicType.LONG_SIZE:
-					return new IDExpression(-sub.longValue());
-				case BasicType.FLOAT_SIZE:
-					return new IDExpression(-sub.floatValue());
-				case BasicType.DOUBLE_SIZE:
-					return new IDExpression(-sub.doubleValue());
+			switch (op) {
+				case UnaryExpression.LOGIC_NOT:
+					return new IDExpression(!sub.boolValue());
+//Phép toán +(-4), không cần xử lý
+				case UnaryExpression.PLUS:
+					return sub;
+
+				//Phép toán -(-4), cần xử lý => 4
 				default:
-					return new IDExpression(-sub.intValue());
-				}
-				
+					switch (sub.getType().getSize()) {
+						case BasicType.LONG_SIZE:
+							return new IDExpression(-sub.longValue());
+						case BasicType.FLOAT_SIZE:
+							return new IDExpression(-sub.floatValue());
+						case BasicType.DOUBLE_SIZE:
+							return new IDExpression(-sub.doubleValue());
+						default:
+							return new IDExpression(-sub.intValue());
+					}
+
 			}
 		}
 		
@@ -69,145 +69,128 @@ public class SimpleEval implements Evaluateable {
 			String op = bin.getOperator();
 			
 			//Phép toán logic AND, OR
-			if (op.equals(BinaryExpression.LOGIC_AND))
-				return new IDExpression(l.boolValue() && r.boolValue());
-			else if (op.equals(BinaryExpression.LOGIC_OR))
-				return new IDExpression(l.boolValue() || r.boolValue());
-			
-			//Các phép toán tính toán (+,-, ...), và so sánh (==, <, ...)
-			else {
-				int max = Math.max(l.getType().getSize(), r.getType().getSize());
-				
-				if (op.equals(BinaryExpression.EQUALS)){
-					switch (max){
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() == r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() == r.doubleValue());
-					default:
-						return new IDExpression(l.longValue() == r.longValue());
+			switch (op) {
+				case BinaryExpression.LOGIC_AND:
+					return new IDExpression(l.boolValue() && r.boolValue());
+				case BinaryExpression.LOGIC_OR:
+					return new IDExpression(l.boolValue() || r.boolValue());
+
+				//Các phép toán tính toán (+,-, ...), và so sánh (==, <, ...)
+				default:
+					int max = Math.max(l.getType().getSize(), r.getType().getSize());
+
+					switch (op) {
+						case BinaryExpression.EQUALS:
+							switch (max) {
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() == r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() == r.doubleValue());
+								default:
+									return new IDExpression(l.longValue() == r.longValue());
+							}
+						case BinaryExpression.NOT_EQUALS:
+							switch (max) {
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() != r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() != r.doubleValue());
+								default:
+									return new IDExpression(l.longValue() != r.longValue());
+							}
+						case BinaryExpression.LESS:
+							switch (max) {
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() < r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() < r.doubleValue());
+								default:
+									return new IDExpression(l.longValue() < r.longValue());
+							}
+						case BinaryExpression.LESS_EQUALS:
+							switch (max) {
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() <= r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() <= r.doubleValue());
+								default:
+									return new IDExpression(l.longValue() <= r.longValue());
+							}
+						case BinaryExpression.GREATER:
+							switch (max) {
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() > r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() > r.doubleValue());
+								default:
+									return new IDExpression(l.longValue() > r.longValue());
+							}
+						case BinaryExpression.GREATER_EQUALS:
+							switch (max) {
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() >= r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() >= r.doubleValue());
+								default:
+									return new IDExpression(l.longValue() >= r.longValue());
+							}
+						case BinaryExpression.ADD:
+							switch (max) {
+								case BasicType.LONG_SIZE:
+									return new IDExpression(l.longValue() + r.longValue());
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() + r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() + r.doubleValue());
+								default:
+									return new IDExpression(l.intValue() + r.intValue());
+							}
+						case BinaryExpression.MINUS:
+							switch (max) {
+								case BasicType.LONG_SIZE:
+									return new IDExpression(l.longValue() - r.longValue());
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() - r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() - r.doubleValue());
+								default:
+									return new IDExpression(l.intValue() - r.intValue());
+							}
+						case BinaryExpression.MUL:
+							switch (max) {
+								case BasicType.LONG_SIZE:
+									return new IDExpression(l.longValue() * r.longValue());
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() * r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() * r.doubleValue());
+								default:
+									return new IDExpression(l.intValue() * r.intValue());
+							}
+						case BinaryExpression.DIV:
+							switch (max) {
+								case BasicType.LONG_SIZE:
+									return new IDExpression(l.longValue() / r.longValue());
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() / r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() / r.doubleValue());
+								default:
+									return new IDExpression(l.intValue() / r.intValue());
+							}
+						case BinaryExpression.MOD:
+							switch (max) {
+								case BasicType.LONG_SIZE:
+									return new IDExpression(l.longValue() % r.longValue());
+								case BasicType.FLOAT_SIZE:
+									return new IDExpression(l.floatValue() % r.floatValue());
+								case BasicType.DOUBLE_SIZE:
+									return new IDExpression(l.doubleValue() % r.doubleValue());
+								default:
+									return new IDExpression(l.intValue() % r.intValue());
+							}
 					}
-				}
-				
-				else if (op.equals(BinaryExpression.NOT_EQUALS)){
-					switch (max){
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() != r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() != r.doubleValue());
-					default:
-						return new IDExpression(l.longValue() != r.longValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.LESS)){
-					switch (max){
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() < r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() < r.doubleValue());
-					default:
-						return new IDExpression(l.longValue() < r.longValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.LESS_EQUALS)){
-					switch (max){
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() <= r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() <= r.doubleValue());
-					default:
-						return new IDExpression(l.longValue() <= r.longValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.GREATER)){
-					switch (max){
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() > r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() > r.doubleValue());
-					default:
-						return new IDExpression(l.longValue() > r.longValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.GREATER_EQUALS)){
-					switch (max){
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() >= r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() >= r.doubleValue());
-					default:
-						return new IDExpression(l.longValue() >= r.longValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.ADD)){
-					switch (max){
-					case BasicType.LONG_SIZE:
-						return new IDExpression(l.longValue() + r.longValue());
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() + r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() + r.doubleValue());
-					default:
-						return new IDExpression(l.intValue() + r.intValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.MINUS)){
-					switch (max){
-					case BasicType.LONG_SIZE:
-						return new IDExpression(l.longValue() - r.longValue());
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() - r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() - r.doubleValue());
-					default:
-						return new IDExpression(l.intValue() - r.intValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.MUL)){
-					switch (max){
-					case BasicType.LONG_SIZE:
-						return new IDExpression(l.longValue() * r.longValue());
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() * r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() * r.doubleValue());
-					default:
-						return new IDExpression(l.intValue() * r.intValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.DIV)){
-					switch (max){
-					case BasicType.LONG_SIZE:
-						return new IDExpression(l.longValue() / r.longValue());
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() / r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() / r.doubleValue());
-					default:
-						return new IDExpression(l.intValue() / r.intValue());
-					}
-				}
-				
-				else if (op.equals(BinaryExpression.MOD)){
-					switch (max){
-					case BasicType.LONG_SIZE:
-						return new IDExpression(l.longValue() % r.longValue());
-					case BasicType.FLOAT_SIZE:
-						return new IDExpression(l.floatValue() % r.floatValue());
-					case BasicType.DOUBLE_SIZE:
-						return new IDExpression(l.doubleValue() % r.doubleValue());
-					default:
-						return new IDExpression(l.intValue() % r.intValue());
-					}
-				}
+					break;
 			}
 		}
 		

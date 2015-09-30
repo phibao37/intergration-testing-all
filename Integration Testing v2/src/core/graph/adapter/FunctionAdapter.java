@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import core.error.MainNotFoundException;
 import core.graph.node.FunctionNode;
 import core.graph.node.Node;
 import core.inte.FunctionCallGraph;
@@ -25,7 +24,6 @@ public class FunctionAdapter extends NodeAdapter<FunctionNode> {
 	/**
 	 * Phân tích cấu trúc hàm gọi hàm, tìm ra hàm số <b>main</b> làm nút gốc
 	 * @param fGraph Danh sách hàm số đã được gán các hàm được gọi bên trong nó
-	 * @throws MainNotFoundException khi không có hàm <b>main</b> được tìm thấy
 	 */
 	public FunctionAdapter(FunctionCallGraph fGraph){
 		generateNode(fGraph.getRoot());
@@ -36,7 +34,7 @@ public class FunctionAdapter extends NodeAdapter<FunctionNode> {
 	 */
 	private void generateNode(Function main){
 		FunctionNode node, rNode;
-		Queue<FunctionNode> queue = new LinkedList<FunctionNode>();
+		Queue<FunctionNode> queue = new LinkedList<>();
 
 		node = new FunctionNode(main);
 		queue.add(node);
@@ -47,7 +45,7 @@ public class FunctionAdapter extends NodeAdapter<FunctionNode> {
 			this.add(node);
 			
 			ArrayList<Function> refer = node.getFunction().getRefers();
-			ArrayList<FunctionNode> nRefer = new ArrayList<FunctionNode>();
+			ArrayList<FunctionNode> nRefer = new ArrayList<>();
 			
 			for (Function f: refer){
 				rNode = getNodeByElement(f);

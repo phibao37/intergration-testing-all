@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
@@ -45,19 +44,16 @@ public class FunctionCanvas extends Canvas {
 				Canvas.class.getResource("/image/stub.png")));
 		stub.setToolTipText(Utils.html(
 				"Thêm Stub<br/>[Ctrl+Click]: Xóa ô nhập"));
-		stub.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				int i = 0;
-				mShowStub = !mShowStub;
-				for (FunctionNode n: fnNodeList)
-					n.setStubFieldVisible(mShowStub, 
-							Utils.hasFlag(e.getModifiers(), ActionEvent.CTRL_MASK),
-					i++ == 0);
-				if (!mShowStub)
-					createNewStubSuite();
-			}
-		});
+		stub.addActionListener(e -> {
+            int i = 0;
+            mShowStub = !mShowStub;
+            for (FunctionNode n: fnNodeList)
+                n.setStubFieldVisible(mShowStub,
+                        Utils.hasFlag(e.getModifiers(), ActionEvent.CTRL_MASK),
+                i++ == 0);
+            if (!mShowStub)
+                createNewStubSuite();
+        });
 		stub.setSelected(true);
 		toolbar.add(stub);
 	}
@@ -85,7 +81,7 @@ public class FunctionCanvas extends Canvas {
 		
 		int centerX = this.getWidth()/2, leftCX, leftX;
 		int currentY = paddingY, k = 0;
-		ArrayList<Node> rowNode = new ArrayList<Node>();
+		ArrayList<Node> rowNode = new ArrayList<>();
 		
 		if (S.CANVAS_DRAW_TOPDOWN){
 			adapter.get(0).setLocation(centerX - adapter.get(0).getWidth()/2, currentY);

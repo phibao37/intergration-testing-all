@@ -15,5 +15,5 @@ public interface Evaluateable {
 	 * @param expression biểu thức cần tính toán
 	 * @return giá trị đã được tính
 	 */
-	public Expression evalExpression(Expression expression);
+	Expression evalExpression(Expression expression);
 }

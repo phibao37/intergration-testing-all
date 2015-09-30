@@ -1,7 +1,6 @@
 package core.graph.adapter;
 
 import java.util.ArrayList;
-import java.util.function.Predicate;
 
 import core.graph.node.StatementNode;
 import core.models.Statement;
@@ -51,12 +50,7 @@ public class StatementAdapter extends NodeAdapter<StatementNode> {
 			int flagTrue, int flagFalse, boolean addLabel){
 		ArrayList<Statement> copy = (ArrayList<Statement>) stmList.clone();
 		
-		copy.removeIf(new Predicate<Statement>() {
-			@Override
-			public boolean test(Statement t) {
-				return t instanceof ScopeStatement;
-			}
-		});
+		copy.removeIf(t -> t instanceof ScopeStatement);
 		
 		StatementNode[] path = new StatementNode[copy.size()];
 		int i = 0;

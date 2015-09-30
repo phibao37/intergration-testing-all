@@ -22,6 +22,6 @@ public interface Runner {
 	 * Một số hàm còn làm thay đổi các giá trị đấu vào (thí dụ: thay đổi giá trị phần tử
 	 * mảng), các thay đổi này phải được cập nhật vào danh sách biến số đầu vào
 	 */
-	public Object run(Function function, Variable... args);
+	Object run(Function function, Variable... args);
 	
 }
