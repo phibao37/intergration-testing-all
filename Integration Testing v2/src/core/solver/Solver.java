@@ -148,6 +148,7 @@ public abstract class Solver implements Contentable {
 		private int mCode;
 		private String mMessage;
 		private Variable[] mSolution;
+		private Variable[] mAfterSolution;
 		private Expression mReturnValue;
 		private Solver mSolver;
 		
@@ -157,14 +158,26 @@ public abstract class Solver implements Contentable {
 		 * @param message xem {@link #getSolutionMessage()}
 		 * @param solution xem {@link #getSolution()}
 		 * @param returnValue xem {@link #getReturnValue()}
+		 * @param afterSolution xem {@link #getAfterSolution()}
+		 * @param solver xem {@link #getSolver()}
 		 */
 		public Result(int code, String message, Variable[] solution, 
-				Expression returnValue, Solver solver){
+				Expression returnValue, Variable[] afterSolution, Solver solver){
 			mCode = code;
 			mMessage = message;
 			mSolution = solution;
 			mReturnValue = returnValue;
+			mAfterSolution = afterSolution;
 			mSolver = solver;
+		}
+		
+		/**
+		 * Tạo một kết quả không giải được nghiệm
+		 * @param code mã lỗi (vô nghiệm hoặc không xác định được)
+		 * @param message chuỗi mô tả lỗi
+		 */
+		public Result(int code, String message){
+			this(code, message, null, null, null, null);
 		}
 		
 		/**
@@ -203,6 +216,13 @@ public abstract class Solver implements Contentable {
 		}
 		
 		/**
+		 * Trả về nghiệm sau khi được truyền qua hàm kiểm thử
+		 */
+		public Variable[] getAfterSolution(){
+			return mAfterSolution;
+		}
+		
+		/**
 		 * Trả về bộ giải hệ được dùng để tạo ra kết quả này
 		 */
 		public Solver getSolver(){
@@ -225,8 +245,7 @@ public abstract class Solver implements Contentable {
 		public static final int UNKNOWN = -1;
 		
 
-		public static final Result DEFAULT = new Result(UNKNOWN, "unknown", 
-				null, null, null);
+		public static final Result DEFAULT = new Result(UNKNOWN, "unknown");
 	}
 	
 	/**

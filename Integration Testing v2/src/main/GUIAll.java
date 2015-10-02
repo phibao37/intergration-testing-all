@@ -138,14 +138,17 @@ public class GUIAll extends GUI {
 	 * Chạy ứng dụng
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(() -> {
-            try {
-                GUIAll window = new GUIAll();
-                window.frame_main.setVisible(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+	                GUIAll window = new GUIAll();
+	                window.frame_main.setVisible(true);
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+			}
+		});
 	}
 
 	/**
@@ -581,14 +584,19 @@ public class GUIAll extends GUI {
 		Result r = path.getSolveResult();
 		currentResult = r;
 		
-		if (r.getSolutionCode() == Result.SUCCESS)
+		if (r.getSolutionCode() == Result.SUCCESS){
+			i = 0;
+			Variable[] afters = r.getAfterSolution();
+			
 			for (Variable testcase: r.getSolution()){
 				testcaseModel.addRow(new Object[]{
 						testcase.getType(),
 						testcase.getName(),
-						testcase.getValueString()
+						testcase.getValueString(),
+						afters[i++].getValueString()
 				});
 			}
+		}
 		
 		lbl_return_value.setText(Utils.toString(r.getReturnValue(), null));
 		syncTestResult(currentFunction, r);
@@ -843,7 +851,7 @@ public class GUIAll extends GUI {
 			new Object[][] {
 			},
 			new String[] {
-				"Ki\u1EC3u", "T\u00EAn bi\u1EBFn", "Gi\u00E1 tr\u1ECB"
+				"Ki\u1EC3u", "T\u00EAn bi\u1EBFn", "Gi\u00E1 tr\u1ECB", "Gi\u00E1 tr\u1ECB sau"
 			}
 		));
 		table_testcase.getColumnModel().getColumn(0).setMinWidth(75);

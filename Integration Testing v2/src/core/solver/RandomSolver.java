@@ -1,6 +1,8 @@
 package core.solver;
 
 import java.util.ArrayList;
+import java.util.Map;
+
 import core.S;
 import core.error.CoreException;
 import core.eval.SimpleEval;
@@ -35,6 +37,7 @@ public class RandomSolver extends Solver {
 	private String mSolutionStr;
 	private int mSolutionCode;
 	private Expression mReturnValue;
+	private Variable[] mAfterTestcase;
 	
 	private VariableTable mTable;
 	
@@ -47,6 +50,7 @@ public class RandomSolver extends Solver {
 		//Khởi tạo bảng biến, reset lại nghiệm
 		mTable = new VariableTable();
 		mTestcase = null;
+		mAfterTestcase = null;
 		mSolutionCode = Result.UNKNOWN;
 		mSolutionStr = RESULT_UNKNOWN;
 		mReturnValue = null;
@@ -144,6 +148,50 @@ public class RandomSolver extends Solver {
 					} catch (ArithmeticException e){
 						mReturnValue = new IDExpression("Infinity");
 					}
+				
+				//Tình toán các giá trị sau khi hàm chạy
+				mAfterTestcase = constraints.getAfterVariables();
+				int i = -1;
+				for (Variable var: mAfterTestcase){
+					i++;
+					
+					//Các giá trị không thay đổi, lấy từ nguồn của nó
+					if (!var.getType().isValueChangeable() || !var.isValueSet()){
+						var.setValue(mTestcase[i].getValue());
+						continue;
+					}
+					
+					//Là biến mảng, gán giá trị từng phần tử
+					if (var instanceof ArrayVariable){
+						ArrayVariable arr = (ArrayVariable) var;
+						System.out.println(arr.getValueString());
+						Map<int[], Expression> elms = arr.getAllValue();
+						for (Map.Entry<int[], Expression> entry: elms.entrySet()){
+							arr.setValueAt(calculate(entry.getValue()), entry.getKey());
+						}
+						
+						//Các chỉ số chứa ẩn số sẽ được tính toán và ghi đè sau, 
+						//không thể hỗ trợ theo đúng thứ tự !!!!
+						Map<ArrayList<Expression>, Expression> map =
+								arr.getAbstractDatas();
+						for (Map.Entry<ArrayList<Expression>, Expression> entry: 
+								map.entrySet()){
+							ArrayList<Expression> indexes = entry.getKey();
+							Expression[] indexs = new Expression[indexes.size()];
+							System.out.println(indexes + " =>> " + entry.getValue());
+							
+							for (int j = 0; j < indexs.length; j++)
+								indexs[j] = calculate(indexes.get(j));
+							
+							IDExpression ee;
+							arr.setValueAt(ee = calculate(entry.getValue()), indexs);
+							System.out.println("=>>>" + ee);
+						}
+					} else {
+						var.setValue(calculate(var.getValue()));
+					}
+				}
+				
 
 				mSolutionStr = summarySolution(mTable);
 				mSolutionCode = Result.SUCCESS;
@@ -151,7 +199,8 @@ public class RandomSolver extends Solver {
 			
 		}
 		
-		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue, this);
+		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue, 
+				mAfterTestcase, this);
 	}
 	
 	/**

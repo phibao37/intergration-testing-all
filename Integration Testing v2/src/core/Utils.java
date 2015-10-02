@@ -89,10 +89,20 @@ public class Utils {
 	 * @see #merge(String, Object[])
 	 */
 	public static String merge(String sep, List<?> list){
-		Object[] array = new Object[list.size()];
-		list.toArray(array);
+		return merge(sep, list.toArray());
+	}
+	
+	/**
+	 * @see #merge(String, Object[])
+	 */
+	public static String merge(String sep, int[] args){
+		if (args == null || args.length == 0)
+			return "";
 		
-		return merge(sep, array);
+		String result = String.valueOf(args[0]);
+		for (int i = 1; i < args.length; i++)
+			result += sep + args[i];
+		return result;
 	}
 	
 	/**

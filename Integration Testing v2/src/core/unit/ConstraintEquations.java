@@ -25,13 +25,17 @@ public class ConstraintEquations extends ArrayList<Expression> {
 	private Variable[] mTestcases;
 	private ArrayList<ArrayIndexExpression> mArray;
 	private Expression mReturn;
+	private Variable[] mAfterVariables;
 	
 	/**
 	 * Tạo một hệ ràng buộc mới
 	 * @param testcases danh sách các biến số cần được giải trong ràng buộc
+	 * @param afterVariables danh sách các biến số đầu vào mang giá trị sau khi
+	 * hàm kiểm thử đã thực hiện xong
 	 */
-	public ConstraintEquations(Variable[] testcases){
+	public ConstraintEquations(Variable[] testcases, Variable[] afterVariables){
 		mTestcases = testcases;
+		mAfterVariables = afterVariables;
 		mArray = new ArrayList<>();
 	}
 	
@@ -66,6 +70,13 @@ public class ConstraintEquations extends ArrayList<Expression> {
 	 */
 	public void setReturnExpression(Expression value){
 		mReturn = value;
+	}
+	
+	/**
+	 * Trả về các biến số đầu vào mang giá trị sau khi hàm số được thực hiện 
+	 */
+	public Variable[] getAfterVariables(){
+		return mAfterVariables;
 	}
 	
 	/**

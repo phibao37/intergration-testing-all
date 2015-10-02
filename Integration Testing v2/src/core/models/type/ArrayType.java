@@ -17,7 +17,7 @@ import core.models.expression.ArrayExpression;
 public class ArrayType extends Type {
 	
 	private Type mSubType;
-	private int mCapacity;
+	private ArrayModifier mArrayMod;
 	
 	/**
 	 * Tạo một kiểu mảng với kiểu phần tử con và số lượng phần tử
@@ -27,7 +27,7 @@ public class ArrayType extends Type {
 	public ArrayType(Type subType, int capacity) {
 		super(String.format("%s[%s]", subType, capacity == 0 ? "" : capacity), 0);
 		mSubType = subType;
-		mCapacity = capacity;
+		addModifier(mArrayMod = new ArrayModifier(capacity));
 	}
 	
 	/**
@@ -41,18 +41,38 @@ public class ArrayType extends Type {
 	 * Trả về kích thước của kiểu mảng, 0 cho trường hợp chưa xác định
 	 */
 	public int getCapacity(){
-		return mCapacity;
+		return mArrayMod.getCapacity();
 	}
 
 	@Override
 	public Expression getDefaultValue() {
-		int size = mCapacity == 0 ? 1 : mCapacity;
+		int capacity = mArrayMod.getCapacity(), 
+				size = capacity == 0 ? 1 : capacity;
 		Expression[] elements = new Expression[size];
 		
 		for (int i = 0; i < size; i++)
 			elements[i] = null;
 		
 		return new ArrayExpression(elements);
+	}
+	
+	public static class ArrayModifier extends Modifier{
+		private int mCapacity;
+
+		public ArrayModifier(int capacity) {
+			super("[" + capacity + "]");
+			mCapacity = capacity;
+		}
+		
+		public int getCapacity(){
+			return mCapacity;
+		}
+
+		@Override
+		public boolean makeValueChangeable() {
+			return true;
+		}
+		
 	}
 
 }

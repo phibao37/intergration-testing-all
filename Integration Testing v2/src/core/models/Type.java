@@ -1,5 +1,7 @@
 package core.models;
 
+import java.util.ArrayList;
+
 import core.graph.Graphable;
 import core.models.type.ArrayType;
 
@@ -11,6 +13,7 @@ import core.models.type.ArrayType;
 public abstract class Type extends Element implements Graphable, Comparable<Type> {
 	
 	private int mSize;
+	private ArrayList<Modifier> mModifiers;
 	
 	/**
 	 * Tạo một kiểu cùng với nội dung của nó
@@ -46,12 +49,66 @@ public abstract class Type extends Element implements Graphable, Comparable<Type
 	public boolean isArrayType(){
 		return this instanceof ArrayType;
 	}
+	
+	/**
+	 * Thêm cờ hiệu tham số cho kiểu
+	 */
+	protected void addModifier(Modifier mod){
+		if (mModifiers == null)
+			mModifiers = new ArrayList<>();
+		mModifiers.add(mod);
+	}
+	
+	/**
+	 * Trả về danh sách các cờ hiệu của kiểu, hoặc null nếu không có
+	 */
+	public ArrayList<Modifier> getModifiers(){
+		return mModifiers;
+	}
+	
+	/**
+	 * Kiểm tra xem giá trị của biến mang kiểu có thể bị thay đổi sau khi 
+	 * truyền qua hàm không<br/>
+	 * Giá trị có thể là bị thay đổi một phần (như thay đổi phần tử mảng)
+	 * hoặc toàn bộ (làm cho biến mang một giá trị khác) 
+	 */
+	public boolean isValueChangeable(){
+		if (mModifiers != null)
+			for (Modifier m: mModifiers)
+				if (m.makeValueChangeable())
+					return true;
+		return false;
+	}
 
 	@Override
 	public String getHTMLContent() {
-		return String.format("<span style=\"color:%s\">%s</span>", 
-				HTML_COLOR, getContent());
+		return String.format("<span style=\"color:blue\">%s</span>", getContent());
+	}
+	
+	/**
+	 * Mô tả các cờ hiệu tham số bổ sung nghĩa cho kiểu biến số. Thí dụ:
+	 * <ul>
+	 * 	<li>final/const: kiểu hằng, giá trị không thể thay đổi</li>
+	 * 	<li>* (C/C++): kiểu con trỏ, giá trị là một địa chỉ trỏ tới biến khác </li>
+	 * 	<li>& (C++): truyền tham chiếu thay vì tham trị</li>
+	 * </ul>
+	 *
+	 */
+	public static abstract class Modifier extends Element{
+		
+		/**
+		 * Khởi tạo cờ hiệu tham số bằng chuỗi hiển thị
+		 */
+		public Modifier(String content){
+			super(content);
+		}
+		
+		/**
+		 * Cờ hiệu này có làm cho giá trị biến số bị thay đổi sau khi truyền qua hàm
+		 * hay không?
+		 */
+		public abstract boolean makeValueChangeable();
+		
 	}
 
-	public static String HTML_COLOR = "blue";
 }

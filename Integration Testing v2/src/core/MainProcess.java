@@ -312,8 +312,7 @@ public abstract class MainProcess implements FilenameFilter {
 					if (j == tm.size()){
 						basis.setSolveResult(new Result(
 								Result.ERROR, caller.getRefers().size() > 0 ? 
-									"No testcase match" : "No testcase needed", 
-								null, null, null));
+									"No testcase match" : "No testcase needed"));
 					}
 				}
 				} finally {

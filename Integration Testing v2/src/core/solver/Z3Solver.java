@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import core.error.CoreException;
+import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Type;
 import core.models.Variable;
@@ -25,6 +27,7 @@ import core.unit.VariableTable;
 public class Z3Solver extends Solver {
 	
 	private Variable[] mTestcase;
+	private Variable[] mAfterTestcase;
 	private String mSolutionStr;
 	private int mSolutionCode;
 	private Expression mReturnValue;
@@ -45,10 +48,12 @@ public class Z3Solver extends Solver {
 	public Result solve(ConstraintEquations constraints) throws CoreException {
 		Variable[] testcases = constraints.getTestcases();
 		ArrayList<ArrayIndexExpression> array = constraints.getArrayAccesses();
+		Variable[] afters = constraints.getAfterVariables();
 		
 		//Khởi tạo bảng biến, reset lại nghiệm
 		mTable = new VariableTable();
 		mTestcase = null;
+		mAfterTestcase = null;
 		mSolutionCode = Result.UNKNOWN;
 		mSolutionStr = RESULT_UNKNOWN;
 		mReturnValue = null;
@@ -122,6 +127,39 @@ public class Z3Solver extends Solver {
 			if (mReturnValue != null)
 				z3.addLine("simplify %s", parseCondition(mReturnValue));//(IV)
 			
+			//Rút gọn giá trị của các biến bị thay đổi sau khi hàm chạy xong
+			mAfterTestcase = afters;
+			for (Variable var: mAfterTestcase){
+				
+				//Bỏ qua các biến không bị thay đổi giá trị 
+				if (!var.getType().isValueChangeable() || !var.isValueSet())
+					continue;
+				
+				//Là biến mảng, rút gọn từng phần tử
+				if (var instanceof ArrayVariable){
+					ArrayVariable arr = (ArrayVariable) var;
+					Map<int[], Expression> elms = arr.getAllValue();
+					for (Map.Entry<int[], Expression> entry: elms.entrySet()){
+						z3.addLine("simplify %s", 
+								parseCondition(entry.getValue()));		//(V)
+					}
+					
+					//Các chỉ số chứa ẩn số sẽ được tính toán và ghi đè sau, 
+					//không thể hỗ trợ theo đúng thứ tự !!!!
+					Map<ArrayList<Expression>, Expression> map = arr.getAbstractDatas();
+					for (Map.Entry<ArrayList<Expression>, Expression> entry: 
+							map.entrySet()){
+						for (Expression ex: entry.getKey())
+							z3.addLine("simplify %s", parseCondition(ex)); //(V-b)
+						z3.addLine("simplify %s", 
+								parseCondition(entry.getValue())); 		//(V-c)
+					}
+					
+				} else {
+					z3.addLine("simplify %s", parseCondition(var.getValue()));//(VI)
+				}
+			}
+			
 			z3.execute();
 			
 			for (Variable v: testcases)
@@ -157,12 +195,49 @@ public class Z3Solver extends Solver {
 			mSolutionCode = Result.SUCCESS;
 			mSolutionStr = summarySolution(mTable);
 			
+			//Gán các giá trị sau khi gọi hàm
+			int i = -1;
+			for (Variable var: mAfterTestcase){
+				i++;
+				
+				//Các giá trị không thay đổi, lấy từ nguồn của nó
+				if (!var.getType().isValueChangeable() || !var.isValueSet()){
+					var.setValue(mTestcase[i].getValue());
+					continue;
+				}
+				
+				//Là biến mảng, gán giá trị từng phần tử
+				if (var instanceof ArrayVariable){
+					ArrayVariable arr = (ArrayVariable) var;
+					Map<int[], Expression> elms = arr.getAllValue();
+					for (Map.Entry<int[], Expression> entry: elms.entrySet()){
+						arr.setValueAt(str2Expression(z3.getLine()), 	//(V)
+								entry.getKey());
+					}
+					
+					//Các chỉ số chứa ẩn số sẽ được tính toán và ghi đè sau, 
+					//không thể hỗ trợ theo đúng thứ tự !!!!
+					Map<ArrayList<Expression>, Expression> map = arr.getAbstractDatas();
+					for (Map.Entry<ArrayList<Expression>, Expression> entry: 
+							map.entrySet()){
+						Expression[] indexs = new Expression[entry.getKey().size()];
+						
+						for (int j = 0; j < indexs.length; j++)
+							indexs[j] = str2Expression(z3.getLine());	//(V-b)
+						arr.setValueAt(str2Expression(z3.getLine()), indexs);//(V-c)
+					}
+				} else {
+					var.setValue(str2Expression(z3.getLine()));			//(VI)
+				}
+			}
+			
 		} else if (RESULT_UNSAT.equals(result)){
 			mSolutionCode = Result.ERROR;
 			mSolutionStr = RESULT_UNSAT; //+ Why?
 		} 
 		
-		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue, this);
+		return new Result(mSolutionCode, mSolutionStr, mTestcase, mReturnValue,
+				mAfterTestcase, this);
 	}
 	
 	/**

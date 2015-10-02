@@ -84,6 +84,14 @@ public class ArrayVariable extends Variable {
 	}
 	
 	/**
+	 * Trả về danh sách các cặp chỉ số->giá trị mà giá trị của chỉ số vần còn là một
+	 * ẩn số.<br/> Thí dụ: a[1][x][2] = 3;
+	 */
+	public HashMap<ArrayList<Expression>, Expression> getAbstractDatas(){
+		return mMapData;
+	}
+	
+	/**
 	 * Kiểm tra mảng đã có giá trị ở một vị trí nhất định
 	 */
 	public boolean isValueSet(Expression... indexes){

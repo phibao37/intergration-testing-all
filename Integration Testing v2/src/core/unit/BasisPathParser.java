@@ -143,7 +143,10 @@ public class BasisPathParser {
 		mStubSuite = stub;
 		shouldContinue = true;
 		//mPath = path;
-		mConstraints = new ConstraintEquations(func.getParameters());
+		
+		Variable[] paras = func.getParameters();
+		Variable[] afterVariables = new Variable[paras.length];
+		mConstraints = new ConstraintEquations(paras, afterVariables);
 		tables = new VariableTable();
 		mAnalyzic = new ArrayList<>();
 		path.setAnalyzic(mAnalyzic);
@@ -153,8 +156,8 @@ public class BasisPathParser {
 		tables.newOpenScope();
 		
 		//Cho bản sao của các tham số vào bảng biến
-		for (Variable para: func.getParameters())
-			tables.add(para.clone());
+		for (int i = 0; i < paras.length; i++)
+			tables.add(afterVariables[i] = paras[i].clone());
 		
 		//Duyệt qua các câu lệnh trong đường thi hành
 		for (int i = 0; shouldContinue && i < path.size(); i++){
@@ -192,6 +195,7 @@ public class BasisPathParser {
 				postFix.forEach(this::handleAssignOne);
 			}
 		}
+		
 	}
 	
 	/**
