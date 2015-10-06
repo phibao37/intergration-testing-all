@@ -164,7 +164,6 @@ public class RandomSolver extends Solver {
 					//Là biến mảng, gán giá trị từng phần tử
 					if (var instanceof ArrayVariable){
 						ArrayVariable arr = (ArrayVariable) var;
-						System.out.println(arr.getValueString());
 						Map<int[], Expression> elms = arr.getAllValue();
 						for (Map.Entry<int[], Expression> entry: elms.entrySet()){
 							arr.setValueAt(calculate(entry.getValue()), entry.getKey());
@@ -178,14 +177,11 @@ public class RandomSolver extends Solver {
 								map.entrySet()){
 							ArrayList<Expression> indexes = entry.getKey();
 							Expression[] indexs = new Expression[indexes.size()];
-							System.out.println(indexes + " =>> " + entry.getValue());
 							
 							for (int j = 0; j < indexs.length; j++)
 								indexs[j] = calculate(indexes.get(j));
 							
-							IDExpression ee;
-							arr.setValueAt(ee = calculate(entry.getValue()), indexs);
-							System.out.println("=>>>" + ee);
+							arr.setValueAt(calculate(entry.getValue()), indexs);
 						}
 					} else {
 						var.setValue(calculate(var.getValue()));

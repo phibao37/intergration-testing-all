@@ -118,12 +118,12 @@ public class S {
 	/**
 	 * Phiên bản ứng dụng
 	 */
-	public static final String VERSION = "2.0.6";
+	public static final String VERSION = "2.1.0";
 	
 	/**
 	 * Chế độ debug ứng dụng
 	 */
-	public static transient boolean DEBUG = true;
+	public static transient boolean DEBUG = false;
 	
 	/**
 	 * In ra console với định dạng, và chỉ in khi {@link #DEBUG} đang được bật

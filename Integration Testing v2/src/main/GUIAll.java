@@ -42,6 +42,7 @@ import javax.swing.event.ListDataListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -589,12 +591,42 @@ public class GUIAll extends GUI {
 			Variable[] afters = r.getAfterSolution();
 			
 			for (Variable testcase: r.getSolution()){
-				testcaseModel.addRow(new Object[]{
-						testcase.getType(),
-						testcase.getName(),
-						testcase.getValueString(),
-						afters[i++].getValueString()
-				});
+				if (testcase instanceof ArrayVariable){
+					testcaseModel.addRow(new Object[]{
+							testcase.getType(),
+							testcase.getName(), "{}", "{}"
+					});
+				
+					Map<int[], Expression> 
+							m1 = ((ArrayVariable)testcase).getAllValue(), 
+							m2 = ((ArrayVariable)afters[i++]).getAllValue();
+					int row = testcaseModel.getRowCount();	
+					for (j = 0; j < Math.max(m1.size(), m2.size()); j++)
+						testcaseModel.addRow(new Object[]{});
+					
+					j = 0;
+					for (Entry<int[], Expression> entry: m1.entrySet())
+						testcaseModel.setValueAt(
+								String.format("[%s] => %s", 
+										Utils.merge("][", entry.getKey()), 
+										entry.getValue()), 
+								row + j++, 2);
+					
+					j = 0;
+					for (Entry<int[], Expression> entry: m2.entrySet())
+						testcaseModel.setValueAt(
+								String.format("[%s] => %s", 
+										Utils.merge("][", entry.getKey()), 
+										entry.getValue()), 
+								row + j++, 3);
+				} 
+				else
+					testcaseModel.addRow(new Object[]{
+							testcase.getType(),
+							testcase.getName(),
+							testcase.getValueString(),
+							afters[i++].getValueString()
+					});
 			}
 		}
 		

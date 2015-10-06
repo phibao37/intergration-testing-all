@@ -17,7 +17,7 @@ import core.models.type.ArrayType;
  */
 public class ArrayVariable extends Variable {
 	
-	private ArrayExpression mData;
+	//private ArrayExpression mData;
 	private HashMap<ArrayList<Expression>, Expression> mMapData = new HashMap<>();
 	
 	/**
@@ -212,7 +212,7 @@ public class ArrayVariable extends Variable {
 
 	@Override
 	public ArrayExpression getValue() {
-		return mData;
+		return (ArrayExpression) super.getValue();
 	}
 
 	@Override
@@ -234,7 +234,7 @@ public class ArrayVariable extends Variable {
 		if (value != null && !(value instanceof ArrayExpression))
 			throw new RuntimeException("The value must be an array expression");
 
-		mData = (ArrayExpression) value;
+		//mData = (ArrayExpression) value;
 		super.setValue(value);
 	}
 
@@ -245,6 +245,15 @@ public class ArrayVariable extends Variable {
 		return replaced;
 	}
 	
+	
+	
+	@Override
+	public ArrayVariable clone() {
+		ArrayVariable clone = (ArrayVariable) super.clone();
+		clone.mMapData = new HashMap<>(mMapData);
+		return clone;
+	}
+
 	@Override
 	public String getValueString() {
 		String value = "";

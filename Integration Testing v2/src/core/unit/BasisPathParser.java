@@ -142,6 +142,7 @@ public class BasisPathParser {
 		mError = null;
 		mStubSuite = stub;
 		shouldContinue = true;
+		//System.out.println("\n\n#### " + path);
 		//mPath = path;
 		
 		Variable[] paras = func.getParameters();
