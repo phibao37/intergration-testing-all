@@ -3,7 +3,6 @@ package core.unit;
 import java.util.ArrayList;
 
 import core.error.CoreException;
-import core.inte.StubSuite;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Function;
@@ -48,7 +47,6 @@ public class BasisPathParser {
 	private ArrayList<Pair<Statement, ArrayList<Expression>>> mAnalyzic;
 	private Statement mStatement;
 	private ArrayList<Expression> mStmConstraint;
-	protected StubSuite mStubSuite;
 	protected CoreException mError;
 	
 	/**
@@ -134,13 +132,11 @@ public class BasisPathParser {
 	 * Phân tích một đường thi hành để tìm các ràng buộc testcase
 	 * @param path đường thi hành cần phân tích
 	 * @param func hàm chứa đường thi hành, dùng để lấy các biến tham số
-	 * @param stub bộ stub dùng để thay thế các hàm bằng các giá trị cứng
 	 * @throws CoreException các lỗi làm cho việc phân tích không thực hiện được
 	 */
-	public void parseBasisPath(BasisPath path, Function func, StubSuite stub) 
+	public void parseBasisPath(BasisPath path, Function func) 
 			throws CoreException{
 		mError = null;
-		mStubSuite = stub;
 		shouldContinue = true;
 		//System.out.println("\n\n#### " + path);
 		//mPath = path;
@@ -451,25 +447,12 @@ public class BasisPathParser {
 	
 	/**
 	 * Xử lý một biểu thức gọi hàm
-	 * @return nếu hàm được gọi để lấy giá trị, thì giá trị kết quả sẽ được trả về
-	 * <ul>
-	 * <li>Hàm sẽ được chuyển qua bộ biên dịch để tạo file thực thi, sau đó truyền
-	 * các tham số vào và nhận lấy kết quả, được chuyển sang biểu thức</li>
-	 * <li>
-	 * Các hàm mà đã biết được cả nội dung thân hàm có thể được chạy theo chế độ static
-	 * nếu hỗ trợ
-	 * </li>
-	 * </ul>
-	 * @throws CoreException chưa có bộ stub kiểm thử
+	 * @deprecated Công cụ chỉ xử lý các unit, trong thân hàm 
+	 * 	không được có lời gọi tới hàm khác
 	 */
 	protected Expression handleFunctionCall(FunctionCallExpression call) 
 			throws CoreException{
-		try{
-			//assert mStubSuite.containsKey(call.getFunction());
-			return mStubSuite.get(call.getFunction());
-		} catch (Exception e){
-			throw new CoreException("Cần có bộ stub và hàm tương ứng để kiểm thử");
-		}
+		throw new CoreException("Không hỗ trợ gọi hàm trong hàm unit");
 	}
 	
 	/**

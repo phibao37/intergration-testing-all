@@ -40,9 +40,7 @@ public class StatementCanvas extends Canvas {
 	private ArrayList<StatementNode> smtNodeList = new ArrayList<StatementNode>();
 	JCheckBox mShowLabel;
 	
-	/** Tạo một đồ thị tương ứng với một hàm */
-	public StatementCanvas(Function fn){
-		this.mFunc = fn;
+	public StatementCanvas() {
 		mShowLabel = new JCheckBox("Hiện thứ tự", true);
 		mShowLabel.setToolTipText("Hiện thứ tự các câu lệnh trên đường đi");
 		mShowLabel.addActionListener(new ActionListener() {
@@ -54,11 +52,9 @@ public class StatementCanvas extends Canvas {
 		toolbar.add(mShowLabel);
 	}
 	
-	public StatementCanvas() {}
-	
-	public void setFunction(Function fn){
+	public void setFunction(Function fn, boolean subCondition){
 		this.mFunc = fn;
-		setAdapter(new StatementAdapter(fn.getCFG(true)));
+		setAdapter(new StatementAdapter(fn.getCFG(subCondition)));
 	}
 	
 	/** Tạo cây đồ họa mô tả đồ thị dòng điều khiển*/
@@ -68,11 +64,7 @@ public class StatementCanvas extends Canvas {
 		smtNodeList.addAll(adapter);
 		StatementNode beginNode = smtNodeList.get(0);
 		
-		int width = getWidth();
-		if (width == 0)
-			width = GUI.instance.getDefaultCanvasWidth();
-		
-		beginNode.setLocation(width/2, paddingY);
+		beginNode.setLocation(getWidth()/2, paddingY);
 		for (StatementNode node: smtNodeList){
 			StatementNode[] refer = (StatementNode[]) node.getRefers();
 			boolean isCondition = node.isConditionNode();
@@ -361,13 +353,6 @@ public class StatementCanvas extends Canvas {
 			});
 			this.add(item);
 			
-			item = new JMenuItem("Quản lý testcase");
-			item.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					GUI.instance.openFunctionTestcaseManager(canvas.getFunction());
-				}
-			});
-			this.add(item);
 		}
 
 		private void openPopupNode(StatementCanvas n, MouseEvent e) {

@@ -1,16 +1,11 @@
 package core.models;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Objects;
-
-import core.GUI;
 import core.Utils;
 import core.error.StatementNoRootException;
 import core.graph.Graphable;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
-import core.solver.Solver.Result;
 import core.unit.CFG;
 import core.visitor.BodyFunctionVisitor;
 import core.visitor.ExpressionVisitor;
@@ -34,7 +29,6 @@ public class Function extends Element implements Graphable {
 	private CFG mCFG_12;
 	private CFG mCFG_3;
 	
-	private ArrayList<Function> mRefers;
 	private File mFile;
 	
 	/**
@@ -51,7 +45,6 @@ public class Function extends Element implements Graphable {
 		mType = returnType;
 		setContent(String.format("%s %s(%s)%s", mType, mName, 
 				Utils.merge(", ", paras), getBodyString(mBody)));
-		mRefers = new ArrayList<Function>();
 	}
 	
 	/**
@@ -112,24 +105,7 @@ public class Function extends Element implements Graphable {
 	public CFG getCFG(boolean subCondition){
 		return subCondition ? mCFG_3 : mCFG_12;
 	}
-	
-	/**
-	 * Thêm một hàm nằm trong danh sách tham chiếu, tức những hàm được hàm này gọi
-	 * bên trong phần thân của nó (có thể bao gồm chính nó)
-	 * @param refer hàm được tham chiếu tới
-	 */
-	public void addRefer(Function refer){
-		if (!mRefers.contains(refer))
-			mRefers.add(refer);
-	}
-	
-	/**
-	 * Trả về danh sách các hàm được tham chiếu trong hàm này
-	 * @see #addRefer(Function)
-	 */
-	public ArrayList<Function> getRefers(){
-		return mRefers;
-	}
+
 	
 	/**
 	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 
@@ -162,17 +138,6 @@ public class Function extends Element implements Graphable {
 				
 			}
 		}
-	}
-	
-	private TestcaseManager mTestcase;
-	/**
-	 * Trả về bộ quản lý các testcase úng với hàm số
-	 */
-	public TestcaseManager getTestcaseManager(){
-		if (mTestcase == null){
-			mTestcase = new TestcaseManager();
-		}
-		return mTestcase;
 	}
 	
 	/**
@@ -221,90 +186,5 @@ public class Function extends Element implements Graphable {
 				getName(), 
 				b);
 	}
-	
-	/**
-	 * Kiểm tra hàm này phụ thuộc vào các hàm khác
-	 */
-	public boolean isDependence(){
-		return !getRefers().isEmpty();
-	}
 
-	public class TestcaseManager extends ArrayList<Testcase>{
-		private static final long serialVersionUID = 1L;
-		
-		private TestcaseManager() {}
-		
-		/**
-		 * Kiểm tra xem kết quả tính toán được do giải hệ có khớp với testcase mong
-		 * muốn hay không
-		 */
-		public TestResult test(Result result){
-			Testcase test = null;
-			boolean match = false;
-			
-			for (Testcase t: this)
-				if (t.isMatchResult(result)){
-					test = t;
-					match = Objects.equals(
-							t.getReturnOutput(), result.getReturnValue());
-					break;
-				}
-			
-			return new TestResult(getFunction(), test, result, match);
-		}
-		
-		public Function getFunction(){
-			return Function.this;
-		}
-		
-		/**
-		 * Trả về danh sách tên các biến testcase đầu vào
-		 */
-		public String getSummaryName(){
-			String s = "(";
-			
-			if (mParas.length > 0){
-				s += mParas[0].getName();
-				for (int i = 1; i < mParas.length; i++)
-					s += ", " + mParas[i].getName();
-			}
-			
-			s += ")";
-			return s;
-		}
-
-		@Override
-		public boolean add(Testcase e) {
-			return contains(e) ? false : super.add(e) | notifyTestcaseChanged();
-		}
-		
-		/**
-		 * @throws RuntimeException testcase bị trùng với testcase khác
-		 */
-		@Override
-		public Testcase set(int index, Testcase element) throws RuntimeException {
-			int i = indexOf(element);
-			
-			if (i >= 0 && i != index)
-				throw new RuntimeException(element.getSummaryInput()
-						+ " bị trùng với testcase số " + i);
-			
-			Testcase c = super.set(index, element);
-			notifyTestcaseChanged();
-			return c;
-		}
-
-		@Override
-		public Testcase remove(int index) {
-			Testcase t = super.remove(index);
-			notifyTestcaseChanged();
-			return t;
-		}
-
-		private boolean notifyTestcaseChanged(){
-			GUI.instance.notifyFunctionTestcaseChanged(getFunction(), size());
-			return true;
-		}
-		
-	}
 }
