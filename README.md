@@ -1,18 +1,11 @@
-# Intergration-testing-all
-Ứng dụng kiểm thử tích hợp/kiểm thử đơn vị cho các chương trình viết bằng:
- * C
- * C++
- * Java
+# Control Flow Testing for Java Unit
+Kiểm thử theo dòng điều khiển cho các Unit Java
 
-Ứng dụng hỗ trợ việc sinh testcase tự động/bán tự động cho các hàm trong chương trình nhằm đáp ứng các cấp độ phủ cơ bản (với kiểm thử đơn vị) và đáp ứng sự tích hợp của các cặp hàm trong chương trình (với kiểm thử tích hợp).
+## Các bộ giải hệ ràng buộc hỗ trợ:
+1. Random Solver
+2. Z3 Solver
 
-##Cài đặt
-Các nền tảng hỗ trợ
- * Windows
-
-1. Tải bản chạy trực tiếp (*Runnable JAR file*) [tại đây](https://github.com/phibao37/intergration-testing-all/releases) và khởi chạy ứng dụng. Một thư mục với tên `Integration` ở cùng cấp tập tin bản chạy được tạo ra để lưu trữ các cài đặt, cache,...
-2. Tải bộ giải hệ Z3Solver [tại đây](https://github.com/Z3Prover/z3/releases). Chọn một trong hai bước sau:
-  * Giải nén tập tin zip và đổi tên thư mục ngoài cùng thành `z3`, sau đó di chuyển thư mục vào trong thư mục `Integration`
-  * Vào ứng dụng đã khởi chạy và chọn mục *Cài đặt/Giải hệ ràng buộc/Bộ giải Z3/Đường dẫn* và mở hộp thoại lựa chọn tập tin thực thi `z3.exe`, sau đó chọn *OK* để lưu lại cài đặt
-
-##Sử dụng (later)
+## Định dạng mã nguồn được hỗ trợ
+- Các kiểu số nguyên (`int`, `long`), số thực (`float`, `double`), logic (`boolean`) và mảng của các kiểu này. *Chưa hỗ trợ* thuộc tính `length` của kiểu mảng Java
+- Các phép tính tính toán thông thường (+, -, *, /, ...), so sánh logic
+- Các phép gán thông thường (=, +=, ++, --. ...), *chưa hỗ trợ* phép gán lồng trong biểu thức (`a + (b=2)`, `b=c=d=1`,...)
