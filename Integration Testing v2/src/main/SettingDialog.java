@@ -167,6 +167,10 @@ public class SettingDialog extends JDialog {
 				JButton btnXa = new JButton("Xóa");
 				btnXa.addActionListener(e -> {
                     if (S.DIR_TEMP.isDirectory()){
+                    	if (JOptionPane.showConfirmDialog(parent, "Bạn sẽ xóa tất cả nội dung bên trong thư mục\"" + S.DIR_TEMP + "\"?", 
+                    			"Xác nhận xóa", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE) 
+                    			== JOptionPane.CANCEL_OPTION)
+                    		return;
                         File[] childs = S.DIR_TEMP.listFiles();
                         assert childs != null;
 
