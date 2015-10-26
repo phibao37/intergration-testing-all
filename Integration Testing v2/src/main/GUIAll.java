@@ -1,6 +1,5 @@
 package main;
 
-import cdt.CMainProcess;
 import core.GUI;
 import core.MainProcess;
 import core.MainProcess.Return;
@@ -151,43 +150,6 @@ public class GUIAll extends GUI {
 	            }
 			}
 		});
-	}
-
-	/**
-	 * Mở hộp thoại chọn tập tin C/C++
-	 */
-	private void openCFiles() {
-		int status = fileChooserC.showDialog(frame_main, "Mở tập tin C/thư mục");
-
-		if (status == JFileChooser.APPROVE_OPTION) {
-			tab_canvas.setSelectedComponent(cv_fn_call_wrap);
-			try {
-				main = new CMainProcess();
-				main.setWorkingFiles(fileChooserC.getSelectedFiles(), true);
-				main.loadFunctionFromFiles();
-				if (main.isEmptyFunction())
-					return;
-				
-				FunctionCallGraph fcg = main.getFunctionCallGraph();
-				try{
-					fcg.setByMain();
-					setIntegration();
-					preRoot = null;
-				} catch (MainNotFoundException e1){
-					if (fcg.size() == 1)
-						fcg.setRoot(fcg.get(0));
-					else {
-						openSelectFunction();
-						return;
-					}
-				}
-				canvas_fn_call.setAdapter(new FunctionAdapter(fcg));
-			} 
-			catch (Exception e) {
-				alertError(e.getMessage());
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	/**
@@ -776,7 +738,7 @@ public class GUIAll extends GUI {
 		
 		frame_main = new JFrame();
 		frame_main.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIAll.class.getResource("/image/testing.png")));
-		frame_main.setTitle("Kiểm thử tích hơp");
+		frame_main.setTitle("Kiểm thử đơn vị Java");
 		frame_main.setBounds(50, 50, 1266, 630);
 		frame_main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
 		frame_main.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -1374,24 +1336,15 @@ public class GUIAll extends GUI {
 		panel_toolbar.setBorder(new MatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY));
 		
 				JPanel panel_toolbar_left = new JPanel();
-				
-						JButton btn_open_c = new JButton();
-						btn_open_c.setMargin(new Insets(2, 5, 2, 5));
-						btn_open_c.setPreferredSize(new Dimension(90, 30));
-						btn_open_c.setToolTipText("Mở tập tin C/thư mục");
-						btn_open_c.setText("Mở C");
-						btn_open_c.addActionListener(e -> openCFiles());
-						btn_open_c.setIcon(new ImageIcon(GUIAll.class.getResource("/image/c.png")));
 
 						JButton btn_set_root = new JButton();
 						btn_set_root.setMargin(new Insets(2, 5, 2, 5));
 						btn_set_root.setPreferredSize(new Dimension(100, 30));
 						btn_set_root.addActionListener(e -> openSelectFunction());
 						btn_set_root.setIcon(new ImageIcon(GUIAll.class.getResource("/image/root.png")));
-						btn_set_root.setToolTipText("Đặt hàm số gốc tùy chỉnh");
-						btn_set_root.setText("Đặt gốc");
+						btn_set_root.setToolTipText("Chọn hàm kiểm thử từ danh sách");
+						btn_set_root.setText("Đặt unit");
 						panel_toolbar_left.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-						panel_toolbar_left.add(btn_open_c);
 						
 						JButton btn_open_j = new JButton();
 						btn_open_j.setMargin(new Insets(2, 5, 2, 5));
@@ -1399,7 +1352,7 @@ public class GUIAll extends GUI {
 						btn_open_j.setIcon(new ImageIcon(GUIAll.class.getResource("/image/java.png")));
 						btn_open_j.addActionListener(e -> openJavaFiles());
 						btn_open_j.setToolTipText("Mở tập tin C/thư mục");
-						btn_open_j.setText("Mở Java");
+						btn_open_j.setText("Mở tập tin");
 						panel_toolbar_left.add(btn_open_j);
 						panel_toolbar_left.add(btn_set_root);
 						
@@ -1425,13 +1378,6 @@ public class GUIAll extends GUI {
 						btn_setting.setPreferredSize(new Dimension(90, 30));
 						btn_setting.addActionListener(e -> new SettingDialog(frame_main).setVisible(true));
 						panel_toolbar_right.add(btn_setting);
-						
-						JButton btn_about = new JButton("");
-						btn_about.addActionListener(e -> new AboutDialog(frame_main).setVisible(true));
-						btn_about.setIcon(new ImageIcon(GUIAll.class.getResource("/image/info.png")));
-						btn_about.setHorizontalTextPosition(SwingConstants.LEFT);
-						btn_about.setPreferredSize(new Dimension(30, 30));
-						panel_toolbar_right.add(btn_about);
 						panel_toolbar.setLayout(gl_panel_toolbar);
 		panel_tray.setLayout(new FlowLayout(FlowLayout.RIGHT, 10, 5));
 		

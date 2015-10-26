@@ -78,7 +78,7 @@ public class SelectFunction extends JDialog {
 	public SelectFunction(JFrame parent, ArrayList<Function> funcs, Function preRoot) {
 		super(parent, null, Dialog.ModalityType.DOCUMENT_MODAL);
 		setIconImage(Toolkit.getDefaultToolkit().getImage(SelectFunction.class.getResource("/image/root.png")));
-		setTitle("Chọn hàm số gốc");
+		setTitle("Chọn hàm số");
 		setResizable(false);
 		
 		setBounds(100, 100, 450, 300);
