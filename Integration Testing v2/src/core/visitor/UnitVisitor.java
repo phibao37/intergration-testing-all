@@ -1,6 +1,7 @@
 package core.visitor;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import core.models.Function;
@@ -17,12 +18,11 @@ public interface UnitVisitor {
 	/**
 	 * Bắt đầu quá trình phân tích nội dung của mã nguồn, lọc ra danh sách các đối tượng
 	 * cần thiết
-	 * @param source nội dung của một tập tin mã nguồn cần phân tích
-	 * @param file đối tượng tập tin mã nguồn
-	 * @param args các tham số bổ sung, chẳng hạn các marco, include-path (C/C++), ...
+	 * @param source tập tin mã nguồn cần phân tích
 	 * @return trả về chính đối tượng duyệt này để tiếp tục lấy các giá trị khác
+	 * @throws IOException lỗi mở tập tin
 	 */
-	public UnitVisitor parseSource(String source, File file, Object... args);
+	public UnitVisitor parseSource(File source) throws IOException;
 	
 	/**
 	 * Trả về danh sách các hàm số được khai báo trong mã nguồn

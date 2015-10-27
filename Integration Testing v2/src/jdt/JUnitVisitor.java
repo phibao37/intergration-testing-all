@@ -1,6 +1,7 @@
 package jdt;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,11 +26,11 @@ public class JUnitVisitor implements UnitVisitor {
 	private ArrayList<Function> mFunctions = new ArrayList<Function>();
 	
 	@Override
-	public UnitVisitor parseSource(String source, File file, Object... args) {
+	public UnitVisitor parseSource(File source) throws IOException {
 		mFunctions.clear();
 		
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
-		parser.setSource(source.toCharArray());
+		parser.setSource(Utils.getContentFile(source).toCharArray());
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
  
 		final CompilationUnit cu = (CompilationUnit) parser.createAST(null);
@@ -58,7 +59,7 @@ public class JUnitVisitor implements UnitVisitor {
 				Function fn = new Function(s_name, varPara, node.getBody(), 
 						JType.parse(s_type));
 				
-				fn.setSourceFile(file);
+				fn.setSourceFile(source);
 				mFunctions.add(fn);
 				
 				return false;
@@ -120,9 +121,8 @@ public class JUnitVisitor implements UnitVisitor {
 		try{
 		String path = "D:\\Documents\\java\\TestUnit1.java";
 		File f = new File(path);
-		String source = Utils.getContentFile(f);
 		
-		for (Function fn: new JUnitVisitor().parseSource(source, f).getFunctionList()){
+		for (Function fn: new JUnitVisitor().parseSource(f).getFunctionList()){
 			System.out.println(fn);
 		}
 

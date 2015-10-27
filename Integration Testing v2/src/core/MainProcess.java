@@ -48,8 +48,9 @@ public abstract class MainProcess implements FilenameFilter {
 	
 	/**
 	 * Nạp các hàm (và các biến toàn cục, ..) vào tiến trình
+	 * @throws IOException 
 	 */
-	public void loadFunctionFromFiles(){
+	public void loadFunctionFromFiles() throws IOException{
 		//Xóa dữ liệu cũ
 		mFunctions.clear();
 		//mVariables.clear();
@@ -349,17 +350,10 @@ public abstract class MainProcess implements FilenameFilter {
 	/**
 	 * Duyệt qua một tập tin và lấy ra các đối tượng như hàm, biến toàn cục
 	 * @param file tập tin mã nguồn
-	 * @param args các tham số bổ sung
+	 * @throws IOException 
 	 */
-	protected void loadFile(File file, Object... args) {
-		String source = null;
-		try {
-			source = Utils.getContentFile(file);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		mUnitVisitor.parseSource(source, file, args);
-		
+	protected void loadFile(File file) throws IOException {
+		mUnitVisitor.parseSource(file);
 		mFunctions.addAll(mUnitVisitor.getFunctionList());
 		//mVariables.addAll(mUnitVisitor.getGlobalVariableList());
 	}

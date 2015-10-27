@@ -9,12 +9,16 @@ import core.models.Type;
 import core.models.Variable;
 import core.models.type.ArrayType;
 import core.visitor.UnitVisitor;
+
 import org.eclipse.cdt.core.dom.ast.*;
 import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
+import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
+import org.eclipse.cdt.core.model.AbstractLanguage;
 import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.core.parser.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,12 +33,11 @@ public class CUnitVisitor implements UnitVisitor {
 	private ArrayList<Variable> mVariables = new ArrayList<>();
 	
 	@Override
-	public UnitVisitor parseSource(String source, final File file, Object... args) {
+	public UnitVisitor parseSource(File file) throws IOException {
 		mFunctions.clear();
 		mVariables.clear();
 		
-		IASTTranslationUnit u = getIASTTranslationUnit(file.getAbsolutePath(),
-			source.toCharArray());
+		IASTTranslationUnit u = getIASTTranslationUnit(file);
 		
 		u.accept(new ASTVisitor() {
 			{  shouldVisitDeclarations = true; }
@@ -195,11 +198,27 @@ public class CUnitVisitor implements UnitVisitor {
 	 * Trả về một cây cú pháp trừu tượng (Abstract Syntax Tree) 
 	 * tương ứng với đoạn mã nguồn<br/>
 	 * Các thông số được thiết đặt mặc định
-	 * @param filePath đường dẫn đến tập tin mã nguồn C
-	 * @param code Nội dung của mã nguồn C
+	 * @param source tập tin mã nguồn cần phân tích
 	 */
-	static IASTTranslationUnit getIASTTranslationUnit(String filePath, char[] code) {
-		FileContent reader = FileContent.create(filePath, code);
+	static IASTTranslationUnit getIASTTranslationUnit(File source) throws IOException {
+		return getIASTTranslationUnit(
+				Utils.getContentFile(source).toCharArray(), 
+				source.getAbsolutePath(), 
+				Utils.getExtension(source).equalsIgnoreCase("c") ? 
+						GCCLanguage.getDefault() : GPPLanguage.getDefault());
+	}
+	
+	/**
+	 * Trả về cây cú pháp trừu tượng với mã nguồn C đơn giản
+	 */
+	static IASTTranslationUnit getIASTranslationUnit(String source) throws IOException{
+		return getIASTTranslationUnit(source.toCharArray(), "", 
+				GCCLanguage.getDefault());
+	}
+	
+	private static IASTTranslationUnit getIASTTranslationUnit(char[] source, 
+			String filePath, AbstractLanguage lang) throws IOException {
+		FileContent reader = FileContent.create(filePath, source);
 		Map<String, String> macroDefinitions = new HashMap<>();
 		String[] includeSearchPaths = new String[0];
 		IScannerInfo scanInfo = new ScannerInfo(macroDefinitions, includeSearchPaths);
@@ -209,8 +228,7 @@ public class CUnitVisitor implements UnitVisitor {
 		IParserLogService log = new DefaultLogService();
 		
 		try {
-			//GCCLanguage
-			return GCCLanguage.getDefault().getASTTranslationUnit(
+			return lang.getASTTranslationUnit(
 					reader, scanInfo, fileCreator, null, options, log);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -223,18 +241,12 @@ public class CUnitVisitor implements UnitVisitor {
 		try {
 			String filePath = "D:\\Documents\\unit\\delta2.c";
 			File f = new File(filePath);
-			String source = Utils.getContentFile(f);
 			
-			printAllNode(source);
-			/*for (Function fn : new CUnitVisitor()
-				.parseSource(source, f).getFunctionList()){
-				System.out.println(fn);
-				fn.parseCFG(CBodyVisitor.DEFAULT);
-			}*/
+			IASTTranslationUnit u = getIASTTranslationUnit(f);
+			printTree(u, " | ");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			
 		}
 	}
 	
@@ -256,12 +268,6 @@ public class CUnitVisitor implements UnitVisitor {
 		
 	}
 	
-	static void printAllNode(String source){
-		IASTTranslationUnit u = getIASTTranslationUnit("", source.toCharArray());
-		
-		//handle(u);
-		printTree(u, " | ");
-	}
 	
 //	static void handle(IASTTranslationUnit unit){
 //		unit.accept(new ASTVisitor() {

@@ -1,5 +1,6 @@
 package cdt.visitor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -23,7 +24,6 @@ import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
-import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
@@ -223,10 +223,13 @@ public class EpUtils {
 			if (!source.endsWith(";"))
 				source += ";";
 			source = String.format("void main(){%s}", source);
-			IASTTranslationUnit unit = CUnitVisitor.getIASTTranslationUnit("", 
-					source.toCharArray());
-			unit.accept(this);
-			return mExpression;
+			try {
+				CUnitVisitor.getIASTranslationUnit(source).accept(this);
+				return mExpression;
+			} catch (IOException e) {
+				return null;
+			}
+			
 		}
 
 		@Override
