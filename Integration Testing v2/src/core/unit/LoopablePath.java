@@ -67,6 +67,27 @@ public class LoopablePath extends ArrayList<Statement> {
 	}
 	
 	/**
+	 * Kiểm tra đường đi này đã chứa một đường đi khác hay chưa
+	 */
+	public boolean isCover(LoopablePath path){
+		if (this.size() != path.size()) return false;
+		
+		for (int i = 0; i < size(); i++){
+			Statement a = get(i), b = path.get(i);
+			
+			if (a instanceof LoopStatement){
+				if (!((LoopStatement) a).isCover(b))
+					return false;
+			} else {
+				if (a != b)
+					return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
 	 * Ghép các câu lệnh trong đường đi này vào mỗi đường đi trong danh sách cung cấp.
 	 * Nếu gặp phải câu lệnh lặp, câu lệnh lặp này sẽ được lặp một số lần nhất định
 	 * dựa theo chỉ số truyền vào. <br/>

@@ -72,6 +72,20 @@ public class LoopStatement extends Statement {
 	}
 	
 	/**
+	 * Kiểm tra câu lệnh lặp này có chứa câu lệnh khác (có thể là câu lệnh lặp hoặc
+	 * câu lệnh thường)
+	 */
+	public boolean isCover(Statement stm){
+		if (stm instanceof LoopStatement){
+			LoopStatement loop = (LoopStatement) stm;
+			return getCondition() == loop.getCondition()
+					&& getBody().isCover(loop.getBody());
+		}
+		else
+			return getCondition() == stm;
+	}
+	
+	/**
 	 * Lặp phần thân 1 số lần nhất định
 	 * @param body danh sách các câu lệnh trong phần thân
 	 * @param loop số lượng lần lặp

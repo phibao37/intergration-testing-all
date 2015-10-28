@@ -310,8 +310,25 @@ public class GUIAll extends GUI {
 				for (BasisPath path: base){
 					LoopablePath l = new LoopablePath(path);
 					if (l.getLoops().size() > 0){
-						loopablePath.add(l);
-						loopPath.add(path);
+						boolean shouldAdd = true;
+						
+						for (int j = loopablePath.size() - 1; j >= 0; j--){
+							LoopablePath l2 = loopablePath.get(j);
+							
+							if (l.isCover(l2)){
+								loopablePath.remove(j);
+								loopPath.remove(j);
+							}
+							else if (l2.isCover(l)){
+								shouldAdd = false;
+								break;
+							}
+						}
+						
+						if (shouldAdd){
+							loopablePath.add(l);
+							loopPath.add(path);
+						}
 					}
 				}
 				table_loop_path.setBasisPaths(loopPath);

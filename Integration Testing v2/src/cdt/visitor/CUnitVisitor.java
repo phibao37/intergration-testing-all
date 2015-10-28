@@ -239,7 +239,7 @@ public class CUnitVisitor implements UnitVisitor {
 	
 	public static void main(String[] args) {
 		try {
-			String filePath = "D:\\Documents\\unit\\delta2.c";
+			String filePath = "D:\\Documents\\unit\\delta2.cpp";
 			File f = new File(filePath);
 			
 			IASTTranslationUnit u = getIASTTranslationUnit(f);
