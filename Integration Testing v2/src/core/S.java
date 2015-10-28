@@ -65,7 +65,7 @@ public class S {
 	/**
 	 * Thư mục bin chứa bộ giải hệ Z3
 	 */
-	public static File DIR_Z3_BIN = new File("D:\\App\\Library\\z3\\bin");
+	public static File DIR_Z3_BIN = new File("integration/z3/bin").getAbsoluteFile();
 	
 	/**
 	 * Thư mục lưu các tập tin tạm thời để xử lý
@@ -80,7 +80,7 @@ public class S {
 	/**
 	 * Thư mục chứa bộ biên dịch GCC
 	 */
-	public static File DIR_GCC = new File("D:\\App\\Library\\Cygwin\\bin");
+	public static File DIR_GCC = new File("integration/Cygwin/bin").getAbsoluteFile();
 	
 	
 	/**
