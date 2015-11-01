@@ -51,7 +51,9 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	 * Mảng được truy cập trực tiếp, do vậy, không nên thay đổi các phần tử trong mảng này
 	 */
 	public Expression[] getArguments(){
-		return g;
+		Expression[] indexs = new Expression[g.length - 1];
+		System.arraycopy(g, 1, indexs, 0, indexs.length);
+		return indexs;
 	}
 	
 	/**

@@ -72,7 +72,8 @@ public class RandomSolver extends Solver {
 				ep.accept(new ExpressionVisitor() {
 					@Override
 					public void leave(NameExpression name) {
-						ref.add(name);
+						if (name.getRole() == NameExpression.ROLE_NORMAL)
+							ref.add(name);
 					}
 
 					@Override
@@ -97,6 +98,8 @@ public class RandomSolver extends Solver {
 					Expression constraint = entry.getKey().clone();
 					PlaceHolderExpression h = new PlaceHolderExpression(constraint);
 					
+
+					//System.out.println("Before calculate: " + h);
 					for (NamedAttribute name: entry.getValue()){
 						if (name instanceof NameExpression)
 							h.replace((Expression) name, 
@@ -106,6 +109,8 @@ public class RandomSolver extends Solver {
 									getValue((ArrayIndexExpression) name));
 						}
 					}
+
+					//System.out.println("calculate: " + h.getElement());
 					
 					try{
 						IDExpression result = SimpleEval.calculate(h.getElement());
@@ -213,7 +218,8 @@ public class RandomSolver extends Solver {
 			
 			@Override
 			public void leave(NameExpression name) {
-				h.replace(name, getValue(name));
+				if (name.getRole() == NameExpression.ROLE_NORMAL)
+					h.replace(name, getValue(name));
 			}
 
 			@Override
