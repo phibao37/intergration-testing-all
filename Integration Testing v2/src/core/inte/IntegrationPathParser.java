@@ -14,6 +14,7 @@ import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.NameExpression;
 import core.unit.BasisPathParser;
 
 /**
@@ -99,7 +100,7 @@ public class IntegrationPathParser extends BasisPathParser {
 				//Đây là biến testcase, tạo thêm truy cập mảng mới
 				else if (array2.getScope() == 1){
 					ArrayIndexExpression arr = new ArrayIndexExpression(
-							array2.getName(), key);
+							new NameExpression(array2.getName()), key);
 					
 					addArrayAccess(arr);
 					addConstraint(new BinaryExpression(

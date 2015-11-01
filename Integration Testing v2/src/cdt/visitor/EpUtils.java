@@ -111,7 +111,7 @@ public class EpUtils {
 			for (int i = 0; i < indexes.length; i++)
 				indexes[i] = parseNode(listIndexes.get(i));
 			
-			return new ArrayIndexExpression(node.getRawSignature(), indexes);
+			return new ArrayIndexExpression(parseNode(node), indexes);
 		}
 		
 		if (node instanceof IASTFunctionCallExpression){
@@ -122,7 +122,7 @@ public class EpUtils {
 			for (int i = 0; i < args.length; i++)
 				argEps[i] = parseNode(args[i]);
 			return new FunctionCallExpression(
-					call.getFunctionNameExpression().getRawSignature(), argEps);
+					parseNode(call.getFunctionNameExpression()), argEps);
 		}
 		
 		if (node instanceof IASTDeclarationStatement){
@@ -144,7 +144,8 @@ public class EpUtils {
 					
 					for (int j = 0; j < mdfs.length; j++)
 						indexes[j] = parseNode(mdfs[j].getConstantExpression());
-					decEps[i] = new ArrayIndexExpression(name, indexes).setDeclare();
+					decEps[i] = new ArrayIndexExpression(
+							new NameExpression(name), indexes).setDeclare();
 				} else {
 					decEps[i] = new NameExpression(name);
 				}

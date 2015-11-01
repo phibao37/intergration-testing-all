@@ -113,7 +113,7 @@ public class JEpUtil {
 			for (int i = 0; i < index.length; i++)
 				index[i] = parseNode(list.get(i));
 			
-			return new ArrayIndexExpression(node.toString(), index);
+			return new ArrayIndexExpression(parseNode(node), index);
 		}
 		
 		else if(node instanceof Assignment){
@@ -207,10 +207,9 @@ public class JEpUtil {
 				String name = var.getName().getIdentifier();
 				Expression init = var.getInitializer();
 				
-				if (indexs == null)
-					vars[i] = new NameExpression(name);
-				else
-					vars[i] = new ArrayIndexExpression(name, indexs);
+				vars[i] = new NameExpression(name);
+				if (indexs != null)
+					vars[i] = new ArrayIndexExpression(vars[i], indexs);
 				//Có khai báo mảng ở sau biến?? int[][] a, b[], làm sau
 				
 				if (init != null)

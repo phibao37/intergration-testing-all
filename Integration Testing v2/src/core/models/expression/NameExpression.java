@@ -26,6 +26,11 @@ public class NameExpression extends Expression implements NamedAttribute {
 	 */
 	public static final int ROLE_FUNCTION = 2;
 	
+	/**
+	 * Tham gia vai trò tên đối tượng trong biểu thức truy cập thuộc tính
+	 */
+	public static final int ROLE_OBJECT = 3;
+	
 	private Type mType;
 	private int mRole = ROLE_NORMAL;
 	
@@ -35,14 +40,6 @@ public class NameExpression extends Expression implements NamedAttribute {
 	 */
 	public NameExpression(String name){
 		super(name);
-	}
-
-	/**
-	 * Trả về tên của biến tham chiếu
-	 */
-	@Override
-	public String getName() {
-		return getContent();
 	}
 
 	@Override
@@ -74,6 +71,11 @@ public class NameExpression extends Expression implements NamedAttribute {
 	 */
 	public void setRole(int role) {
 		mRole = role;
+	}
+
+	@Override
+	public Expression getNameExpression() {
+		return this;
 	}
 
 }

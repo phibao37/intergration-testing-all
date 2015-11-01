@@ -18,7 +18,6 @@ import core.models.Type;
  */
 public class FunctionCallExpression extends ExpressionGroup implements NamedAttribute{
 	
-	private String mName;
 	private Function mFunc;
 	
 	/**
@@ -26,9 +25,13 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	 * @param name tên của hàm được gọi
 	 * @param argument danh sách các biểu thức (đối số của hàm)
 	 */
-	public FunctionCallExpression(String name, Expression... argument) {
-		super(argument);
-		mName = name;
+	public FunctionCallExpression(Expression name, Expression... argument) {
+		g = new Expression[argument.length + 1];
+		g[0] = name;
+		System.arraycopy(argument, 0, g, 1, argument.length);
+		
+		if (name instanceof NameExpression)
+			((NameExpression) name).setRole(NameExpression.ROLE_FUNCTION);
 	}
 	
 	@Override
@@ -41,13 +44,6 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 		for (int i = 1; i < g.length; i++)
 			args += "," + g[i].getContent();
 		return String.format("%s(%s)", getName(), args);
-	}
-	
-	/**
-	 * Trả về tên hàm của lời gọi hàm
-	 */
-	public String getName(){
-		return mName;
 	}
 	
 	/**
@@ -88,6 +84,11 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 		if (mFunc != null)
 			return mFunc.getReturnType();
 		return null;
+	}
+
+	@Override
+	public Expression getNameExpression() {
+		return g[0];
 	}
 	
 	
