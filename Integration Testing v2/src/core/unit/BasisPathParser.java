@@ -280,7 +280,7 @@ public class BasisPathParser {
 						indexs[i] = tables.evalExpression(indexes[i]);
 					
 					addArrayAccess(new ArrayIndexExpression(
-							array.getName(), 
+							array.getNameExpression(), 
 							indexs));
 				}
 					

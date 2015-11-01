@@ -104,6 +104,8 @@ public class VariableTable extends ArrayList<Variable> {
 			@Override
 			// Đang duyệt qua một tên biến, thay thế bằng giá trị của nó
 			public int visit(NameExpression name) {
+				if (name.getRole() != NameExpression.ROLE_NORMAL)
+					return PROCESS_CONTINUE;
 				Variable find = find(name.getName());
 				
 				if (find instanceof ArrayVariable){

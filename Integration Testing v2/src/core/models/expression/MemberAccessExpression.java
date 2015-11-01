@@ -27,6 +27,9 @@ public class MemberAccessExpression extends ExpressionGroup implements NamedAttr
 	public MemberAccessExpression(Expression parent, String member, boolean dot) {
 		super(parent);
 		mMember = member;
+		
+		if (parent instanceof NameExpression)
+			((NameExpression) parent).setRole(NameExpression.ROLE_OBJECT);
 	}
 	
 	@Override
@@ -49,14 +52,6 @@ public class MemberAccessExpression extends ExpressionGroup implements NamedAttr
 	}
 	
 	@Override
-	/**
-	 * Trả về chuối hiển thị của đối tượng trong biểu thức
-	 */
-	public String getName() {
-		return g[0].getContent();
-	}
-	
-	@Override
 	public Type getType() {
 		return mType;
 	}
@@ -66,6 +61,11 @@ public class MemberAccessExpression extends ExpressionGroup implements NamedAttr
 		mType = type;
 		if (isCloneExpression())
 			((NameExpression)getSource()).setType(type);
+	}
+
+	@Override
+	public Expression getNameExpression() {
+		return g[0];
 	}
 
 }

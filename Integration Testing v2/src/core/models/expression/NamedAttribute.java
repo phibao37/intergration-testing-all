@@ -1,18 +1,26 @@
 package core.models.expression;
 
+import core.models.Expression;
 import core.models.Type;
 
 /**
- * Mô phỏng các biểu thức có chứa tên
+ * Mô phỏng các biểu thức có chứa phần tên
  * @author ducvu
  *
  */
 public interface NamedAttribute {
 	
 	/**
-	 * Trả về thuộc tính tên của biểu thức
+	 * Trả về chuỗi hiển thị tên của biểu thức
 	 */
-	public String getName();
+	public default String getName(){
+		return getNameExpression().getContent();
+	}
+	
+	/**
+	 * Trả về biểu thức tương ứng tên của biểu thức
+	 */
+	public Expression getNameExpression();
 	
 	/**
 	 * Gán kiểu của dữ liệu đươc liên kết với biểu thức

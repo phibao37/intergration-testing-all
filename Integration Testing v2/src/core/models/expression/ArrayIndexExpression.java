@@ -17,7 +17,6 @@ import core.models.Type;
  */
 public class ArrayIndexExpression extends ExpressionGroup implements NamedAttribute {
 	
-	private String mName;
 	private boolean mDeclare;
 	private Type mType;
 	
@@ -29,9 +28,13 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	 * Đối với chỉ số rỗng trong khai báo (thí dụ <code>int a[][3]<code>) ta truyền null
 	 * vào vị trí rỗng đó (thí dụ <code>new ArrayExpression(a, [null, 3])</code>) 
 	 */
-	public ArrayIndexExpression(String arrayName, Expression... index){
-		super(index);
-		mName = arrayName;
+	public ArrayIndexExpression(Expression arrayName, Expression... index){
+		g = new Expression[index.length + 1];
+		g[0] = arrayName;
+		System.arraycopy(index, 0, g, 1, index.length);
+		
+		if (arrayName instanceof NameExpression)
+			((NameExpression) arrayName).setRole(NameExpression.ROLE_ARRAY);
 	}
 	
 	/**
@@ -40,9 +43,8 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	 * @param index danh sách các chỉ số nguyên theo thứ tự từ ngoài vào trong, 
 	 * xác định vị trí phần tử trong mảng
 	 */
-	public ArrayIndexExpression(String arrayName, int... index){
-		super(int2exp(index));
-		mName = arrayName;
+	public ArrayIndexExpression(Expression arrayName, int... index){
+		this(arrayName, int2exp(index));
 	}
 	
 	@Override
@@ -51,14 +53,6 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 		for (Expression ep: g)
 			content += "[" + ep + "]";
 		return content;
-	}
-
-	/**
-	 * Trả về tên của biến mảng đang tham chiếu
-	 */
-	@Override
-	public String getName() {
-		return mName;
 	}
 	
 	/**
@@ -84,8 +78,6 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	public boolean isDeclare(){
 		return mDeclare;
 	}
-	
-	
 	
 	@Override
 	public boolean isConstant() {
@@ -113,5 +105,10 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	@Override
 	public Type getType() {
 		return mType;
+	}
+
+	@Override
+	public Expression getNameExpression() {
+		return g[0];
 	}
 }
