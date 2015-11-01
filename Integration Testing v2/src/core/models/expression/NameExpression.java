@@ -11,7 +11,23 @@ import core.models.Type;
  */
 public class NameExpression extends Expression implements NamedAttribute {
 	
+	/**
+	 * Vai trò bình thường, tham chiếu đến các biến
+	 */
+	public static final int ROLE_NORMAL = 0;
+	
+	/**
+	 * Tham gia vai trò tên biến mảng trong một biểu thức truy cập phần tử mảng
+	 */
+	public static final int ROLE_ARRAY = 1;
+	
+	/**
+	 * Tham gia vai trò tên hàm trong biểu thức gọi hàm
+	 */
+	public static final int ROLE_FUNCTION = 2;
+	
 	private Type mType;
+	private int mRole = ROLE_NORMAL;
 	
 	/**
 	 * Tạo một biểu thức tên mới
@@ -44,6 +60,20 @@ public class NameExpression extends Expression implements NamedAttribute {
 	@Override
 	public Type getType() {
 		return mType;
+	}
+
+	/**
+	 * Trả về vai trò của biểu thức tên đối với biểu thức cha của nó
+	 */
+	public int getRole() {
+		return mRole;
+	}
+	
+	/**
+	 * Gán vai trò của biểu thức tên trong biểu thức cha của nó
+	 */
+	public void setRole(int role) {
+		mRole = role;
 	}
 
 }

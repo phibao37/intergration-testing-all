@@ -217,7 +217,7 @@ public class Function extends Element implements Graphable {
 	    }
 		
 		return String.format("%s %s(%s)", 
-				mType.getHTMLContent(), 
+				mType == null ? "??" : mType.getHTMLContent(), 
 				getName(), 
 				b);
 	}

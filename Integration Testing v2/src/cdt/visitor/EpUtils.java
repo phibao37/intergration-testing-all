@@ -14,6 +14,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
+import org.eclipse.cdt.core.dom.ast.IASTFieldReference;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTInitializer;
@@ -36,6 +37,7 @@ import core.models.expression.BinaryExpression;
 import core.models.expression.DeclareExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.MemberAccessExpression;
 import core.models.expression.NameExpression;
 import core.models.expression.ReturnExpression;
 import core.models.expression.UnaryExpression;
@@ -198,6 +200,13 @@ public class EpUtils {
 		if (node instanceof IASTReturnStatement){
 			Expression rt = parseNode(((IASTReturnStatement) node).getReturnValue());
 			return new ReturnExpression(rt);
+		}
+		
+		if (node instanceof IASTFieldReference){
+			IASTFieldReference field = (IASTFieldReference) node;
+			Expression object = parseNode(field.getFieldOwner());
+			return new MemberAccessExpression(object, 
+					field.getFieldName().getRawSignature(), !field.isPointerDereference());
 		}
 		
 		if (node instanceof IASTExpressionStatement){

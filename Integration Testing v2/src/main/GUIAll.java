@@ -695,7 +695,7 @@ public class GUIAll extends GUI {
 			gbc_lblMinarr.gridy = i+1;
 			panel_stub_content.add(lbl_fn_name, gbc_lblMinarr);
 			
-			JLabel lbl_fn_type = new JLabel(f.getReturnType().getContent());
+			JLabel lbl_fn_type = new JLabel(f.getReturnType()+"");
 			GridBagConstraints gbl_lbl_fn_type = new GridBagConstraints();
 			gbl_lbl_fn_type.insets = new Insets(0, 0, 5, 5);
 			gbl_lbl_fn_type.gridx = 2;
