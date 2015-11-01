@@ -61,7 +61,9 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	 * 	Đây là tham chiếu trực tiếp, không nên chỉnh sửa các phần tử trong tập này
 	 */
 	public Expression[] getIndexes(){
-		return g;
+		Expression[] indexs = new Expression[g.length - 1];
+		System.arraycopy(g, 1, indexs, 0, indexs.length);
+		return indexs;
 	}
 	
 	/**

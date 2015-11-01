@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Name;
@@ -36,6 +37,7 @@ import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
 import core.models.expression.DeclareExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.MemberAccessExpression;
 import core.models.expression.NameExpression;
 
 public class JEpUtil {
@@ -225,6 +227,14 @@ public class JEpUtil {
 			return new core.models.expression.ReturnExpression(
 					parseNode(x.getExpression())
 			);
+		}
+		
+		else if (node instanceof FieldAccess){
+			FieldAccess x = (FieldAccess) node;
+			return new MemberAccessExpression(
+					parseNode(x.getExpression()), 
+					x.getName().getIdentifier(), 
+					true);
 		}
 		
 		if (node != null){
