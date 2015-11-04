@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import core.graph.Graphable;
 import core.models.type.ArrayType;
+import core.models.type.ObjectType;
 
 /**
  * Mô tả kiểu của các biến số trong các ngôn ngữ
@@ -51,6 +52,13 @@ public abstract class Type extends Element implements Graphable, Comparable<Type
 	}
 	
 	/**
+	 * Kiểm tra kiểu cấu trúc
+	 */
+	public boolean isObjectType(){
+		return this instanceof ObjectType;
+	}
+	
+	/**
 	 * Thêm cờ hiệu tham số cho kiểu
 	 */
 	protected void addModifier(Modifier mod){
@@ -64,6 +72,18 @@ public abstract class Type extends Element implements Graphable, Comparable<Type
 	 */
 	public ArrayList<Modifier> getModifiers(){
 		return mModifiers;
+	}
+	
+	/**
+	 * Kiểm tra kiểu có chứa cờ hiệu hay không
+	 */
+	public boolean hasModifier(Modifier modifier){
+		if (mModifiers == null)
+			return false;
+		for (Modifier mdf: mModifiers)
+			if (mdf.equals(modifier))
+				return true;
+		return false;
 	}
 	
 	/**
@@ -108,6 +128,13 @@ public abstract class Type extends Element implements Graphable, Comparable<Type
 		 * hay không?
 		 */
 		public abstract boolean makeValueChangeable();
+		
+		/**
+		 * Cờ hiệu hằng số cho các kiểu dữ liệu
+		 */
+		public static final Modifier FINAL_MODIFIER = new Modifier("const") {
+			public boolean makeValueChangeable() { return false; }
+		};
 		
 	}
 

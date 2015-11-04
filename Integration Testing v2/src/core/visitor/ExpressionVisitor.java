@@ -8,7 +8,9 @@ import core.models.expression.BinaryExpression;
 import core.models.expression.DeclareExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.MemberAccessExpression;
 import core.models.expression.NameExpression;
+import core.models.expression.ObjectExpression;
 import core.models.expression.PlaceHolderExpression;
 import core.models.expression.UnaryExpression;
 
@@ -88,6 +90,14 @@ public abstract class ExpressionVisitor {
 		return PROCESS_CONTINUE;
 	}
 	
+	public int visit(ObjectExpression object){
+		return PROCESS_CONTINUE;
+	}
+	
+	public int visit(MemberAccessExpression member){
+		return PROCESS_CONTINUE;
+	}
+	
 	public void leave(NameExpression name){}
 	
 	public void leave(FunctionCallExpression call){}
@@ -105,6 +115,10 @@ public abstract class ExpressionVisitor {
 	public void leave(IDExpression id){}
 	
 	public void leave(PlaceHolderExpression place){}
+	
+	public void leave(ObjectExpression object) {}
+	
+	public void leave(MemberAccessExpression member) {}
 	
 	/**
 	 * Được gọi khi đang duyệt qua các câu lệnh trong hàm số

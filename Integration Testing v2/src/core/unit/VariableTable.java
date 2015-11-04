@@ -2,13 +2,16 @@ package core.unit;
 
 import java.util.ArrayList;
 
+import core.error.CoreException;
 import core.eval.Evaluateable;
 import core.eval.SimpleEval;
 import core.models.ArrayVariable;
 import core.models.Expression;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
+import core.models.expression.MemberAccessExpression;
 import core.models.expression.NameExpression;
+import core.models.expression.ObjectExpression;
 import core.models.expression.PlaceHolderExpression;
 import core.visitor.ExpressionVisitor;
 
@@ -60,9 +63,10 @@ public class VariableTable extends ArrayList<Variable> {
 	 * Cập nhật giá trị mới cho biến số
 	 * @param name tên của biến số
 	 * @param value giá trị mới cần cập nhật
-	 * @throws NullPointerException - tên biến không tồn tại
+	 * @throws NullPointerException tên biến không tồn tại
 	 */
-	public void updateVariableValue(String name, Expression value){
+	public void updateVariableValue(String name, Expression value)
+			throws NullPointerException{
 		//System.out.printf("Gan %s = %s", name, value);
 		value = fillExpression(value);
 		//System.out.printf(" --> %s\n\n", value);
@@ -74,9 +78,10 @@ public class VariableTable extends ArrayList<Variable> {
 	 * @param name tên biến mảng
 	 * @param indexs danh sách các biểu thức chỉ số xác định vị trí phần tử cần câp nhật
 	 * @param value giá trị mới cho phần tử mảng
-	 * @throws NullPointerException - tên biến không tồn tại
+	 * @throws NullPointerException tên biến không tồn tại
 	 */
-	public void updateArrayValue(String name, Expression[] indexs, Expression value){
+	public void updateArrayValue(String name, Expression[] indexs, Expression value)
+			throws NullPointerException{
 		value = fillExpression(value);
 		Expression[] newIndexs = new Expression[indexs.length];
 		
@@ -84,6 +89,31 @@ public class VariableTable extends ArrayList<Variable> {
 			newIndexs[i] = evalExpression(indexs[i]);
 		
 		((ArrayVariable)find(name)).setValueAt(value, newIndexs);
+	}
+	
+	/**
+	 * Cập nhật giá trị mới cho thuộc tính của biến đối tượng
+	 * @param member biểu thức truy cập thuộc tính, hỗ trợ:
+	 * <ul>
+	 * 	<li>Kiểu thường: a.age</li>
+	 * 	<li>TODO: Kiểu mảng: a[0].age, sẽ hỗ trợ</li>
+	 * </ul>
+	 * @param value giá trị mới cho thuộc tính
+	 * @throws NullPointerException tên biến không tồn tại
+	 * @throws CoreException các lỗi liên quan đến core logic
+	 */
+	public void updateMemberValue(MemberAccessExpression member, Expression value)
+			throws NullPointerException, CoreException{
+		//System.out.printf("Update member %s with %s", member, value);
+		value = fillExpression(value);
+		//System.out.println(" => " + value);
+		
+		//Normal Access
+		Variable v = find(member.getName());
+		v.initValueIfNotSet();
+		v.object().setMember(member.getMemberName(), value);
+		
+		//Array Access...
 	}
 	
 
@@ -152,6 +182,31 @@ public class VariableTable extends ArrayList<Variable> {
 				}
 				return PROCESS_CONTINUE;
 			}
+
+			@Override
+			//Đang duyệt qua một truy cập thuộc tính của đối tượng
+			public int visit(MemberAccessExpression member) {
+				Variable find = find(member.getName());
+				String name = member.getMemberName();
+				
+				if (find != null){
+					find.initValueIfNotSet();
+					ObjectExpression object = find.object();
+					member.setType(object.getMemberType(name));
+					if (object.isMemberSet(name)){
+						Expression clone = object.getMember(name)
+								.clone()
+								.setBlockReplace(true);
+						justReplaces.add(clone);
+						copy.replace(member, clone);
+					}
+				} else {
+					System.out.println("Not found: " + member);
+				}
+				return PROCESS_CONTINUE;
+			}
+			
+			
 
 		});
 		

@@ -15,6 +15,7 @@ import core.models.expression.Conditionable;
 import core.models.expression.DeclareExpression;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.MemberAccessExpression;
 import core.models.expression.NameExpression;
 import core.models.expression.NamedAttribute;
 import core.models.expression.PlaceHolderExpression;
@@ -386,7 +387,7 @@ public class BasisPathParser {
 			value = new BinaryExpression(name, op.substring(0, 1), value);
 		}
 		
-		//Không có truy cập phần tử mảng
+		//Gán biến thường
 		if (name instanceof NameExpression){
 			boolean shouldReplace = true;
 			String s_name = ((NameExpression) name).getName();
@@ -406,6 +407,16 @@ public class BasisPathParser {
 			
 			if (shouldReplace)
 				tables.updateVariableValue(s_name, value);
+		}
+		
+		//Gán thuộc tính đối tượng
+		else if (name instanceof MemberAccessExpression){
+			try {
+				tables.updateMemberValue((MemberAccessExpression) name, value);
+			} catch (CoreException e) {
+				e.printStackTrace();
+				mError = e;
+			}
 		}
 		
 		//Có truy cập vào phần tử mảng

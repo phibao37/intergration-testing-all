@@ -1,8 +1,6 @@
 package core.models.type;
 
 import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-
 import core.models.Expression;
 import core.models.Type;
 import core.models.expression.ObjectExpression;
@@ -40,15 +38,15 @@ public class ObjectType extends Type {
 	@Override
 	public Expression getDefaultValue() {
 		Expression[] datas = new Expression[mSchema.size()];
-		int i = 0;
-		
-		for (Entry<String, Type> entry: mSchema.entrySet()){
-			Type t = entry.getValue();
-			
-			//Ngăn chặn việc cấp phát không dừng lại
-			if (t != this)
-				datas[i] = t.getDefaultValue();
-		}
+//		int i = 0;
+//		
+//		for (Entry<String, Type> entry: mSchema.entrySet()){
+//			Type t = entry.getValue();
+//			
+//			//Ngăn chặn việc cấp phát không dừng lại
+//			if (t != this)
+//				datas[i] = t.getDefaultValue();
+//		}
 		
 		return new ObjectExpression(this, datas);
 	}
