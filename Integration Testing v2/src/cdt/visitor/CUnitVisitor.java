@@ -2,12 +2,14 @@ package cdt.visitor;
 
 import cdt.models.CFunction;
 import cdt.models.CType;
+import core.MainProcess;
 import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Function;
 import core.models.Type;
 import core.models.Variable;
 import core.models.type.ArrayType;
+import core.models.type.ObjectType;
 import core.visitor.UnitVisitor;
 
 import org.eclipse.cdt.core.dom.ast.*;
@@ -21,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -38,62 +41,94 @@ public class CUnitVisitor implements UnitVisitor {
 		mVariables.clear();
 		
 		IASTTranslationUnit u = getIASTTranslationUnit(file);
+		ArrayList<ObjectType> objectType = MainProcess.instance.getDeclaredTypes();
 		
 		u.accept(new ASTVisitor() {
-			{  shouldVisitDeclarations = true; }
 			
-			/** Duyệt các khai báo trong chương trình*/
-			@Override
-			public int visit(IASTDeclaration declaration) {
+{  shouldVisitDeclarations = true; }
+
+/** Duyệt các khai báo trong chương trình*/
+@Override
+public int visit(IASTDeclaration declaration) {
+	
+	//Duyệt các khai báo biến đơn giản
+	if (declaration instanceof IASTSimpleDeclaration){
+		IASTSimpleDeclaration declare = (IASTSimpleDeclaration) declaration;
+		IASTDeclSpecifier spec = declare.getDeclSpecifier();
+		
+		/* 
+		 * Duyệt các khai báo đơn giản, bỏ qua khai báo struct, và
+		 * không chứa extern, typedef
+		 */
+		if (spec instanceof IASTSimpleDeclSpecifier &&
+				spec.getStorageClass() == IASTDeclSpecifier.sc_unspecified
+			){
+			mVariables.addAll(parseVariableDeclaration(declare));
+		}
+		
+		/*
+		 * Duyệt qua các khai báo struct 
+		 */
+		else if (spec instanceof IASTCompositeTypeSpecifier){
+			IASTCompositeTypeSpecifier comp = (IASTCompositeTypeSpecifier) spec;
+			if (comp.getKey() == IASTCompositeTypeSpecifier.k_struct){
+				LinkedHashMap<String, Type> schema = new LinkedHashMap<>();
+				String name = comp.getName().toString();
 				
-				//Duyệt các khai báo biến đơn giản
-				if (declaration instanceof IASTSimpleDeclaration){
-					IASTSimpleDeclaration declare = (IASTSimpleDeclaration) declaration;
-					IASTDeclSpecifier spec = declare.getDeclSpecifier();
+				//Thêm các khai báo thuộc tính thành phần
+				for (IASTDeclaration member: comp.getMembers()){
+					IASTSimpleDeclaration sd = (IASTSimpleDeclaration) member;
+					Type type = CType.parse(sd.getDeclSpecifier().getRawSignature());
 					
-					/* 
-					 * Duyệt các khai báo đơn giản, bỏ qua khai báo struct, và
-					 * không chứa extern, typedef
-					 */
-					if (spec instanceof IASTSimpleDeclSpecifier &&
-							spec.getStorageClass() == IASTDeclSpecifier.sc_unspecified
-						){
-						mVariables.addAll(parseVariableDeclaration(declare));
-					}
+					for (IASTDeclarator dc: sd.getDeclarators())
+						schema.put(dc.getName().toString(), type);
 				}
 				
-				//Duyệt các khai báo hàm
-				if (declaration instanceof IASTFunctionDefinition) {
-					IASTFunctionDefinition fnDefine = 
-							(IASTFunctionDefinition) declaration;
-					IASTFunctionDeclarator fnDeclare = fnDefine.getDeclarator();
-					
-					String type = fnDefine.getDeclSpecifier().getRawSignature();
-					String name = fnDeclare.getName().getRawSignature();
-					Variable[] para = null;
-					IASTStatement fnBody = fnDefine.getBody();
-					final Function fn;
-					
-					//Kiểu con trỏ, tham chiếu, làm sau
-					//for (IASTPointerOperator p: fnDeclare.getPointerOperators())
-						//type += p.getRawSignature();
-					
-					//Duyệt các khai báo hàm dạng chuẩn tắc
-					if (fnDeclare instanceof IASTStandardFunctionDeclarator){
-						IASTStandardFunctionDeclarator fDeclare = 
-							(IASTStandardFunctionDeclarator) fnDeclare;
-						IASTParameterDeclaration[] fnPara = fDeclare.getParameters();
-						para = new Variable[fnPara.length];
-						for (int i = 0; i < fnPara.length; i++)
-							para[i] = parseParameter(fnPara[i]);
-					}
-					
-					fn = new CFunction(name, para, fnBody, CType.parse(type));
-					fn.setSourceFile(file);
-					mFunctions.add(fn);
-				}
-				return PROCESS_SKIP;
+				//if: Phòng trường hợp khai báo anonymous
+				if (!name.isEmpty())
+					objectType.add(new ObjectType(name, schema));
+				
+				//Có từ khóa typedef, thêm các tên được định nghĩa
+				if (comp.getStorageClass() == IASTDeclSpecifier.sc_typedef){
+					for (IASTDeclarator dc: declare.getDeclarators())
+						objectType.add(new ObjectType(dc.getName().toString(), schema));
+				} 
 			}
+		}
+	}
+	
+	//Duyệt các khai báo hàm
+	if (declaration instanceof IASTFunctionDefinition) {
+		IASTFunctionDefinition fnDefine = 
+				(IASTFunctionDefinition) declaration;
+		IASTFunctionDeclarator fnDeclare = fnDefine.getDeclarator();
+		
+		String type = fnDefine.getDeclSpecifier().getRawSignature();
+		String name = fnDeclare.getName().getRawSignature();
+		Variable[] para = null;
+		IASTStatement fnBody = fnDefine.getBody();
+		final Function fn;
+		
+		//Kiểu con trỏ, tham chiếu, làm sau
+		//for (IASTPointerOperator p: fnDeclare.getPointerOperators())
+			//type += p.getRawSignature();
+		
+		//Duyệt các khai báo hàm dạng chuẩn tắc
+		if (fnDeclare instanceof IASTStandardFunctionDeclarator){
+			IASTStandardFunctionDeclarator fDeclare = 
+				(IASTStandardFunctionDeclarator) fnDeclare;
+			IASTParameterDeclaration[] fnPara = fDeclare.getParameters();
+			para = new Variable[fnPara.length];
+			for (int i = 0; i < fnPara.length; i++)
+				para[i] = parseParameter(fnPara[i]);
+		}
+		
+		fn = new CFunction(name, para, fnBody, CType.parse(type));
+		fn.setSourceFile(file);
+		mFunctions.add(fn);
+	}
+	return PROCESS_SKIP;
+}
 		});
 		
 		return this;

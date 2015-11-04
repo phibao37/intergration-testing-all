@@ -2,6 +2,8 @@ package cdt.models;
 
 import java.util.HashMap;
 
+import core.MainProcess;
+import core.models.Type;
 import core.models.type.BasicType;
 
 /**
@@ -25,11 +27,21 @@ public class CType {
 	}
 	
 	/**
-	 * Lây đối tượng kiểu cơ bản trong C
+	 * Lây đối tượng kiểu trong C
 	 * @param content chuỗi nội dung của kiểu
-	 * @return kiểu cơ bản ứng với nội dung
+	 * @return kiểu ứng với nội dung
 	 */
-	public static BasicType parse(String content){
-		return typeMap.get(content);
+	public static Type parse(String content){
+		Type type = typeMap.get(content);
+		
+		//Không phải kiểu cơ bản, duyệt trong các kiểu cấu trúc
+		if (type == null){
+			for (Type t: MainProcess.instance.getDeclaredTypes())
+				if (t.getContent().equals(content)){
+					type = t;
+					break;
+				}
+		}
+		return type;
 	}
 }
