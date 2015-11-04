@@ -6,9 +6,13 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
 import core.Utils;
+import core.models.Type.Modifier;
 import core.models.expression.ArrayExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.ObjectExpression;
 import core.models.type.ArrayType;
+import core.models.type.BasicType;
+import core.models.type.ObjectType;
 
 /**
  * Mô tả kiểu biến mảng
@@ -17,8 +21,8 @@ import core.models.type.ArrayType;
  */
 public class ArrayVariable extends Variable {
 	
-	//private ArrayExpression mData;
 	private HashMap<ArrayList<Expression>, Expression> mMapData = new HashMap<>();
+	private ObjectExpression mObject;
 	
 	/**
 	 * Tạo một biến mảng với tên và kiểu biến
@@ -208,6 +212,30 @@ public class ArrayVariable extends Variable {
 			}
 		}
 		return value;
+	}
+	
+	private static ObjectType ARRAY_LENGTH_TYPE;
+	
+	/**
+	 * Kích hoạt chế độ đối tượng cho biến mảng, biến sẽ có thêm thuộc tính "length"
+	 * tương ứng với kích thước của mảng
+	 */
+	public void setSupportObject(){
+		if (ARRAY_LENGTH_TYPE == null){
+			LinkedHashMap<String, Type> schema = new LinkedHashMap<>();
+			Type finalInt = (Type) BasicType.INT.clone();
+			
+			finalInt.addModifier(Modifier.FINAL_MODIFIER);
+			schema.put("length", finalInt);
+			ARRAY_LENGTH_TYPE = new ObjectType(getType().getContent(), schema);
+		}
+		
+		mObject = new ObjectExpression(ARRAY_LENGTH_TYPE);
+	}
+
+	@Override
+	public ObjectExpression object(){
+		return mObject;
 	}
 
 	@Override

@@ -332,6 +332,13 @@ public class Z3 {
 		public String getType(){
 			return mType;
 		}
+		
+		/**
+		 * Trả về giá trị dạng chuỗi của hàm
+		 */
+		public String getValue(){
+			return mValue;
+		}
 
 		@Override
 		public String toString() {

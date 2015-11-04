@@ -5,7 +5,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import core.error.CoreException;
 import core.models.ArrayVariable;
 import core.models.Expression;
@@ -14,6 +13,7 @@ import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.MemberAccessExpression;
 import core.models.expression.UnaryExpression;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
@@ -34,6 +34,8 @@ public class Z3Solver extends Solver {
 	
 	private VariableTable mTable;
 	private Z3 z3 = new Z3();
+	private ArrayList<LinkMemberVariable> linkList = new ArrayList<>();
+	private boolean mSolveOk;
 	
 	/**
 	 * Bộ giải hệ theo Z3 mặc định
@@ -57,10 +59,12 @@ public class Z3Solver extends Solver {
 		mSolutionCode = Result.UNKNOWN;
 		mSolutionStr = RESULT_UNKNOWN;
 		mReturnValue = null;
+		mSolveOk = false;
+		linkList.clear();
 		
 		//Thêm các khai báo biến vào bảng biến
 		for (Variable testcase: testcases)
-			addVariable(testcase);
+			addVariable(testcase, true);
 		
 		//Thêm các ràng buộc của hệ
 		for (Expression constraint: constraints)
@@ -93,18 +97,24 @@ public class Z3Solver extends Solver {
 			
 			//Bỏ qua dòng cuối: đóng model)
 			z3.getLine();
+			mSolveOk = true;
 			
 			for (Variable var: nonResult){
-				Func func = toZ3Func(var, false);
-				
-				//Với các biến không được z3 giải, tạo khai báo hàm mặc định theo kiểu
-				func.setValueFromType();
-				z3.addFunction(func);
+				if (var.getType().isObjectType()){
+					var.initValueIfNotSet();
+				}
+				else{
+					Func func = toZ3Func(var, false);
+					
+					//Với các biến không được z3 giải, tạo khai báo mặc định theo kiểu
+					func.setValueFromType();
+					z3.addFunction(func);
+				}
 			}
 
-			for (Variable v: testcases)
+			for (Variable v: mTable)
 				//Rút gọn các biểu thức hàm trong z3 nếu không là biến mảng
-				if (!v.getType().isArrayType())
+				if (!v.getType().isArrayType() && !v.getType().isObjectType())
 					z3.addLine("simplify %s", v.getName());  			// (I)
 			
 			for (ArrayIndexExpression arr: array){
@@ -162,8 +172,8 @@ public class Z3Solver extends Solver {
 			
 			z3.execute();
 			
-			for (Variable v: testcases)
-				if (!v.getType().isArrayType()){
+			for (Variable v: mTable)
+				if (!v.getType().isArrayType() && !v.getType().isObjectType()){
 					String value = z3.getLine();						// (I)
 					String name = v.getName();
 					
@@ -188,6 +198,13 @@ public class Z3Solver extends Solver {
 			if (mReturnValue != null){
 				mReturnValue = str2Expression(z3.getLine());			//(IV)
 			}
+			
+			//Gán các giá trị dạng đối tượng
+			for (LinkMemberVariable var: linkList){
+				MemberAccessExpression member = var.getLinkedExpression();
+				mTable.updateMemberValue(member, var.getValue());
+			}
+			mTable.removeIf(t -> t instanceof LinkMemberVariable);
 			
 			//Đặt kết quả
 			mTestcase = new Variable[testcases.length];
@@ -307,12 +324,13 @@ public class Z3Solver extends Solver {
 	/**
 	 * Thêm một biến testcase vào để giải
 	 */
-	public Z3Solver addVariable(Variable var){
+	public Z3Solver addVariable(Variable var, boolean clone){
 		//Thêm bản sao vào bảng biến, vì sẽ được gán giá trị sau đó
-		mTable.add(var.clone());
+		mTable.add(clone ? var.clone() : var);
 		
 		//Thêm khai báo hàm vào z3 từ biến testcase
-		z3.addFunction(toZ3Func(var, true));
+		if (!(var.getType().isObjectType()))
+			z3.addFunction(toZ3Func(var, true));
 		return this;
 	}
 	
@@ -426,8 +444,61 @@ public class Z3Solver extends Solver {
 			return String.format("(%s %s)", array.getName(), params);
 		}
 		
+		//Biểu thức truy cập thuộc tính đối tượng, chuyển đổi sang biến trung gian
+		else if (ex instanceof MemberAccessExpression){
+			MemberAccessExpression member = (MemberAccessExpression) ex;
+			String name = null;
+			
+			//Tìm biểu thức trong danh sách hiện thời
+			for (LinkMemberVariable var: linkList)
+				if (var.getLinkedExpression().equals(member)){
+					name = var.getName();
+					break;
+				}
+			
+			//Không tìm thấy, tạo biến trung gian mới
+			if (name == null){
+				name = "___" + linkList.size() + "___";
+				Variable find = mTable.find(member.getName());
+				find.initValueIfNotSet();
+				LinkMemberVariable var = new LinkMemberVariable(name, 
+						find.object().getMemberType(member.getMemberName()), member);
+				
+				linkList.add(var);
+				if (mSolveOk){
+					Func func = toZ3Func(var, false);
+					func.setValueFromType();
+					z3.addFunction(func);
+					var.setValue(str2Expression(func.getValue()));
+				}
+				else
+					addVariable(var, false);
+				return name;
+			}
+		}
+		
 		//Kiểu bình thường (tên biến, giá trị hằng), trả về nội dung của biểu thức
 		return ex.getContent();
+	}
+	
+	/**
+	 * Biến trung gian, được liên kết đến một biểu thức truy cập thuộc tính
+	 */
+	private static class LinkMemberVariable extends Variable{
+
+		private MemberAccessExpression mLink;
+		
+		public LinkMemberVariable(String name, Type type, MemberAccessExpression link) {
+			super(name, type);
+			mLink = link;
+		}
+		
+		/**
+		 * Trả về biểu thức truy cập thuộc tính được liên kết đến
+		 */
+		public MemberAccessExpression getLinkedExpression(){
+			return mLink;
+		}
 	}
 	
 	private static HashMap<Type, String> smtMap = new HashMap<>();

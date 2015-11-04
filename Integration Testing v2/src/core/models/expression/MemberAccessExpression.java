@@ -27,6 +27,7 @@ public class MemberAccessExpression extends ExpressionGroup implements NamedAttr
 	public MemberAccessExpression(Expression parent, String member, boolean dot) {
 		super(parent);
 		mMember = member;
+		isDot = dot;
 		
 		if (parent instanceof NameExpression)
 			((NameExpression) parent).setRole(NameExpression.ROLE_OBJECT);
@@ -60,7 +61,7 @@ public class MemberAccessExpression extends ExpressionGroup implements NamedAttr
 	public void setType(Type type) {
 		mType = type;
 		if (isCloneExpression())
-			((NameExpression)getSource()).setType(type);
+			((NamedAttribute)getSource()).setType(type);
 	}
 
 	@Override

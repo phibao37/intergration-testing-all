@@ -10,6 +10,7 @@ import core.models.Statement;
 import core.models.Testcase;
 import core.models.expression.FunctionCallExpression;
 import core.models.expression.IDExpression;
+import core.models.type.ObjectType;
 import core.solver.Solver;
 import core.solver.Solver.Result;
 import core.unit.BasisPath;
@@ -38,6 +39,7 @@ public abstract class MainProcess implements FilenameFilter {
 	
 	private FunctionCallGraph mFunctions = new FunctionCallGraph();
 	//private ArrayList<Variable> mVariables = new ArrayList<>();
+	private ArrayList<ObjectType> mObjectTypes = new ArrayList<>(); 
 	
 	private UnitVisitor mUnitVisitor;
 	private BodyFunctionVisitor mBodyVisitor;
@@ -47,12 +49,22 @@ public abstract class MainProcess implements FilenameFilter {
 	private StubSuiteManager mStubMgr = new StubSuiteManager();
 	
 	/**
+	 * Đối tượng chương trình chính đang điểu khiển
+	 */
+	public static MainProcess instance;
+	
+	protected MainProcess(){
+		instance = this;
+	}
+	
+	/**
 	 * Nạp các hàm (và các biến toàn cục, ..) vào tiến trình
 	 * @throws IOException 
 	 */
 	public void loadFunctionFromFiles() throws IOException{
 		//Xóa dữ liệu cũ
 		mFunctions.clear();
+		mObjectTypes.clear();
 		//mVariables.clear();
 		
 		//Duyệt các tập tin đang làm việc, thêm các hàm và biến tìm được 
@@ -408,6 +420,23 @@ public abstract class MainProcess implements FilenameFilter {
 	 */
 	public boolean isEmptyFunction(){
 		return mFunctions.isEmpty();
+	}
+	
+	/**
+	 * Trả về danh sách các cấu trúc (struct/class) được định nghĩa trong chương trình
+	 */
+	public ArrayList<ObjectType> getDeclaredTypes(){
+		return mObjectTypes;
+	}
+	
+	/**
+	 * Thêm một kiểu cấu trúc được định nghĩa
+	 * @param type kiểu cấu trúc
+	 * @return đối tượng hiện thời
+	 */
+	public MainProcess addDeclaredType(ObjectType type){
+		mObjectTypes.add(type);
+		return this;
 	}
 	
 	/**

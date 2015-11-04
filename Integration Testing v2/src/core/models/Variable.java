@@ -1,6 +1,7 @@
 package core.models;
 
 import core.graph.Graphable;
+import core.models.expression.ObjectExpression;
 
 /**
  * Mô tả một biến số. Mỗi biến số tương đương với các biến trong chương trình, tồn tại
@@ -131,6 +132,25 @@ public class Variable extends ExpressionGroup implements Graphable {
 				getType().getHTMLContent(), 
 				getName(), 
 				isValueSet() ? " = " + getValue() : "");
+	}
+	
+	/**
+	 * Trả về biểu thức giá trị dạng đối tượng khi biến này là biến cấu trúc
+	 * hoặc trả về <i>null</i> nếu không đúng
+	 */
+	public ObjectExpression object() {
+		try{
+			return (ObjectExpression) getValue();
+		} catch (ClassCastException e){
+			return null;
+		}
+	}
+	
+	/**
+	 * Kiểm tra biến có chứa giá trị dạng đối tượng
+	 */
+	public boolean containObject(){
+		return object() != null;
 	}
 	
 }
