@@ -447,34 +447,30 @@ public class Z3Solver extends Solver {
 		//Biểu thức truy cập thuộc tính đối tượng, chuyển đổi sang biến trung gian
 		else if (ex instanceof MemberAccessExpression){
 			MemberAccessExpression member = (MemberAccessExpression) ex;
-			String name = null;
 			
 			//Tìm biểu thức trong danh sách hiện thời
 			for (LinkMemberVariable var: linkList)
-				if (var.getLinkedExpression().equals(member)){
-					name = var.getName();
-					break;
-				}
+				if (var.getLinkedExpression().equals(member))
+					return var.getName();
 			
 			//Không tìm thấy, tạo biến trung gian mới
-			if (name == null){
-				name = "___" + linkList.size() + "___";
-				Variable find = mTable.find(member.getName());
-				find.initValueIfNotSet();
-				LinkMemberVariable var = new LinkMemberVariable(name, 
-						find.object().getMemberType(member.getMemberName()), member);
-				
-				linkList.add(var);
-				if (mSolveOk){
-					Func func = toZ3Func(var, false);
-					func.setValueFromType();
-					z3.addFunction(func);
-					var.setValue(str2Expression(func.getValue()));
-				}
-				else
-					addVariable(var, false);
-				return name;
+			String name = "___" + linkList.size() + "___";
+			Variable find = mTable.find(member.getName());
+			find.initValueIfNotSet();
+			LinkMemberVariable var = new LinkMemberVariable(name, 
+					find.object().getMemberType(member.getMemberName()), member);
+			
+			linkList.add(var);
+			if (mSolveOk){
+				Func func = toZ3Func(var, false);
+				func.setValueFromType();
+				z3.addFunction(func);
+				var.setValue(str2Expression(func.getValue()));
 			}
+			else
+				addVariable(var, false);
+			return name;
+			
 		}
 		
 		//Kiểu bình thường (tên biến, giá trị hằng), trả về nội dung của biểu thức
