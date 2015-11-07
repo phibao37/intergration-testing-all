@@ -108,9 +108,10 @@ public class Variable extends ExpressionGroup implements Graphable {
 	/**
 	 * Thiết đặt giá trị cho biến nếu như nó chưa có giá trị
 	 */
-	public void initValueIfNotSet(){
+	public Variable initValueIfNotSet(){
 		if (!isValueSet())
 			setValue(getType().getDefaultValue());
+		return this;
 	}
 
 	@Override

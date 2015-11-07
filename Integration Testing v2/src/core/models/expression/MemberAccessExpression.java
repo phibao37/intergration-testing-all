@@ -45,6 +45,14 @@ public class MemberAccessExpression extends ExpressionGroup implements NamedAttr
 		return isDot;
 	}
 	
+	@Override
+	/**
+	 * Trả về tên tham chiếu đến đối tượng trong biểu thức
+	 */
+	public String getName() {
+		return NamedAttribute.super.getName();
+	}
+
 	/**
 	 * Trả về tên của thuộc tính
 	 */
