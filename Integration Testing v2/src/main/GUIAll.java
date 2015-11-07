@@ -609,9 +609,11 @@ public class GUIAll extends GUI {
 			
 			for (Variable testcase: r.getSolution()){
 				if (testcase instanceof ArrayVariable){
+					String s = testcase.hasDifferObject() ? 
+							testcase.object().getContent() : "{}";
 					testcaseModel.addRow(new Object[]{
 							testcase.getType(),
-							testcase.getName(), "{}", "{}"
+							testcase.getName(), s, s
 					});
 				
 					Map<int[], Expression> 

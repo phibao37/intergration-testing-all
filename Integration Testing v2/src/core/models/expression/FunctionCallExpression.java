@@ -36,12 +36,12 @@ public class FunctionCallExpression extends ExpressionGroup implements NamedAttr
 	
 	@Override
 	protected String generateContent() {
-		if (g == null || g.length == 0){
+		if (g.length == 1){
 			return getName() + "()";
 		}
 		
-		String args = g[0].getContent();
-		for (int i = 1; i < g.length; i++)
+		String args = g[1].getContent();
+		for (int i = 2; i < g.length; i++)
 			args += "," + g[i].getContent();
 		return String.format("%s(%s)", getName(), args);
 	}

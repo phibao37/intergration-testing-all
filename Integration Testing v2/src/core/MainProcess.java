@@ -48,6 +48,8 @@ public abstract class MainProcess implements FilenameFilter {
 	private IntegrationPathParser mIntePathParser = IntegrationPathParser.DEFAULT;
 	private StubSuiteManager mStubMgr = new StubSuiteManager();
 	
+	private boolean mSupportLengthArray;
+	
 	/**
 	 * Đối tượng chương trình chính đang điểu khiển
 	 */
@@ -469,6 +471,20 @@ public abstract class MainProcess implements FilenameFilter {
 		GUI.instance.setStatus(2, "Đã thêm bộ stub \"%s\" thành công", s.getName());
 	}
 	
+	/**
+	 * Kiểm tra process có hỗ trợ thuộc tính "length" của biến mảng
+	 */
+	public boolean isSupportLengthArray() {
+		return mSupportLengthArray;
+	}
+
+	/**
+	 * Đặt sự hỗ trợ thuộc tính "length" của biến mảng
+	 */
+	public void setSupportLengthArray(boolean support) {
+		this.mSupportLengthArray = support;
+	}
+
 	/**
 	 * Thread dùng để chạy các công việc cần xử lý
 	 * @param <R> listener cho kết quả

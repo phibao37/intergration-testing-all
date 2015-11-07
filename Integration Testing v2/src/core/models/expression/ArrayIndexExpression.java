@@ -49,9 +49,9 @@ public class ArrayIndexExpression extends ExpressionGroup implements NamedAttrib
 	
 	@Override
 	protected String generateContent() {
-		String content = getName();
-		for (Expression ep: g)
-			content += "[" + ep + "]";
+		String content = g[0].getContent();
+		for (int i = 1; i < g.length; i++)
+			content += "[" + g[i] + "]";
 		return content;
 	}
 	

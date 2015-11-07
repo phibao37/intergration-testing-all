@@ -148,6 +148,15 @@ public class Variable extends ExpressionGroup implements Graphable {
 	}
 	
 	/**
+	 * Kiểm tra biểu thức đối tượng có tồn tại trong biến và khác với biểu thức giá trị
+	 */
+	public boolean hasDifferObject(){
+		ObjectExpression object = object();
+		
+		return object != null && object != getValue();
+	}
+	
+	/**
 	 * Kiểm tra biến có chứa giá trị dạng đối tượng
 	 */
 	public boolean containObject(){
