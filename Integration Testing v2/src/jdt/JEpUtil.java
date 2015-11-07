@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -131,6 +132,13 @@ public class JEpUtil {
 			core.models.Expression rightElement = parseNode(exp.getRightOperand());
 			return new BinaryExpression(leftElement, operator, rightElement);
 		}
+		else if (node instanceof QualifiedName){
+			QualifiedName x = (QualifiedName) node;
+			return new MemberAccessExpression(
+					new NameExpression(x.getQualifier().toString()), 
+					x.getName().getIdentifier(), 
+					true);
+		}
 		else if(node instanceof Name){
 			return new NameExpression(node.toString());
 		}
@@ -235,7 +243,7 @@ public class JEpUtil {
 					parseNode(x.getExpression()), 
 					x.getName().getIdentifier(), 
 					true);
-		}
+		} 
 		
 		if (node != null){
 			System.out.printf("Chua xu ly den: %s - %s\n", node, node.getClass());

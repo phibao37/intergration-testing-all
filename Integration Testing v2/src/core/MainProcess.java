@@ -36,6 +36,8 @@ public abstract class MainProcess implements FilenameFilter {
 	
 	private BasisPathParser mUnitPathParser = BasisPathParser.DEFAULT;
 	
+	private boolean mSupportLengthArray;
+	
 	/**
 	 * Đối tượng chương trình chính đang điểu khiển
 	 */
@@ -265,6 +267,20 @@ public abstract class MainProcess implements FilenameFilter {
 //		return mVariables;
 //	}
 	
+	/**
+	 * Kiểm tra process có hỗ trợ thuộc tính "length" của biến mảng
+	 */
+	public boolean isSupportLengthArray() {
+		return mSupportLengthArray;
+	}
+
+	/**
+	 * Đặt sự hỗ trợ thuộc tính "length" của biến mảng
+	 */
+	public void setSupportLengthArray(boolean support) {
+		this.mSupportLengthArray = support;
+	}
+
 	/**
 	 * Thread dùng để chạy các công việc cần xử lý
 	 * @param <R> listener cho kết quả

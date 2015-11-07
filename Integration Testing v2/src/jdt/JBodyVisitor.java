@@ -441,7 +441,7 @@ class JStatement extends Statement{
 //		try {
 //			System.out.printf("\n%s => %s\n", this, getRoot().getClass());
 //			getRoot().printTree("  -");
-//		} catch (StatementNoRootException e) {
+//		} catch (Exception e) {
 //			System.out.printf("\n%s\n => No root\n", this);
 //		}
 	}

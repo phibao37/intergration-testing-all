@@ -9,6 +9,7 @@ public class JMainProcess extends MainProcess {
 	public JMainProcess() {
 		setUnitVisitor(new JUnitVisitor());
 		setBodyVisitor(new JBodyVisitor());
+		setSupportLengthArray(true);
 	}
 	
 	@Override
