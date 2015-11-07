@@ -16,3 +16,8 @@ Các nền tảng hỗ trợ
   * Vào ứng dụng đã khởi chạy và chọn mục *Cài đặt/Giải hệ ràng buộc/Bộ giải Z3/Đường dẫn* và mở hộp thoại lựa chọn tập tin thực thi `z3.exe`, sau đó chọn *OK* để lưu lại cài đặt
 
 ##Sử dụng (later)
+
+##Bản quyền mã nguồn
+- Tác giả: [Sầm Đức Vũ](https://github.com/duonganh2812), [Dương Tuấn Anh](https://github.com/duonganh2812)
+- Giáo viên hướng dẫn: [TS. Phạm Ngọc Hùng](http://uet.vnu.edu.vn/~hungpn/)
+- Trường: [Đại học Công Nghệ - Đại học Quốc Gia Hà Nội](http://uet.vnu.edu.vn)
