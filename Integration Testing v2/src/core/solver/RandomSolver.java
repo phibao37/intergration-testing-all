@@ -8,11 +8,14 @@ import core.error.CoreException;
 import core.eval.SimpleEval;
 import core.models.ArrayVariable;
 import core.models.Expression;
+import core.models.Type;
 import core.models.Variable;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.IDExpression;
+import core.models.expression.MemberAccessExpression;
 import core.models.expression.NameExpression;
 import core.models.expression.NamedAttribute;
+import core.models.expression.ObjectExpression;
 import core.models.expression.PlaceHolderExpression;
 import core.models.type.BasicType;
 import core.unit.ConstraintEquations;
@@ -80,6 +83,12 @@ public class RandomSolver extends Solver {
 					public void leave(ArrayIndexExpression array) {
 						ref.add(array);
 					}
+
+					@Override
+					public void leave(MemberAccessExpression member) {
+						ref.add(member);
+					}
+					
 				});
 				
 				refMap.add(new Pair<Expression, ArrayList<NamedAttribute>>(ep, ref));
@@ -104,9 +113,13 @@ public class RandomSolver extends Solver {
 						if (name instanceof NameExpression)
 							h.replace((Expression) name, 
 									getValue((NameExpression) name));
-						else {
+						else if (name instanceof ArrayIndexExpression) {
 							h.replace((Expression) name, 
 									getValue((ArrayIndexExpression) name));
+						}
+						else if (name instanceof MemberAccessExpression){
+							h.replace((Expression) name, 
+									getValue((MemberAccessExpression)name));
 						}
 					}
 
@@ -137,7 +150,7 @@ public class RandomSolver extends Solver {
 				mTable.toArray(mTestcase);
 				for (Variable var: mTestcase)
 					if (!var.isValueSet()){
-						if (var instanceof ArrayVariable)
+						if (var.getType().isArrayType() || var.getType().isObjectType())
 							var.initValueIfNotSet();
 						else
 							var.setValue(createRandomValue(var));
@@ -226,6 +239,13 @@ public class RandomSolver extends Solver {
 			public void leave(ArrayIndexExpression array) {
 				h.replace(array, getValue(array));
 			}
+
+			@Override
+			public void leave(MemberAccessExpression member) {
+				h.replace(member, getValue(member));
+			}
+			
+			
 		});
 		
 		return SimpleEval.calculate(h.getElement());
@@ -265,11 +285,38 @@ public class RandomSolver extends Solver {
 	}
 	
 	/**
+	 * Lấy giá trị một truy cập thuộc tính đối tượng, hoặc tạo ngẫu nhiên nếu chưa có
+	 */
+	private Expression getValue(MemberAccessExpression member){
+		Variable find = mTable.find(member.getName()).initValueIfNotSet();
+		String name = member.getMemberName();
+		ObjectExpression object = find.object();
+		
+		if (object.isMemberSet(name))
+			return object.getMember(name);
+		
+		Expression ep = createRandomValue(object.getMemberType(name));
+		try {
+			object.setMember(name, ep);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ep;
+	}
+	
+	/**
 	 * Tạo giá trị ngẫu nhiên từ một biến số có kiểu nhất định
 	 */
 	private static IDExpression createRandomValue(Variable var){
-		Object value = RandomGenarator.forType((BasicType) var.getDataType());
-		return new IDExpression(value);
+		return createRandomValue(var.getDataType());
+	}
+	
+	/**
+	 * Tạo giá trị ngẫu nhiên từ một kiểu nhất định
+	 * @param type kiểu giá trị, đang hỗ trợ BasicType
+	 */
+	private static IDExpression createRandomValue(Type type){
+		return new IDExpression(RandomGenarator.forType((BasicType) type));
 	}
 	
 	/**
