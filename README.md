@@ -18,6 +18,6 @@ Các nền tảng hỗ trợ
 ##Sử dụng (later)
 
 ##Copyright
-- Tác giả: [Sầm Đức Vũ](https://github.com/duonganh2812), [Dương Tuấn Anh](https://github.com/duonganh2812)
+- Tác giả: [Sầm Đức Vũ](https://github.com/phibao37), [Dương Tuấn Anh](https://github.com/duonganh2812)
 - Giáo viên hướng dẫn: [TS. Phạm Ngọc Hùng](http://uet.vnu.edu.vn/~hungpn/)
 - Trường: [Đại học Công Nghệ - Đại học Quốc Gia Hà Nội](http://uet.vnu.edu.vn)
