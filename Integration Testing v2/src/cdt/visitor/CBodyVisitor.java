@@ -431,6 +431,7 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 		public CStatement(IASTNode node) {
 			super(node.getRawSignature());
 			setRoot(mUtils.parseNode(node));
+			//try{getRoot().printTree("  ");} catch (Exception e) {}
 		}
 		
 	}

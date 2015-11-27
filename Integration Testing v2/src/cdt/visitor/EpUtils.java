@@ -242,7 +242,7 @@ public class EpUtils {
 				source += ";";
 			source = String.format("void main(){%s}", source);
 			try {
-				CUnitVisitor.getIASTranslationUnit(source).accept(this);
+				CUnitVisitor.getIASTranslationUnit(source, null).accept(this);
 				return mExpression;
 			} catch (IOException e) {
 				return null;

@@ -1,5 +1,6 @@
 package cdt.visitor;
 
+import cdt.CMainProcess;
 import cdt.models.CFunction;
 import cdt.models.CType;
 import core.ProcessInterface;
@@ -18,7 +19,9 @@ import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
 import org.eclipse.cdt.core.model.AbstractLanguage;
 import org.eclipse.cdt.core.model.ILanguage;
 import org.eclipse.cdt.core.parser.*;
-
+import org.eclipse.cdt.internal.core.parser.IMacroDictionary;
+import org.eclipse.cdt.internal.core.parser.SavedFilesProvider;
+import org.eclipse.cdt.internal.core.parser.scanner.InternalFileContent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,19 +37,26 @@ import java.util.Map;
 public class CUnitVisitor implements UnitVisitor {
 	private ArrayList<Function> mFunctions = new ArrayList<>();
 	private ArrayList<Variable> mVariables = new ArrayList<>();
-	private ProcessInterface mProcess;
+	private CMainProcess mProcess;
 	private EpUtils mUtils;
 	
 	@Override
-	public UnitVisitor parseSource(File file,  ProcessInterface process) 
+	public UnitVisitor parseSource(File file, ProcessInterface process) 
 			throws IOException {
 		mFunctions.clear();
 		mVariables.clear();
-		mProcess = process;
+		mProcess = (CMainProcess) process;
 		mUtils = new EpUtils(process);
 		
-		IASTTranslationUnit u = getIASTTranslationUnit(file);
+		IASTTranslationUnit u = getIASTTranslationUnit(file, process);
 		ArrayList<ObjectType> objectType = process.getDeclaredTypes();
+		
+		for (IASTPreprocessorMacroDefinition marco: u.getMacroDefinitions()){
+			String key = marco.getName().toString();
+			String expand = marco.getExpansion();
+			System.out.println(key + " => " + expand);
+			mProcess.addMarcoDefine(key, expand);
+		}
 		
 		u.accept(new ASTVisitor() {
 			
@@ -241,30 +251,34 @@ public int visit(IASTDeclaration declaration) {
 	 * Các thông số được thiết đặt mặc định
 	 * @param source tập tin mã nguồn cần phân tích
 	 */
-	static IASTTranslationUnit getIASTTranslationUnit(File source) throws IOException {
+	static IASTTranslationUnit getIASTTranslationUnit(File source, 
+			ProcessInterface process) throws IOException {
 		return getIASTTranslationUnit(
 				Utils.getContentFile(source).toCharArray(), 
 				source.getAbsolutePath(), 
 				Utils.getExtension(source).equalsIgnoreCase("c") ? 
-						GCCLanguage.getDefault() : GPPLanguage.getDefault());
+						GCCLanguage.getDefault() : GPPLanguage.getDefault(), process);
 	}
 	
 	/**
 	 * Trả về cây cú pháp trừu tượng với mã nguồn C đơn giản
 	 */
-	static IASTTranslationUnit getIASTranslationUnit(String source) throws IOException{
+	static IASTTranslationUnit getIASTranslationUnit(String source, 
+			ProcessInterface process) throws IOException{
 		return getIASTTranslationUnit(source.toCharArray(), "", 
-				GCCLanguage.getDefault());
+				GCCLanguage.getDefault(), process);
 	}
 	
 	private static IASTTranslationUnit getIASTTranslationUnit(char[] source, 
-			String filePath, AbstractLanguage lang) throws IOException {
+			String filePath, AbstractLanguage lang, ProcessInterface process) 
+					throws IOException {
+		CMainProcess cp = (CMainProcess) process;
 		FileContent reader = FileContent.create(filePath, source);
-		Map<String, String> macroDefinitions = new HashMap<>();
+		Map<String, String> macroDefinitions = process == null ? new HashMap<>()
+				: cp.getListMarco();
 		String[] includeSearchPaths = new String[0];
 		IScannerInfo scanInfo = new ScannerInfo(macroDefinitions, includeSearchPaths);
-		IncludeFileContentProvider fileCreator = 
-				IncludeFileContentProvider.getEmptyFilesProvider();
+		IncludeFileContentProvider fileCreator = new IncludeFileProvider();
 		int options = ILanguage.OPTION_IS_SOURCE_UNIT;
 		IParserLogService log = new DefaultLogService();
 		
@@ -280,10 +294,18 @@ public int visit(IASTDeclaration declaration) {
 	
 	public static void main(String[] args) {
 		try {
-			String filePath = "D:\\Documents\\unit\\delta2.cpp";
+			String filePath = "D:\\Documents\\unit\\min.c";
 			File f = new File(filePath);
 			
-			IASTTranslationUnit u = getIASTTranslationUnit(f);
+			IASTTranslationUnit u = getIASTTranslationUnit(f, null);
+			for (IASTPreprocessorStatement s: u.getAllPreprocessorStatements()){
+				System.out.println(s.getClass());
+				if (s instanceof IASTPreprocessorIncludeStatement){
+					IASTPreprocessorIncludeStatement pre = 
+							(IASTPreprocessorIncludeStatement) s;
+					System.out.println("#Include path: " + pre.getPath());
+				}
+			}
 			printTree(u, " | ");
 			
 		} catch (Exception e) {
@@ -343,8 +365,17 @@ public int visit(IASTDeclaration declaration) {
 //			System.out.println("Comment: " + cmt.getRawSignature());
 //	}
 }
+class IncludeFileProvider extends SavedFilesProvider{
 
-
+	@Override
+	public InternalFileContent getContentForInclusion(String path,
+			IMacroDictionary macroDictionary) {
+		if (!getInclusionExists(path))
+			return null;
+		return (InternalFileContent) FileContent.createForExternalFileLocation(path);
+	}
+	
+}
 
 
 
