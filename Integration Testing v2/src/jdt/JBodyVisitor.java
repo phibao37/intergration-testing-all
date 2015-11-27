@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 
+import core.ProcessInterface;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
@@ -38,9 +39,12 @@ public class JBodyVisitor implements BodyFunctionVisitor {
 	private Statement BEGIN, END;
 	private ArrayList<Statement> stmList = new ArrayList<>();
 	private boolean mSubCondition;
+	private ProcessInterface mProcess;
 	
 	@Override
-	public Statement[] parseBody(Object body, boolean subCondition) {
+	public Statement[] parseBody(Object body, boolean subCondition, 
+			ProcessInterface process) {
+		mProcess = process;
 		BEGIN = FlagStatement.newBeginFlag();
 		END = FlagStatement.newEndFlag();
 		mSubCondition = subCondition;
@@ -431,21 +435,22 @@ public class JBodyVisitor implements BodyFunctionVisitor {
 	private static boolean notNull(ASTNode node){
 		return node != null && !(node instanceof EmptyStatement);
 	}
-}
-
-class JStatement extends Statement{
-
-	public JStatement(ASTNode node) {
-		super(node.toString().replaceAll("\n", ""));
-		setRoot(JEpUtil.parseNode(node));
-//		try {
-//			System.out.printf("\n%s => %s\n", this, getRoot().getClass());
-//			getRoot().printTree("  -");
-//		} catch (Exception e) {
-//			System.out.printf("\n%s\n => No root\n", this);
-//		}
-	}
 	
+	class JStatement extends Statement{
+
+		public JStatement(ASTNode node) {
+			super(node.toString().replaceAll("\n", ""));
+			setRoot(new JEpUtil(mProcess).parseNode(node));
+//			try {
+//				System.out.printf("\n%s => %s\n", this, getRoot().getClass());
+//				getRoot().printTree("  -");
+//			} catch (Exception e) {
+//				System.out.printf("\n%s\n => No root\n", this);
+//			}
+		}
+		
+	}
+
 }
 
 

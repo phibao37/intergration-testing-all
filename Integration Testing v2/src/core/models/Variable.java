@@ -1,6 +1,6 @@
 package core.models;
 
-import core.graph.Graphable;
+import graph.Graphable;
 import core.models.expression.ObjectExpression;
 
 /**

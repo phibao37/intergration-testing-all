@@ -2,6 +2,7 @@ package core.visitor;
 
 import java.util.List;
 
+import core.ProcessInterface;
 import core.models.Statement;
 import core.models.statement.ScopeStatement;
 
@@ -21,11 +22,13 @@ public interface BodyFunctionVisitor {
 	 * của phần thân
 	 * @param subCondition có phân tích và "bóc" các điều kiện phức hợp thành các
 	 * điều kiện con hay không
+	 * @param process tiến trình quản lý chính
 	 * @return danh sách các câu lệnh đã được liên kết, câu lệnh đầu danh sách luôn
 	 * là câu lệnh được thực hiện trước tiên khi hàm số được chạy trong chương trình.<br/>
 	 * Thông thường, nó sẽ phải là "câu lệnh" mở khối thân hàm { - {@link ScopeStatement}
 	 */
-	public Statement[] parseBody(Object body, boolean subCondition);
+	public Statement[] parseBody(Object body, boolean subCondition, 
+			ProcessInterface process);
 	
 	
 	 /**

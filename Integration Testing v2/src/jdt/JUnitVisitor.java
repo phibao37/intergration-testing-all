@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
+import core.ProcessInterface;
 import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Function;
@@ -24,10 +25,13 @@ import core.visitor.UnitVisitor;
 public class JUnitVisitor implements UnitVisitor {
 	
 	private ArrayList<Function> mFunctions = new ArrayList<Function>();
+	private ProcessInterface mProcess;
 	
 	@Override
-	public UnitVisitor parseSource(File source) throws IOException {
+	public UnitVisitor parseSource(File source, ProcessInterface process) 
+			throws IOException {
 		mFunctions.clear();
+		mProcess = process;
 		
 		ASTParser parser = ASTParser.newParser(AST.JLS8);
 		parser.setSource(Utils.getContentFile(source).toCharArray());
@@ -57,7 +61,7 @@ public class JUnitVisitor implements UnitVisitor {
 				
 				//Thêm một hàm mới được tìm thấy
 				Function fn = new Function(s_name, varPara, node.getBody(), 
-						JType.parse(s_type));
+						JType.parse(s_type, mProcess));
 				
 				fn.setSourceFile(source);
 				mFunctions.add(fn);
@@ -75,7 +79,7 @@ public class JUnitVisitor implements UnitVisitor {
 	 * @param para
 	 * @return
 	 */
-	private static Variable parseParameter(SingleVariableDeclaration para){
+	private Variable parseParameter(SingleVariableDeclaration para){
 		return createVariable(para.getType(), para.getName().getIdentifier());
 	}
 	
@@ -83,13 +87,14 @@ public class JUnitVisitor implements UnitVisitor {
 	 * Tạo biến từ kiểu và tên biến
 	 */
 	@SuppressWarnings("unchecked")
-	public static Variable createVariable(Type type, String name){
+	public Variable createVariable(Type type, String name){
 		Variable var = null;
 		
 		//Có một hoặc nhiều cặp [] trong khai báo
 		if (type instanceof ArrayType){
 			ArrayType arrType = (ArrayType) type;
-			core.models.Type arr = JType.parse(arrType.getElementType().toString());
+			core.models.Type arr = JType.parse(
+					arrType.getElementType().toString(), mProcess);
 			List<Dimension> dimen = arrType.dimensions();
 			
 			for (Dimension d: dimen){
@@ -101,7 +106,7 @@ public class JUnitVisitor implements UnitVisitor {
 		
 		//Không có khai báo biến mảng, số lượng [] bằng 0
 		else {
-			var = new Variable(name, JType.parse(type.toString()));
+			var = new Variable(name, JType.parse(type.toString(), mProcess));
 		}
 		
 		return var;
@@ -122,7 +127,7 @@ public class JUnitVisitor implements UnitVisitor {
 		String path = "D:\\Documents\\java\\TestUnit1.java";
 		File f = new File(path);
 		
-		for (Function fn: new JUnitVisitor().parseSource(f).getFunctionList()){
+		for (Function fn: new JUnitVisitor().parseSource(f, null).getFunctionList()){
 			System.out.println(fn);
 		}
 

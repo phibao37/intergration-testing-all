@@ -2,7 +2,7 @@ package cdt.visitor;
 
 import cdt.models.CFunction;
 import cdt.models.CType;
-import core.MainProcess;
+import core.ProcessInterface;
 import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Function;
@@ -34,14 +34,19 @@ import java.util.Map;
 public class CUnitVisitor implements UnitVisitor {
 	private ArrayList<Function> mFunctions = new ArrayList<>();
 	private ArrayList<Variable> mVariables = new ArrayList<>();
+	private ProcessInterface mProcess;
+	private EpUtils mUtils;
 	
 	@Override
-	public UnitVisitor parseSource(File file) throws IOException {
+	public UnitVisitor parseSource(File file,  ProcessInterface process) 
+			throws IOException {
 		mFunctions.clear();
 		mVariables.clear();
+		mProcess = process;
+		mUtils = new EpUtils(process);
 		
 		IASTTranslationUnit u = getIASTTranslationUnit(file);
-		ArrayList<ObjectType> objectType = MainProcess.instance.getDeclaredTypes();
+		ArrayList<ObjectType> objectType = process.getDeclaredTypes();
 		
 		u.accept(new ASTVisitor() {
 			
@@ -78,7 +83,8 @@ public int visit(IASTDeclaration declaration) {
 				//Thêm các khai báo thuộc tính thành phần
 				for (IASTDeclaration member: comp.getMembers()){
 					IASTSimpleDeclaration sd = (IASTSimpleDeclaration) member;
-					Type type = CType.parse(sd.getDeclSpecifier().getRawSignature());
+					Type type = CType.parse(
+							sd.getDeclSpecifier().getRawSignature(), mProcess);
 					
 					for (IASTDeclarator dc: sd.getDeclarators())
 						schema.put(dc.getName().toString(), type);
@@ -123,7 +129,7 @@ public int visit(IASTDeclaration declaration) {
 				para[i] = parseParameter(fnPara[i]);
 		}
 		
-		fn = new CFunction(name, para, fnBody, CType.parse(type));
+		fn = new CFunction(name, para, fnBody, CType.parse(type, mProcess));
 		fn.setSourceFile(file);
 		mFunctions.add(fn);
 	}
@@ -147,7 +153,7 @@ public int visit(IASTDeclaration declaration) {
 	/** Duyệt qua một khai báo đơn giản, sau đó trả về danh sách các biến được khai báo
 	 * @param declare khai báo biến, thí dụ: <code>int x=1, *y, z[] = {1};</code>
 	 * */
-	public static ArrayList<Variable> parseVariableDeclaration(
+	public ArrayList<Variable> parseVariableDeclaration(
 			IASTSimpleDeclaration declare){
 		IASTDeclSpecifier spec = declare.getDeclSpecifier();
 		ArrayList<Variable> gVarList = new ArrayList<>();
@@ -162,7 +168,7 @@ public int visit(IASTDeclaration declaration) {
 	 * Trả về biến ứng với một biến tham số của hàm
 	 * @param declare nút AST ứng với khai báo tham số hàm
 	 */
-	private static Variable parseParameter(IASTParameterDeclaration declare){
+	private Variable parseParameter(IASTParameterDeclaration declare){
 		return parseVariable(declare.getDeclarator(), declare.getDeclSpecifier());
 	}
 	
@@ -171,9 +177,9 @@ public int visit(IASTDeclaration declaration) {
 	 * @param declare nội dung khai báo: a = 2, b[] = {1, 2}
 	 * @param spec kiểu của biến khai báo: int, float
 	 */
-	private static Variable parseVariable(IASTDeclarator declare, 
+	private Variable parseVariable(IASTDeclarator declare, 
 			IASTDeclSpecifier spec){
-		Type type = CType.parse(spec.getRawSignature());
+		Type type = CType.parse(spec.getRawSignature(), mProcess);
 		String name = declare.getName().getRawSignature();
 		IASTInitializer init = declare.getInitializer();
 		Variable var;
@@ -208,7 +214,7 @@ public int visit(IASTDeclaration declaration) {
 				IASTInitializerList initList = (IASTInitializerList) 
 						((IASTEqualsInitializer) init)
 						.getInitializerClause();
-				var.setValue(EpUtils.parseNode(initList));
+				var.setValue(mUtils.parseNode(initList));
 			}
 		} 
 		//Biến thường
@@ -222,7 +228,7 @@ public int visit(IASTDeclaration declaration) {
 						.getInitializerClause();
 				
 				//Giá trị gán là một biểu thức cơ bản của chương trình
-				var.setValue(EpUtils.parseNode(initClause));
+				var.setValue(mUtils.parseNode(initClause));
 				
 			}
 		}

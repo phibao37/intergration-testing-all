@@ -1,4 +1,6 @@
-package core.graph.canvas;
+package graph.canvas;
+
+import graph.node.LoopNode;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -8,9 +10,9 @@ import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-import core.graph.node.LoopNode;
 import core.unit.LoopStatement;
 import core.unit.LoopablePath;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 

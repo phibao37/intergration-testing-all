@@ -1,4 +1,4 @@
-package core.graph.node;
+package graph.node;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

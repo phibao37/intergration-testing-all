@@ -1,8 +1,10 @@
-package core.graph.canvas;
+package graph.canvas;
+
+import graph.node.FunctionPairNode;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import core.graph.node.FunctionPairNode;
+
 import core.inte.FunctionPair;
 import core.models.Function;
 

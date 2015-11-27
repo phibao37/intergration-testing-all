@@ -1,11 +1,12 @@
-package core.graph.adapter;
+package graph.adapter;
+
+import graph.node.FunctionNode;
+import graph.node.Node;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import core.graph.node.FunctionNode;
-import core.graph.node.Node;
 import core.inte.FunctionCallGraph;
 import core.inte.FunctionPair;
 import core.models.Function;

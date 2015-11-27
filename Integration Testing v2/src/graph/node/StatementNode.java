@@ -1,4 +1,4 @@
-package core.graph.node;
+package graph.node;
 
 import core.models.Statement;
 

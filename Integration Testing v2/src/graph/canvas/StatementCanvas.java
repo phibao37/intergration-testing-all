@@ -1,4 +1,8 @@
-package core.graph.canvas;
+package graph.canvas;
+
+import graph.adapter.StatementAdapter;
+import graph.node.Node;
+import graph.node.StatementNode;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -15,9 +19,6 @@ import javax.swing.JPopupMenu;
 
 import core.GUI;
 import core.S;
-import core.graph.adapter.StatementAdapter;
-import core.graph.node.Node;
-import core.graph.node.StatementNode;
 import core.models.Function;
 import core.models.Statement;
 

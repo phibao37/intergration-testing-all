@@ -1,9 +1,10 @@
 package core;
 
+import graph.CFGView;
+
 import java.io.File;
 import java.util.ArrayList;
 
-import core.graph.CFGView;
 import core.models.Function;
 import javafx.util.Pair;
 

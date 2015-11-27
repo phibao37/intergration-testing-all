@@ -33,7 +33,7 @@ import java.util.Collections;
  * @author ducvu
  *
  */
-public abstract class MainProcess implements FilenameFilter {
+public abstract class MainProcess implements FilenameFilter, ProcessInterface {
 
 	private ArrayList<File> mFiles = new ArrayList<>();
 	
@@ -49,15 +49,6 @@ public abstract class MainProcess implements FilenameFilter {
 	private StubSuiteManager mStubMgr = new StubSuiteManager();
 	
 	private boolean mSupportLengthArray;
-	
-	/**
-	 * Đối tượng chương trình chính đang điểu khiển
-	 */
-	public static MainProcess instance;
-	
-	protected MainProcess(){
-		instance = this;
-	}
 	
 	/**
 	 * Nạp các hàm (và các biến toàn cục, ..) vào tiến trình
@@ -76,7 +67,7 @@ public abstract class MainProcess implements FilenameFilter {
 		
 		//Duyệt qua các thân hàm để tạo các đồ thị CFG
 		for (Function func: mFunctions)
-			func.parseCFG(mBodyVisitor);
+			func.parseCFG(mBodyVisitor, this);
 		
 		//Duyệt qua các lời gọi hàm để liên kết tới các khai báo tương ứng
 		for (Function func: mFunctions){
@@ -367,7 +358,7 @@ public abstract class MainProcess implements FilenameFilter {
 	 * @throws IOException 
 	 */
 	protected void loadFile(File file) throws IOException {
-		mUnitVisitor.parseSource(file);
+		mUnitVisitor.parseSource(file, this);
 		mFunctions.addAll(mUnitVisitor.getFunctionList());
 		//mVariables.addAll(mUnitVisitor.getGlobalVariableList());
 	}
@@ -424,9 +415,7 @@ public abstract class MainProcess implements FilenameFilter {
 		return mFunctions.isEmpty();
 	}
 	
-	/**
-	 * Trả về danh sách các cấu trúc (struct/class) được định nghĩa trong chương trình
-	 */
+	@Override
 	public ArrayList<ObjectType> getDeclaredTypes(){
 		return mObjectTypes;
 	}

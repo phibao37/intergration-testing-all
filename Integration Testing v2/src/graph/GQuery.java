@@ -1,4 +1,4 @@
-package core.graph;
+package graph;
 
 import java.awt.Component;
 import java.awt.Container;

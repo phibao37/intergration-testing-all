@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-import core.MainProcess;
 import core.Utils;
 import core.models.Type.Modifier;
 import core.models.expression.ArrayExpression;
@@ -42,8 +41,9 @@ public class ArrayVariable extends Variable {
 	 */
 	public ArrayVariable(String name, ArrayType type, ArrayExpression value){
 		super(name, type, value);
-		if (MainProcess.instance.isSupportLengthArray())
-			this.setSupportObject();
+		
+		//Default
+		setSupportObject();
 	}
 	
 	/**

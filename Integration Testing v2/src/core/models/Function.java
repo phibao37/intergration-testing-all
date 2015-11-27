@@ -1,13 +1,15 @@
 package core.models;
 
+import graph.Graphable;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Objects;
 
 import core.GUI;
+import core.ProcessInterface;
 import core.Utils;
 import core.error.StatementNoRootException;
-import core.graph.Graphable;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
 import core.solver.Solver.Result;
@@ -59,9 +61,9 @@ public class Function extends Element implements Graphable {
 	 * @param bodyVisitor bộ chuyển đổi từ nội dung thân hàm để tạo ra cấu trúc
 	 * các câu lệnh được liên kết với nhau
 	 */
-	public void parseCFG(BodyFunctionVisitor bodyVisitor){
-		setCFG(new CFG(bodyVisitor.parseBody(mBody, false)), false);
-		setCFG(new CFG(bodyVisitor.parseBody(mBody, true)), true);
+	public void parseCFG(BodyFunctionVisitor bodyVisitor, ProcessInterface process){
+		setCFG(new CFG(bodyVisitor.parseBody(mBody, false, process)), false);
+		setCFG(new CFG(bodyVisitor.parseBody(mBody, true, process)), true);
 	}
 	
 	/**

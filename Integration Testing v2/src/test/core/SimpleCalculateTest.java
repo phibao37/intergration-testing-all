@@ -16,7 +16,7 @@ public class SimpleCalculateTest {
 	
 	public static IDExpression calc(String expression){
 		return SimpleEval.calculate(
-				EpUtils.parseNode(EpUtils.getExpression(expression)));
+				new EpUtils(null).parseNode(EpUtils.getExpression(expression)));
 	}
 	
 	@Test

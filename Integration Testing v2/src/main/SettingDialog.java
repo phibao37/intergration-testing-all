@@ -3,14 +3,15 @@ package main;
 import core.S;
 import core.S.SCREEN;
 import core.Utils;
-import core.graph.GQuery;
-import core.graph.SelectList;
 import core.solver.Solver;
+import graph.GQuery;
+import graph.SelectList;
 
 import javax.swing.*;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
+
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;

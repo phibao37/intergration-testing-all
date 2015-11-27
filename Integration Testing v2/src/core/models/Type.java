@@ -1,8 +1,9 @@
 package core.models;
 
+import graph.Graphable;
+
 import java.util.ArrayList;
 
-import core.graph.Graphable;
 import core.models.type.ArrayType;
 import core.models.type.ObjectType;
 

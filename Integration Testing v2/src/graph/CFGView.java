@@ -1,7 +1,7 @@
-package core.graph;
+package graph;
 
-import core.graph.adapter.StatementAdapter;
-import core.graph.canvas.StatementCanvas;
+import graph.adapter.StatementAdapter;
+import graph.canvas.StatementCanvas;
 import core.models.Function;
 import core.unit.CFG;
 

@@ -17,7 +17,7 @@ import core.visitor.ExpressionVisitor;
 public class ExpressionVisitTest {
 	
 	public static Expression parse(String expression){
-		return EpUtils.parseNode(EpUtils.getExpression(expression));
+		return new EpUtils(null).parseNode(EpUtils.getExpression(expression));
 	}
 	
 	@Test

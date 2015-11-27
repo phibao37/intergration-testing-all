@@ -22,6 +22,7 @@ import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 
+import core.ProcessInterface;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
@@ -37,9 +38,12 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 	private Statement END;
 	private ArrayList<Statement> stmList = new ArrayList<>();
 	private boolean mSubCondition;
+	private EpUtils mUtils;
 	
 	@Override
-	public Statement[] parseBody(Object body, boolean subCondition) {
+	public Statement[] parseBody(Object body, boolean subCondition, 
+			ProcessInterface process) {
+		mUtils = new EpUtils(process);
 		Statement BEGIN = FlagStatement.newBeginFlag();
 		END = FlagStatement.newEndFlag();
 		mSubCondition = subCondition;
@@ -418,16 +422,17 @@ public class CBodyVisitor implements BodyFunctionVisitor {
 	 * Bộ duyệt mặc định
 	 */
 	public static CBodyVisitor DEFAULT = new CBodyVisitor();
-}
-
-/**
- * Câu lệnh C
- */
-class CStatement extends Statement{
-
-	public CStatement(IASTNode node) {
-		super(node.getRawSignature());
-		setRoot(EpUtils.parseNode(node));
-	}
 	
+	/**
+	 * Câu lệnh C
+	 */
+	class CStatement extends Statement{
+
+		public CStatement(IASTNode node) {
+			super(node.getRawSignature());
+			setRoot(mUtils.parseNode(node));
+		}
+		
+	}
 }
+

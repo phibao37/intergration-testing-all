@@ -1,8 +1,9 @@
-package core.graph.adapter;
+package graph.adapter;
+
+import graph.node.StatementNode;
 
 import java.util.ArrayList;
 
-import core.graph.node.StatementNode;
 import core.models.Statement;
 import core.models.statement.ScopeStatement;
 import core.unit.CFG;

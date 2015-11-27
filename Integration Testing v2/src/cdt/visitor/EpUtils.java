@@ -29,6 +29,7 @@ import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
 import cdt.models.CType;
+import core.ProcessInterface;
 import core.models.Expression;
 import core.models.Type;
 import core.models.expression.ArrayExpression;
@@ -61,12 +62,18 @@ public class EpUtils {
 		return SimpleVisitor.DEFAULT.getExpression(expression);
 	}
 	
+	private ProcessInterface mProcess;
+	
+	public EpUtils(ProcessInterface process){
+		mProcess = process;
+	}
+	
 	/**
 	 * Phân tích nội dung một nút AST và lấy về biểu thức gốc chứa trong nút
 	 * @param node nút AST, thường là một {@link IASTExpression}
 	 * @return biểu thức tại gốc của nút
 	 */
-	public static Expression parseNode(IASTNode node){
+	public Expression parseNode(IASTNode node){
 		
 		if (node instanceof IASTBinaryExpression){
 			IASTBinaryExpression astBin = (IASTBinaryExpression) node;
@@ -128,7 +135,8 @@ public class EpUtils {
 		if (node instanceof IASTDeclarationStatement){
 			IASTSimpleDeclaration declare = (IASTSimpleDeclaration) 
 					((IASTDeclarationStatement) node).getDeclaration();
-			Type type = CType.parse(declare.getDeclSpecifier().getRawSignature());
+			Type type = CType.parse(
+					declare.getDeclSpecifier().getRawSignature(), mProcess);
 			IASTDeclarator[] drs = declare.getDeclarators();
 			Expression[] decEps = new Expression[drs.length];
 			

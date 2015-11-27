@@ -1,7 +1,7 @@
 package core.models;
 
+import graph.Graphable;
 import core.error.StatementNoRootException;
-import core.graph.Graphable;
 import core.models.expression.BinaryExpression;
 import core.models.expression.DeclareExpression;
 import core.models.expression.FunctionCallExpression;

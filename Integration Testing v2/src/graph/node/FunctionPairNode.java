@@ -1,4 +1,4 @@
-package core.graph.node;
+package graph.node;
 
 import javax.swing.JPanel;
 

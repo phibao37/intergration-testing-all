@@ -1,9 +1,9 @@
-package core.graph.adapter;
+package graph.adapter;
+
+import graph.Graphable;
+import graph.node.Node;
 
 import java.util.ArrayList;
-
-import core.graph.Graphable;
-import core.graph.node.Node;
 
 /**
  * Lưu trữ danh sách các nút đồ họa có cấu trúc liên kết với nhau.<br/>

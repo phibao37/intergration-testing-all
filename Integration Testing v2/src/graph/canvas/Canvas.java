@@ -1,10 +1,10 @@
-package core.graph.canvas;
+package graph.canvas;
 
 import core.GUI;
 import core.S;
 import core.Utils;
-import core.graph.DragScrollPane;
-import core.graph.node.Node;
+import graph.DragScrollPane;
+import graph.node.Node;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -12,6 +12,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.border.SoftBevelBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -119,7 +120,7 @@ public class Canvas extends JPanel implements MouseListener {
 				else if (code == 107 || code == 109){
 					Node.addFontSize(code == 107 ? 1 : -1);
 
-					defaultNodeList.forEach(core.graph.node.Node::reApplyFont);
+					defaultNodeList.forEach(graph.node.Node::reApplyFont);
 					S.save();
 					Canvas.this.repaint();
 				}

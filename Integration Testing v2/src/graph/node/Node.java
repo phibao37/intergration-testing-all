@@ -1,4 +1,6 @@
-package core.graph.node;
+package graph.node;
+
+import graph.Graphable;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -16,7 +18,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.LineBorder;
 
 import core.S;
-import core.graph.Graphable;
 
 /**
  * Một nút biểu thị một phần tử được hiển thị ra dưới dạng đồ họa.<br/>

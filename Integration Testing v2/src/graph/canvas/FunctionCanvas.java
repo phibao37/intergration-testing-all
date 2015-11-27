@@ -1,4 +1,8 @@
-package core.graph.canvas;
+package graph.canvas;
+
+import graph.adapter.FunctionAdapter;
+import graph.node.FunctionNode;
+import graph.node.Node;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -14,9 +18,6 @@ import javax.swing.JButton;
 import core.GUI;
 import core.S;
 import core.Utils;
-import core.graph.adapter.FunctionAdapter;
-import core.graph.node.FunctionNode;
-import core.graph.node.Node;
 import core.inte.FunctionPair;
 import core.models.Function;
 import core.models.type.BasicType;

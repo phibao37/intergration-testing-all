@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import core.ProcessInterface;
 import core.models.expression.ArrayExpression;
 import core.models.expression.ArrayIndexExpression;
 import core.models.expression.BinaryExpression;
@@ -81,8 +82,14 @@ public class JEpUtil {
 		
 	}
 	
+	private ProcessInterface mProcess;
+	
+	public JEpUtil(ProcessInterface process) {
+		mProcess = process;
+	}
+	
 	@SuppressWarnings("unchecked")
-	public static core.models.Expression parseNode(ASTNode node){
+	public core.models.Expression parseNode(ASTNode node){
 		if(node instanceof ArrayInitializer){
 			ArrayInitializer arr = (ArrayInitializer)node;
 			List<Expression> list = arr.expressions();
@@ -228,7 +235,7 @@ public class JEpUtil {
 							BinaryExpression.ASSIGN, 
 							parseNode(init));
 			}
-			return new DeclareExpression(JType.parse(type.toString()), vars);
+			return new DeclareExpression(JType.parse(type.toString(), mProcess), vars);
 		}
 		
 		else if(node instanceof ReturnStatement){
