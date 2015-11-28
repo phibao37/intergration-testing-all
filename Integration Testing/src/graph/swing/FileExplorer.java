@@ -1,10 +1,14 @@
 package graph.swing;
 
 import java.awt.Component;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileFilter;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
@@ -63,6 +67,10 @@ public class FileExplorer extends JTree
 			}
 		}
 		
+		public boolean hasFile(){
+			return mFile != null;
+		}
+		
 		public File getFile(){
 			return mFile;
 		}
@@ -81,12 +89,17 @@ public class FileExplorer extends JTree
 		
 		public boolean isNotLoadedDirectory(){
 			if (getChildCount() == 1){
-				TreeNode first = (TreeNode) getChildAt(0);
+				TreeNode first = getChildAt(0);
 				return first.getUserObject() == null && first.getFile() == null;
 			} else
 				return false;
 		}
 		
+		@Override
+		public TreeNode getChildAt(int index) {
+			return (TreeNode) super.getChildAt(index);
+		}
+
 		@SuppressWarnings("unchecked")
 		public void sortChild(Comparator<TreeNode> c){
 			if (children != null)
@@ -111,38 +124,9 @@ public class FileExplorer extends JTree
 		}
 	}
 	
+	private DefaultTreeModel mTreeModel;
 	private TreeNode mRoot;
 	private Config mCf;
-	
-	public FileExplorer(){
-		setConfig(Config.DEFAULT);
-		
-		String hostName = DEFAULT_HOSTNAME;
-		try {
-			hostName = InetAddress.getLocalHost().getHostName();
-		} catch (Exception x) {}
-		mRoot = new TreeNode(hostName);
-		setModel(new DefaultTreeModel(mRoot));
-		setCellRenderer(new TreeCellRender());
-		loadFiles(File.listRoots(), mRoot);
-		expandRow(0);
-		
-		addTreeExpansionListener(new TreeExpansionListener() {
-			
-			@Override
-			public void treeExpanded(TreeExpansionEvent event) {
-				TreeNode node = (TreeNode) event.getPath().getLastPathComponent();
-				DefaultTreeModel model = (DefaultTreeModel) treeModel;
-				
-				if (node.isDirectory() && node.isNotLoadedDirectory()){
-					loadFiles(node.getFile().listFiles(FileExplorer.this), node);
-					model.reload(node);
-				}
-			}
-			
-			public void treeCollapsed(TreeExpansionEvent event) {}
-		});
-	}
 	
 	public FileExplorer(File path){
 		this();
@@ -153,8 +137,97 @@ public class FileExplorer extends JTree
 		this(new File(path));
 	}
 	
+	public FileExplorer(){
+		setConfig(Config.DEFAULT);
+		
+		String hostName = DEFAULT_HOSTNAME;
+		try {
+			hostName = InetAddress.getLocalHost().getHostName();
+		} catch (Exception x) {}
+		mRoot = new TreeNode(hostName);
+		setModel(mTreeModel = new DefaultTreeModel(mRoot));
+		setCellRenderer(new TreeCellRender());
+		loadFiles(File.listRoots(), mRoot);
+		expandRow(0);
+		
+		addTreeExpansionListener(new TreeExpansionListener() {
+			
+			@Override
+			public void treeExpanded(TreeExpansionEvent event) {
+				TreeNode node = (TreeNode) event.getPath().getLastPathComponent();
+				
+				if (node.isDirectory() && node.isNotLoadedDirectory()){
+					loadFiles(node.getFile().listFiles(FileExplorer.this), node);
+				}
+			}
+			
+			public void treeCollapsed(TreeExpansionEvent event) {}
+		});
+		addKeyListener(new KeyAdapter(){
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				boolean isCtrk = e.isControlDown();
+				
+				switch (e.getKeyCode()){
+				case KeyEvent.VK_F5:
+					refresh();
+					break;
+				case KeyEvent.VK_C:
+					if (isCtrk);
+				}
+			}
+			
+		});
+	}
+	
+	/**
+	 * Làm mới trình duyệt tập tin
+	 */
+	public void refresh(){
+		ArrayList<File> listExpanded = new ArrayList<>();
+		ArrayList<File> selected = new ArrayList<>();
+		TreePath[] listSelected = getSelectionPaths();
+		TreePath rootPath = new TreePath(mRoot);
+		Enumeration<TreePath> iter = getExpandedDescendants(rootPath);
+		boolean rootSelect = isPathSelected(rootPath);
+		
+		for (int i = 0; i < listSelected.length; i++){
+			TreeNode node = (TreeNode) listSelected[i].getLastPathComponent();
+			if (node.hasFile())
+				selected.add(node.getFile());
+		}
+		
+		if (iter != null)
+		while (iter.hasMoreElements()){
+			TreeNode node = (TreeNode) iter.nextElement().getLastPathComponent();
+			if (node.hasFile())
+				listExpanded.add(node.getFile());
+		}
+		
+		loadFiles(File.listRoots(), mRoot);
+		
+		for (File path: listExpanded)
+			if (path.exists())
+				expandToPath(path);
+		
+		if (rootSelect)
+			setSelectionPath(rootPath);
+		else
+			setSelectedPath(selected.toArray(new File[selected.size()]));
+	}
+	
 	public void setSelectedPath(File path) throws NullPointerException{
-		selectionModel.setSelectionPath(expandToPath(path));
+		setSelectionPath(expandToPath(path));
+	}
+	
+	public void setSelectedPath(File[] paths){
+		ArrayList<TreePath> selectPath = new ArrayList<>();
+		for (File path: paths){
+			if (path.exists())
+				selectPath.add(expandToPath(path));
+		}
+		setSelectionPaths(selectPath.toArray(new TreePath[selectPath.size()]));
 	}
 
 	private void loadFiles(File[] files, TreeNode node){
@@ -164,6 +237,7 @@ public class FileExplorer extends JTree
 			node.add(child);
 		}
 		node.sortChild(this);
+		mTreeModel.reload(node);
 	}
 	
 	private TreePath expandToPath(File path) throws NullPointerException {
@@ -183,7 +257,7 @@ public class FileExplorer extends JTree
 			find = null;
 			
 			for (int i = 0; i < trace.getChildCount(); i++){
-				TreeNode child = (TreeNode) trace.getChildAt(i);
+				TreeNode child = trace.getChildAt(i);
 				if (file.equals(child.getFile())){
 					find = child;
 					break;

@@ -1,8 +1,6 @@
 package main;
 
 import graph.swing.FileExplorer;
-import graph.swing.FileExplorer.Config;
-
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -53,12 +51,8 @@ public class WindowTest {
 		frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
 		
 		FileExplorer tree = new FileExplorer();
-		tree.setSelectedPath(new java.io.File("D:/Downloads/image"));
+		tree.setSelectedPath(new java.io.File("D:/Downloads/"));
 		scrollPane.setViewportView(tree);
-		
-		Config cf = new Config();
-		cf.showRoot = false;
-		tree.setConfig(cf);
 	}
 
 }
