@@ -10,7 +10,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.LinkedList;
+import java.util.function.Consumer;
 import javax.swing.ImageIcon;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
@@ -124,9 +126,57 @@ public class FileExplorer extends JTree
 		}
 	}
 	
+	public static interface MenuHandle extends Consumer<JPopupMenu>{
+		public void accept(File...files);
+	}
+	
+	class PopupMenu extends JPopupMenu{
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void show(Component invoker, int x, int y) {
+			TreePath select = getPathForLocation(x, y);
+			
+			if (select == null){
+				if (mMenuHandle != null)
+					mMenuHandle.accept();
+				setSelectionPaths(null);
+			} else {
+				boolean findPath = false;
+				TreePath[] selects = getSelectionPaths();
+				
+				if (getSelectionCount() > 0)
+					for (TreePath p: selects)
+						if (p.equals(select)){
+							findPath = true;
+							break;
+						}
+				if (!findPath){
+					setSelectionPath(select);
+					selects = new TreePath[]{select};
+				}
+				
+				if (mMenuHandle != null){
+					File[] files = new File[selects.length];
+					
+					for (int i = 0; i < files.length; i++){
+						TreeNode node = (TreeNode) selects[i].getLastPathComponent();
+						files[i] = node.getFile();
+					}
+					mMenuHandle.accept(files);
+				}
+			}
+			super.show(invoker, x, y);
+		}
+		
+	}
+	
 	private DefaultTreeModel mTreeModel;
 	private TreeNode mRoot;
 	private Config mCf;
+	
+	private PopupMenu mMenu;
+	private MenuHandle mMenuHandle;
 	
 	public FileExplorer(File path){
 		this();
@@ -179,6 +229,42 @@ public class FileExplorer extends JTree
 			}
 			
 		});
+		setComponentPopupMenu(mMenu = new PopupMenu());
+	}
+	
+	/**
+	 * Trả về tập tin đầu tiên đang được chọn, hoặc null nếu không có mục được chọn
+	 */
+	public File getSelectedFile(){
+		if (getSelectionCount() == 0)
+			return null;
+		TreeNode node = (TreeNode) getSelectionPath().getLastPathComponent();
+		return node.getFile();
+	}
+	
+	/**
+	 * Trả về danh sách tập tin đang được chọn, có thể là tập rỗng
+	 */
+	public File[] getSelectedFiles(){
+		if (getSelectionCount() == 0)
+			return new File[0];
+		TreePath[] paths = getSelectionPaths();
+		File[] files = new File[paths.length];
+		
+		for (int i = 0; i < paths.length; i++){
+			TreeNode node = (TreeNode) paths[i].getLastPathComponent();
+			files[i] = node.getFile();
+		}
+		return files;
+	}
+	
+	/**
+	 * Đặt điều khiển menu chuột phải
+	 */
+	public void setMenuHandle(MenuHandle handle){
+		mMenuHandle = handle;
+		mMenu.removeAll();
+		handle.accept(mMenu);
 	}
 	
 	/**
