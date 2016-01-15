@@ -5,7 +5,7 @@ import java.util.List;
 
 import api.models.IBasisPath;
 import api.models.IFunction;
-import api.parser.UnitParser;
+import api.models.IVariable;
 
 /**
  * Giao diện tiến trình chính của ứng dụng, quản lý danh sách các đối tượng đầu vào trong
@@ -18,7 +18,16 @@ public interface IMain {
 	 */
 	public List<IFunction> getFunctions();
 	
-	public UnitParser newUnitParser(File source);
+	public void addFunction(IFunction function);
+	
+	/**
+	 * Trả về danh sách các biến toàn cục trong phiên làm việc
+	 */
+	public List<IVariable> getGlobalVars();
+	
+	public void addGlobalVar(IVariable global);
+	
+	public void parseUnit(File source);
 	
 	/**
 	 * Quá trình kiểm thử một hàm đơn vị

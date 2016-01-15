@@ -8,27 +8,39 @@ import cdt.CMain;
 import api.IMain;
 import api.models.IBasisPath;
 import api.models.IFunction;
-import api.parser.UnitParser;
+import api.models.IVariable;
 
 public abstract class Main implements IMain {
 	
 	private List<IFunction> listFunction;
+	private List<IVariable> listGlobalVar;
 
 	public Main(File... sources){
 		listFunction = new ArrayList<>();
-		for (File source: sources)
-			loadFile(source);
-	}
-	
-	protected void loadFile(File source){
-		UnitParser u = newUnitParser(source);
+		listGlobalVar = new ArrayList<>();
 		
-		listFunction.addAll(u.getParsedFunctions());
+		for (File source: sources)
+			parseUnit(source);
 	}
 
 	@Override
 	public List<IFunction> getFunctions() {
 		return listFunction;
+	}
+
+	@Override
+	public void addFunction(IFunction function) {
+		listFunction.add(function);
+	}
+	
+	@Override
+	public List<IVariable> getGlobalVars() {
+		return listGlobalVar;
+	}
+
+	@Override
+	public void addGlobalVar(IVariable global) {
+		listGlobalVar.add(global);
 	}
 
 	@Override

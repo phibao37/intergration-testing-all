@@ -11,7 +11,7 @@ public interface IExpression extends IElement {
 	 * @note các bản sao cần giữ một liên kết tới nguồn của nó, sẽ được sử dụng bởi
 	 * {@link #equalsSource(IExpression)} và {@link #getSource()}
 	 */
-	public IElement cloneElement();
+	public IExpression cloneElement();
 	
 	/**
 	 * So sánh 2 biểu thức có cùng chung một nguồn

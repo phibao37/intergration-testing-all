@@ -41,4 +41,10 @@ public interface IVariable extends IElement {
 	 * Trả về mức độ khả dụng của biến
 	 */
 	public int getScope();
+	
+	/**
+	 * Tạo ra một biến mới có cùng giá trị (đã được sao chép) từ biến này
+	 */
+	@Override
+	public IVariable cloneElement();
 }

@@ -50,13 +50,13 @@ public abstract class Element implements IElement{
 	/* SELF IMPLEMENT */
 	
 	@Override
-	public boolean equals(Object o){
-		return equalsContent(o);
+	public Element clone(){
+		return cloneElement();
 	}
 	
 	@Override
-	public Element clone(){
-		return cloneElement();
+	public boolean equals(Object o){
+		return equalsContent(o);
 	}
 
 	@Override

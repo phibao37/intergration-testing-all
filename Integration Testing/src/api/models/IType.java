@@ -1,5 +1,7 @@
 package api.models;
 
+import java.util.List;
+
 import api.expression.IExpression;
 
 
@@ -19,5 +21,40 @@ public interface IType extends IElement, Comparable<IType> {
 	@Override
 	public default int compareTo(IType t){
 		return Integer.compare(getSize(), t.getSize());
+	}
+	
+	/**
+	 * Trả về danh sách các cờ hiệu của kiểu, hoặc null nếu không có
+	 */
+	public List<ITypeModifier> getModifiers();
+	
+	public default boolean hasModifier(ITypeModifier mdf){
+		List<ITypeModifier> mdfs = getModifiers();
+		
+		if (mdfs == null)
+			return false;
+		
+		for (ITypeModifier item: mdfs)
+			if (item.equalsContent(mdf))
+				return true;
+		
+		return false;
+	}
+	
+	public default boolean hasModifier(Class<? extends ITypeModifier> cls){
+		List<ITypeModifier> mdfs = getModifiers();
+		
+		if (mdfs == null)
+			return false;
+		
+		for (ITypeModifier item: mdfs)
+			if (cls.isInstance(item))
+				return true;
+		
+		return false;
+	}
+	
+	public static interface ITypeModifier extends IElement{
+		
 	}
 }

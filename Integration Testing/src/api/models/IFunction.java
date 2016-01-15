@@ -1,5 +1,6 @@
 package api.models;
 
+import java.io.File;
 import java.util.List;
 
 public interface IFunction extends IElement {
@@ -41,4 +42,8 @@ public interface IFunction extends IElement {
 	 * Trả về danh sách các hàm được tham chiếu
 	 */
 	public List<IFunction> getRefers();
+	
+	public void setSourceFile(File file);
+	
+	public File getSourceFile();
 }
