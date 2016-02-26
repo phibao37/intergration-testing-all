@@ -68,11 +68,22 @@ public class Variable extends Element implements IVariable {
 	@Override
 	public void setValue(IExpression value) {
 		mValue = value;
+		setContent(getType() + " " + getName() + 
+				(value == null ? "" : "(" + value + ")"));
 	}
 
 	@Override
 	public IExpression getValue() {
 		return mValue;
+	}
+	
+	/**
+	 * Thiết đặt giá trị cho biến nếu như nó chưa có giá trị
+	 */
+	public Variable initValueIfNotSet(){
+		if (!isValueSet())
+			setValue(getType().getDefaultValue());
+		return this;
 	}
 
 	@Override

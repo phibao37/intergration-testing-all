@@ -1,6 +1,8 @@
 package api.expression;
 
+import core.expression.ExpressionVisitor;
 import api.models.IElement;
+import api.models.IType;
 
 /**
  * Các giao diện của một biểu thức bên trong một câu lệnh đơn
@@ -50,4 +52,8 @@ public interface IExpression extends IElement {
 	 * Trả về <i>false</i> nếu trong biểu thức tồn tại các tham số, biến,...
 	 */
 	public boolean isConstant();
+	
+	public int accept(ExpressionVisitor visitor);
+	
+	public IType getType();
 }

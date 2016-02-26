@@ -9,11 +9,12 @@ import api.expression.IArrayExpression;
 import api.expression.IExpression;
 import api.models.IType;
 import core.Utils;
+import core.expression.ArrayExpression;
+import core.expression.NumberExpression;
 import core.models.type.ArrayType;
 
 /**
  * Mô tả kiểu biến mảng
- * @author ducvu
  *
  */
 public class ArrayVariable extends Variable {
@@ -38,9 +39,6 @@ public class ArrayVariable extends Variable {
 	 */
 	public ArrayVariable(String name, ArrayType type, IArrayExpression value){
 		super(name, type, value);
-		
-		//Default
-		setSupportObject();
 	}
 	
 	/**
@@ -67,7 +65,7 @@ public class ArrayVariable extends Variable {
 		
 		try {
 			for (int i = 0; i < indexes.length; i++)
-				indexs[i] = ((IDExpression)indexes[i]).intValue();
+				indexs[i] = ((NumberExpression)indexes[i]).intValue();
 		} catch (Exception e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -139,6 +137,10 @@ public class ArrayVariable extends Variable {
 		replace(old, newValue);
 	}
 	
+	private void replace(IExpression find, IExpression replace){
+		throw new RuntimeException("Cai dat ArrayVariable.replace sau");
+	}
+	
 	/**
 	 * Lấy giá trị của phần tử tại vị trí chỉ định
 	 * @param indexes danh sách chỉ số xác định vị trí của phần tử
@@ -193,18 +195,18 @@ public class ArrayVariable extends Variable {
 				throw new ArrayIndexOutOfBoundsException(i);
 			
 			else {
-				Expression[] arr = new Expression[i+1];
+				IExpression[] arr = new IExpression[i+1];
 				
 				for (int j = 0; j < group.length(); j++)
 					arr[j] = group.getElement(j);
 					arr[i] = subType.getDefaultValue();
 				value = new ArrayExpression(arr);
 				replace(group, value);
-				value = ((ArrayExpression)value).getElement(i);
+				value = ((IArrayExpression)value).getElement(i);
 			}
 			
-			if (value instanceof ArrayExpression){
-				group = (ArrayExpression) value;
+			if (value instanceof IArrayExpression){
+				group = (IArrayExpression) value;
 				type = subType;
 			} else {
 				group = null;
@@ -249,15 +251,6 @@ public class ArrayVariable extends Variable {
 	}
 
 	@Override
-	public Type getDataType() {
-		Type data = getType();
-		
-		while (data instanceof ArrayType)
-			data = ((ArrayType)data).getSubType();
-		return data;
-	}
-
-	@Override
 	public void setValue(IExpression value) {
 		if (value != null && !(value instanceof IArrayExpression))
 			throw new RuntimeException("The value must be an array expression");
@@ -279,32 +272,17 @@ public class ArrayVariable extends Variable {
 	public ArrayVariable clone() {
 		ArrayVariable clone = (ArrayVariable) super.clone();
 		clone.mMapData = new HashMap<>(mMapData);
-		if (mObject != null)
-			clone.mObject = (ObjectExpression) mObject.clone();
+		//if (mObject != null)
+			//clone.mObject = (ObjectExpression) mObject.clone();
 		return clone;
-	}
-
-	@Override
-	public String getValueString() {
-		String value = "";
-		HashMap<int[], Expression> valueMap = getAllValue();
-		
-		for (int[] indexs: valueMap.keySet()){
-			value += ", ";
-			for (int index: indexs)
-				value += "[" + index + "]";
-			value += " => " + valueMap.get(indexs);
-		}
-		
-		return "{" + (value.isEmpty() ? value : value.substring(2)) + "}";
 	}
 
 	/**
 	 * Trả về ánh xạ giữa các chỉ số (kiểu nguyên) và giá trị của mảng ứng với các
 	 * chỉ số này. Chỉ các giá trị khác null mới được liệt kê
 	 */
-	public LinkedHashMap<int[], Expression> getAllValue(){
-		LinkedHashMap<int[], Expression> map = new LinkedHashMap<>();
+	public LinkedHashMap<int[], IExpression> getAllValue(){
+		LinkedHashMap<int[], IExpression> map = new LinkedHashMap<>();
 		
 		travelIndexMap(getValue(), new LinkedList<Integer>(), map);
 		return map;
@@ -313,13 +291,13 @@ public class ArrayVariable extends Variable {
 	/**
 	 * Duyệt các giá trị ứng theo chỉ số
 	 */
-	private void travelIndexMap(Expression value, LinkedList<Integer> indexes, 
-			LinkedHashMap<int[], Expression> map){
+	private void travelIndexMap(IExpression value, LinkedList<Integer> indexes, 
+			LinkedHashMap<int[], IExpression> map){
 		if (value == null)
 			return;
 		
-		if (value instanceof ArrayExpression){
-			ArrayExpression array = (ArrayExpression) value;
+		if (value instanceof IArrayExpression){
+			IArrayExpression array = (IArrayExpression) value;
 			
 			for (int i = 0; i < array.length(); i++){
 				indexes.add(i);

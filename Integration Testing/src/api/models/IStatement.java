@@ -1,5 +1,6 @@
 package api.models;
 
+import core.models.Statement;
 import api.expression.IExpression;
 
 /**
@@ -65,5 +66,17 @@ public interface IStatement extends IElement {
 	public default void setBranch(IStatement next){
 		setBranch(next, next);
 	}
+	
+	/**
+	 * Đánh dấu câu lệnh đã được thăm hay chưa, thường dùng cho việc duyệt đồ thị
+	 * @param visited true: đã thăm qua câu lệnh
+	 */
+	public void setVisit(boolean visited);
+	
+	/**
+	 * Kiểm tra câu lệnh đã được thăm hay chưa
+	 * @see Statement#setVisit(boolean)
+	 */
+	public boolean isVisited();
 	
 }

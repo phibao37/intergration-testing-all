@@ -1,7 +1,5 @@
 package api.models;
 
-import api.solver.ISolveResult;
-
 /**
  * Giao diện một đường thì hành cơ bản, là một dãy có thứ tự các câu lệnh đơn sẽ được
  * chạy bởi chương trình khi được thực thi
@@ -9,7 +7,12 @@ import api.solver.ISolveResult;
 public interface IBasisPath {
 	
 	/**
-	 * Trả về kêt quả giải hệ ràng buộc
+	 * Số câu lệnh trong đường thi hành
 	 */
-	public ISolveResult getResult();
+	public int size();
+	
+	public Iterable<IStatement> iter();
+	
+	public IStatement get(int index);
+	
 }

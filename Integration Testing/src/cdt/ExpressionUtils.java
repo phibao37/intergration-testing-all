@@ -14,7 +14,6 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
-import org.eclipse.cdt.core.dom.ast.IASTFieldReference;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTInitializer;
@@ -28,28 +27,29 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
+import api.IProject;
 import api.expression.IExpression;
 import api.models.IType;
-import core.models.expression.ArrayExpression;
-import core.models.expression.ArrayIndexExpression;
-import core.models.expression.BinaryExpression;
-import core.models.expression.DeclareExpression;
-import core.models.expression.FunctionCallExpression;
-import core.models.expression.IDExpression;
-import core.models.expression.MemberAccessExpression;
-import core.models.expression.NameExpression;
-import core.models.expression.ReturnExpression;
-import core.models.expression.UnaryExpression;
+import core.expression.ArrayExpression;
+import core.expression.ArrayIndexExpression;
+import core.expression.BinaryExpression;
+import core.expression.DeclareExpression;
+import core.expression.FunctionCallExpression;
+import core.expression.NumberExpression;
+import core.expression.NameExpression;
+import core.expression.ReturnExpression;
+import core.expression.StringExpression;
+import core.expression.UnaryExpression;
 
 /**
  * Chuyển đổi các cấu trúc AST sang các biểu thức
  * @author ducvu
  *
  */
-public class EpUtils {
+public class ExpressionUtils {
 	
 	public static void main(String[] args){
-		System.out.println(EpUtils.getExpression("test(maaa)"));
+		System.out.println(ExpressionUtils.getExpression("test(maaa)"));
 		
 	}
 	
@@ -60,10 +60,10 @@ public class EpUtils {
 		return SimpleVisitor.DEFAULT.getExpression(expression);
 	}
 	
-	private CUnitParser mParser;
+	private IProject mProject;
 	
-	public EpUtils(CUnitParser parser){
-		mParser = parser;
+	public ExpressionUtils(IProject project){
+		mProject = project;
 	}
 	
 	/**
@@ -83,7 +83,7 @@ public class EpUtils {
 		
 		if (node instanceof IASTUnaryExpression){
 			IASTUnaryExpression unary = (IASTUnaryExpression) node;
-			Expression child = parseNode(unary.getOperand());
+			IExpression child = parseNode(unary.getOperand());
 			int op = unary.getOperator();
 			String opStr = String.valueOf(ASTStringUtil.getUnaryOperatorString(unary));
 			
@@ -111,7 +111,7 @@ public class EpUtils {
 			}
 			
 			Collections.reverse(listIndexes);
-			Expression[] indexes = new Expression[listIndexes.size()];
+			IExpression[] indexes = new IExpression[listIndexes.size()];
 			
 			for (int i = 0; i < indexes.length; i++)
 				indexes[i] = parseNode(listIndexes.get(i));
@@ -122,7 +122,7 @@ public class EpUtils {
 		if (node instanceof IASTFunctionCallExpression){
 			IASTFunctionCallExpression call = (IASTFunctionCallExpression) node;
 			IASTInitializerClause[] args = call.getArguments();
-			Expression[] argEps = new Expression[args.length];
+			IExpression[] argEps = new IExpression[args.length];
 			
 			for (int i = 0; i < args.length; i++)
 				argEps[i] = parseNode(args[i]);
@@ -133,10 +133,10 @@ public class EpUtils {
 		if (node instanceof IASTDeclarationStatement){
 			IASTSimpleDeclaration declare = (IASTSimpleDeclaration) 
 					((IASTDeclarationStatement) node).getDeclaration();
-			IType type = mParser.searchType(
+			IType type = mProject.findType(
 					declare.getDeclSpecifier().getRawSignature());
 			IASTDeclarator[] drs = declare.getDeclarators();
-			Expression[] decEps = new Expression[drs.length];
+			IExpression[] decEps = new IExpression[drs.length];
 			
 			for (int i = 0; i < drs.length; i++){
 				IASTDeclarator dr = drs[i];
@@ -146,7 +146,7 @@ public class EpUtils {
 				if (dr instanceof IASTArrayDeclarator){
 					IASTArrayModifier[] mdfs = ((IASTArrayDeclarator) dr)
 							.getArrayModifiers();
-					Expression[] indexes = new Expression[mdfs.length];
+					IExpression[] indexes = new IExpression[mdfs.length];
 					
 					for (int j = 0; j < mdfs.length; j++)
 						indexes[j] = parseNode(mdfs[j].getConstantExpression());
@@ -157,7 +157,7 @@ public class EpUtils {
 				}
 				
 				if (init instanceof IASTEqualsInitializer){
-					Expression right = parseNode(((IASTEqualsInitializer) init)
+					IExpression right = parseNode(((IASTEqualsInitializer) init)
 							.getInitializerClause());
 					decEps[i] = new BinaryExpression(
 							decEps[i], 
@@ -172,7 +172,7 @@ public class EpUtils {
 		//Đang thăm 1 danh sách khởi tạo {1, 2, a, b+c}
 		if (node instanceof IASTInitializerList){
 			IASTInitializerClause[] clauses = ((IASTInitializerList) node).getClauses();
-			Expression[] elements = new Expression[clauses.length];
+			IExpression[] elements = new IExpression[clauses.length];
 			
 			for (int i = 0; i < clauses.length; i++)
 				elements[i] = parseNode(clauses[i]);
@@ -183,19 +183,23 @@ public class EpUtils {
 		//Đang thăm 1 cấu trúc hằng
 		if (node instanceof IASTLiteralExpression){
 			int liter = ((IASTLiteralExpression) node).getKind();
+			
+			if (liter == IASTLiteralExpression.lk_string_literal)
+				return new StringExpression(node.toString());
+			
 			int flag = 0;
 			
 			if (liter == IASTLiteralExpression.lk_integer_constant)
-				flag = IDExpression.INTEGER | IDExpression.LONG;
+				flag = NumberExpression.INTEGER | NumberExpression.LONG;
 			else if (liter == IASTLiteralExpression.lk_float_constant)
-				flag = IDExpression.FLOAT | IDExpression.DOUBLE;
+				flag = NumberExpression.FLOAT | NumberExpression.DOUBLE;
 			else if (liter == IASTLiteralExpression.lk_char_constant)
-				flag = IDExpression.CHARACTER;
+				flag = NumberExpression.CHARACTER;
 			else if (liter == IASTLiteralExpression.lk_true
 					|| liter == IASTLiteralExpression.lk_false)
-				flag = IDExpression.BOOLEAN;
+				flag = NumberExpression.BOOLEAN;
 
-			return new IDExpression(node.toString(), flag);
+			return new NumberExpression(node.toString(), flag);
 		}
 		
 		//Đang thăm 1 tham chiếu tên biến
@@ -205,16 +209,16 @@ public class EpUtils {
 		
 		//Đang thăm 1 câu lệnh RETURN
 		if (node instanceof IASTReturnStatement){
-			Expression rt = parseNode(((IASTReturnStatement) node).getReturnValue());
+			IExpression rt = parseNode(((IASTReturnStatement) node).getReturnValue());
 			return new ReturnExpression(rt);
 		}
 		
-		if (node instanceof IASTFieldReference){
-			IASTFieldReference field = (IASTFieldReference) node;
-			Expression object = parseNode(field.getFieldOwner());
-			return new MemberAccessExpression(object, 
-					field.getFieldName().getRawSignature(), !field.isPointerDereference());
-		}
+//		if (node instanceof IASTFieldReference){
+//			IASTFieldReference field = (IASTFieldReference) node;
+//			IExpression object = parseNode(field.getFieldOwner());
+//			return new MemberAccessExpression(object, 
+//					field.getFieldName().getRawSignature(), !field.isPointerDereference());
+//		}
 		
 		if (node instanceof IASTExpressionStatement){
 			return parseNode(((IASTExpressionStatement) node).getExpression());

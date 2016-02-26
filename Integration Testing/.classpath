@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="lib/org.eclipse.cdt.core_5.11.0.201509131935.jar" sourcepath="D:/App/App Data/Eclipse Luna/source/org.eclipse.cdt.core.source_5.11.0.201509131935.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.cdt.core_5.11.0.201509131935.jar" sourcepath="E:/Store/Source/cdt-8.8.0/plugins/org.eclipse.cdt.core.source_5.11.0.201509131935.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.core.resources_3.10.1.v20150725-1910.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.equinox.common_3.7.0.v20150402-1709.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

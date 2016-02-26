@@ -8,6 +8,8 @@ import core.models.Function;
 
 public class CFunction extends Function<IASTStatement> {
 	
+	private String declare;
+	
 	public CFunction(String name, IVariable[] paras, IType returnType,
 			IASTStatement body) {
 		super(name, paras, returnType, body);
@@ -15,6 +17,15 @@ public class CFunction extends Function<IASTStatement> {
 	
 	public CFunction(String name, IVariable[] paras, IType returnType) {
 		this(name, paras, returnType, null);
+	}
+	
+	public CFunction setDeclareStr(String str){
+		declare = str;
+		return this;
+	}
+	
+	public String getDeclareStr(){
+		return declare;
 	}
 
 }

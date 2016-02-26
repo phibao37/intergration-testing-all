@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import core.Utils;
 import api.Value;
 import api.models.ICFG;
 import api.models.IFunction;
@@ -26,6 +27,9 @@ public class Function<T> extends Element implements IFunction {
 		mParas = paras;
 		mReturnType = returnType;
 		mRefers = new ArrayList<>();
+		
+		setContent(String.format("%s %s(%s)", mReturnType, mName, 
+				Utils.merge(", ", paras)));
 		setBody(body);
 	}
 	

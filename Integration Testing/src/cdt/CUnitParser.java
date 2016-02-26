@@ -40,30 +40,33 @@ import org.eclipse.cdt.internal.core.parser.IMacroDictionary;
 import org.eclipse.cdt.internal.core.parser.SavedFilesProvider;
 import org.eclipse.cdt.internal.core.parser.scanner.InternalFileContent;
 
+import api.IProject;
 import api.models.IType;
+import api.parser.UnitParser;
 import cdt.models.CFunction;
 import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Variable;
 import core.models.type.ArrayType;
 
-public class CUnitParser extends ASTVisitor{
+public class CUnitParser extends ASTVisitor implements UnitParser{
 	
 	{  
 		shouldVisitDeclarations = true; 	
 	}
 	
-	private CMain mMain;
+	private CProject mMain;
 	private File mFile;
-	private EpUtils mUtils;
+	private ExpressionUtils mUtils;
 	
-	public CUnitParser(File file, CMain main) {
-		mMain = main;
-		mFile = file;
-		mUtils = new EpUtils(this);
+	@Override
+	public void parseUnit(File source, IProject project) {
+		mMain = (CProject) project;
+		mFile = source;
+		mUtils = new ExpressionUtils(project);
 		
 		try {
-			IASTTranslationUnit u = getIASTTranslationUnit(file, main.getMarcoMap());
+			IASTTranslationUnit u = getIASTTranslationUnit(source, mMain.getMarcoMap());
 			
 			for (IASTPreprocessorMacroDefinition marco: u.getMacroDefinitions()){
 				String key = marco.getName().toString();
@@ -77,9 +80,6 @@ public class CUnitParser extends ASTVisitor{
 		}
 	}
 	
-	public IType searchType(String type){
-		return null;
-	}
 	
 	/** Duyệt các khai báo trong chương trình*/
 	@Override
@@ -159,7 +159,8 @@ public class CUnitParser extends ASTVisitor{
 					para[i] = parseParameter(fnPara[i]);
 			}
 			
-			fn = new CFunction(name, para, searchType(type), fnBody);
+			fn = new CFunction(name, para, mMain.findType(type), fnBody)
+				.setDeclareStr(type + " " + fnDeclare.getRawSignature());
 			fn.setSourceFile(mFile);
 			mMain.addFunction(fn);
 		}
@@ -195,7 +196,7 @@ public class CUnitParser extends ASTVisitor{
 	 */
 	private Variable parseVariable(IASTDeclarator declare, 
 			IASTDeclSpecifier spec){
-		IType type = searchType(spec.getRawSignature());
+		IType type = mMain.findType(spec.getRawSignature());
 		String name = declare.getName().getRawSignature();
 		IASTInitializer init = declare.getInitializer();
 		Variable var;

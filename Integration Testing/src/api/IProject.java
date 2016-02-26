@@ -1,0 +1,67 @@
+package api;
+
+import java.util.List;
+
+import api.models.IFunction;
+import api.models.ITestResult;
+import api.models.IType;
+import api.models.IVariable;
+import api.parser.BodyParser;
+import api.parser.UnitParser;
+
+/**
+ * Các phương thức cơ bản của 1 project
+ */
+public interface IProject {
+	
+	/**
+	 * Nạp các cấu trúc và tạo các liên kết
+	 */
+	public void loadProject();
+	
+	/**
+	 * Kiểm thử một hàm nhất định
+	 */
+	public ITestResult testFunction(IFunction func);
+	
+	/**
+	 * Trả về danh sách các hàm trong project
+	 */
+	public List<IFunction> getFunctions();
+	
+	public void addFunction(IFunction function);
+	
+	/**
+	 * Trả về danh sách các biến toàn cục trong phiên làm việc
+	 */
+	public List<IVariable> getGlobalVars();
+	
+	public void addGlobalVar(IVariable global);
+	
+	/**
+	 * Trả về danh sách các kiểu co bản/cấu trúc được nạp vào project
+	 */
+	public List<IType> getLoadedType();
+	
+	public void addLoadedType(IType type);
+	
+	/**
+	 * Tạo đối tượng phân tích mã nguồn
+	 */
+	public UnitParser getUnitParser();
+	
+	/**
+	 * Tạo đối tượng phân tích thân hàm
+	 */
+	public BodyParser getBodyParser();
+	
+	/**
+	 * Tìm kiểu theo tên của nó
+	 */
+	public default IType findType(String type){
+		for (IType item: getLoadedType())
+			if (item.getContent().equals(type))
+				return item;
+		return null;
+	}
+}

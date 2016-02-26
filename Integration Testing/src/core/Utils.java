@@ -2,6 +2,8 @@ package core;
 import java.io.*;
 import java.util.*;
 
+import api.error.ProcessErrorException;
+
 /**
  * Các tiện ích chung
  * @author ducvu
@@ -198,25 +200,25 @@ public class Utils {
 	 * @throws ProcessErrorException tiến trình trả về mã lỗi khác 0
 	 * @throws NullPointerException đối tượng thực thi hoặc các tham số bằng null
 	 */
-//	public static String runCommand(Object target, String[] envp, 
-//			File dir, Object... args) 
-//			throws IOException, InterruptedException, 
-//			ProcessErrorException, NullPointerException{
-//		
-//		String[] cmdArray = new String[args.length + 1];
-//		cmdArray[0] = target.toString();
-//		for (int i = 0; i < args.length; i++)
-//			cmdArray[i + 1] = args[i].toString();
-//		
-//		Process p = Runtime.getRuntime().exec(cmdArray, envp, dir);
-//		int exit = p.waitFor();
-//		
-//		if (exit != 0)
-//			throw new ProcessErrorException(exit, 
-//					Utils.getContentStream(p.getErrorStream()));
-//		
-//		return Utils.getContentStream(p.getInputStream());
-//	}
+	public static String runCommand(Object target, String[] envp, 
+			File dir, Object... args) 
+			throws IOException, InterruptedException, 
+			ProcessErrorException, NullPointerException{
+		
+		String[] cmdArray = new String[args.length + 1];
+		cmdArray[0] = target.toString();
+		for (int i = 0; i < args.length; i++)
+			cmdArray[i + 1] = args[i].toString();
+		
+		Process p = Runtime.getRuntime().exec(cmdArray, envp, dir);
+		int exit = p.waitFor();
+		
+		if (exit != 0)
+			throw new ProcessErrorException(exit, 
+					Utils.getContentStream(p.getErrorStream()));
+		
+		return Utils.getContentStream(p.getInputStream());
+	}
 	
 	/**
 	 * Trả về kích thước của tập tin hoặc thư mục
