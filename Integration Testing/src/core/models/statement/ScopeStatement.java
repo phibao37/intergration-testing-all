@@ -79,6 +79,12 @@ public class ScopeStatement extends Statement {
 	public boolean isOpenScope(){
 		return SCOPE_OPEN.equals(mContent);
 	}
+	
+
+	@Override
+	public boolean isNormal() {
+		return false;
+	}
 }
 
 

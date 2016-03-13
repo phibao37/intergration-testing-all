@@ -31,5 +31,16 @@ public interface INumberExpression extends IConstantExpression {
 	 * Trả về giá trị nhị phân của biểu thức, hoặc false nếu không thể chuyển sang được
 	 */
 	public abstract boolean boolValue();
+	
+	@Override
+	public default int _handleVisit(IExpressionVisitor visitor) {
+		return visitor.visit(this);
+	}
+
+
+	@Override
+	public default void _handleLeave(IExpressionVisitor visitor) {
+		visitor.leave(this);
+	}
 
 }

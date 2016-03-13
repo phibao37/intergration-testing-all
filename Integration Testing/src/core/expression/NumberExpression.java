@@ -18,32 +18,6 @@ import core.models.type.BasicType;
  */
 public class NumberExpression extends Expression implements INumberExpression{
 
-	/**
-	 * Demo NumberExpression Creator
-	 */
-	public static void main(String[] args){
-		
-		NumberExpression x;
-		
-		//Khởi tạo bằng cách truyền trực tiếp kiểu trong Java
-		x = new NumberExpression(true);  //type = bool
-		x = new NumberExpression('a');  //type = char
-		x = new NumberExpression(12);  //type = int
-		x = new NumberExpression(12l);  //type = long
-		x = new NumberExpression(12f); //type = float
-		x = new NumberExpression(12d);  //type = double
-		
-		//Khởi tạo bằng cách truyền chuỗi string trong mã nguồn,
-		//cần thêm cờ hiệu để xác định được nhanh hơn
-		x = new NumberExpression("true", BOOLEAN); //type = bool
-		x = new NumberExpression("12", INTEGER | LONG); //type = int
-		x = new NumberExpression("2147483647777", INTEGER | LONG); //type = long
-		
-		//Khởi tạo bằng chuỗi, không có gợi ý. Cần phân tích lâu hơn
-		x = new NumberExpression("12.3");
-		//x = new NumberExpression("12.3", FLOAT); //nhanh hon
-		System.out.println(x.getType()); //type = float
-	}
 	
 	/**
 	 * Biểu thức hằng số nguyên 0
@@ -94,10 +68,10 @@ public class NumberExpression extends Expression implements INumberExpression{
 	private String mExtraDisplay;
 	
 	private boolean valBool;
-	private char valChar;
-	private int valInt;
+	//private char valChar;
+	//private int valInt;
 	private long valLong;
-	private float valFloat;
+	//private float valFloat;
 	private double valDouble;
 	
 	/**
@@ -188,11 +162,11 @@ public class NumberExpression extends Expression implements INumberExpression{
 	
 	private void setBool(boolean val){
 		valBool = val;
-		valChar = (char) (val ? 1 : 0);
-		valInt = val ? 1 : 0;
-		valLong = valInt;
-		valFloat = valInt;
-		valDouble = valInt;
+		//valChar = (char) (val ? 1 : 0);
+		//valInt = val ? 1 : 0;
+		valLong = val ? 1 : 0;
+		//valFloat = valInt;
+		valDouble = valLong;
 		if (mType == null){
 			mType = BasicType.BOOL;
 			setContent(val);
@@ -201,10 +175,10 @@ public class NumberExpression extends Expression implements INumberExpression{
 	
 	private void setChar(char val){
 		valBool = val != 0;
-		valChar = val;
-		valInt = val;
+		//valChar = val;
+		//valInt = val;
 		valLong = val;
-		valFloat = val;
+		//valFloat = val;
 		valDouble = val;
 		if (mType == null){
 			mType = BasicType.CHAR;
@@ -214,10 +188,10 @@ public class NumberExpression extends Expression implements INumberExpression{
 	
 	private void setInt(int val){
 		valBool = val != 0;
-		valChar = (char) val;
-		valInt = val;
+		//valChar = (char) val;
+		//valInt = val;
 		valLong = val;
-		valFloat = val;
+		//valFloat = val;
 		valDouble = val;
 		if (mType == null){
 			mType = BasicType.INT;
@@ -227,10 +201,10 @@ public class NumberExpression extends Expression implements INumberExpression{
 	
 	private void setLong(long val){
 		valBool = val != 0;
-		valChar = (char) val;
-		valInt = (int) val;
+		//valChar = (char) val;
+		//valInt = (int) val;
 		valLong = val;
-		valFloat = val;
+		//valFloat = val;
 		valDouble = val;
 		if (mType == null){
 			mType = BasicType.LONG;
@@ -240,10 +214,10 @@ public class NumberExpression extends Expression implements INumberExpression{
 	
 	private void setFloat(float val){
 		valBool = val != 0;
-		valChar = (char) val;
-		valInt = (int) val;
+		//valChar = (char) val;
+		//valInt = (int) val;
 		valLong = (long) val;
-		valFloat = val;
+		//valFloat = val;
 		valDouble = val;
 		if (mType == null){
 			mType = BasicType.FLOAT;
@@ -253,10 +227,10 @@ public class NumberExpression extends Expression implements INumberExpression{
 	
 	private void setDouble(double val){
 		valBool = val != 0;
-		valChar = (char) val;
-		valInt = (int) val;
+		//valChar = (char) val;
+		//valInt = (int) val;
 		valLong = (long) val;
-		valFloat = (float) val;
+		//valFloat = (float) val;
 		valDouble = val;
 		if (mType == null){
 			mType = BasicType.DOUBLE;
@@ -264,12 +238,9 @@ public class NumberExpression extends Expression implements INumberExpression{
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IIDExpression#intValue()
-	 */
 	@Override
 	public int intValue(){
-		return valInt;
+		return (int)valLong;
 	}
 	
 	/* (non-Javadoc)
@@ -285,7 +256,7 @@ public class NumberExpression extends Expression implements INumberExpression{
 	 */
 	@Override
 	public float floatValue(){
-		return valFloat;
+		return (float) valDouble;
 	}
 	
 	/* (non-Javadoc)
@@ -301,7 +272,7 @@ public class NumberExpression extends Expression implements INumberExpression{
 	 */
 	@Override
 	public char charValue(){
-		return valChar;
+		return (char) valLong;
 	}
 	
 	/* (non-Javadoc)

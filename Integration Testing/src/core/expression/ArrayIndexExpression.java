@@ -1,5 +1,6 @@
 package core.expression;
 
+import api.expression.IArrayIndexExpression;
 import api.expression.IExpression;
 import core.models.type.Type;
 
@@ -14,7 +15,7 @@ import core.models.type.Type;
  * @author ducvu
  *
  */
-public class ArrayIndexExpression extends ExpressionGroup {
+public class ArrayIndexExpression extends ExpressionGroup implements IArrayIndexExpression {
 	
 	private boolean mDeclare;
 	private Type mType;
@@ -54,28 +55,29 @@ public class ArrayIndexExpression extends ExpressionGroup {
 		return content;
 	}
 	
-	/**
-	 * Trả về danh sách các chỉ số truy cập mảng
-	 * @note
-	 * 	Đây là tham chiếu trực tiếp, không nên chỉnh sửa các phần tử trong tập này
+	/* (non-Javadoc)
+	 * @see core.expression.IArrayIndexExpression#getIndexes()
 	 */
+	@Override
 	public Expression[] getIndexes(){
 		Expression[] indexs = new Expression[g.length - 1];
 		System.arraycopy(g, 1, indexs, 0, indexs.length);
 		return indexs;
 	}
 	
-	/**
-	 * Thiết đặt đây là một biểu thức khai báo mảng: int a[1][] = ...
+	/* (non-Javadoc)
+	 * @see core.expression.IArrayIndexExpression#setDeclare()
 	 */
+	@Override
 	public ArrayIndexExpression setDeclare(){
 		mDeclare = true;
 		return this;
 	}
 	
-	/**
-	 * Kiểm tra đây là biểu thức trong khai báo
+	/* (non-Javadoc)
+	 * @see core.expression.IArrayIndexExpression#isDeclare()
 	 */
+	@Override
 	public boolean isDeclare(){
 		return mDeclare;
 	}
@@ -105,6 +107,11 @@ public class ArrayIndexExpression extends ExpressionGroup {
 	@Override
 	public Type getType() {
 		return mType;
+	}
+
+	@Override
+	public IExpression getName() {
+		return g[0];
 	}
 
 }

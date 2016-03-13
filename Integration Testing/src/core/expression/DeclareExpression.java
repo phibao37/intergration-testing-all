@@ -1,5 +1,6 @@
 package core.expression;
 
+import api.expression.IDeclareExpression;
 import api.expression.IExpression;
 import api.models.IType;
 
@@ -18,7 +19,7 @@ import api.models.IType;
  * @author ducvu
  *
  */
-public class DeclareExpression extends ExpressionGroup {
+public class DeclareExpression extends ExpressionGroup implements IDeclareExpression {
 	
 	private IType mType;
 	
@@ -34,16 +35,18 @@ public class DeclareExpression extends ExpressionGroup {
 		mType = type;
 	}
 	
-	/**
-	 * Trả về kiểu của khai báo
+	/* (non-Javadoc)
+	 * @see core.expression.IDeclareExpression#getType()
 	 */
+	@Override
 	public IType getType(){
 		return mType;
 	}
 	
-	/**
-	 * Trả về danh sách các biểu thức biến được khai báo
+	/* (non-Javadoc)
+	 * @see core.expression.IDeclareExpression#getDeclares()
 	 */
+	@Override
 	public IExpression[] getDeclares(){
 		return g;
 	}

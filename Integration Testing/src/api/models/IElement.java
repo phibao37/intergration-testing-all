@@ -8,5 +8,5 @@ public interface IElement extends HasContent, Cloneable {
 	/**
 	 * Tạo ra bản sao mới của một phần tử
 	 */
-	public IElement cloneElement();
+	public IElement clone();
 }

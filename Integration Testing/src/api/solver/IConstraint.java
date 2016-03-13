@@ -17,6 +17,11 @@ public interface IConstraint {
 	public List<IExpression> getLogicConstraints();
 	
 	/**
+	 * Thêm ràng buộc vào hệs
+	 */
+	public void addLogicConstraint(IExpression constraint);
+	
+	/**
 	 * Lấy danh sách các tham số của hàm, là các biến số cần được giải ràng buộc
 	 */
 	public IVariable[] getParameters();
@@ -25,4 +30,9 @@ public interface IConstraint {
 	 * Lấy biểu thức trả về của hàm ứng với điều kiện ràng buộc
 	 */
 	public IExpression getReturnExpression();
+	
+	/**
+	 * Tạo bản sao hệ ràng buộc
+	 */
+	public IConstraint clone();
 }

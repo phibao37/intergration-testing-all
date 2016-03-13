@@ -4,11 +4,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.expression.ExpressionVisitor;
 import core.expression.FunctionCallExpression;
 import core.models.CFG;
 import api.IProject;
-import api.Value;
+import api.models.ICFG;
 import api.models.IFunction;
 import api.models.ITestResult;
 import api.models.IType;
@@ -39,31 +38,31 @@ public abstract class AbstractProject implements IProject {
 		
 		//Phân tích CFG cho các hàm
 		for (IFunction func: listFunction){
-			func.setCFG(Value.COVER_BRANCH, new CFG(
+			func.setCFG(ICFG.COVER_BRANCH, new CFG(
 					getBodyParser().parseBody(func.getBody(), false, this)));
-			func.setCFG(Value.COVER_SUBCONDITION, new CFG(
+			func.setCFG(ICFG.COVER_SUBCONDITION, new CFG(
 					getBodyParser().parseBody(func.getBody(), true, this)));
 			
 		}
 		
 		//Liên kết các lời gọi hàm tới các hàm
-		for (IFunction func: listFunction){
-			func.accept(new ExpressionVisitor() {
-
-				@Override
-				public int visit(FunctionCallExpression call) {
-					try {
-						IFunction refer = findFunctionByCall(call);
-						func.addRefer(refer);
-					} catch (FunctionNotFoundException e) {
-						System.out.println("Loi goi ham ben ngoai: " + call);
-						//Load #include<header> của bộ biên dịch ???
-					}
-					return PROCESS_CONTINUE;
-				}
-				
-			});
-		}
+//		for (IFunction func: listFunction){
+//			func.accept(new ExpressionVisitor() {
+//
+//				@Override
+//				public int visit(FunctionCallExpression call) {
+//					try {
+//						IFunction refer = findFunctionByCall(call);
+//						func.addRefer(refer);
+//					} catch (FunctionNotFoundException e) {
+//						System.out.println("Loi goi ham ben ngoai: " + call);
+//						//Load #include<header> của bộ biên dịch ???
+//					}
+//					return PROCESS_CONTINUE;
+//				}
+//				
+//			});
+//		}
 		
 	}
 	
@@ -105,9 +104,6 @@ public abstract class AbstractProject implements IProject {
 		if (func.getParameters().length != call.getArguments().length)
 			return false;
 		
-		//TODO các biểu thức tham số phải khớp kiểu trong khai báo hàm
-		//TODO có nhũng lời gọi bỏ qua tham số cuối cùng đã được định nghĩa
-		//System.out.printf("Find %s => Found %s\n", call, func.getName());
 		return true;
 	}
 

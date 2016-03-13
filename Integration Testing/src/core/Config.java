@@ -7,7 +7,7 @@ import java.io.File;
  */
 public class Config {
 
-	public static File DIR_TEMP = new File("ctesting/temp").getAbsoluteFile();
+	public static File DIR_TEMP = new File("local/temp").getAbsoluteFile();
 	
 	public static File DIR_GCC = new File(
 			"C:/Program Files (x86)/Dev-Cpp/MinGW64/bin");

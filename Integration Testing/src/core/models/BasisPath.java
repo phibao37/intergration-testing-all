@@ -2,9 +2,9 @@ package core.models;
 
 import java.util.ArrayList;
 
+import api.expression.IExpressionVisitor;
 import api.models.IBasisPath;
 import api.models.IStatement;
-import core.expression.ExpressionVisitor;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
@@ -67,24 +67,24 @@ public class BasisPath extends ArrayList<IStatement> implements IBasisPath {
 	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 
 	 * theo danh sách trong đường thi hành
 	 * @param visitor bộ duyệt biểu thức. 
-	 * Sử dụng {@link ExpressionVisitor#visit(Statement)} để "bắt" được khi các
+	 * Sử dụng {@link IExpressionVisitor#visit(Statement)} để "bắt" được khi các
 	 * câu lệnh được duyệt vào
 	 */
-	public void accept(ExpressionVisitor visitor){
+	public void accept(IExpressionVisitor visitor){
 		int process;
 		
 		for (IStatement stm: this){
 			process = visitor.visit(stm);
 			
-			if (process == ExpressionVisitor.PROCESS_ABORT)
+			if (process == IExpressionVisitor.PROCESS_ABORT)
 				break;
-			else if (process == ExpressionVisitor.PROCESS_CONTINUE
+			else if (process == IExpressionVisitor.PROCESS_CONTINUE
 					&& !(stm instanceof ScopeStatement)
 					&& !(stm instanceof FlagStatement)){
 				
 				
 				process = stm.getRoot().accept(visitor);
-				if (process == ExpressionVisitor.PROCESS_ABORT)
+				if (process == IExpressionVisitor.PROCESS_ABORT)
 					break;
 				
 				

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.Utils;
-import api.Value;
 import api.models.ICFG;
 import api.models.IFunction;
 import api.models.IType;
@@ -59,11 +58,11 @@ public class Function<T> extends Element implements IFunction {
 	@Override
 	public void setCFG(int cover, ICFG cfg) {
 		switch (cover){
-		case Value.COVER_STATEMENT:
-		case Value.COVER_BRANCH:
+		case ICFG.COVER_STATEMENT:
+		case ICFG.COVER_BRANCH:
 			mCFG_12 = cfg;
 			break;
-		case Value.COVER_SUBCONDITION:
+		case ICFG.COVER_SUBCONDITION:
 			mCFG_3 = cfg;
 			break;
 		}
@@ -72,10 +71,10 @@ public class Function<T> extends Element implements IFunction {
 	@Override
 	public ICFG getCFG(int cover) {
 		switch (cover){
-		case Value.COVER_STATEMENT:
-		case Value.COVER_BRANCH:
+		case ICFG.COVER_STATEMENT:
+		case ICFG.COVER_BRANCH:
 			return mCFG_12;
-		case Value.COVER_SUBCONDITION:
+		case ICFG.COVER_SUBCONDITION:
 			return mCFG_3;
 		default:
 			return null;

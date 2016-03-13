@@ -1,5 +1,7 @@
 package core.expression;
 
+import api.expression.IExpression;
+import api.expression.INameExpression;
 import api.models.IType;
 
 
@@ -9,27 +11,7 @@ import api.models.IType;
  * @author ducvu
  *
  */
-public class NameExpression extends Expression {
-	
-	/**
-	 * Vai trò bình thường, tham chiếu đến các biến
-	 */
-	public static final int ROLE_NORMAL = 0;
-	
-	/**
-	 * Tham gia vai trò tên biến mảng trong một biểu thức truy cập phần tử mảng
-	 */
-	public static final int ROLE_ARRAY = 1;
-	
-	/**
-	 * Tham gia vai trò tên hàm trong biểu thức gọi hàm
-	 */
-	public static final int ROLE_FUNCTION = 2;
-	
-	/**
-	 * Tham gia vai trò tên đối tượng trong biểu thức truy cập thuộc tính
-	 */
-	public static final int ROLE_OBJECT = 3;
+public class NameExpression extends Expression implements INameExpression {
 	
 	private IType mType;
 	private int mRole = ROLE_NORMAL;
@@ -58,18 +40,19 @@ public class NameExpression extends Expression {
 		return mType;
 	}
 
-	/**
-	 * Trả về vai trò của biểu thức tên đối với biểu thức cha của nó
-	 */
+	@Override
 	public int getRole() {
 		return mRole;
 	}
 	
-	/**
-	 * Gán vai trò của biểu thức tên trong biểu thức cha của nó
-	 */
+	@Override
 	public void setRole(int role) {
 		mRole = role;
+	}
+
+	@Override
+	public IExpression getName() {
+		return this;
 	}
 
 }

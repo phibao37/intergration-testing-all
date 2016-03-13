@@ -41,4 +41,11 @@ public class FlagStatement extends Statement {
 	public static FlagStatement newEndFlag(){
 		return new FlagStatement(END);
 	}
+
+	@Override
+	public boolean isNormal() {
+		return false;
+	}
+	
+	
 }

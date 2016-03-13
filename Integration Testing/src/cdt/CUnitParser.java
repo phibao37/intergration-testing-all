@@ -217,6 +217,7 @@ public class CUnitParser extends ASTVisitor implements UnitParser{
 				try {
 					capacity = Integer.valueOf(constant.getRawSignature());
 				} catch (Exception e){
+					//TODO tìm trong #define
 					throw new RuntimeException("Named length array not support"
 							+ arrMdf.getConstantExpression());
 				}

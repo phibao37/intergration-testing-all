@@ -1,8 +1,7 @@
 package core.expression;
 
-import java.lang.reflect.InvocationTargetException;
-
 import api.expression.IExpression;
+import api.expression.IExpressionVisitor;
 import core.models.Element;
 
 /**
@@ -59,8 +58,9 @@ public abstract class Expression extends Element implements IExpression {
 	 * Tạo ra một bản sao của biểu thức. Các biểu thức bản sao và cả bản chính đều sẽ
 	 * có chung một nguồn, sử dụng {@link #equalsSource(Expression)} để kiểm tra
 	 */
-	public Expression cloneElement(){
-		Expression clone = (Expression) super.cloneElement();
+	@Override
+	public Expression clone(){
+		Expression clone = (Expression) super.clone();
 		
 		clone.mSource = this.mSource;
 		return clone;
@@ -115,21 +115,21 @@ public abstract class Expression extends Element implements IExpression {
 	 * <code>int visit(SomeExpression ep) {...}</code> trong bộ duyệt, với
 	 * <code>SomeExpression</code> là loại biểu thức cần "bắt"
 	 * @return
-	 * {@link ExpressionVisitor#PROCESS_CONTINUE}: đã duyệt qua hết mọi biểu thức<br/>
-	 * {@link ExpressionVisitor#PROCESS_SKIP}: các biểu thức con bị bỏ qua<br/>
-	 * {@link ExpressionVisitor#PROCESS_ABORT}: một biểu thức đã hủy áp dụng<br/>
+	 * {@link IExpressionVisitor#PROCESS_CONTINUE}: đã duyệt qua hết mọi biểu thức<br/>
+	 * {@link IExpressionVisitor#PROCESS_SKIP}: các biểu thức con bị bỏ qua<br/>
+	 * {@link IExpressionVisitor#PROCESS_ABORT}: một biểu thức đã hủy áp dụng<br/>
 	 */
-	public int accept(ExpressionVisitor visitor){
-		int process = ExpressionVisitor.PROCESS_SKIP;
+	public int accept(IExpressionVisitor visitor){
+		int process = IExpressionVisitor.PROCESS_SKIP;
 		
 		//Tiền xử lý biểu thức cho phép thăm chính thức
 		if (visitor.preVisit(this)){
 			
 			//Chính thức thăm một biểu thức ứng với kiểu cụ thể
-			process = handleVisit(visitor);
+			process = _handleVisit(visitor);
 			
 			//Kết quả thăm biểu thức cho phép duyệt các biểu thức con
-			if (process == ExpressionVisitor.PROCESS_CONTINUE 
+			if (process == IExpressionVisitor.PROCESS_CONTINUE 
 					&& this instanceof ExpressionGroup){
 				
 				//Áp dụng bộ duyệt cho biểu thức con
@@ -139,63 +139,19 @@ public abstract class Expression extends Element implements IExpression {
 					
 					//Kết quả duyệt biểu thức con yêu cầu hủy quá trình duyệt,
 					//bỏ qua các biểu thức con khác, trả về kết quả lên biểu thức cha
-					if (child_process == ExpressionVisitor.PROCESS_ABORT){
+					if (child_process == IExpressionVisitor.PROCESS_ABORT){
 						process = child_process;
 						break;
 					}
 				}
 				
 			}
-			handleLeave(visitor);
+			_handleLeave(visitor);
 		}
 		
 		//Hậu xử lý và trả về kết quả duyệt
 		visitor.postVisit(this);
 		return process;
-	}
-	
-	/**
-	 * Xử lý việc thăm với từng loại biểu thức
-	 */
-	private int handleVisit(ExpressionVisitor visitor){
-		boolean stop = false;
-		Class<?> cls = getClass();
-		
-		do{
-			try {
-				return (int) ExpressionVisitor.class
-						.getMethod("visit", cls)
-						.invoke(visitor, this);
-			} catch (NoSuchMethodException 
-					| IllegalAccessException | InvocationTargetException e) {
-				cls = cls.getSuperclass();
-				if (cls == Expression.class || cls == ExpressionGroup.class)
-					stop = true;
-			}
-		} while (!stop);
-		return ExpressionVisitor.PROCESS_CONTINUE;
-	}
-	
-	/**
-	 * Xử lý việc rời đi với từng loại biểu thức
-	 */
-	private void handleLeave(ExpressionVisitor visitor){
-		boolean stop = false;
-		Class<?> cls = getClass();
-		
-		do{
-			try {
-				ExpressionVisitor.class
-						.getMethod("leave", cls)
-						.invoke(visitor, this);
-				return;
-			} catch (NoSuchMethodException 
-					| IllegalAccessException | InvocationTargetException e) {
-				cls = cls.getSuperclass();
-				if (cls == Expression.class || cls == ExpressionGroup.class)
-					stop = true;
-			}
-		} while (!stop);
 	}
 	
 	/**

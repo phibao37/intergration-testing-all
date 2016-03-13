@@ -46,5 +46,5 @@ public interface IVariable extends IElement {
 	 * Tạo ra một biến mới có cùng giá trị (đã được sao chép) từ biến này
 	 */
 	@Override
-	public IVariable cloneElement();
+	public IVariable clone();
 }

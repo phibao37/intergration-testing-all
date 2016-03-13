@@ -22,4 +22,8 @@ public interface ICFG {
 	 * @param cover cấp độ phủ mã nguồn yêu cầu
 	 */
 	public List<IBasisPath> getPathsCover(int cover);
+	
+	public static final int COVER_STATEMENT = 1;
+	public static final int COVER_BRANCH = 2;
+	public static final int COVER_SUBCONDITION = 3;
 }

@@ -1,6 +1,7 @@
 package core.expression;
 
 import api.expression.IExpression;
+import api.expression.IUnaryExpression;
 import api.models.IType;
 import core.Utils;
 import core.models.type.BasicType;
@@ -17,7 +18,7 @@ import core.models.type.BasicType;
  * @author ducvu
  *
  */
-public class UnaryExpression extends ExpressionGroup {
+public class UnaryExpression extends ExpressionGroup implements IUnaryExpression {
 	
 	/** Phép toán lấy dấu dương (3 + (+3))*/
 	public static final String PLUS = "+";
@@ -71,34 +72,42 @@ public class UnaryExpression extends ExpressionGroup {
 			return String.format("(%s%s)", getSubElement(), getOperator());
 	}
 	
-	/**
-	 * Kiểm tra phép toán nằm ở bên trái của biểu thức con
+	/* (non-Javadoc)
+	 * @see core.expression.IUnaryExpression#isLeftOperator()
 	 */
+	@Override
 	public boolean isLeftOperator(){
 		return mLeft;
 	}
 	
-	/**
-	 * Kiểm tra đây là một biểu thức gán
+	/* (non-Javadoc)
+	 * @see core.expression.IUnaryExpression#isAssignOperator()
 	 */
+	@Override
 	public boolean isAssignOperator(){
 		return Utils.find(ASSIGNS, getOperator());
 	}
 	
-	/**
-	 * Trả về phép toán của biểu thức
+	/* (non-Javadoc)
+	 * @see core.expression.IUnaryExpression#getOperator()
 	 */
+	@Override
 	public String getOperator(){
 		return mOperator;
 	}
 	
-	/**
-	 * Trả về biểu thức con
+	/* (non-Javadoc)
+	 * @see core.expression.IUnaryExpression#getSubElement()
 	 */
+	@Override
 	public IExpression getSubElement(){
 		return g[0];
 	}
 
+	/* (non-Javadoc)
+	 * @see core.expression.IUnaryExpression#isConditionExpression()
+	 */
+	@Override
 	public boolean isConditionExpression() {
 		return getOperator().equals(LOGIC_NOT);
 	}

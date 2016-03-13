@@ -1,5 +1,6 @@
 package core.expression;
 
+import api.expression.IBinaryExpression;
 import api.expression.IExpression;
 import api.models.IType;
 import core.Utils;
@@ -18,7 +19,7 @@ import core.models.type.BasicType;
  * @author ducvu
  *
  */
-public class BinaryExpression extends ExpressionGroup{
+public class BinaryExpression extends ExpressionGroup implements IBinaryExpression{
 	
 	/**
 	 * Phép toán gán (=)
@@ -105,34 +106,42 @@ public class BinaryExpression extends ExpressionGroup{
 		return String.format("(%s%s%s)", getLeft(), getOperator(), getRight());
 	}
 	
-	/**
-	 * Trả về biểu thức nằm ở bên trái
+	/* (non-Javadoc)
+	 * @see core.expression.IBinaryExpression#getLeft()
 	 */
+	@Override
 	public IExpression getLeft(){
 		return g[0];
 	}
 	
-	/**
-	 * Trả về phép toán của biểu thức
+	/* (non-Javadoc)
+	 * @see core.expression.IBinaryExpression#getOperator()
 	 */
+	@Override
 	public String getOperator(){
 		return mOperator;
 	}
 	
-	/**
-	 * Trả về biểu thức nằm ở bên phải
+	/* (non-Javadoc)
+	 * @see core.expression.IBinaryExpression#getRight()
 	 */
+	@Override
 	public IExpression getRight(){
 		return g[1];
 	}
 	
-	/**
-	 * Kiểm tra biểu thức gán
+	/* (non-Javadoc)
+	 * @see core.expression.IBinaryExpression#isAssignOperator()
 	 */
+	@Override
 	public boolean isAssignOperator(){
 		return Utils.find(ASSIGNS, getOperator());
 	}
 
+	/* (non-Javadoc)
+	 * @see core.expression.IBinaryExpression#isConditionExpression()
+	 */
+	@Override
 	public boolean isConditionExpression() {
 		return Utils.find(CONDITIONS, getOperator());
 	}

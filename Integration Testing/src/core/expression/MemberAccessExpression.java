@@ -1,5 +1,7 @@
 package core.expression;
 
+import api.expression.IExpression;
+import api.expression.IMemberAccessExpression;
 import api.models.IType;
 
 
@@ -11,7 +13,7 @@ import api.models.IType;
  * </pre>
  *
  */
-public class MemberAccessExpression extends ExpressionGroup {
+public class MemberAccessExpression extends ExpressionGroup implements IMemberAccessExpression {
 
 	private String mMember;
 	private boolean isDot;
@@ -37,17 +39,19 @@ public class MemberAccessExpression extends ExpressionGroup {
 		return g[0] + (isDot ? "." : "->") + mMember;
 	}
 	
-	/**
-	 * Kiểm tra thuộc tính được truy cập bằng "." thay vì "->" 
+	/* (non-Javadoc)
+	 * @see core.expression.IMemberAccessExpression#isDotAccess()
 	 */
+	@Override
 	public boolean isDotAccess(){
 		return isDot;
 	}
 	
 
-	/**
-	 * Trả về tên của thuộc tính
+	/* (non-Javadoc)
+	 * @see core.expression.IMemberAccessExpression#getMemberName()
 	 */
+	@Override
 	public String getMemberName(){
 		return mMember;
 	}
@@ -61,6 +65,12 @@ public class MemberAccessExpression extends ExpressionGroup {
 		mType = type;
 		if (isCloneExpression())
 			((MemberAccessExpression) getSource()).setType(type);
+	}
+
+
+	@Override
+	public IExpression getName() {
+		return g[0];
 	}
 
 

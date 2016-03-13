@@ -1,6 +1,5 @@
 package api.expression;
 
-import core.expression.ExpressionVisitor;
 import api.models.IElement;
 import api.models.IType;
 
@@ -9,11 +8,12 @@ import api.models.IType;
  */
 public interface IExpression extends IElement {
 	
+	@Override
 	/**
 	 * @note các bản sao cần giữ một liên kết tới nguồn của nó, sẽ được sử dụng bởi
 	 * {@link #equalsSource(IExpression)} và {@link #getSource()}
 	 */
-	public IExpression cloneElement();
+	public IExpression clone();
 	
 	/**
 	 * So sánh 2 biểu thức có cùng chung một nguồn
@@ -24,7 +24,7 @@ public interface IExpression extends IElement {
 	 * Trả về nguồn của biểu thức, được xác định như sau:
 	 * <ul>
 	 * 	<li>Đối tượng được sinh ra bởi constructor: trả về chính đối tượng đó</li>
-	 * 	<li>Đối tượng được sinh bởi {@link #cloneElement()}: trả về đối tượng nguồn
+	 * 	<li>Đối tượng được sinh bởi {@link #clone()}: trả về đối tượng nguồn
 	 *  mà nó được sao chép</li>
 	 * </ul>
 	 */
@@ -53,7 +53,11 @@ public interface IExpression extends IElement {
 	 */
 	public boolean isConstant();
 	
-	public int accept(ExpressionVisitor visitor);
-	
 	public IType getType();
+	
+	public int accept(IExpressionVisitor visitor);
+	
+	public int _handleVisit(IExpressionVisitor visitor);
+	
+	public void _handleLeave(IExpressionVisitor visitor);
 }

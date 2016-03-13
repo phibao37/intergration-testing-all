@@ -50,6 +50,14 @@ public interface IStatement extends IElement {
 	}
 	
 	/**
+	 * Kiểm tra câu lệnh dạng thông thường, khác với một số câu lệnh đặc biệt dùng
+	 * để đánh dấu giúp cho việc xử lý
+	 */
+	public default boolean isNormal(){
+		return true;
+	}
+	
+	/**
 	 * Thiết đặt các nhánh liên kết
 	 * @param trueBranch câu lệnh tiếp theo khi điều kiện câu lệnh đúng
 	 * @param falseBranch câu lệnh tiếp theo khi điều kiện câu lệnh sai

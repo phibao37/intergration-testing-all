@@ -97,13 +97,14 @@ public abstract class ExpressionGroup extends Expression implements IExpressionG
 	 * Tạo ra một bản sao của biểu thức. Các thành phần biểu thức con cũng tự nó được
 	 * sao chép (deep-clone)
 	 */
-	public ExpressionGroup cloneElement(){
-		ExpressionGroup clone = (ExpressionGroup) super.cloneElement();
+	@Override
+	public ExpressionGroup clone(){
+		ExpressionGroup clone = (ExpressionGroup) super.clone();
 		
 		clone.g = new Expression[g.length];
 		for (int i = 0; i < g.length; i++){
 			if (g[i] != null)
-			clone.g[i] = g[i].cloneElement();
+			clone.g[i] = g[i].clone();
 		}
 		return clone;
 	}

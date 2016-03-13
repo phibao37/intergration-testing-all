@@ -1,6 +1,7 @@
 package core.expression;
 
 import api.expression.IExpression;
+import api.expression.IFunctionCallExpression;
 import api.models.IFunction;
 import api.models.IType;
 
@@ -15,7 +16,7 @@ import api.models.IType;
  * @author ducvu
  *
  */
-public class FunctionCallExpression extends ExpressionGroup{
+public class FunctionCallExpression extends ExpressionGroup implements IFunctionCallExpression{
 	
 	private IFunction mFunc;
 	
@@ -44,31 +45,29 @@ public class FunctionCallExpression extends ExpressionGroup{
 			args += "," + g[i].getContent();
 		return String.format("%s(%s)", getName(), args);
 	}
-	
-	public String getName() {
-		return g[0].getContent();
-	}
 
-	/**
-	 * Trả về danh sách các tham số gọi hàm<br/>
-	 * Mảng được truy cập trực tiếp, do vậy, không nên thay đổi các phần tử trong mảng này
+	/* (non-Javadoc)
+	 * @see core.expression.IFunctionCallExpression#getArguments()
 	 */
-	public Expression[] getArguments(){
-		Expression[] indexs = new Expression[g.length - 1];
+	@Override
+	public IExpression[] getArguments(){
+		IExpression[] indexs = new IExpression[g.length - 1];
 		System.arraycopy(g, 1, indexs, 0, indexs.length);
 		return indexs;
 	}
 	
-	/**
-	 * Thiết đặt hàm số được cho là đúng với lời gọi hàm này
+	/* (non-Javadoc)
+	 * @see core.expression.IFunctionCallExpression#setFunction(api.models.IFunction)
 	 */
+	@Override
 	public void setFunction(IFunction func){
 		mFunc = func;
 	}
 	
-	/**
-	 * Trả về hàm số tương ứng với lời gọi hàm này, hoặc null nếu không có
+	/* (non-Javadoc)
+	 * @see core.expression.IFunctionCallExpression#getFunction()
 	 */
+	@Override
 	public IFunction getFunction(){
 		return mFunc;
 	}
@@ -83,6 +82,12 @@ public class FunctionCallExpression extends ExpressionGroup{
 		if (mFunc != null)
 			return mFunc.getReturnType();
 		return null;
+	}
+
+
+	@Override
+	public IExpression getName() {
+		return g[0];
 	}
 
 //	@Override

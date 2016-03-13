@@ -38,20 +38,15 @@ public abstract class Element implements IElement{
 		return mContent;
 	}
 	
+	/* SELF IMPLEMENT */
+	
 	@Override
-	public Element cloneElement(){
+	public Element clone(){
 		try{
 			return (Element) super.clone();
 		} catch (Exception e){
 			return null;
 		}
-	}
-	
-	/* SELF IMPLEMENT */
-	
-	@Override
-	public Element clone(){
-		return cloneElement();
 	}
 	
 	@Override

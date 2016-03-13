@@ -87,11 +87,11 @@ public class Variable extends Element implements IVariable {
 	}
 
 	@Override
-	public Variable cloneElement() {
-		Variable v = (Variable) super.cloneElement();
+	public Variable clone() {
+		Variable v = (Variable) super.clone();
 		
 		if (mValue != null)
-			v.mValue = mValue.cloneElement();
+			v.mValue = mValue.clone();
 		return v;
 	}
 	
