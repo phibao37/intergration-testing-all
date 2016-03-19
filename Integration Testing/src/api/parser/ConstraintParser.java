@@ -3,6 +3,7 @@ package api.parser;
 import java.util.List;
 
 import api.models.IBasisPath;
+import api.models.IVariable;
 import api.solver.IConstraint;
 
 public interface ConstraintParser {
@@ -16,5 +17,9 @@ public interface ConstraintParser {
 	 * 	(chia cho 0, con trỏ NULL, truy cập phẩn tử mảng âm, ...)</li>
 	 * </ul>
 	 */
-	List<IConstraint> parseBasisPath(IBasisPath path);
+	List<IConstraint> parseBasisPath(IBasisPath path, IVariable[] params, 
+			int options);
+	
+	final int DEFAULT = 0,
+			PARSE_ERROR_PATH = 1;
 }

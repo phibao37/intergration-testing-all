@@ -17,4 +17,9 @@ public interface IExpressionGroup extends IExpression {
 	 * @throws NullPointerException biểu thức tìm kiểm bằng null
 	 */
 	public boolean replaceChild(IExpression find, IExpression replace);
+	
+	/**
+	 * Loại bỏ đóng nhóm
+	 */
+	IExpression ungroup();
 }

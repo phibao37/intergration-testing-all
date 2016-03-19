@@ -7,7 +7,9 @@ import api.models.ITestResult;
 import api.models.IType;
 import api.models.IVariable;
 import api.parser.BodyParser;
+import api.parser.ConstraintParser;
 import api.parser.UnitParser;
+import api.solver.ISolver;
 
 /**
  * Các phương thức cơ bản của 1 project
@@ -54,6 +56,16 @@ public interface IProject {
 	 * Tạo đối tượng phân tích thân hàm
 	 */
 	public BodyParser getBodyParser();
+	
+	/**
+	 * Tạo đối tượng phân tích hệ ràng buộc từ đường thi hành
+	 */
+	public ConstraintParser getConstraintParser();
+	
+	/**
+	 * Trả về bộ giải hệ
+	 */
+	public ISolver getSolver();
 	
 	/**
 	 * Tìm kiểu theo tên của nó

@@ -1,6 +1,7 @@
 package core.expression;
 
 import api.expression.IExpression;
+import api.expression.IExpressionGroup;
 import api.expression.IExpressionVisitor;
 import core.models.Element;
 
@@ -131,11 +132,12 @@ public abstract class Expression extends Element implements IExpression {
 			//Kết quả thăm biểu thức cho phép duyệt các biểu thức con
 			if (process == IExpressionVisitor.PROCESS_CONTINUE 
 					&& this instanceof ExpressionGroup){
+				IExpression[] childs = ((ExpressionGroup)this).g;
 				
 				//Áp dụng bộ duyệt cho biểu thức con
-				for (IExpression e: ((ExpressionGroup)this).g){
-					if (e == null) continue;
-					int child_process = e.accept(visitor);
+				for (int i = 0; i < childs.length; i++){
+					if (childs[i] == null) continue;
+					int child_process = childs[i].accept(visitor);
 					
 					//Kết quả duyệt biểu thức con yêu cầu hủy quá trình duyệt,
 					//bỏ qua các biểu thức con khác, trả về kết quả lên biểu thức cha
@@ -154,6 +156,13 @@ public abstract class Expression extends Element implements IExpression {
 		return process;
 	}
 	
+	
+	
+	@Override
+	public IExpressionGroup group() {
+		return new SingleGroupExpression(this);
+	}
+
 	/**
 	 * In cây quan hệ
 	 * @param margin khoảng cách đầu dòng

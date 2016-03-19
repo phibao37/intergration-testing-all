@@ -6,10 +6,10 @@ import java.util.Map;
 
 import api.parser.BodyParser;
 import api.parser.UnitParser;
-import core.AbstractProject;
+import core.BaseProject;
 import core.models.type.BasicType;
 
-public class CProject extends AbstractProject {
+public class CProject extends BaseProject {
 
 	private Map<String, String> mapMarco;
 	

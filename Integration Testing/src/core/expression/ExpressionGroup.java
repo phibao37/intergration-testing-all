@@ -2,6 +2,8 @@ package core.expression;
 
 import api.expression.IExpression;
 import api.expression.IExpressionGroup;
+import api.expression.IExpressionVisitor;
+import api.models.IType;
 
 /**
  * Kiểu biểu thức nhóm trong ngôn ngữ mà nó chứa các biểu thức con ở bên trong.<br/>
@@ -108,9 +110,50 @@ public abstract class ExpressionGroup extends Expression implements IExpressionG
 		}
 		return clone;
 	}
+
+	@Override
+	public IExpression ungroup() {
+		return this;
+	}
+	
+	
 }
 
+class SingleGroupExpression extends ExpressionGroup{
 
+	public SingleGroupExpression(IExpression ex) {
+		super(ex);
+	}
+	
+	@Override
+	public IExpressionGroup group() {
+		return this;
+	}
+	
+	@Override
+	public IExpression ungroup() {
+		return g[0];
+	}
+
+	@Override
+	public IType getType() {
+		return g[0].getType();
+	}
+
+	@Override
+	public int _handleVisit(IExpressionVisitor visitor) {
+		return 0;
+	}
+
+	@Override
+	public void _handleLeave(IExpressionVisitor visitor) {}
+
+	@Override
+	protected String generateContent() {
+		return g[0].getContent();
+	}
+	
+}
 
 
 

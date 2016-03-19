@@ -55,6 +55,11 @@ public interface IExpression extends IElement {
 	
 	public IType getType();
 	
+	/**
+	 * Nhóm lại nếu chưa là biểu thức nhóm, phục vụ mục đích replace
+	 */
+	IExpressionGroup group();
+	
 	public int accept(IExpressionVisitor visitor);
 	
 	public int _handleVisit(IExpressionVisitor visitor);

@@ -2,8 +2,6 @@ package core.models;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
-
 import api.models.IBasisPath;
 import api.models.ICFG;
 import api.models.IStatement;
@@ -46,11 +44,7 @@ public class CFG implements ICFG{
 		return mList;
 	}
 	
-	/**
-	 * Trả về danh sách các đường đi phủ hết được các câu lệnh
-	 * @return danh sách tối giản các đường đi, sau khi duyệt hết các đường đi này, mọi
-	 * câu lệnh trong đồ thị đều được thăm
-	 */
+	@Override
 	public ArrayList<IBasisPath> getCoverStatementPaths(){
 		
 		//Tạo bản sao danh sách các đường thi hành
@@ -67,7 +61,7 @@ public class CFG implements ICFG{
 			//các đường thi hành này là đã được thăm
 			for (IBasisPath path: copy){
 				if (path == copy.get(i)) continue;
-				for (IStatement stm: path.iter())
+				for (IStatement stm: path)
 					stm.setVisit(true);
 			}
 			
@@ -86,11 +80,7 @@ public class CFG implements ICFG{
 		return copy;
 	}
 	
-	/**
-	 * Trả về danh sách các đường đi phủ hết được các nhánh
-	 * @return danh sách tối giản các đường đi, sau khi duyệt hết các đường đi này, mọi
-	 * nhánh trong đồ thị (các cạnh) đều được thăm
-	 */
+	@Override
 	public ArrayList<IBasisPath> getCoverBranchPaths(){
 		//Tạo bản sao danh sách các đường thi hành
 		ArrayList<IBasisPath> copy = new ArrayList<>(getAllBasisPaths());
@@ -151,7 +141,7 @@ public class CFG implements ICFG{
 	 * @param current câu lệnh cần được thêm vào đường đi
 	 * @refer Anh DucAnh
 	 */
-	private void travel(BasisPath path, IStatement current){
+	private void travel(IBasisPath path, IStatement current){
 		if (current == null)
 			mPaths.add(path.clone());
 		else if (checkStatement(path, current)){
@@ -172,7 +162,7 @@ public class CFG implements ICFG{
 	private boolean checkStatement(IBasisPath path, IStatement current){
 		int dem = 0;
 		
-		for (IStatement stm: path.iter())
+		for (IStatement stm: path)
 			if (stm == current)
 				dem++;
 		return dem <= 1;
@@ -212,13 +202,6 @@ public class CFG implements ICFG{
 			return other.mStart == mStart && other.mEnd == mEnd;
 		}
 		
-	}
-
-
-	@Override
-	public List<IBasisPath> getPathsCover(int cover) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }
 

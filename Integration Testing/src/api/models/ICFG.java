@@ -17,11 +17,18 @@ public interface ICFG {
 	public List<IBasisPath> getAllBasisPaths();
 	
 	/**
-	 * Lấy danh sách các đường thi hành (thường tối thiểu) thỏa mãn một cấp độ phủ
-	 * cho trước
-	 * @param cover cấp độ phủ mã nguồn yêu cầu
+	 * Trả về danh sách các đường đi phủ hết được các câu lệnh
+	 * @return danh sách tối giản các đường đi, sau khi duyệt hết các đường đi này,
+	 * mọi câu lệnh trong đồ thị đều được thăm
 	 */
-	public List<IBasisPath> getPathsCover(int cover);
+	List<IBasisPath> getCoverStatementPaths();
+	
+	/**
+	 * Trả về danh sách các đường đi phủ hết được các nhánh
+	 * @return danh sách tối giản các đường đi, sau khi duyệt hết các đường đi này, 
+	 * mọi nhánh trong đồ thị (các cạnh) đều được thăm
+	 */
+	List<IBasisPath> getCoverBranchPaths();
 	
 	public static final int COVER_STATEMENT = 1;
 	public static final int COVER_BRANCH = 2;
