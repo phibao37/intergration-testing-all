@@ -20,6 +20,7 @@ import api.solver.ISolveResult;
 import api.solver.ISolver;
 import core.expression.BinaryExpression;
 import core.expression.NumberExpression;
+import core.expression.StringExpression;
 import core.expression.UnaryExpression;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
@@ -100,7 +101,7 @@ try{
 			
 			for (IVariable v: varTable)
 				//Rút gọn các biểu thức hàm trong z3 nếu không là biến mảng
-				if (!(v.getType() instanceof ArrayType))
+				if (v.getType() instanceof BasicType)
 					z3.addLine("simplify %s", v.getName());  			// (I)
 			
 			if (isNormalConstraint && constraint.getReturnExpression() != null)
@@ -110,7 +111,7 @@ try{
 			z3.execute();
 			
 			for (IVariable v: varTable)
-				if (!(v.getType() instanceof ArrayType)){
+				if (v.getType() instanceof BasicType){
 					String value = z3.getLine();						// (I)
 					String name = v.getName();
 					
@@ -126,6 +127,13 @@ try{
 			//Với các hệ ràng buộc gây ra lỗi, sẽ không có biểu thức return
 			else {
 				code = ISolveResult.ERROR;
+				String error = null;
+				
+				switch (constraint.getConstraintType()){
+				case IConstraint.TYPE_DIVIDE_ZERO:
+					error = "Division by 0"; break;
+				}
+				returnValue = new StringExpression(error);
 			}
 			
 			solution = new IVariable[varTable.size()];

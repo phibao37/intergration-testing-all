@@ -48,6 +48,6 @@ public class SolveResult implements ISolveResult {
 	}
 
 	public String toString(){
-		return getMessage();
+		return getMessage() + ",return " + returnValue;
 	}
 }
