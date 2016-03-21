@@ -10,10 +10,12 @@ import core.expression.FunctionCallExpression;
 import core.models.CFG;
 import core.solver.BaseConstraintParser;
 import core.solver.TestResult;
+import core.solver.z3.Z3Solver;
 import api.IProject;
 import api.models.IBasisPath;
 import api.models.ICFG;
 import api.models.IFunction;
+import api.models.IStatement;
 import api.models.ITestResult;
 import api.models.IType;
 import api.models.IVariable;
@@ -56,8 +58,6 @@ public abstract class BaseProject implements IProject {
 		//Liên kết các lời gọi hàm tới các hàm
 		
 	}
-	
-	
 
 	@Override
 	public ITestResult testFunction(IFunction func) {
@@ -68,13 +68,21 @@ public abstract class BaseProject implements IProject {
 				errorPath = new ArrayList<>();
 		IVariable[] params = func.getParameters();
 		
+		//Reset visit state
+		for (IStatement stm: cfg_12.getStatements())
+			stm.setVisit(false);
+		for (IStatement stm: cfg_3.getStatements())
+			stm.setVisit(false);
+		
 		for (IBasisPath path: allPath_12){
 			List<IConstraint> cnts = getConstraintParser()
 					.parseBasisPath(path, params, ConstraintParser.PARSE_ERROR_PATH);
 			
 			for (IConstraint cnt: cnts){
+				System.out.println("\nHe rang buoc: " + cnt);
 				ISolveResult r = getSolver().solveConstraint(cnt);
 				cnt.getPath().setSolveResult(r);
+				System.out.println("=> Ket qua: " + r);
 				
 				if (cnt.getConstraintType() != IConstraint.TYPE_NORMAL)
 					errorPath.add(cnt.getPath());
@@ -167,8 +175,7 @@ public abstract class BaseProject implements IProject {
 
 	@Override
 	public ISolver getSolver() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Z3Solver();
 	}
 
 }

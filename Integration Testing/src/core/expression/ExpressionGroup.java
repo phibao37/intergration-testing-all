@@ -142,7 +142,7 @@ class SingleGroupExpression extends ExpressionGroup{
 
 	@Override
 	public int _handleVisit(IExpressionVisitor visitor) {
-		return 0;
+		return IExpressionVisitor.PROCESS_CONTINUE;
 	}
 
 	@Override

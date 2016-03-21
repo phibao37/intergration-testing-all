@@ -81,6 +81,11 @@ public class Constraint implements IConstraint {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return listLogic.toString();
+	}
+
 	
 
 }

@@ -159,9 +159,8 @@ public class ExpressionUtils {
 				if (init instanceof IASTEqualsInitializer){
 					IExpression right = parseNode(((IASTEqualsInitializer) init)
 							.getInitializerClause());
-					decEps[i] = new BinaryExpression(
-							decEps[i], 
-							BinaryExpression.ASSIGN, 
+					decEps[i] = new BinaryExpression.DeclarePartExpression(
+							decEps[i],  
 							right);
 				} 
 			}

@@ -3,11 +3,16 @@ package core.solver;
 import java.util.ArrayList;
 import java.util.List;
 
+import api.expression.IArrayIndexExpression;
 import api.expression.IBinaryExpression;
 import api.expression.IDeclareExpression;
 import api.expression.IExpression;
 import api.expression.IExpressionGroup;
 import api.expression.IMemberAccessExpression;
+import api.expression.INameExpression;
+import api.expression.IRegistterValueUsed;
+import api.expression.IReturnExpression;
+import api.expression.IUnaryExpression;
 import api.models.IBasisPath;
 import api.models.IStatement;
 import api.models.IType;
@@ -20,6 +25,7 @@ import core.expression.BinaryExpression;
 import core.expression.ExpressionVisitor;
 import core.expression.NumberExpression;
 import core.expression.UnaryExpression;
+import core.models.Variable;
 import core.models.statement.ScopeStatement;
 import core.models.type.BasicType;
 
@@ -39,7 +45,7 @@ public class BaseConstraintParser extends ExpressionVisitor
 	public List<IConstraint> parseBasisPath(IBasisPath path, IVariable[] params,
 			int options) {
 		
-		parseError = Utils.hasFlag(options, PARSE_ERROR_PATH);
+		boolean parseError = Utils.hasFlag(options, PARSE_ERROR_PATH);
 		varTable = createVariableTable();
 		constraint = new Constraint(params, path);
 		listConstraint = new ArrayList<>();
@@ -58,8 +64,16 @@ public class BaseConstraintParser extends ExpressionVisitor
 			IStatement stm = path.get(iter);
 			
 			if (stm.isNormal()){
-				IExpression root = stm.getRoot().clone();
+				IExpression root = stm.getRoot();
+
+				if (!stm.isVisited()){
+					this.parseError = parseError;
+					varTable.injectTypeExpression(root);
+				}
+				else
+					this.parseError = false;
 				
+				root = root.clone();
 				rootgroup = root.group();
 				rootgroup.accept(this);
 				root = rootgroup.ungroup();
@@ -74,6 +88,7 @@ public class BaseConstraintParser extends ExpressionVisitor
 					constraint.addLogicConstraint(root);
 				}
 				
+				stm.setVisit(true);
 			}
 			
 			//Thay đổi scope khi gặp các dấu ngoặc {}
@@ -91,24 +106,133 @@ public class BaseConstraintParser extends ExpressionVisitor
 	
 	@Override
 	public void leave(IDeclareExpression declare) {
+		IType type = declare.getType();
 		
+		for (IExpression dc: declare.getDeclares()){
+			IExpression left = dc, right = null;
+			IVariable var = null;
+			INameExpression ref = null;
+			
+			//Khai báo được gán giá trị
+			if (left instanceof IBinaryExpression){
+				IBinaryExpression bin = (IBinaryExpression) left;
+				left = bin.getLeft();
+				right = bin.getRight();
+			}
+			
+			//Đây là một biến thường
+			if (left instanceof INameExpression){
+				ref = (INameExpression) left;
+				var = new Variable(ref.getName(), type);
+			}
+			
+			//Đây là một biến mảng
+			else if (left instanceof IArrayIndexExpression) {
+				//
+			}
+			
+			//Thêm biến vào bảng biến
+			varTable.addVariable(var);
+			
+			//Khai báo và khởi tạo giá trị, thực hiện như gán
+			if (right != null)
+				handleAssignment(new BinaryExpression(
+						ref, BinaryExpression.ASSIGN, right));
+		}
 	}
 
 	@Override
 	public void leave(IBinaryExpression bin) {
 		if (bin.isAssignOperator()){
+			handleAssignment(bin);
+		}
+		
+		else 
+			checkDivideByZero(bin);
+	}
+	
+	@Override
+	public void leave(IUnaryExpression unary) {
+		String op = unary.getOperator();
+		IExpression sub = unary.getSubElement();
+		
+		switch (op){
+		case UnaryExpression.DECREASE:
+		case UnaryExpression.INCREASE:
+			String newOp = op.substring(1) + "=";
+			//Phép tính ++i, --j: thực hiện phép tính rồi trả về giá trị sau
+			if (unary.isLeftOperator()){
+				
+				//Chuyển qua biểu thức gán để xử lý: i = i+1
+				handleAssignment(new BinaryExpression(
+						sub, newOp, NumberExpression.ONE));
+			}
+			
+			//Phép tính: i++, j--: trả về rồi thực hiện phép tính sau
+			else{
+				
+				((IRegistterValueUsed)sub).setOnValueUsedOne(ex -> 
+					handleAssignment(new BinaryExpression(
+						ex, newOp, NumberExpression.ONE)));
+			}
+			
+			//Thay thế bằng tên biến: call(++i) => call(i)
+			rootgroup.replaceChild(unary, sub);
+			break;
+		}
+	}
+
+	@Override
+	public void leave(IReturnExpression rt) {
+		IExpression value = rt.getReturnExpression();
+		
+		if (value != null)
+			constraint.setReturnExpression(varTable.fill(value));
+	}
+
+	protected void handleAssignment(IBinaryExpression assign){
+		String op = assign.getOperator();
+		IExpression left = assign.getLeft(), right = assign.getRight();
+		
+		//Các phép toán tình gộp, tách ra: a += b => a = (a+b)
+		if (!op.equals(BinaryExpression.ASSIGN)){
+			op = op.substring(0, 1);
+			right = new BinaryExpression(left, op, right);
+			checkDivideByZero((IBinaryExpression) right);
+		}
+		
+		//Biến thường
+		if (left instanceof INameExpression){
+			String name = ((INameExpression) left).getName();
+			
+			//Xử lý gán mảng: int b[] = a;...
+			
+			varTable.updateVariable(name, right);
+		}
+		
+		//Biển phần tử mảng
+		else if (left instanceof IArrayIndexExpression){
+			IArrayIndexExpression array = (IArrayIndexExpression) left;
+			varTable.updateArrayElement(array.getName(), array.getIndexes(), right);
+		}
+		
+		//Truy cập thuộc tính đối tượng
+		else if (left instanceof IMemberAccessExpression){
 			
 		}
 		
-		else if (bin.getOperator().equals(BinaryExpression.DIV))
-			checkDivideByZero(bin.getLeft(), bin.getRight());
+		//Thay thế biểu thức gốc bằng vế trái:
+		//call(a = b[i]);  =>  call(a);
+		rootgroup.replaceChild(assign, left);
 	}
-
 
 	/**
 	 * Thêm ràng buộc biểu thức chia cho 0
 	 */
-	private void checkDivideByZero(IExpression up, IExpression down){
+	protected void checkDivideByZero(IBinaryExpression bin){
+		if (!bin.getOperator().equals(BinaryExpression.DIV))
+			return;
+		IExpression up = bin.getLeft(), down = bin.getRight();
 		IType tup = up.getType(), tdown = down.getType(), INT = BasicType.INT,
 				LONG = BasicType.LONG;
 		
@@ -120,25 +244,44 @@ public class BaseConstraintParser extends ExpressionVisitor
 		rootgroup.replaceChild(down, fdown);
 		
 		//Tạo hệ ràng buộc bắt lỗi thương = 0
+		cloneConstraint(new BinaryExpression(
+					fdown, BinaryExpression.EQUALS, NumberExpression.ZERO),
+				IConstraint.TYPE_DIVIDE_ZERO);
+	}
+	
+	/**
+	 * Tạo hệ ràng buộc mới ứng với trường hợp lỗi
+	 * @param extraConstraint ràng buộc tạo ra lỗi
+	 */
+	protected void cloneConstraint(IExpression extraConstraint, int errorType){
 		if (parseError){
 			IConstraint clone = constraint.clone();
-			clone.setConstraintType(IConstraint.TYPE_DIVIDE_ZERO);
+			clone.setConstraintType(errorType);
 			clone.setPath(path.cloneAt(iter));
 			listConstraint.add(clone);
 			
-			clone.addLogicConstraint(new BinaryExpression(
-					fdown, BinaryExpression.EQUALS, NumberExpression.ZERO));
+			clone.addLogicConstraint(extraConstraint);
 		}
-		constraint.addLogicConstraint(new BinaryExpression(
-				fdown, BinaryExpression.NOT_EQUALS, NumberExpression.ZERO));
+		constraint.addLogicConstraint(new UnaryExpression(
+				UnaryExpression.LOGIC_NOT, extraConstraint));
+	}
+	
+	@Override
+	public void leave(IArrayIndexExpression array) {
+		//Kiểm tra mọi chỉ số đều >= 0 và < length...
 	}
 
 	@Override
 	public void leave(IMemberAccessExpression member) {
-		
+		//Kiểm tra con trỏ NULL
+		if (!member.isDotAccess()){ //a -> b
+			IExpression pointer = member.getNameExpression();
+			pointer = varTable.fill(pointer);
+			cloneConstraint(new BinaryExpression(
+					pointer, BinaryExpression.EQUALS, NumberExpression.ZERO), 
+				IConstraint.TYPE_NULL_POINTER);
+		}
 	}
-
-
 
 	protected IVariableTable createVariableTable(){
 		return new VariableTable();

@@ -2,7 +2,7 @@ package api.expression;
 
 
 public interface IArrayIndexExpression extends IExpressionGroup, 
-		IContainNameExpression {
+		IContainNameExpression, IRegistterValueUsed {
 
 	
 	/**

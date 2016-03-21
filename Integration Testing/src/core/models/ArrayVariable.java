@@ -39,6 +39,7 @@ public class ArrayVariable extends Variable {
 	 */
 	public ArrayVariable(String name, ArrayType type, IArrayExpression value){
 		super(name, type, value);
+		//TODO tạo một mảng các biểu thức để lưu kích thước phần tử
 	}
 	
 	/**

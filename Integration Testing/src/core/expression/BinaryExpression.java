@@ -106,41 +106,27 @@ public class BinaryExpression extends ExpressionGroup implements IBinaryExpressi
 		return String.format("(%s%s%s)", getLeft(), getOperator(), getRight());
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IBinaryExpression#getLeft()
-	 */
+	
 	@Override
 	public IExpression getLeft(){
 		return g[0];
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IBinaryExpression#getOperator()
-	 */
 	@Override
 	public String getOperator(){
 		return mOperator;
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IBinaryExpression#getRight()
-	 */
 	@Override
 	public IExpression getRight(){
 		return g[1];
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IBinaryExpression#isAssignOperator()
-	 */
 	@Override
 	public boolean isAssignOperator(){
 		return Utils.find(ASSIGNS, getOperator());
 	}
 
-	/* (non-Javadoc)
-	 * @see core.expression.IBinaryExpression#isConditionExpression()
-	 */
 	@Override
 	public boolean isConditionExpression() {
 		return Utils.find(CONDITIONS, getOperator());
@@ -163,5 +149,18 @@ public class BinaryExpression extends ExpressionGroup implements IBinaryExpressi
 		if (isAssignOperator())
 			return left;
 		return left.compareTo(right) > 0 ? left : right;
+	}
+	
+	public static class DeclarePartExpression extends BinaryExpression{
+
+		public DeclarePartExpression(IExpression ref, IExpression value) {
+			super(ref, ASSIGN, value);
+		}
+
+		@Override
+		public boolean isAssignOperator() {
+			return false;
+		}
+		
 	}
 }

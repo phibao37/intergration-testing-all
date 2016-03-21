@@ -2,6 +2,7 @@ package core.expression;
 
 import api.expression.IArrayIndexExpression;
 import api.expression.IExpression;
+import api.expression.INameExpression;
 import core.models.type.Type;
 
 /**
@@ -33,8 +34,8 @@ public class ArrayIndexExpression extends ExpressionGroup implements IArrayIndex
 		g[0] = arrayName;
 		System.arraycopy(index, 0, g, 1, index.length);
 		
-		//if (arrayName instanceof NameExpression)
-			//((NameExpression) arrayName).setRole(NameExpression.ROLE_ARRAY);
+		if (arrayName instanceof INameExpression)
+			((INameExpression) arrayName).setRole(INameExpression.ROLE_ARRAY);
 	}
 	
 	/**
@@ -55,9 +56,6 @@ public class ArrayIndexExpression extends ExpressionGroup implements IArrayIndex
 		return content;
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IArrayIndexExpression#getIndexes()
-	 */
 	@Override
 	public Expression[] getIndexes(){
 		Expression[] indexs = new Expression[g.length - 1];
@@ -65,18 +63,12 @@ public class ArrayIndexExpression extends ExpressionGroup implements IArrayIndex
 		return indexs;
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IArrayIndexExpression#setDeclare()
-	 */
 	@Override
 	public ArrayIndexExpression setDeclare(){
 		mDeclare = true;
 		return this;
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IArrayIndexExpression#isDeclare()
-	 */
 	@Override
 	public boolean isDeclare(){
 		return mDeclare;
@@ -110,8 +102,22 @@ public class ArrayIndexExpression extends ExpressionGroup implements IArrayIndex
 	}
 
 	@Override
-	public IExpression getName() {
+	public IExpression getNameExpression() {
 		return g[0];
+	}
+	
+	private OnValueUsed valueUsed;
+	
+	@Override
+	public void setOnValueUsedOne(OnValueUsed listener) {
+		valueUsed = listener;
+	}
+
+	@Override
+	public void notifyValueUsed() {
+		if (valueUsed != null)
+			valueUsed.valueUsed(this);
+		valueUsed = null;
 	}
 
 }

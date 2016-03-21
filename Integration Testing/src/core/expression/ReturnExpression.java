@@ -1,13 +1,14 @@
 package core.expression;
 
 import api.expression.IExpression;
+import api.expression.IReturnExpression;
 
 /**
  * Mô tả biểu thức return
  * @author ducvu
  *
  */
-public class ReturnExpression extends UnaryExpression {
+public class ReturnExpression extends UnaryExpression implements IReturnExpression {
 	
 	public static final String RETURN = "return";
 	
@@ -24,9 +25,10 @@ public class ReturnExpression extends UnaryExpression {
 		return String.format("%s %s", RETURN, getReturnExpression());
 	}
 
-	/**
-	 * Trả về biểu thức sau return
+	/* (non-Javadoc)
+	 * @see core.expression.IReturnExpression#getReturnExpression()
 	 */
+	@Override
 	public IExpression getReturnExpression(){
 		return getSubElement();
 	}

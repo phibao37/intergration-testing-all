@@ -65,4 +65,6 @@ public interface IExpression extends IElement {
 	public int _handleVisit(IExpressionVisitor visitor);
 	
 	public void _handleLeave(IExpressionVisitor visitor);
+	
+	public void printTree(String margin);
 }

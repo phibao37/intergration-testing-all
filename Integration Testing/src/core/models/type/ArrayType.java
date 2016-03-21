@@ -55,4 +55,10 @@ public class ArrayType extends Type {
 		return null;
 	}
 
+	@Override
+	public int compareTo(IType o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
 }

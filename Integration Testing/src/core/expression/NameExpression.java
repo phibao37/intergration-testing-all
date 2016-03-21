@@ -51,8 +51,23 @@ public class NameExpression extends Expression implements INameExpression {
 	}
 
 	@Override
-	public IExpression getName() {
+	public IExpression getNameExpression() {
 		return this;
+	}
+
+
+	private OnValueUsed valueUsed;
+	
+	@Override
+	public void setOnValueUsedOne(OnValueUsed listener) {
+		valueUsed = listener;
+	}
+
+	@Override
+	public void notifyValueUsed() {
+		if (valueUsed != null)
+			valueUsed.valueUsed(this);
+		valueUsed = null;
 	}
 
 }

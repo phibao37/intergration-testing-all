@@ -2,6 +2,7 @@ package core.expression;
 
 import api.expression.IExpression;
 import api.expression.IFunctionCallExpression;
+import api.expression.INameExpression;
 import api.models.IFunction;
 import api.models.IType;
 
@@ -30,8 +31,8 @@ public class FunctionCallExpression extends ExpressionGroup implements IFunction
 		g[0] = name;
 		System.arraycopy(argument, 0, g, 1, argument.length);
 		
-		//if (name instanceof NameExpression)
-			//((NameExpression) name).setRole(NameExpression.ROLE_FUNCTION);
+		if (name instanceof INameExpression)
+			((INameExpression) name).setRole(INameExpression.ROLE_FUNCTION);
 	}
 	
 	@Override
@@ -86,14 +87,8 @@ public class FunctionCallExpression extends ExpressionGroup implements IFunction
 
 
 	@Override
-	public IExpression getName() {
+	public IExpression getNameExpression() {
 		return g[0];
 	}
-
-//	@Override
-//	public Expression getNameExpression() {
-//		return g[0];
-//	}
-	
 	
 }

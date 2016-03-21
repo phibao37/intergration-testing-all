@@ -2,6 +2,7 @@ package core.expression;
 
 import api.expression.IExpression;
 import api.expression.IMemberAccessExpression;
+import api.expression.INameExpression;
 import api.models.IType;
 
 
@@ -30,8 +31,8 @@ public class MemberAccessExpression extends ExpressionGroup implements IMemberAc
 		mMember = member;
 		isDot = dot;
 		
-		//if (parent instanceof NameExpression)
-			//((NameExpression) parent).setRole(NameExpression.ROLE_OBJECT);
+		if (parent instanceof INameExpression)
+			((INameExpression) parent).setRole(INameExpression.ROLE_OBJECT);
 	}
 	
 	@Override
@@ -39,18 +40,12 @@ public class MemberAccessExpression extends ExpressionGroup implements IMemberAc
 		return g[0] + (isDot ? "." : "->") + mMember;
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IMemberAccessExpression#isDotAccess()
-	 */
 	@Override
 	public boolean isDotAccess(){
 		return isDot;
 	}
 	
 
-	/* (non-Javadoc)
-	 * @see core.expression.IMemberAccessExpression#getMemberName()
-	 */
 	@Override
 	public String getMemberName(){
 		return mMember;
@@ -69,9 +64,21 @@ public class MemberAccessExpression extends ExpressionGroup implements IMemberAc
 
 
 	@Override
-	public IExpression getName() {
+	public IExpression getNameExpression() {
 		return g[0];
 	}
 
+	private OnValueUsed valueUsed;
+	
+	@Override
+	public void setOnValueUsedOne(OnValueUsed listener) {
+		valueUsed = listener;
+	}
 
+	@Override
+	public void notifyValueUsed() {
+		if (valueUsed != null)
+			valueUsed.valueUsed(this);
+		valueUsed = null;
+	}
 }

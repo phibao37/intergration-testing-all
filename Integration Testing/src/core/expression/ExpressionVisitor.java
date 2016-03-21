@@ -10,11 +10,22 @@ import api.expression.IFunctionCallExpression;
 import api.expression.IMemberAccessExpression;
 import api.expression.INameExpression;
 import api.expression.INumberExpression;
+import api.expression.IReturnExpression;
 import api.expression.IStringExpression;
 import api.expression.IUnaryExpression;
 import api.models.IStatement;
 
 public abstract class ExpressionVisitor implements IExpressionVisitor {
+
+	@Override
+	public int visit(IReturnExpression rt) {
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(IReturnExpression rt) {
+		
+	}
 
 	@Override
 	public boolean preVisit(IExpression expression) {

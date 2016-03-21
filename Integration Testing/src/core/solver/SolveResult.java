@@ -47,4 +47,7 @@ public class SolveResult implements ISolveResult {
 		return solver;
 	}
 
+	public String toString(){
+		return getMessage();
+	}
 }

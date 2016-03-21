@@ -1,7 +1,7 @@
 package api.expression;
 
 public interface IMemberAccessExpression extends IExpressionGroup, 
-		IContainNameExpression {
+		IContainNameExpression, IRegistterValueUsed {
 
 	/**
 	 * Kiểm tra thuộc tính được truy cập bằng "." thay vì "->" 
