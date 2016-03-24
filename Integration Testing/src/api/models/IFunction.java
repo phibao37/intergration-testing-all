@@ -3,7 +3,9 @@ package api.models;
 import java.io.File;
 import java.util.List;
 
+import api.IProject;
 import api.expression.IExpressionVisitor;
+import api.parser.BodyParser;
 import core.models.Statement;
 
 public interface IFunction extends IElement {
@@ -24,16 +26,14 @@ public interface IFunction extends IElement {
 	public IType getReturnType();
 	
 	/**
-	 * Thiết đặt đồ thị dòng điều khiển ứng với hàm
-	 * @param cover mức độ phủ của đồ thị
-	 * @param cfg đồ thị dòng điều khiển ứng với phần thân hàm
-	 */
-	public void setCFG(int cover, ICFG cfg);
-	
-	/**
 	 * Trả về đồ thị dòng điều khiển của hàm ứng với một mức độ phủ xác định
 	 */
 	public ICFG getCFG(int cover);
+	
+	/**
+	 * Tạo đối tượng phân tích thân hàm
+	 */
+	public BodyParser getBodyParser();
 	
 	/**
 	 * Thêm một hàm vào danh sách hàm được tham chiếu
@@ -51,6 +51,8 @@ public interface IFunction extends IElement {
 	public void setSourceFile(File file);
 	
 	public File getSourceFile();
+	
+	public IProject getProject();
 	
 	/**
 	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 

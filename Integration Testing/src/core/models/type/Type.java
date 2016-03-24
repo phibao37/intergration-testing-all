@@ -21,6 +21,11 @@ public abstract class Type extends Element implements IType {
 		return mSize;
 	}
 	
+	@Override
+	public String getHTML() {
+		return String.format("<span style='color:blue'>%s</span>", getContent());
+	}
+	
 	protected void addModifier(ITypeModifier mdf){
 		if (listMdf == null)
 			listMdf = new ArrayList<>();

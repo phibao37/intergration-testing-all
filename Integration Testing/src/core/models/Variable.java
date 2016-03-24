@@ -76,6 +76,11 @@ public class Variable extends Element implements IVariable {
 		return mValue;
 	}
 	
+	@Override
+	public String getHTML() {
+		return getType().getHTML() + " " + getName();
+	}
+	
 	/**
 	 * Thiết đặt giá trị cho biến nếu như nó chưa có giá trị
 	 */

@@ -10,6 +10,10 @@ public interface HasContent {
 	 */
 	public String getContent();
 	
+	public default String getHTML(){
+		return getContent();
+	}
+	
 	/**
 	 * So sánh 2 phần tử dựa trên nội dung hiển thị của nó
 	 */

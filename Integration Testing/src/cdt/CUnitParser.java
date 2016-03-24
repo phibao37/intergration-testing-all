@@ -195,7 +195,7 @@ public class CUnitParser extends ASTVisitor implements UnitParser{
 					para[i] = parseParameter(fnPara[i]);
 			}
 			
-			fn = new CFunction(name, para, mMain.findType(type), fnBody)
+			fn = new CFunction(name, para, mMain.findType(type), fnBody, mMain)
 				.setDeclareStr(type + " " + fnDeclare.getRawSignature());
 			fn.setSourceFile(mFile);
 			mMain.addFunction(fn);

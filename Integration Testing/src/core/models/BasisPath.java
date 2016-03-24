@@ -18,41 +18,22 @@ public class BasisPath extends ArrayList<IStatement> implements IBasisPath {
 	private ISolveResult result;
 	
 	public String toString(){
-		String content = get(0).toString();
+		String content = "";
 		
-		for (int i = 1; i < size(); i++){
+		for (int i = 0; i < size(); i++){
 			IStatement stm = get(i);
+			if (!stm.isNormal()) continue;
 			
-			content += String.format(" -> %s",	stm);
+			content += " -> " + stm;
 			if (stm.isCondition())
 				content += String.format(" (%s)", stm.getTrue() == get(i+1));
 		}
 		
-		return content;
+		return content.substring(4);
 	}
 	
 	public BasisPath clone(){
 		return (BasisPath) super.clone();
-	}
-	
-	/**
-	 * Trả về chuỗi mô tả đường thi hành, bỏ qua các câu lệnh BEGIN, END, {, }, ...
-	 */
-	public String toStringSkipMarkdown(){
-		String content = "";
-		int i = 0;
-		
-		for (IStatement stm: this){
-			i++;
-			if (!stm.isNormal())
-				continue;
-			
-			content += String.format(" -> %s",	stm);
-			if (stm.isCondition())
-				content += String.format(" (%s)", stm.getTrue() == get(i));
-		}
-		
-		return content.isEmpty() ? content : content.substring(4);
 	}
 
 	@Override

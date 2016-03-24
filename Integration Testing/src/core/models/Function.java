@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import core.Utils;
+import api.IProject;
 import api.models.ICFG;
 import api.models.IFunction;
 import api.models.IType;
 import api.models.IVariable;
 
-public class Function<T> extends Element implements IFunction {
+public abstract class Function<T> extends Element implements IFunction {
 
 	private String mName;
 	private IVariable[] mParas;
@@ -20,12 +21,15 @@ public class Function<T> extends Element implements IFunction {
 	private ICFG mCFG_12, mCFG_3;
 	private List<IFunction> mRefers;
 	private File mFile;
+	private IProject project;
 	
-	public Function(String name, IVariable[] paras, IType returnType, T body){
+	public Function(String name, IVariable[] paras, IType returnType, T body, 
+			IProject project){
 		mName = name;
 		mParas = paras;
 		mReturnType = returnType;
 		mRefers = new ArrayList<>();
+		this.project = project;
 		
 		setContent(String.format("%s %s(%s)", mReturnType, mName, 
 				Utils.merge(", ", paras)));
@@ -56,16 +60,8 @@ public class Function<T> extends Element implements IFunction {
 	}
 
 	@Override
-	public void setCFG(int cover, ICFG cfg) {
-		switch (cover){
-		case ICFG.COVER_STATEMENT:
-		case ICFG.COVER_BRANCH:
-			mCFG_12 = cfg;
-			break;
-		case ICFG.COVER_SUBCONDITION:
-			mCFG_3 = cfg;
-			break;
-		}
+	public IProject getProject() {
+		return project;
 	}
 
 	@Override
@@ -73,8 +69,16 @@ public class Function<T> extends Element implements IFunction {
 		switch (cover){
 		case ICFG.COVER_STATEMENT:
 		case ICFG.COVER_BRANCH:
+			if (mCFG_12 == null){
+				mCFG_12 = new CFG(getBodyParser().parseBody(
+						getBody(), false, getProject()));
+			}
 			return mCFG_12;
 		case ICFG.COVER_SUBCONDITION:
+			if (mCFG_3 == null){
+				mCFG_3 = new CFG(getBodyParser().parseBody(
+						getBody(), true, getProject()));
+			}
 			return mCFG_3;
 		default:
 			return null;
@@ -94,6 +98,19 @@ public class Function<T> extends Element implements IFunction {
 	@Override
 	public void setSourceFile(File file) {
 		mFile = file;
+	}
+	
+	@Override
+	public String getHTML() {
+		String para = "";
+		
+		if (mParas.length > 0){
+			para = mParas[0].getHTML();
+			for (int i = 1; i < mParas.length; i++)
+				para += ", " + mParas[i].getHTML();
+		}
+		
+		return String.format("%s %s(%s)", mReturnType.getHTML(), mName, para);
 	}
 
 	@Override

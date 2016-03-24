@@ -9,8 +9,16 @@ import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 
+import api.IProject;
+import api.models.IBasisPath;
+import api.models.IFunction;
+import api.models.ITestResult;
+import api.solver.ISolveResult;
 import cdt.CProject;
 import cdt.models.CProjectNode;
+import core.Utils;
+import graph.swing.FileView;
+import graph.swing.LightTabbedPane;
 import graph.swing.ProjectExplorer;
 
 import javax.swing.JPanel;
@@ -30,15 +38,28 @@ import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class GUIMain {
 
 	private JFrame frmCProjectTesting;
 	private JScrollPane scroll_project_tree;
 	
+	private IProject currentProject;
+	
+	private ProjectExplorer tree_project;
 	private JFileChooser chooserProject;
+	private LightTabbedPane tab_source_view;
+	private JLabel lblFunctionName;
+	private JTable table_simple_result;
 
 	/**
 	 * Launch the application.
@@ -71,14 +92,57 @@ public class GUIMain {
 			File root = chooserProject.getSelectedFile();
 			
 			CProject project = new CProject(root);
+			currentProject = project;
 			project.loadProject();
 			
 			CProjectNode rootNode = new CProjectNode(root, 
 					CProjectNode.TYPE_PROJECT, project); 
 			
-			ProjectExplorer tree_project = new ProjectExplorer(rootNode);
+			tree_project = new ProjectExplorer(rootNode);
+			tree_project.addItemClickListener((item, count) -> {
+				if (count == 2){
+					CProjectNode node = (CProjectNode) item;
+					if (node.getType() == CProjectNode.TYPE_FILE){
+						openSourceView(node.getFile());
+					}
+				}
+			});
 			scroll_project_tree.setViewportView(tree_project);
+			
 		}
+	}
+	
+	void openSourceView(File file){
+		try {
+			tab_source_view.openTab(file.getName(), null, file.getAbsolutePath(), 
+					FileView.class.getConstructor(File.class), file);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+	}
+	
+	void testFunction(IFunction fn){
+		lblFunctionName.setText(Utils.html(fn.getHTML()));
+		Map<Integer, List<IBasisPath>> r = currentProject.testFunction(fn).getMapPathResult();
+		ArrayList<IBasisPath> show = new ArrayList<>();
+		DefaultTableModel model = (DefaultTableModel) table_simple_result.getModel();
+		
+		show.addAll(r.get(ITestResult.BRANCH));
+		show.addAll(r.get(ITestResult.ERROR));
+		
+		model.setRowCount(0);
+		for (int i = 0; i < show.size(); i++){
+			IBasisPath path = show.get(i);
+			ISolveResult sr = path.getSolveResult();
+			
+			model.addRow(new Object[]{
+				i+1,
+				path,
+				sr.getMessage(),
+				sr.getReturnValue()
+			});
+		}
+		model.addRow(new Object[]{});
 	}
 	
 	/**
@@ -96,6 +160,7 @@ public class GUIMain {
 		int margin = 50;
 		
 		frmCProjectTesting = new JFrame();
+		frmCProjectTesting.setIconImage(Toolkit.getDefaultToolkit().getImage(GUIMain.class.getResource("/image/project_test.png")));
 		frmCProjectTesting.setTitle("C Project Testing");
 		frmCProjectTesting.setBounds(margin, margin, sc.width - 2*margin, sc.height - 2*margin);
 		frmCProjectTesting.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -104,19 +169,23 @@ public class GUIMain {
 		JPanel panel = new JPanel();
 		
 		JSplitPane splitPane = new JSplitPane();
-		splitPane.setDividerSize(4);
+		splitPane.setDividerSize(5);
 		splitPane.setBorder(null);
 		GroupLayout groupLayout = new GroupLayout(frmCProjectTesting.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addComponent(panel, GroupLayout.DEFAULT_SIZE, 1354, Short.MAX_VALUE)
-				.addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 1354, Short.MAX_VALUE)
+				.addGroup(groupLayout.createSequentialGroup()
+					.addGap(6)
+					.addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 1342, Short.MAX_VALUE)
+					.addContainerGap())
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addComponent(panel, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-					.addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 652, Short.MAX_VALUE))
+					.addComponent(splitPane, GroupLayout.DEFAULT_SIZE, 646, Short.MAX_VALUE)
+					.addContainerGap())
 		);
 		
 		JPanel panel_1 = new JPanel();
@@ -133,20 +202,18 @@ public class GUIMain {
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_panel_1.createSequentialGroup()
+				.addGroup(gl_panel_1.createSequentialGroup()
 					.addContainerGap()
-					.addGroup(gl_panel_1.createParallelGroup(Alignment.TRAILING)
-						.addComponent(scroll_project_tree, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
-						.addComponent(toolBar, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE))
+					.addComponent(toolBar, GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
 					.addContainerGap())
+				.addComponent(scroll_project_tree, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
 		);
 		gl_panel_1.setVerticalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_1.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(toolBar, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)
-					.addComponent(scroll_project_tree, GroupLayout.DEFAULT_SIZE, 613, Short.MAX_VALUE)
-					.addContainerGap())
+					.addComponent(scroll_project_tree, GroupLayout.DEFAULT_SIZE, 619, Short.MAX_VALUE))
 		);
 		
 		JPanel panel_3 = new JPanel();
@@ -170,14 +237,73 @@ public class GUIMain {
 		panel_1.setLayout(gl_panel_1);
 		
 		JSplitPane splitPane_1 = new JSplitPane();
-		splitPane_1.setDividerSize(4);
+		splitPane_1.setDividerSize(5);
 		splitPane.setRightComponent(splitPane_1);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		LightTabbedPane tabbedPane = new LightTabbedPane(JTabbedPane.TOP);
 		splitPane_1.setLeftComponent(tabbedPane);
 		
+		JPanel panel_4 = new JPanel();
+		panel_4.setBackground(Color.WHITE);
+		tabbedPane.addTab("Call graph", null, panel_4, null);
+		
+		JSplitPane splitPane_2 = new JSplitPane();
+		splitPane_2.setDividerSize(5);
+		splitPane_2.setOrientation(JSplitPane.VERTICAL_SPLIT);
+		splitPane_1.setRightComponent(splitPane_2);
+		
 		JPanel panel_2 = new JPanel();
-		splitPane_1.setRightComponent(panel_2);
+		splitPane_2.setLeftComponent(panel_2);
+		
+		lblFunctionName = new JLabel("");
+		lblFunctionName.setFont(lblFunctionName.getFont().deriveFont(18f));
+		lblFunctionName.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBorder(null);
+		scrollPane_1.getViewport().setBackground(Color.WHITE);
+		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
+		gl_panel_2.setHorizontalGroup(
+			gl_panel_2.createParallelGroup(Alignment.TRAILING)
+				.addComponent(lblFunctionName, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE)
+				.addGroup(gl_panel_2.createSequentialGroup()
+					.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 537, Short.MAX_VALUE))
+		);
+		gl_panel_2.setVerticalGroup(
+			gl_panel_2.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_2.createSequentialGroup()
+					.addComponent(lblFunctionName, GroupLayout.PREFERRED_SIZE, 52, GroupLayout.PREFERRED_SIZE)
+					.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 311, Short.MAX_VALUE))
+		);
+		
+		table_simple_result = new JTable();
+		table_simple_result.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"ID", "Test path", "Input", "Output"
+			}
+		));
+		table_simple_result.getColumnModel().getColumn(0).setResizable(false);
+		table_simple_result.getColumnModel().getColumn(0).setPreferredWidth(30);
+		table_simple_result.getColumnModel().getColumn(0).setMaxWidth(30);
+		table_simple_result.getColumnModel().getColumn(1).setPreferredWidth(200);
+		table_simple_result.getColumnModel().getColumn(2).setPreferredWidth(100);
+		table_simple_result.getColumnModel().getColumn(3).setPreferredWidth(50);
+		scrollPane_1.setViewportView(table_simple_result);
+		panel_2.setLayout(gl_panel_2);
+		
+		tab_source_view = new LightTabbedPane(JTabbedPane.TOP);
+		splitPane_2.setRightComponent(tab_source_view);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBorder(null);
+		tab_source_view.addTab("Process Manager", null, scrollPane, null);
+		
+		JPanel panel_5 = new JPanel();
+		panel_5.setBackground(Color.WHITE);
+		scrollPane.setViewportView(panel_5);
+		splitPane_2.setDividerLocation(370);
 		splitPane_1.setDividerLocation(500);
 		splitPane.setDividerLocation(300);
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -209,6 +335,17 @@ public class GUIMain {
 		panel.add(btnExport, gbc_btnExport);
 		
 		JButton btnTest = new JButton("Test");
+		btnTest.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (tree_project.getSelectionCount() == 0)
+					return;
+				CProjectNode node = (CProjectNode) tree_project.getSelectedItem();
+				
+				if (node.getType() == CProjectNode.TYPE_FUNCTION){
+					testFunction(node.getFunction());
+				}
+			}
+		});
 		btnTest.setIcon(new ImageIcon(GUIMain.class.getResource("/image/run-test.png")));
 		btnTest.setPreferredSize(new Dimension(120, 40));
 		btnTest.setFont(btnTest.getFont().deriveFont(18f));

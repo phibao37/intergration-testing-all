@@ -137,8 +137,8 @@ public class CProjectNode implements IProjectNode {
 		return childs;
 	}
 	
-	public boolean isFunction(){
-		return type == TYPE_FUNCTION;
+	public int getType(){
+		return type;
 	}
 	
 	public IFunction getFunction() throws ClassCastException {

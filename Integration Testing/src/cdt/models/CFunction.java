@@ -4,6 +4,9 @@ import org.eclipse.cdt.core.dom.ast.IASTStatement;
 
 import api.models.IType;
 import api.models.IVariable;
+import api.parser.BodyParser;
+import cdt.CBodyParser;
+import cdt.CProject;
 import core.models.Function;
 
 public class CFunction extends Function<IASTStatement> {
@@ -11,12 +14,13 @@ public class CFunction extends Function<IASTStatement> {
 	private String declare;
 	
 	public CFunction(String name, IVariable[] paras, IType returnType,
-			IASTStatement body) {
-		super(name, paras, returnType, body);
+			IASTStatement body, CProject project) {
+		super(name, paras, returnType, body, project);
 	}
 	
-	public CFunction(String name, IVariable[] paras, IType returnType) {
-		this(name, paras, returnType, null);
+	public CFunction(String name, IVariable[] paras, IType returnType, 
+			CProject project) {
+		this(name, paras, returnType, null, project);
 	}
 	
 	public CFunction setDeclareStr(String str){
@@ -28,4 +32,8 @@ public class CFunction extends Function<IASTStatement> {
 		return declare;
 	}
 
+	@Override
+	public BodyParser getBodyParser() {
+		return new CBodyParser();
+	}
 }
