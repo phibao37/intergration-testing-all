@@ -1,7 +1,11 @@
 package api;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.util.List;
+import java.util.Map;
 
+import api.graph.IProjectNode;
 import api.models.IFunction;
 import api.models.ITestResult;
 import api.models.IType;
@@ -14,7 +18,7 @@ import api.solver.ISolver;
 /**
  * Các phương thức cơ bản của 1 project
  */
-public interface IProject {
+public interface IProject extends FileFilter {
 	
 	/**
 	 * Nạp các cấu trúc và tạo các liên kết
@@ -66,6 +70,8 @@ public interface IProject {
 	 * Trả về bộ giải hệ
 	 */
 	public ISolver getSolver();
+	
+	public Map<File, IProjectNode> getMapProjectStruct();
 	
 	/**
 	 * Tìm kiểu theo tên của nó

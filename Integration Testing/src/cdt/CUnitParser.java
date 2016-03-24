@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTArrayDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTArrayModifier;
+import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
@@ -26,6 +28,8 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
 import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
 import org.eclipse.cdt.core.model.AbstractLanguage;
@@ -44,6 +48,7 @@ import api.IProject;
 import api.models.IType;
 import api.parser.UnitParser;
 import cdt.models.CFunction;
+import cdt.models.CProjectNode;
 import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Variable;
@@ -51,19 +56,24 @@ import core.models.type.ArrayType;
 
 public class CUnitParser extends ASTVisitor implements UnitParser{
 	
-	{  
-		shouldVisitDeclarations = true; 	
+	public CUnitParser(){
+		super(true);
 	}
 	
 	private CProject mMain;
 	private File mFile;
 	private ExpressionUtils mUtils;
+	private Stack<CProjectNode> stackTreeNode;
 	
 	@Override
 	public void parseUnit(File source, IProject project) {
 		mMain = (CProject) project;
 		mFile = source;
 		mUtils = new ExpressionUtils(project);
+		
+		stackTreeNode = new Stack<>();
+		CProjectNode root = new CProjectNode();
+		stackTreeNode.push(root);
 		
 		try {
 			IASTTranslationUnit u = getIASTTranslationUnit(source, mMain.getMarcoMap());
@@ -75,6 +85,7 @@ public class CUnitParser extends ASTVisitor implements UnitParser{
 			}
 			
 			u.accept(this);
+			mMain.putMapProjectStruct(source, root);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -99,6 +110,31 @@ public class CUnitParser extends ASTVisitor implements UnitParser{
 				){
 				for (Variable v: parseVariableDeclaration(declare))
 					mMain.addGlobalVar(v);
+			}
+			
+			if (spec instanceof IASTCompositeTypeSpecifier){
+				IASTCompositeTypeSpecifier comp = (IASTCompositeTypeSpecifier) spec;
+				int key = comp.getKey();
+				String name = comp.getName().toString();
+				
+				//Khai báo struct
+				if (key == IASTCompositeTypeSpecifier.k_struct){
+					CProjectNode st = new CProjectNode(
+							declare, CProjectNode.TYPE_STRUCT, name);
+					
+					stackTreeNode.peek().addChild(st);
+					stackTreeNode.push(st);
+				}
+				
+				else if (key == ICPPASTCompositeTypeSpecifier.k_class){
+					CProjectNode cl = new CProjectNode(
+							declare, CProjectNode.TYPE_CLASS, name);
+					
+					stackTreeNode.peek().addChild(cl);
+					stackTreeNode.push(cl);
+				}
+				
+				return PROCESS_CONTINUE;
 			}
 			
 			/*
@@ -163,8 +199,37 @@ public class CUnitParser extends ASTVisitor implements UnitParser{
 				.setDeclareStr(type + " " + fnDeclare.getRawSignature());
 			fn.setSourceFile(mFile);
 			mMain.addFunction(fn);
+			stackTreeNode.peek().addChild(new CProjectNode(fn));
 		}
 		return PROCESS_SKIP;
+	}
+	
+	@Override
+	public int visit(ICPPASTNamespaceDefinition namespaceDefinition) {
+		CProjectNode ns = new CProjectNode(namespaceDefinition);
+		
+		stackTreeNode.peek().addChild(ns);
+		stackTreeNode.push(ns);
+		return PROCESS_CONTINUE;
+	}
+
+
+
+	@Override
+	public int leave(ICPPASTNamespaceDefinition namespaceDefinition) {
+		stackTreeNode.pop();
+		return PROCESS_CONTINUE;
+	}
+	
+	@Override
+	public int leave(IASTDeclaration declaration) {
+		//Duyệt các khai báo biến đơn giản
+		if (declaration instanceof IASTSimpleDeclaration){
+			IASTSimpleDeclaration declare = (IASTSimpleDeclaration) declaration;
+			if (declare == stackTreeNode.peek().getValue())
+				stackTreeNode.pop();
+		}
+		return PROCESS_CONTINUE;
 	}
 	
 	/** Duyệt qua một khai báo đơn giản, sau đó trả về danh sách các biến được khai báo
@@ -218,8 +283,9 @@ public class CUnitParser extends ASTVisitor implements UnitParser{
 					capacity = Integer.valueOf(constant.getRawSignature());
 				} catch (Exception e){
 					//TODO tìm trong #define
-					throw new RuntimeException("Named length array not support"
-							+ arrMdf.getConstantExpression());
+					capacity = 0;
+//					throw new RuntimeException("Named length array not support"
+//							+ arrMdf.getConstantExpression());
 				}
 				type = new ArrayType(type, capacity);
 			}
@@ -229,10 +295,13 @@ public class CUnitParser extends ASTVisitor implements UnitParser{
 			
 			//Có biểu thức khởi tạo mảng, gán giá trị này cho biến mảng
 			if (init instanceof IASTEqualsInitializer){
-				IASTInitializerList initList = (IASTInitializerList) 
-						((IASTEqualsInitializer) init)
+				//IASTInitializerList initList = (IASTInitializerList) 
+				IASTInitializerClause initClause =
+				((IASTEqualsInitializer) init)
 						.getInitializerClause();
-				var.setValue(mUtils.parseNode(initList));
+				
+				if (initClause instanceof IASTInitializerList)
+					var.setValue(mUtils.parseNode(initClause));
 			}
 		} 
 		//Biến thường

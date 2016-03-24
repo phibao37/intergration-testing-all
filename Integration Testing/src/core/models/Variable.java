@@ -68,8 +68,7 @@ public class Variable extends Element implements IVariable {
 	@Override
 	public void setValue(IExpression value) {
 		mValue = value;
-		setContent(getType() + " " + getName() + 
-				(value == null ? "" : "(" + value + ")"));
+		setContent(getType() + " " + getName());
 	}
 
 	@Override

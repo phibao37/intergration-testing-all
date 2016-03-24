@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import core.expression.FunctionCallExpression;
-import core.models.CFG;
 import core.solver.BaseConstraintParser;
 import core.solver.TestResult;
 import core.solver.z3.Z3Solver;
@@ -29,13 +28,13 @@ public abstract class BaseProject implements IProject {
 	private List<IFunction> listFunction;
 	private List<IVariable> listGlobalVar;
 	private List<IType> listType;
-	private File[] listFile;
+	private File root;
 
-	public BaseProject(File... sources){
+	public BaseProject(File root){
 		listFunction = new ArrayList<>();
 		listGlobalVar = new ArrayList<>();
 		listType = new ArrayList<>();
-		listFile = sources;
+		this.root = root;
 	}
 	
 
@@ -43,20 +42,29 @@ public abstract class BaseProject implements IProject {
 	public void loadProject() {
 		
 		//Lọc các hàm từ các tập tin mã nguồn
-		for (File source: listFile)
-			getUnitParser().parseUnit(source, this);
+		parseEachSource(root);
 		
 		//Phân tích CFG cho các hàm
-		for (IFunction func: listFunction){
+		/*for (IFunction func: listFunction){
 			func.setCFG(ICFG.COVER_BRANCH, new CFG(
 					getBodyParser().parseBody(func.getBody(), false, this)));
 			func.setCFG(ICFG.COVER_SUBCONDITION, new CFG(
 					getBodyParser().parseBody(func.getBody(), true, this)));
 			
-		}
+		}*/
 		
 		//Liên kết các lời gọi hàm tới các hàm
 		
+	}
+	
+	private void parseEachSource(File parent){
+		for (File f: parent.listFiles()){
+			if (f.isDirectory())
+				parseEachSource(f);
+			else if (accept(f)) {
+				getUnitParser().parseUnit(f, this);
+			}
+		}
 	}
 
 	@Override

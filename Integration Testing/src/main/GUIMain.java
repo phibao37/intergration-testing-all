@@ -8,11 +8,19 @@ import java.awt.Toolkit;
 import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+
+import cdt.CProject;
+import cdt.models.CProjectNode;
+import graph.swing.ProjectExplorer;
+
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
 import java.awt.GridBagLayout;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
+
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JSplitPane;
@@ -20,10 +28,17 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
 
 public class GUIMain {
 
 	private JFrame frmCProjectTesting;
+	private JScrollPane scroll_project_tree;
+	
+	private JFileChooser chooserProject;
 
 	/**
 	 * Launch the application.
@@ -43,7 +58,29 @@ public class GUIMain {
 			}
 		});
 	}
+	
+	private void init2(){
+		chooserProject = new JFileChooser();
+		chooserProject.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	}
 
+	void openProjectFolder(){
+		int result = chooserProject.showDialog(frmCProjectTesting, "Open project folder");
+		
+		if (result == JFileChooser.APPROVE_OPTION){
+			File root = chooserProject.getSelectedFile();
+			
+			CProject project = new CProject(root);
+			project.loadProject();
+			
+			CProjectNode rootNode = new CProjectNode(root, 
+					CProjectNode.TYPE_PROJECT, project); 
+			
+			ProjectExplorer tree_project = new ProjectExplorer(rootNode);
+			scroll_project_tree.setViewportView(tree_project);
+		}
+	}
+	
 	/**
 	 * Create the application.
 	 */
@@ -90,12 +127,17 @@ public class GUIMain {
 		FlowLayout fl_toolBar = new FlowLayout(FlowLayout.CENTER);
 		fl_toolBar.setVgap(0);
 		toolBar.setLayout(fl_toolBar);
+		
+		scroll_project_tree = new JScrollPane();
+		scroll_project_tree.setBorder(null);
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup()
+				.addGroup(Alignment.TRAILING, gl_panel_1.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(toolBar, GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+					.addGroup(gl_panel_1.createParallelGroup(Alignment.TRAILING)
+						.addComponent(scroll_project_tree, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+						.addComponent(toolBar, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		gl_panel_1.setVerticalGroup(
@@ -103,8 +145,13 @@ public class GUIMain {
 				.addGroup(gl_panel_1.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(toolBar, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(625, Short.MAX_VALUE))
+					.addComponent(scroll_project_tree, GroupLayout.DEFAULT_SIZE, 613, Short.MAX_VALUE)
+					.addContainerGap())
 		);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBackground(Color.WHITE);
+		scroll_project_tree.setViewportView(panel_3);
 		
 		JButton button = new JButton("");
 		button.setToolTipText("Refresh project");
@@ -128,6 +175,9 @@ public class GUIMain {
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		splitPane_1.setLeftComponent(tabbedPane);
+		
+		JPanel panel_2 = new JPanel();
+		splitPane_1.setRightComponent(panel_2);
 		splitPane_1.setDividerLocation(500);
 		splitPane.setDividerLocation(300);
 		GridBagLayout gbl_panel = new GridBagLayout();
@@ -138,6 +188,11 @@ public class GUIMain {
 		panel.setLayout(gbl_panel);
 		
 		JButton btnOpen = new JButton("Open");
+		btnOpen.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openProjectFolder();
+			}
+		});
 		GridBagConstraints gbc_btnOpen = new GridBagConstraints();
 		gbc_btnOpen.insets = new Insets(0, 0, 0, 5);
 		gbc_btnOpen.fill = GridBagConstraints.HORIZONTAL;
@@ -179,5 +234,7 @@ public class GUIMain {
 		gbc_btnAbout.gridy = 0;
 		panel.add(btnAbout, gbc_btnAbout);
 		frmCProjectTesting.getContentPane().setLayout(groupLayout);
+		
+		init2();
 	}
 }

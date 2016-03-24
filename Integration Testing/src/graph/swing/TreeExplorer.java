@@ -158,8 +158,7 @@ public abstract class TreeExplorer<E> extends JTree
 	protected abstract boolean hasItemChild(E item);
 	
 	public TreeExplorer(){
-		setCellRenderer(new TreeCellRender());
-		
+		setModel(null);
 		addTreeExpansionListener(new TreeExpansionListener() {
 			
 			@Override
@@ -200,6 +199,7 @@ public abstract class TreeExplorer<E> extends JTree
 		setModel(mTreeModel = new DefaultTreeModel(mRoot));
 		loadItems(root, mRoot);
 		expandRow(0);
+		setCellRenderer(new TreeCellRender());
 	}
 	
 	/**
