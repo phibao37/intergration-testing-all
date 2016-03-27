@@ -37,23 +37,16 @@ public abstract class BaseProject implements IProject {
 		this.root = root;
 	}
 	
+	@Override
+	public File getRoot() {
+		return root;
+	}
 
 	@Override
 	public void loadProject() {
 		
 		//Lọc các hàm từ các tập tin mã nguồn
 		parseEachSource(root);
-		
-		//Phân tích CFG cho các hàm
-		/*for (IFunction func: listFunction){
-			func.setCFG(ICFG.COVER_BRANCH, new CFG(
-					getBodyParser().parseBody(func.getBody(), false, this)));
-			func.setCFG(ICFG.COVER_SUBCONDITION, new CFG(
-					getBodyParser().parseBody(func.getBody(), true, this)));
-			
-		}*/
-		
-		//Liên kết các lời gọi hàm tới các hàm
 		
 	}
 	
@@ -68,13 +61,14 @@ public abstract class BaseProject implements IProject {
 	}
 
 	@Override
-	public ITestResult testFunction(IFunction func) {
+	public ITestResult testFunction(IFunction func) throws InterruptedException {
 		ICFG cfg_12 = func.getCFG(ICFG.COVER_BRANCH),
 			cfg_3 = func.getCFG(ICFG.COVER_SUBCONDITION);
 		List<IBasisPath> allPath_12 = cfg_12.getAllBasisPaths(),
 				coverPath_3 = cfg_3.getCoverBranchPaths(),
 				errorPath = new ArrayList<>();
 		IVariable[] params = func.getParameters();
+		checkStop();
 		
 		//Reset visit state
 		for (IStatement stm: cfg_12.getStatements())
@@ -83,14 +77,16 @@ public abstract class BaseProject implements IProject {
 			stm.setVisit(false);
 		
 		for (IBasisPath path: allPath_12){
+			checkStop();
 			List<IConstraint> cnts = getConstraintParser()
 					.parseBasisPath(path, params, ConstraintParser.PARSE_ERROR_PATH);
 			
 			for (IConstraint cnt: cnts){
-				System.out.println("\nHe rang buoc: " + cnt);
+				//System.out.println("\nHe rang buoc: " + cnt);
+				checkStop();
 				ISolveResult r = getSolver().solveConstraint(cnt);
 				cnt.getPath().setSolveResult(r);
-				System.out.println("=> Ket qua: " + r);
+				//System.out.println("=> Ket qua: " + r);
 				
 				if (cnt.getConstraintType() != IConstraint.TYPE_NORMAL)
 					errorPath.add(cnt.getPath());
@@ -100,9 +96,12 @@ public abstract class BaseProject implements IProject {
 		for (IBasisPath path: coverPath_3){
 			IConstraint cnt = getConstraintParser()
 					.parseBasisPath(path, params, ConstraintParser.DEFAULT).get(0);
+			checkStop();
 			ISolveResult r = getSolver().solveConstraint(cnt);
 			path.setSolveResult(r);
 		}
+		
+		errorPath.removeIf(p -> p.getSolveResult().getCode() != ISolveResult.ERROR);
 		
 		Map<Integer, List<IBasisPath>> result = new HashMap<>();
 		result.put(ITestResult.STATEMENT, cfg_12.getCoverStatementPaths());

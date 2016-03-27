@@ -17,11 +17,13 @@ public abstract class Function<T> extends Element implements IFunction {
 	private IVariable[] mParas;
 	private IType mReturnType;
 	private T mBody;
-	
 	private ICFG mCFG_12, mCFG_3;
 	private List<IFunction> mRefers;
+	
 	private File mFile;
 	private IProject project;
+	private int status;
+	private boolean testing;
 	
 	public Function(String name, IVariable[] paras, IType returnType, T body, 
 			IProject project){
@@ -34,6 +36,7 @@ public abstract class Function<T> extends Element implements IFunction {
 		setContent(String.format("%s %s(%s)", mReturnType, mName, 
 				Utils.merge(", ", paras)));
 		setBody(body);
+		setStatus(LOADED);
 	}
 	
 	@Override
@@ -62,6 +65,28 @@ public abstract class Function<T> extends Element implements IFunction {
 	@Override
 	public IProject getProject() {
 		return project;
+	}
+
+	@Override
+	public void setStatus(int status) {
+		this.status = status;
+	}
+
+	@Override
+	public int getStatus() {
+		return status;
+	}
+	
+	
+
+	@Override
+	public void setTesting(boolean testing) {
+		this.testing = testing;
+	}
+
+	@Override
+	public boolean isTesting() {
+		return testing;
 	}
 
 	@Override

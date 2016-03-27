@@ -19,6 +19,8 @@ import api.solver.ISolver;
  */
 public interface IProject extends FileFilter {
 	
+	public File getRoot();
+	
 	/**
 	 * Nạp các cấu trúc và tạo các liên kết
 	 */
@@ -27,7 +29,12 @@ public interface IProject extends FileFilter {
 	/**
 	 * Kiểm thử một hàm nhất định
 	 */
-	public ITestResult testFunction(IFunction func);
+	public ITestResult testFunction(IFunction func) throws InterruptedException;
+	
+	public default void checkStop() throws InterruptedException {
+		if (Thread.interrupted())
+			throw new InterruptedException();
+	}
 	
 	/**
 	 * Trả về danh sách các hàm trong project

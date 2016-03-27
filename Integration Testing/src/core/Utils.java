@@ -36,6 +36,10 @@ public class Utils {
 		return content.toString();
 	}
 	
+	public static String relative(File file, File base){
+		return base.toURI().relativize(file.toURI()).getPath();
+	}
+	
 	/**
 	 * Tìm xem một đối tượng có trong một mảng hay không
 	 */

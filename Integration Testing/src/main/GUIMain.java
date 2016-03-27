@@ -6,6 +6,7 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
+import javax.swing.AbstractButton;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 
@@ -17,9 +18,12 @@ import api.solver.ISolveResult;
 import cdt.CProject;
 import cdt.models.CProjectNode;
 import core.Utils;
+import core.process.ProcessManager;
+import core.process.TestProcess;
 import graph.swing.FileView;
 import graph.swing.LightTabbedPane;
 import graph.swing.ProjectExplorer;
+import graph.swing.tablelayout.TableLayout;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -39,6 +43,7 @@ import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.awt.event.ActionEvent;
@@ -49,12 +54,26 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 public class GUIMain {
-
-	private JFrame frmCProjectTesting;
-	private JScrollPane scroll_project_tree;
+	
+	private static final ImageIcon 
+			ICON_CLOSE = new ImageIcon(GUIMain.class.getResource(
+					"/image/close.png")),
+			ICON_DETAILS = new ImageIcon(GUIMain.class.getResource(
+					"/image/details.png")),
+			ICON_TEST = new ImageIcon(GUIMain.class.getResource(
+					"/image/run-test-sm.png")),
+			ICON_LOADING = new ImageIcon(GUIMain.class.getResource(
+					"/image/loading.gif")),
+			ICON_COMPLETE = new ImageIcon(GUIMain.class.getResource(
+					"/image/complete.png"));
 	
 	private IProject currentProject;
+	private ProcessManager processMgr; 
+	private TableLayout layout_process_mgr;
+	private Hashtable<IFunction, TableLayout.TableRow> mapProcess;
 	
+	private JFrame frmCProjectTesting;
+	private JScrollPane scroll_project_tree;
 	private ProjectExplorer tree_project;
 	private JFileChooser chooserProject;
 	private LightTabbedPane tab_source_view;
@@ -83,6 +102,9 @@ public class GUIMain {
 	private void init2(){
 		chooserProject = new JFileChooser();
 		chooserProject.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		
+		processMgr = new ProcessManager();
+		mapProcess = new Hashtable<>();
 	}
 
 	void openProjectFolder(){
@@ -108,8 +130,16 @@ public class GUIMain {
 				}
 			});
 			scroll_project_tree.setViewportView(tree_project);
-			
-		}
+			clearAllView();
+	 	}
+	}
+	
+	void clearAllView(){
+		//Clear Call Graph and CFG
+		
+		//Clear function overview
+		
+		//Clear process manager
 	}
 	
 	void openSourceView(File file){
@@ -121,15 +151,99 @@ public class GUIMain {
 		} 
 	}
 	
+	void removeActionListener(AbstractButton btn){
+		for (ActionListener a: btn.getActionListeners())
+			btn.removeActionListener(a);
+	}
+	
+	void updateProcessView(IFunction fn, JLabel status, JButton action, 
+			TestProcess p){
+		if (fn.isTesting()){
+			status.setIcon(ICON_LOADING);
+			action.setIcon(ICON_CLOSE);
+			action.setToolTipText("Stop test");
+			
+			removeActionListener(action);
+			action.addActionListener(e -> {
+				processMgr.stopTest(p);
+			});
+		}
+		
+		else if (fn.getStatus() == IFunction.TESTED){
+			status.setIcon(ICON_COMPLETE);
+			action.setIcon(ICON_DETAILS);
+			action.setToolTipText("View details");
+			
+			removeActionListener(action);
+			action.addActionListener(e -> {
+				//Open details window
+			});
+		}
+		
+		else if (fn.getStatus() == IFunction.LOADED){
+			status.setIcon(null);
+			action.setIcon(ICON_TEST);
+			action.setToolTipText("Start test");
+			
+			removeActionListener(action);
+			action.addActionListener(e -> {
+				testFunction(fn);
+			});
+		}
+	}
+	
 	void testFunction(IFunction fn){
+		if (fn.isTesting() || 
+				fn.getStatus() == IFunction.UNSUPPORT)
+			return;
+		
+		TestProcess p = new TestProcess() {	
+	private TableLayout.TableRow row;
+		
+	@Override
+	public void testStart() {
 		lblFunctionName.setText(Utils.html(fn.getHTML()));
-		Map<Integer, List<IBasisPath>> r = currentProject.testFunction(fn).getMapPathResult();
+		tab_source_view.setSelectedIndex(0);
+		fn.setTesting(true);
+		row = mapProcess.get(fn);
+		
+		JLabel status = null;
+		JButton action = null;
+		
+		if (row == null){
+			action = new JButton();
+			action.setBorder(null);
+			action.setContentAreaFilled(false);
+			status = new JLabel();
+			
+			String name = Utils.relative(fn.getSourceFile(), currentProject.getRoot())
+					+ "::" + fn.getName();
+			
+			updateProcessView(fn, status, action, this);
+			row = layout_process_mgr.insertRow(0, 40, true, "c c l c c c l c",
+					null, new JLabel(name), status, action);
+			mapProcess.put(fn, row);
+		} else {
+			status = (JLabel) row.getComponent(2);
+			action = (JButton) row.getComponent(3);
+			updateProcessView(fn, status, action, this);
+		}
+		
+	}
+
+	@Override
+	public void test() throws InterruptedException {
+		Thread.sleep(5000);
+		
+		Map<Integer, List<IBasisPath>> r = currentProject.testFunction(fn)
+				.getMapPathResult();
 		ArrayList<IBasisPath> show = new ArrayList<>();
 		DefaultTableModel model = (DefaultTableModel) table_simple_result.getModel();
 		
 		show.addAll(r.get(ITestResult.BRANCH));
 		show.addAll(r.get(ITestResult.ERROR));
 		
+		checkStop();
 		model.setRowCount(0);
 		for (int i = 0; i < show.size(); i++){
 			IBasisPath path = show.get(i);
@@ -143,6 +257,23 @@ public class GUIMain {
 			});
 		}
 		model.addRow(new Object[]{});
+	}
+			
+	@Override
+	public void testEnd(boolean finish) {
+		fn.setTesting(false);
+		if (finish)
+			fn.setStatus(IFunction.TESTED);
+		
+		JLabel status = (JLabel) row.getComponent(2);
+		JButton action = (JButton) row.getComponent(3);
+		
+		updateProcessView(fn, status, action, this);
+	}
+			
+		};
+		processMgr.runTest(p);
+		
 	}
 	
 	/**
@@ -302,6 +433,12 @@ public class GUIMain {
 		
 		JPanel panel_5 = new JPanel();
 		panel_5.setBackground(Color.WHITE);
+		
+		layout_process_mgr = new TableLayout(panel_5, new double[][]{
+			{10, TableLayout.FILL, 40, 40, 10}, {}
+		});
+		panel_5.setLayout(layout_process_mgr);
+		
 		scrollPane.setViewportView(panel_5);
 		splitPane_2.setDividerLocation(370);
 		splitPane_1.setDividerLocation(500);
@@ -337,7 +474,7 @@ public class GUIMain {
 		JButton btnTest = new JButton("Test");
 		btnTest.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (tree_project.getSelectionCount() == 0)
+				if (tree_project == null || tree_project.getSelectionCount() == 0)
 					return;
 				CProjectNode node = (CProjectNode) tree_project.getSelectedItem();
 				

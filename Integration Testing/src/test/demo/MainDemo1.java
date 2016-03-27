@@ -8,7 +8,7 @@ import cdt.CProject;
 
 public class MainDemo1 {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		
 		IProject project = new CProject(new File("D:/Documents/C/test.cpp"));
 		project.loadProject();

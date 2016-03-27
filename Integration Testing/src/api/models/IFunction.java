@@ -54,6 +54,16 @@ public interface IFunction extends IElement {
 	
 	public IProject getProject();
 	
+	public void setStatus(int status);
+	public int getStatus();
+	
+	public void setTesting(boolean testing);
+	public boolean isTesting();
+	
+	final int UNSUPPORT = -1,
+			LOADED = 0,
+			TESTED = 1;
+	
 	/**
 	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 
 	 * ở trong phần thân hàm
