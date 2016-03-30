@@ -58,6 +58,13 @@ public interface IStatement extends IElement {
 	}
 	
 	/**
+	 * Có nên hiển thị trong đồ thị hay không
+	 */
+	public default boolean shouldDisplay(){
+		return isNormal();
+	}
+	
+	/**
 	 * Thiết đặt các nhánh liên kết
 	 * @param trueBranch câu lệnh tiếp theo khi điều kiện câu lệnh đúng
 	 * @param falseBranch câu lệnh tiếp theo khi điều kiện câu lệnh sai

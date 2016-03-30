@@ -46,6 +46,11 @@ public class FlagStatement extends Statement {
 	public boolean isNormal() {
 		return false;
 	}
+
+	@Override
+	public boolean shouldDisplay() {
+		return true;
+	}
 	
 	
 }

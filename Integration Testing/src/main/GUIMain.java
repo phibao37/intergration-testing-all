@@ -12,6 +12,7 @@ import javax.swing.GroupLayout.Alignment;
 
 import api.IProject;
 import api.models.IBasisPath;
+import api.models.ICFG;
 import api.models.IFunction;
 import api.models.ITestResult;
 import api.solver.ISolveResult;
@@ -20,6 +21,7 @@ import cdt.models.CProjectNode;
 import core.Utils;
 import core.process.ProcessManager;
 import core.process.TestProcess;
+import graph.swing.CFGView;
 import graph.swing.FileView;
 import graph.swing.LightTabbedPane;
 import graph.swing.ProjectExplorer;
@@ -76,7 +78,7 @@ public class GUIMain {
 	private JScrollPane scroll_project_tree;
 	private ProjectExplorer tree_project;
 	private JFileChooser chooserProject;
-	private LightTabbedPane tab_source_view;
+	private LightTabbedPane tab_source_view, tab_graph;
 	private JLabel lblFunctionName;
 	private JTable table_simple_result;
 
@@ -106,6 +108,14 @@ public class GUIMain {
 		processMgr = new ProcessManager();
 		mapProcess = new Hashtable<>();
 	}
+	
+	void openCFGView(IFunction fn, int cover){
+		try {
+			tab_graph.openTab("CFG: " + fn.getName(), null, fn.toString(), 
+					CFGView.class.getConstructor(IFunction.class, int.class),
+					fn, cover);
+		} catch (Exception e) { } 
+	}
 
 	void openProjectFolder(){
 		int result = chooserProject.showDialog(frmCProjectTesting, "Open project folder");
@@ -124,8 +134,14 @@ public class GUIMain {
 			tree_project.addItemClickListener((item, count) -> {
 				if (count == 2){
 					CProjectNode node = (CProjectNode) item;
-					if (node.getType() == CProjectNode.TYPE_FILE){
+					int type = node.getType();
+					
+					if (type == CProjectNode.TYPE_FILE){
 						openSourceView(node.getFile());
+					}
+					
+					else if (type == CProjectNode.TYPE_FUNCTION){
+						openCFGView(node.getFunction(), ICFG.COVER_BRANCH);
 					}
 				}
 			});
@@ -371,12 +387,12 @@ public class GUIMain {
 		splitPane_1.setDividerSize(5);
 		splitPane.setRightComponent(splitPane_1);
 		
-		LightTabbedPane tabbedPane = new LightTabbedPane(JTabbedPane.TOP);
-		splitPane_1.setLeftComponent(tabbedPane);
+		tab_graph = new LightTabbedPane(JTabbedPane.TOP);
+		splitPane_1.setLeftComponent(tab_graph);
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBackground(Color.WHITE);
-		tabbedPane.addTab("Call graph", null, panel_4, null);
+		tab_graph.addTab("Call graph", null, panel_4, null);
 		
 		JSplitPane splitPane_2 = new JSplitPane();
 		splitPane_2.setDividerSize(5);
