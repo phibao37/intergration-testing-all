@@ -104,6 +104,10 @@ public class GUIMain {
 	private void init2(){
 		chooserProject = new JFileChooser();
 		chooserProject.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		File example = new File("example");
+		if (example.exists()){
+			chooserProject.setSelectedFile(example.getAbsoluteFile());
+		}
 		
 		processMgr = new ProcessManager();
 		mapProcess = new Hashtable<>();
