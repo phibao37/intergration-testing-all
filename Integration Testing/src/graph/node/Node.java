@@ -1,4 +1,4 @@
-package graph.swing.node;
+package graph.node;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -23,7 +23,7 @@ public class Node<E extends IElement> extends JLabel {
 		
 		if (content.length() > MAX_STR_LEN){
 			setToolTipText(content);
-			content = content.substring(0, MAX_STR_LEN);
+			content = content.substring(0, MAX_STR_LEN - 3) + "...";
 		}
 		
 		setText(content);

@@ -1,4 +1,4 @@
-package graph.swing.node;
+package graph.node;
 
 import java.lang.reflect.Array;
 import api.models.ICFG;

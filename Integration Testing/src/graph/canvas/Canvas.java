@@ -1,4 +1,4 @@
-package graph.swing.canvas;
+package graph.canvas;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -9,8 +9,8 @@ import java.awt.event.MouseListener;
 import javax.swing.JPanel;
 
 import api.models.IElement;
-import graph.swing.node.Node;
-import graph.swing.node.NodeAdapter;
+import graph.node.Node;
+import graph.node.NodeAdapter;
 
 public abstract class Canvas<E extends IElement> extends JPanel 
 		implements MouseListener {

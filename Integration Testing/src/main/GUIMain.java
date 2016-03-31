@@ -249,7 +249,7 @@ public class GUIMain {
 
 	@Override
 	public void test() throws InterruptedException {
-		Thread.sleep(5000);
+		//Thread.sleep(5000);
 		
 		Map<Integer, List<IBasisPath>> r = currentProject.testFunction(fn)
 				.getMapPathResult();

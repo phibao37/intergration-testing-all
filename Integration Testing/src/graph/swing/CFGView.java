@@ -4,8 +4,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
 import api.models.IFunction;
-import graph.swing.canvas.CFGCanvas;
-import graph.swing.node.CFGNodeAdapter;
+import graph.canvas.CFGCanvas;
+import graph.node.CFGNodeAdapter;
 
 public class CFGView extends DragScrollPane 
 		implements LightTabbedPane.EqualsConstruct, ComponentListener {

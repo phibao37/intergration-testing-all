@@ -1,4 +1,4 @@
-package graph.swing.node;
+package graph.node;
 
 import java.awt.Color;
 import java.awt.Dimension;

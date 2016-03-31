@@ -1,4 +1,4 @@
-package graph.swing.canvas;
+package graph.canvas;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -7,13 +7,13 @@ import java.awt.Stroke;
 
 import api.models.IFunction;
 import api.models.IStatement;
-import graph.swing.node.CFGNode;
-import graph.swing.node.Node;
-import graph.swing.node.NodeAdapter;
+import graph.node.CFGNode;
+import graph.node.Node;
+import graph.node.NodeAdapter;
 
 public class CFGCanvas extends Canvas<IStatement> {
 	private static final long serialVersionUID = 1L;
-	protected static final int MARGIN_X = 150, MARGIN_Y = 90;
+	protected static final int MARGIN_X = 120, MARGIN_Y = 80;
 	public static final Color DEFAULT = Color.BLACK;
 	public static final Color TRUE = Color.BLUE;
 	public static final Color FALSE = new Color(0, 153, 51);
