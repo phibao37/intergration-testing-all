@@ -11,22 +11,13 @@ import api.models.IElement;
 
 public class Node<E extends IElement> extends JLabel {
 	private static final long serialVersionUID = 1L;
-	private static final int MAX_STR_LEN = 30;
+	protected static final int MAX_STR_LEN = 30;
 	
 	private E element;
 	private Node<E>[] refer;
 	private int x, y;
 	
-	protected Node(E element){
-		this.element = element;
-		String content = element.getContent();
-		
-		if (content.length() > MAX_STR_LEN){
-			setToolTipText(content);
-			content = content.substring(0, MAX_STR_LEN - 3) + "...";
-		}
-		
-		setText(content);
+	protected Node(){
 		setHorizontalAlignment(CENTER);
 		setFocusable(true);
 		
@@ -92,8 +83,25 @@ public class Node<E extends IElement> extends JLabel {
 		});
 	}
 	
+	protected Node(E element){
+		this();
+		setElement(element);
+		String content = element.getContent();
+		
+		if (content.length() > MAX_STR_LEN){
+			setToolTipText(content);
+			content = content.substring(0, MAX_STR_LEN - 3) + "...";
+		}
+		
+		setText(content);
+	}
+	
 	public boolean isLocationSet(){
 		return getX() != 0 || getY() != 0;
+	}
+	
+	protected void setElement(E element){
+		this.element = element;
 	}
 	
 	public E getElement(){

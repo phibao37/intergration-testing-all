@@ -315,6 +315,13 @@ public class Utils {
 	}
 	
 	/**
+	 * Đưa một nội dung trong body vào một trang html hoàn chỉnh
+	 */
+	public static String htmlCenter(String body){
+		return String.format("<html><body style='text-align:center'>%s</body></html>", body);
+	}
+	
+	/**
 	 * Trả về ánh xạ giữa chỉ số và chuỗi giá trị của phần tử
 	 */
 	public static LinkedHashMap<int[], String> getValueMap(String arrayValue){

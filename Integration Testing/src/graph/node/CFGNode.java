@@ -5,9 +5,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.SystemColor;
+import java.util.List;
 
 import api.expression.IReturnExpression;
 import api.models.IStatement;
+import core.Utils;
 
 public class CFGNode extends Node<IStatement> {
 	private static final long serialVersionUID = 1L;
@@ -37,6 +39,27 @@ public class CFGNode extends Node<IStatement> {
 			size.width = size.height = MARK_SIZE;
 		}
 		
+		setSize(size);
+		setBorderColor(Color.BLACK);
+		setBackground(SystemColor.inactiveCaptionBorder);
+	}
+	
+	public CFGNode(List<IStatement> stmList){
+		setElement(stmList.get(0));
+		type = NORMAL;
+		
+		String txt = "", s;
+		for (IStatement stm: stmList){
+			s = stm.getContent();
+			txt += s.length() <= MAX_STR_LEN ? s : 
+				s.substring(0, MAX_STR_LEN-3) + "...";
+			txt += "<br>";
+		}
+		setText(Utils.htmlCenter(txt));
+		
+		Dimension size = getPreferredSize();
+		size.width += PADDING_X;
+		size.height += PADDING_Y;
 		setSize(size);
 		setBorderColor(Color.BLACK);
 		setBackground(SystemColor.inactiveCaptionBorder);
