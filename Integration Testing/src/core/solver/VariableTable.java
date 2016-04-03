@@ -10,16 +10,21 @@ import api.expression.IExpressionEval;
 import api.expression.IExpressionGroup;
 import api.expression.IMemberAccessExpression;
 import api.expression.INameExpression;
+import api.expression.INumberExpression;
 import api.models.IType;
 import api.models.IVariable;
-import api.parser.IVariableTable;
+import api.solver.IVariableTable;
+import core.expression.ExpressionEval;
 import core.expression.ExpressionVisitor;
+import core.models.ArrayVariable;
 import core.models.Variable;
+import core.models.type.ArrayType;
 
 public class VariableTable extends ArrayList<IVariable> implements IVariableTable {
 	private static final long serialVersionUID = 1L;
 
 	private int scope = 0;
+	private ExpressionEval exEval = new ExpressionEval();
 	
 	@Override
 	public void increaseScope() {
@@ -47,8 +52,13 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 	@Override
 	public void updateArrayElement(String name, IExpression[] indexes, 
 			IExpression value) {
-		// TODO Auto-generated method stub
+		value = fill(value);
+		IExpression[] newIndexes = new IExpression[indexes.length];
 		
+		for (int i = 0; i < indexes.length; i++)
+			newIndexes[i] = eval(indexes[i]);
+		
+		((ArrayVariable)find(name)).setValueAt(value, newIndexes);
 	}
 	
 	@Override
@@ -79,10 +89,23 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 				
 				//Đây là một biến mảng
 				else if (left instanceof IArrayIndexExpression) {
-					//
+					IType arrayType = type;
+					IArrayIndexExpression array = (IArrayIndexExpression) left;
+					IExpression[] indexes = array.getIndexes();
+					
+					for (int i = indexes.length - 1; i >= 0; i--){
+						int size = 0;
+						
+						if (indexes[i] instanceof INumberExpression)
+							size = ((INumberExpression) indexes[i]).intValue();
+						arrayType = new ArrayType(arrayType, size);
+					}
+					
+					array.setType(type);
+					var = new ArrayVariable(array.getName(), (ArrayType) arrayType);
 				}
 				
-				//Khai báo và khởi tạo giá trị, thực hiện như gán
+				//Khai báo và khởi tạo giá trị
 				if (right != null)
 					injectTypeExpression(right);
 					
@@ -129,9 +152,29 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 			}
 
 			@Override
-			public void leave(IArrayIndexExpression array) {
-				//
-				array.notifyValueUsed();
+			public void leave(IArrayIndexExpression arrayEx) {
+				ArrayVariable array = (ArrayVariable) find(arrayEx.getName());
+				
+				if (injectType){
+					IType type = array.getType();
+					for (int i = arrayEx.getIndexes().length; i > 0; i--)
+						type = ((ArrayType)type).getSubType();
+					arrayEx.setType(type);
+					return;
+				}
+				
+				IExpression[] indexes = arrayEx.getIndexes().clone();
+				for (int i = 0; i < indexes.length; i++)
+					indexes[i] = eval(indexes[i]);
+				
+				if (array.isValueSet(indexes)){
+					IExpression value = array.getValueAt(indexes)
+							.clone().blockReplace(true);
+					justReplace.add(value);
+					group.replaceChild(arrayEx, value);
+				}
+				
+				arrayEx.notifyValueUsed();
 			}
 
 			@Override
@@ -158,7 +201,7 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 
 	@Override
 	public IExpressionEval getExpressionEval() {
-		return null;
+		return exEval;
 	}
 
 }

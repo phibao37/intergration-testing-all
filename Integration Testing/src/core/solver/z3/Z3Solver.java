@@ -14,10 +14,10 @@ import api.expression.IMemberAccessExpression;
 import api.expression.IUnaryExpression;
 import api.models.IType;
 import api.models.IVariable;
-import api.parser.IVariableTable;
 import api.solver.IConstraint;
 import api.solver.ISolveResult;
 import api.solver.ISolver;
+import api.solver.IVariableTable;
 import core.expression.BinaryExpression;
 import core.expression.NumberExpression;
 import core.expression.StringExpression;
@@ -41,7 +41,8 @@ public class Z3Solver implements ISolver {
 	public ISolveResult solveConstraint(IConstraint constraint) {
 		IVariable[] solution = null;
 		int code = ISolveResult.UNKNOWN;
-		String message = RESULT_UNKNOWN; 
+		String message = RESULT_UNKNOWN;
+		List<IArrayIndexExpression> array = constraint.getArrayAccess();
 		IExpression returnValue = null;
 		boolean isNormalConstraint = 
 				constraint.getConstraintType() == IConstraint.TYPE_NORMAL;
@@ -104,6 +105,21 @@ try{
 				if (v.getType() instanceof BasicType)
 					z3.addLine("simplify %s", v.getName());  			// (I)
 			
+			for (IArrayIndexExpression arr: array){
+				String params = "";
+				
+				//Với các biểu thức truy cập mảng, đầu tiên cần rút gọn các chỉ số
+				//dẫn đến phần tử mảng
+				for (IExpression index: arr.getIndexes()){
+					String s_index = parseCondition(index);
+					z3.addLine("simplify %s", s_index); 				// (II)
+					params += " " + s_index;
+				}
+				
+				//Sau đó, rút gọn giá trị phần tử mảng tại vị trí tương ứng
+				z3.addLine("simplify (%s%s)", arr.getName(), params); 	// (III)
+			}
+			
 			if (isNormalConstraint && constraint.getReturnExpression() != null)
 				z3.addLine("simplify %s", 
 						parseCondition(constraint.getReturnExpression()));  //(IV)
@@ -118,6 +134,22 @@ try{
 					//Gán giá trị cho biến thường
 					varTable.updateVariable(name, str2Expression(value));
 				}
+			
+			for (IArrayIndexExpression arr: array){
+				IExpression[] indexes = arr.getIndexes();
+				IExpression[] indexs = new IExpression[indexes.length];
+				
+				//Lấy biểu thức các chỉ số mảng sau khi đã được z3 rút gọn
+				for (int i = 0; i < indexs.length; i++){
+					indexs[i] = str2Expression(z3.getLine());			// (II)
+				}
+				
+				try{
+				//Cập nhật giá trị phần tử của biến mảng tại vị trí tương ứng
+				varTable.updateArrayElement(arr.getName(), 
+						indexs, str2Expression(z3.getLine()));			// (III)
+				} catch (ArrayIndexOutOfBoundsException e) {}
+			}
 			
 			if (isNormalConstraint && constraint.getReturnExpression() != null){
 				returnValue = str2Expression(z3.getLine());    				//(IV)
@@ -146,6 +178,7 @@ try{
 		} 
 		
 } catch (IOException e){
+	e.printStackTrace();
 	//Co van de xay ra, return UNKNOWN
 }
 		

@@ -1,7 +1,5 @@
 package api.expression;
 
-import api.models.IType;
-
 public interface INameExpression extends IExpression, IContainNameExpression, 
 		IRegistterValueUsed {
 
@@ -31,8 +29,6 @@ public interface INameExpression extends IExpression, IContainNameExpression,
 	 * Gán vai trò của biểu thức tên trong biểu thức cha của nó
 	 */
 	void setRole(int role);
-	
-	void setType(IType type);
 	
 	@Override
 	public default int _handleVisit(IExpressionVisitor visitor) {

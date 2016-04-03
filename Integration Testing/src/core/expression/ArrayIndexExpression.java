@@ -3,7 +3,7 @@ package core.expression;
 import api.expression.IArrayIndexExpression;
 import api.expression.IExpression;
 import api.expression.INameExpression;
-import core.models.type.Type;
+import api.models.IType;
 
 /**
  * Mô tả một biểu thức truy cập phần tử mảng, bao gồm tên của biến mảng, 
@@ -19,7 +19,7 @@ import core.models.type.Type;
 public class ArrayIndexExpression extends ExpressionGroup implements IArrayIndexExpression {
 	
 	private boolean mDeclare;
-	private Type mType;
+	private IType mType;
 	
 	/**
 	 * Tạo một biểu thức truy cập mảng từ tên mảng và danh sách chỉ số
@@ -90,14 +90,14 @@ public class ArrayIndexExpression extends ExpressionGroup implements IArrayIndex
 		return arr;
 	}
 
-	public void setType(Type type) {
+	public void setType(IType type) {
 		mType = type;
 		if (isCloneExpression())
 			((ArrayIndexExpression)getSource()).setType(type);
 	}
 
 	@Override
-	public Type getType() {
+	public IType getType() {
 		return mType;
 	}
 

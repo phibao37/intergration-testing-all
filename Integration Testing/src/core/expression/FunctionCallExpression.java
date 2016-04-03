@@ -47,9 +47,6 @@ public class FunctionCallExpression extends ExpressionGroup implements IFunction
 		return String.format("%s(%s)", getName(), args);
 	}
 
-	/* (non-Javadoc)
-	 * @see core.expression.IFunctionCallExpression#getArguments()
-	 */
 	@Override
 	public IExpression[] getArguments(){
 		IExpression[] indexs = new IExpression[g.length - 1];
@@ -57,17 +54,11 @@ public class FunctionCallExpression extends ExpressionGroup implements IFunction
 		return indexs;
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IFunctionCallExpression#setFunction(api.models.IFunction)
-	 */
 	@Override
 	public void setFunction(IFunction func){
 		mFunc = func;
 	}
 	
-	/* (non-Javadoc)
-	 * @see core.expression.IFunctionCallExpression#getFunction()
-	 */
 	@Override
 	public IFunction getFunction(){
 		return mFunc;
@@ -89,6 +80,11 @@ public class FunctionCallExpression extends ExpressionGroup implements IFunction
 	@Override
 	public IExpression getNameExpression() {
 		return g[0];
+	}
+
+	@Override
+	public void setType(IType type) {
+		throw new RuntimeException("Use setFunction instead");
 	}
 	
 }

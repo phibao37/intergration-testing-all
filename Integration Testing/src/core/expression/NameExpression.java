@@ -65,8 +65,9 @@ public class NameExpression extends Expression implements INameExpression {
 
 	@Override
 	public void notifyValueUsed() {
-		if (valueUsed != null)
+		if (valueUsed != null){
 			valueUsed.valueUsed(this);
+		}
 		valueUsed = null;
 	}
 

@@ -2,6 +2,7 @@ package core.models.type;
 
 import api.expression.IExpression;
 import api.models.IType;
+import core.expression.ArrayExpression;
 
 public class ArrayType extends Type {
 
@@ -51,13 +52,12 @@ public class ArrayType extends Type {
 
 	@Override
 	public IExpression getDefaultValue() {
-		// TODO Auto-generated method stub
-		return null;
+		int size = Math.max(1, getCapacity());
+		return new ArrayExpression(new IExpression[size]);
 	}
 
 	@Override
 	public int compareTo(IType o) {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 

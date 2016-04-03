@@ -32,6 +32,7 @@ public class Statement extends Element implements IStatement {
 	private IStatement mTrue, mFalse;
 	private IExpression mRoot;
 	private boolean mVisit;
+	private int id;
 	
 	/**
 	 * Tạo một câu lệnh với nội dung của nó
@@ -95,6 +96,16 @@ public class Statement extends Element implements IStatement {
 	 */
 	public boolean isVisited(){
 		return mVisit;
+	}
+
+	@Override
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	@Override
+	public int getId() {
+		return id;
 	}
 
 }

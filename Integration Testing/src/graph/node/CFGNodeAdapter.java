@@ -9,17 +9,30 @@ import api.models.IStatement;
 public class CFGNodeAdapter extends NodeAdapter<IStatement> {
 	private static final long serialVersionUID = 1L;
 
+	private int[] receiveCount;
+	
 	@SuppressWarnings("unchecked")
 	public CFGNodeAdapter(ICFG cfg) {
 		IStatement[] cfgStm = cfg.getStatements();
-		for (IStatement stm: cfgStm)
+		receiveCount = new int[cfgStm.length];
+		int i = 0;
+		for (IStatement stm: cfgStm){
 			stm.setVisit(false);
+			stm.setId(i++);
+		}
+		
+		for (IStatement stm: cfgStm){
+			if (stm.getTrue() != null)
+				receiveCount[stm.getTrue().getId()]++;
+			if (stm.isCondition() && stm.getFalse() != null)
+				receiveCount[stm.getFalse().getId()]++;
+		}
 		
 		for (IStatement stm: cfgStm){
 			if (stm.isVisited() || !stm.shouldDisplay()) continue;
 			stm.setVisit(true);
 			
-			IStatement next = nextNormal(stm);
+			IStatement next = nextInBlock(stm);
 			if (next == stm){
 				add(new CFGNode(stm));
 			} else {
@@ -35,7 +48,7 @@ public class CFGNodeAdapter extends NodeAdapter<IStatement> {
 		}
 		
 		for (Node<IStatement> node: this){
-			IStatement stm = nextNormal(node.getElement());
+			IStatement stm = nextInBlock(node.getElement());
 			Node<IStatement> nodeTrue = getNodeByElement(next(stm.getTrue())),
 					nodeFalse = getNodeByElement(next(stm.getFalse()));
 			
@@ -49,19 +62,26 @@ public class CFGNodeAdapter extends NodeAdapter<IStatement> {
 		}
 	}
 	
-	private static IStatement nextNormal(IStatement stm){
+	/**
+	 * Trả về câu lệnh cuối cùng trong khối câu lệnh nếu có thể nhóm lại
+	 */
+	private IStatement nextInBlock(IStatement stm){
 		if (!stm.isNormal() || stm.isCondition())
 			return stm;
 		IStatement next = stm.getTrue();
 		
-		while (next != null && next.isNormal() && !next.isCondition()){
+		while (next != null && receiveCount[next.getId()] == 1
+				&& next.isNormal() && !next.isCondition()){
 			stm = next;
 			next = stm.getTrue();
 		}
 		return stm;
 	}
 	
-	private static IStatement next(IStatement stm){
+	/**
+	 * Trả về câu lệnh tiếp theo cần được hiển thị, bỏ qua các dấu ngoặc {, }
+	 */
+	private IStatement next(IStatement stm){
 		while (stm != null && !stm.shouldDisplay())
 			stm = stm.getTrue();
 		return stm;

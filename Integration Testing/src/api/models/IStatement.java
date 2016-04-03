@@ -94,4 +94,8 @@ public interface IStatement extends IElement {
 	 */
 	public boolean isVisited();
 	
+	public void setId(int id);
+	public int getId();
+	
+	
 }

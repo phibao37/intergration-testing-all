@@ -22,4 +22,9 @@ public interface IExpressionGroup extends IExpression {
 	 * Loại bỏ đóng nhóm
 	 */
 	IExpression ungroup();
+	
+	/**
+	 * Có sự thay đổi về nội dung các biểu thức con, cần tính toán lại
+	 */
+	public void invalidateChild();
 }

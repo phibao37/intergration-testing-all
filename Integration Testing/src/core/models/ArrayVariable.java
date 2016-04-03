@@ -7,6 +7,7 @@ import java.util.LinkedList;
 
 import api.expression.IArrayExpression;
 import api.expression.IExpression;
+import api.expression.IExpressionGroup;
 import api.models.IType;
 import core.Utils;
 import core.expression.ArrayExpression;
@@ -135,11 +136,8 @@ public class ArrayVariable extends Variable {
 		if (old == null)
 			old = initUpToIndex(indexes);
 		
-		replace(old, newValue);
-	}
-	
-	private void replace(IExpression find, IExpression replace){
-		throw new RuntimeException("Cai dat ArrayVariable.replace sau");
+		getValue().group().replaceChild(old, newValue);
+		getValue().invalidateChild();
 	}
 	
 	/**
@@ -172,6 +170,7 @@ public class ArrayVariable extends Variable {
 	private IExpression initUpToIndex(int... indexes){
 		initValueIfNotSet();
 		IArrayExpression group = getValue();
+		IExpressionGroup root = group.group();
 		
 		IType type = getType();
 		IExpression value = null;
@@ -188,7 +187,7 @@ public class ArrayVariable extends Variable {
 				if (value == null){
 					value = subType.getDefaultValue();
 					group.setElement(i, value);
-					replace(value, value);
+					//replace(value, value);
 				}
 			}
 			
@@ -200,9 +199,9 @@ public class ArrayVariable extends Variable {
 				
 				for (int j = 0; j < group.length(); j++)
 					arr[j] = group.getElement(j);
-					arr[i] = subType.getDefaultValue();
+				arr[i] = subType.getDefaultValue();
 				value = new ArrayExpression(arr);
-				replace(group, value);
+				root.replaceChild(group, value);
 				value = ((IArrayExpression)value).getElement(i);
 			}
 			
@@ -214,6 +213,8 @@ public class ArrayVariable extends Variable {
 				type = null;
 			}
 		}
+		setValue(root.ungroup());
+		getValue().invalidateChild();
 		return value;
 	}
 	

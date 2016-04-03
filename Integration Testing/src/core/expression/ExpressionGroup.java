@@ -33,13 +33,11 @@ public abstract class ExpressionGroup extends Expression implements IExpressionG
 	 */
 	protected abstract String generateContent();
 	
-	/**
-	 * Thông báo rằng nội dung hiển thị đã bị thay đổi do có sự chỉnh sửa các phần tử
-	 */
-	protected final void notifyContentChanged(){
+	@Override
+	public void invalidateChild() {
 		mContent = null;
 	}
-	
+
 	/**
 	 * Thay thế một biểu thức con bằng một biểu thức khác tại cùng vị trí
 	 * @param find biểu thức cần thay thế. Một biểu thức được gọi là khớp để thay thế

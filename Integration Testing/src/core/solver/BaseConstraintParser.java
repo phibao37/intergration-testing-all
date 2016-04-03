@@ -10,7 +10,7 @@ import api.expression.IExpression;
 import api.expression.IExpressionGroup;
 import api.expression.IMemberAccessExpression;
 import api.expression.INameExpression;
-import api.expression.IRegistterValueUsed;
+import api.expression.INumberExpression;
 import api.expression.IReturnExpression;
 import api.expression.IUnaryExpression;
 import api.models.IBasisPath;
@@ -18,15 +18,18 @@ import api.models.IStatement;
 import api.models.IType;
 import api.models.IVariable;
 import api.parser.ConstraintParser;
-import api.parser.IVariableTable;
 import api.solver.IConstraint;
+import api.solver.IVariableTable;
 import core.Utils;
 import core.expression.BinaryExpression;
 import core.expression.ExpressionVisitor;
+import core.expression.NameExpression;
 import core.expression.NumberExpression;
 import core.expression.UnaryExpression;
+import core.models.ArrayVariable;
 import core.models.Variable;
 import core.models.statement.ScopeStatement;
+import core.models.type.ArrayType;
 import core.models.type.BasicType;
 
 public class BaseConstraintParser extends ExpressionVisitor
@@ -128,7 +131,20 @@ public class BaseConstraintParser extends ExpressionVisitor
 			
 			//Đây là một biến mảng
 			else if (left instanceof IArrayIndexExpression) {
-				//
+				IType arrayType = type;
+				IArrayIndexExpression array = (IArrayIndexExpression) left;
+				IExpression[] indexes = array.getIndexes();
+				
+				for (int i = indexes.length - 1; i >= 0; i--){
+					int size = 0;
+					
+					if (indexes[i] instanceof INumberExpression)
+						size = ((INumberExpression) indexes[i]).intValue();
+					arrayType = new ArrayType(arrayType, size);
+				}
+				
+				ref = new NameExpression(array.getName());
+				var = new ArrayVariable(ref.getName(), (ArrayType) arrayType);
 			}
 			
 			//Thêm biến vào bảng biến
@@ -171,9 +187,11 @@ public class BaseConstraintParser extends ExpressionVisitor
 			//Phép tính: i++, j--: trả về rồi thực hiện phép tính sau
 			else{
 				
-				((IRegistterValueUsed)sub).setOnValueUsedOne(ex -> 
-					handleAssignment(new BinaryExpression(
-						ex, newOp, NumberExpression.ONE)));
+//				((IRegistterValueUsed)sub).setOnValueUsedOne(ex -> 
+//					handleAssignment(new BinaryExpression(
+//						ex, newOp, NumberExpression.ONE)));
+				handleAssignment(new BinaryExpression(
+						sub, newOp, NumberExpression.ONE));
 			}
 			
 			//Thay thế bằng tên biến: call(++i) => call(i)
@@ -268,7 +286,23 @@ public class BaseConstraintParser extends ExpressionVisitor
 	
 	@Override
 	public void leave(IArrayIndexExpression array) {
-		//Kiểm tra mọi chỉ số đều >= 0 và < length...
+		if (array.isDeclare()) return;
+		
+		for (IExpression index: array.getIndexes()){
+			IExpression findex = varTable.fill(index);
+			rootgroup.replaceChild(index, findex);
+			
+			//Kiểm tra index < 0
+			cloneConstraint(new BinaryExpression(
+					findex, BinaryExpression.LESS, NumberExpression.ZERO), 
+				IConstraint.TYPE_OUT_OF_BOUND);
+		}
+		
+		//Scope = 1, tương ứng với các biến tham số
+		if (varTable.getScope(array.getName()) == 1){
+			constraint.addArrayAccess((IArrayIndexExpression) 
+					varTable.fill(array.clone()));
+		}
 	}
 
 	@Override

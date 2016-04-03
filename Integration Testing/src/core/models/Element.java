@@ -29,7 +29,7 @@ public abstract class Element implements IElement{
 	 * Thiết đặt nội dung hiển thị của phần tử
 	 * @param content nội dung phần tử, là chuỗi hiển thị của phần tử trong mã nguồn
 	 */
-	protected void setContent(String content){
+	public void setContent(String content){
 		mContent = content;
 	}
 	

@@ -1,5 +1,7 @@
 package api.expression;
 
+import api.models.IType;
+
 public interface IContainNameExpression extends IExpression {
 	
 	/**
@@ -13,4 +15,7 @@ public interface IContainNameExpression extends IExpression {
 	default String getName(){
 		return getNameExpression().getContent();
 	}
+	
+
+	void setType(IType type);
 }

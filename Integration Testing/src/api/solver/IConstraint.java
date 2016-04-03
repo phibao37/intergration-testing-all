@@ -2,6 +2,7 @@ package api.solver;
 
 import java.util.List;
 
+import api.expression.IArrayIndexExpression;
 import api.expression.IExpression;
 import api.models.IBasisPath;
 import api.models.IVariable;
@@ -21,6 +22,13 @@ public interface IConstraint extends Cloneable{
 	 * Thêm ràng buộc vào hệs
 	 */
 	public void addLogicConstraint(IExpression constraint);
+	
+	/**
+	 * Lấy danh sách các truy cập phẩn tử mảng trong thân hàm
+	 */
+	public List<IArrayIndexExpression> getArrayAccess();
+	
+	public void addArrayAccess(IArrayIndexExpression arrayIndex);
 	
 	/**
 	 * Lấy danh sách các tham số của hàm, là các biến số cần được giải ràng buộc

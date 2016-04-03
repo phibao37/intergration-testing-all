@@ -77,16 +77,21 @@ public class LightTabbedPane extends JTabbedPane {
 		    	}
 			});
 			
-			addMouseListener(new MouseAdapter() {
-
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					if (e.getButton() == MouseEvent.BUTTON2){
-						closeThisTab();
-					}
-				}
-				
-			});
+//			addMouseListener(new MouseAdapter() {
+//
+//				@Override
+//				public void mouseClicked(MouseEvent e) {
+//					int button = e.getButton();
+//					
+//					if (button == MouseEvent.BUTTON1){
+//						tab.setSelectedIndex(tab.indexOfTabComponent(Panel.this));
+//					}
+//					else if (button == MouseEvent.BUTTON2){
+//						closeThisTab();
+//					}
+//				}
+//				
+//			});
 			
 			setCloseable(closeable);
 		}

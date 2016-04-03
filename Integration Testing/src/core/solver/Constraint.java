@@ -3,6 +3,7 @@ package core.solver;
 import java.util.ArrayList;
 import java.util.List;
 
+import api.expression.IArrayIndexExpression;
 import api.expression.IExpression;
 import api.models.IBasisPath;
 import api.models.IVariable;
@@ -11,6 +12,7 @@ import api.solver.IConstraint;
 public class Constraint implements IConstraint {
 
 	private List<IExpression> listLogic;
+	private List<IArrayIndexExpression> listArray;
 	private IVariable[] params;
 	private IBasisPath path;
 	private IExpression returnExpression;
@@ -18,6 +20,7 @@ public class Constraint implements IConstraint {
 	
 	public Constraint(IVariable[] params, IBasisPath path) {
 		this.listLogic = new ArrayList<>();
+		this.listArray = new ArrayList<>();
 		this.params = params;
 		this.path = path;
 		this.type = TYPE_NORMAL;
@@ -84,6 +87,16 @@ public class Constraint implements IConstraint {
 	@Override
 	public String toString() {
 		return listLogic.toString();
+	}
+
+	@Override
+	public List<IArrayIndexExpression> getArrayAccess() {
+		return listArray;
+	}
+
+	@Override
+	public void addArrayAccess(IArrayIndexExpression arrayIndex) {
+		listArray.add(arrayIndex);
 	}
 
 	

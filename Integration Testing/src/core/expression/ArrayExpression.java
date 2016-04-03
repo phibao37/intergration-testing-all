@@ -35,7 +35,7 @@ public class ArrayExpression extends ExpressionGroup implements IArrayExpression
 	 */
 	public void setElement(int index, IExpression ex) throws NullPointerException{
 		g[index] = ex;
-		notifyContentChanged();
+		invalidateChild();
 	}
 	
 	/**
