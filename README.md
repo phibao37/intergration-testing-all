@@ -7,7 +7,7 @@ Nền tảng: JRE 8+<br/>
 Cấu trúc mã nguồn C/C++ được hỗ trợ:
  - Kiểu: 
    * Kiểu cơ bản: bool, int, long, float, double
-   * Kiểu mảng (later)
+   * Kiểu mảng
    * Kiểu struct (later)
  - Phép toán: 
    * Gán: =, +=, -=, *=, /=, %=, ++, --

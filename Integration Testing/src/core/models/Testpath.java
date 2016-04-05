@@ -2,9 +2,11 @@ package core.models;
 
 import java.util.ArrayList;
 
-import api.models.IBasisPath;
+import api.models.ITestpath;
 import api.models.IStatement;
-import api.solver.ISolveResult;
+import api.parser.ISymbolicExecutor;
+import api.solver.ISolution;
+import core.solver.SymbolicExecutor;
 
 /**
  * Mô tả một đường thi hành cơ bản, đó là một dãy có thứ tự duy nhất các câu lệnh
@@ -12,10 +14,10 @@ import api.solver.ISolveResult;
  * @author ducvu
  *
  */
-public class BasisPath extends ArrayList<IStatement> implements IBasisPath {
+public class Testpath extends ArrayList<IStatement> implements ITestpath {
 	private static final long serialVersionUID = 8275921168369912688L;
 	
-	private ISolveResult result;
+	private ISolution result;
 	
 	public String toString(){
 		String content = "";
@@ -32,13 +34,13 @@ public class BasisPath extends ArrayList<IStatement> implements IBasisPath {
 		return content.substring(4);
 	}
 	
-	public BasisPath clone(){
-		return (BasisPath) super.clone();
+	public Testpath clone(){
+		return (Testpath) super.clone();
 	}
 
 	@Override
-	public IBasisPath cloneAt(int index) {
-		IBasisPath clone = clone();
+	public ITestpath cloneAt(int index) {
+		ITestpath clone = clone();
 		
 		for (int i = size() - 1; i > index; i--)
 			clone.remove(i);
@@ -46,13 +48,18 @@ public class BasisPath extends ArrayList<IStatement> implements IBasisPath {
 	}
 
 	@Override
-	public void setSolveResult(ISolveResult result) {
+	public void setSolution(ISolution result) {
 		this.result = result;
 	}
 
 	@Override
-	public ISolveResult getSolveResult() {
+	public ISolution getSolution() {
 		return result;
+	}
+	
+	@Override
+	public ISymbolicExecutor getConstraintParser() {
+		return new SymbolicExecutor();
 	}
 	
 }

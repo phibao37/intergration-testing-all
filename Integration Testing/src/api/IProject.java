@@ -7,11 +7,10 @@ import java.util.Map;
 
 import api.graph.IProjectNode;
 import api.models.IFunction;
-import api.models.ITestResult;
+import api.models.IFunctionTestResult;
 import api.models.IType;
 import api.models.IVariable;
-import api.parser.ConstraintParser;
-import api.parser.UnitParser;
+import api.parser.IProjectParser;
 import api.solver.ISolver;
 
 /**
@@ -29,7 +28,7 @@ public interface IProject extends FileFilter {
 	/**
 	 * Kiểm thử một hàm nhất định
 	 */
-	public ITestResult testFunction(IFunction func) throws InterruptedException;
+	public IFunctionTestResult testFunction(IFunction func) throws InterruptedException;
 	
 	public default void checkStop() throws InterruptedException {
 		if (Thread.interrupted())
@@ -60,12 +59,7 @@ public interface IProject extends FileFilter {
 	/**
 	 * Tạo đối tượng phân tích mã nguồn
 	 */
-	public UnitParser getUnitParser();
-	
-	/**
-	 * Tạo đối tượng phân tích hệ ràng buộc từ đường thi hành
-	 */
-	public ConstraintParser getConstraintParser();
+	public IProjectParser getProjectParser();
 	
 	/**
 	 * Trả về bộ giải hệ

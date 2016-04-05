@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import api.graph.IProjectNode;
-import api.parser.UnitParser;
+import api.parser.IProjectParser;
 import core.BaseProject;
 import core.models.type.BasicType;
 
@@ -33,8 +33,8 @@ public class CProject extends BaseProject {
 	}
 
 	@Override
-	public UnitParser getUnitParser() {
-		return new CUnitParser();
+	public IProjectParser getProjectParser() {
+		return new CProjectParser();
 	}
 
 	public void putMapProjectStruct(File source, IProjectNode node){

@@ -7,20 +7,19 @@ import java.util.List;
 import java.util.Map;
 
 import core.expression.FunctionCallExpression;
-import core.solver.BaseConstraintParser;
-import core.solver.TestResult;
+import core.solver.FunctionTestResult;
 import core.solver.z3.Z3Solver;
 import api.IProject;
-import api.models.IBasisPath;
+import api.models.ITestpath;
 import api.models.ICFG;
 import api.models.IFunction;
 import api.models.IStatement;
-import api.models.ITestResult;
+import api.models.IFunctionTestResult;
 import api.models.IType;
 import api.models.IVariable;
-import api.parser.ConstraintParser;
-import api.solver.IConstraint;
-import api.solver.ISolveResult;
+import api.parser.ISymbolicExecutor;
+import api.solver.IPathConstraints;
+import api.solver.ISolution;
 import api.solver.ISolver;
 
 public abstract class BaseProject implements IProject {
@@ -55,16 +54,16 @@ public abstract class BaseProject implements IProject {
 			if (f.isDirectory())
 				parseEachSource(f);
 			else if (accept(f)) {
-				getUnitParser().parseUnit(f, this);
+				getProjectParser().parseSource(f, this);
 			}
 		}
 	}
 
 	@Override
-	public ITestResult testFunction(IFunction func) throws InterruptedException {
+	public IFunctionTestResult testFunction(IFunction func) throws InterruptedException {
 		ICFG cfg_12 = func.getCFG(ICFG.COVER_BRANCH),
 			cfg_3 = func.getCFG(ICFG.COVER_SUBCONDITION);
-		List<IBasisPath> allPath_12 = cfg_12.getAllBasisPaths(),
+		List<ITestpath> allPath_12 = cfg_12.getAllBasisPaths(),
 				coverPath_3 = cfg_3.getCoverBranchPaths(),
 				errorPath = new ArrayList<>();
 		IVariable[] params = func.getParameters();
@@ -76,40 +75,40 @@ public abstract class BaseProject implements IProject {
 		for (IStatement stm: cfg_3.getStatements())
 			stm.setVisit(false);
 		
-		for (IBasisPath path: allPath_12){
+		for (ITestpath path: allPath_12){
 			checkStop();
-			List<IConstraint> cnts = getConstraintParser()
-					.parseBasisPath(path, params, ConstraintParser.PARSE_ERROR_PATH);
+			List<IPathConstraints> cnts = path.getConstraintParser()
+					.execPath(path, params, ISymbolicExecutor.PARSE_ERROR_PATH);
 			
-			for (IConstraint cnt: cnts){
+			for (IPathConstraints cnt: cnts){
 				//System.out.println("\nHe rang buoc: " + cnt);
 				checkStop();
-				ISolveResult r = getSolver().solveConstraint(cnt);
-				cnt.getPath().setSolveResult(r);
+				ISolution r = getSolver().solveConstraint(cnt);
+				cnt.getPath().setSolution(r);
 				//System.out.println("=> Ket qua: " + r);
 				
-				if (cnt.getConstraintType() != IConstraint.TYPE_NORMAL)
+				if (cnt.getConstraintType() != IPathConstraints.TYPE_NORMAL)
 					errorPath.add(cnt.getPath());
 			}
 		}
 		
-		for (IBasisPath path: coverPath_3){
-			IConstraint cnt = getConstraintParser()
-					.parseBasisPath(path, params, ConstraintParser.DEFAULT).get(0);
+		for (ITestpath path: coverPath_3){
+			IPathConstraints cnt = path.getConstraintParser()
+					.execPath(path, params, ISymbolicExecutor.DEFAULT).get(0);
 			checkStop();
-			ISolveResult r = getSolver().solveConstraint(cnt);
-			path.setSolveResult(r);
+			ISolution r = getSolver().solveConstraint(cnt);
+			path.setSolution(r);
 		}
 		
-		errorPath.removeIf(p -> p.getSolveResult().getCode() != ISolveResult.ERROR);
+		errorPath.removeIf(p -> p.getSolution().getCode() != ISolution.ERROR);
 		
-		Map<Integer, List<IBasisPath>> result = new HashMap<>();
-		result.put(ITestResult.STATEMENT, cfg_12.getCoverStatementPaths());
-		result.put(ITestResult.BRANCH, cfg_12.getCoverBranchPaths());
-		result.put(ITestResult.SUBCONDITION, coverPath_3);
-		result.put(ITestResult.ALLPATH, allPath_12);
-		result.put(ITestResult.ERROR, errorPath);
-		return new TestResult(result);
+		Map<Integer, List<ITestpath>> result = new HashMap<>();
+		result.put(IFunctionTestResult.STATEMENT, cfg_12.getCoverStatementPaths());
+		result.put(IFunctionTestResult.BRANCH, cfg_12.getCoverBranchPaths());
+		result.put(IFunctionTestResult.SUBCONDITION, coverPath_3);
+		result.put(IFunctionTestResult.ALLPATH, allPath_12);
+		result.put(IFunctionTestResult.ERROR, errorPath);
+		return new FunctionTestResult(result);
 	}
 
 
@@ -173,12 +172,6 @@ public abstract class BaseProject implements IProject {
 	public void addLoadedType(IType type) {
 		listType.add(type);
 	}
-	
-	@Override
-	public ConstraintParser getConstraintParser() {
-		return new BaseConstraintParser();
-	}
-
 
 	@Override
 	public ISolver getSolver() {

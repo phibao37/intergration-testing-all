@@ -5,7 +5,7 @@ import java.util.List;
 
 import api.IProject;
 import api.expression.IExpressionVisitor;
-import api.parser.BodyParser;
+import api.parser.IFunctionParser;
 import core.models.Statement;
 
 public interface IFunction extends IElement {
@@ -33,7 +33,7 @@ public interface IFunction extends IElement {
 	/**
 	 * Tạo đối tượng phân tích thân hàm
 	 */
-	public BodyParser getBodyParser();
+	public IFunctionParser getFunctionParser();
 	
 	/**
 	 * Thêm một hàm vào danh sách hàm được tham chiếu

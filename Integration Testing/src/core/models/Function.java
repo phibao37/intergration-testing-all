@@ -95,13 +95,13 @@ public abstract class Function<T> extends Element implements IFunction {
 		case ICFG.COVER_STATEMENT:
 		case ICFG.COVER_BRANCH:
 			if (mCFG_12 == null){
-				mCFG_12 = new CFG(getBodyParser().parseBody(
+				mCFG_12 = new CFG(getFunctionParser().parseBody(
 						getBody(), false, getProject()));
 			}
 			return mCFG_12;
 		case ICFG.COVER_SUBCONDITION:
 			if (mCFG_3 == null){
-				mCFG_3 = new CFG(getBodyParser().parseBody(
+				mCFG_3 = new CFG(getFunctionParser().parseBody(
 						getBody(), true, getProject()));
 			}
 			return mCFG_3;

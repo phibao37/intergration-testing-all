@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Kết quả của việc kiểm thử một hàm
  */
-public interface ITestResult {
+public interface IFunctionTestResult {
 	
 	final Integer
 		STATEMENT = 1,
@@ -15,5 +15,5 @@ public interface ITestResult {
 		ALLPATH = 4,
 		ERROR = 5;
 	
-	Map<Integer, List<IBasisPath>> getMapPathResult();
+	Map<Integer, List<ITestpath>> getMapPathResult();
 }

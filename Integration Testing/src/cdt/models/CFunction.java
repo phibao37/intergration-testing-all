@@ -4,8 +4,8 @@ import org.eclipse.cdt.core.dom.ast.IASTStatement;
 
 import api.models.IType;
 import api.models.IVariable;
-import api.parser.BodyParser;
-import cdt.CBodyParser;
+import api.parser.IFunctionParser;
+import cdt.CFunctionParser;
 import cdt.CProject;
 import core.models.Function;
 
@@ -33,7 +33,7 @@ public class CFunction extends Function<IASTStatement> {
 	}
 
 	@Override
-	public BodyParser getBodyParser() {
-		return new CBodyParser();
+	public IFunctionParser getFunctionParser() {
+		return new CFunctionParser();
 	}
 }

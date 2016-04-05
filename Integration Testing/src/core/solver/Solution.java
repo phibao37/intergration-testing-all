@@ -2,10 +2,10 @@ package core.solver;
 
 import api.expression.IExpression;
 import api.models.IVariable;
-import api.solver.ISolveResult;
+import api.solver.ISolution;
 import api.solver.ISolver;
 
-public class SolveResult implements ISolveResult {
+public class Solution implements ISolution {
 
 	private IVariable[] solution;
 	private int code;
@@ -13,7 +13,7 @@ public class SolveResult implements ISolveResult {
 	private IExpression returnValue;
 	private ISolver solver;
 	
-	public SolveResult(IVariable[] solution, int code, String message, 
+	public Solution(IVariable[] solution, int code, String message, 
 			IExpression returnValue, ISolver solver) {
 		this.solution = solution;
 		this.code = code;

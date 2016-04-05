@@ -3,7 +3,7 @@ package api.solver;
 import api.expression.IExpression;
 import api.models.IVariable;
 
-public interface ISolveResult {
+public interface ISolution {
 
 	/**
 	 * Trả về nghiệm ứng với danh sách đầu vào hàm

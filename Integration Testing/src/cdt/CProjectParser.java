@@ -46,7 +46,7 @@ import org.eclipse.cdt.internal.core.parser.scanner.InternalFileContent;
 
 import api.IProject;
 import api.models.IType;
-import api.parser.UnitParser;
+import api.parser.IProjectParser;
 import cdt.models.CFunction;
 import cdt.models.CProjectNode;
 import core.Utils;
@@ -54,22 +54,22 @@ import core.models.ArrayVariable;
 import core.models.Variable;
 import core.models.type.ArrayType;
 
-public class CUnitParser extends ASTVisitor implements UnitParser{
+public class CProjectParser extends ASTVisitor implements IProjectParser{
 	
-	public CUnitParser(){
+	public CProjectParser(){
 		super(true);
 	}
 	
 	private CProject mMain;
 	private File mFile;
-	private ExpressionUtils mUtils;
+	private ExpressionConverter mUtils;
 	private Stack<CProjectNode> stackTreeNode;
 	
 	@Override
-	public void parseUnit(File source, IProject project) {
+	public void parseSource(File source, IProject project) {
 		mMain = (CProject) project;
 		mFile = source;
-		mUtils = new ExpressionUtils(project);
+		mUtils = new ExpressionConverter(project);
 		
 		stackTreeNode = new Stack<>();
 		CProjectNode root = new CProjectNode();

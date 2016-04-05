@@ -14,7 +14,7 @@ import core.models.statement.ScopeStatement;
  * @author ducvu
  *
  */
-public interface BodyParser {
+public interface IFunctionParser {
 	
 	/**
 	 * Phân tích nội dung của một hàm và tạo ra cấu trúc các câu lệnh liên kết với nhau
@@ -36,7 +36,7 @@ public interface BodyParser {
 	  * Câu lệnh trung gian, không mang dữ liệu.<br/>
 	  * Nếu dùng phương pháp nút trung gian để liên kết các câu lệnh với nhau, có thể
 	  * sử dụng loại câu lệnh này
-	  * @see BodyParser#linkStatement(Statement, List)
+	  * @see IFunctionParser#linkStatement(Statement, List)
 	 */
 	public static class ForwardStatement extends Statement{
 		

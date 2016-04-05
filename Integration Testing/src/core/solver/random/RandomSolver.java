@@ -1,13 +1,13 @@
 package core.solver.random;
 
-import api.solver.IConstraint;
-import api.solver.ISolveResult;
+import api.solver.IPathConstraints;
+import api.solver.ISolution;
 import api.solver.ISolver;
 
 public class RandomSolver implements ISolver {
 
 	@Override
-	public ISolveResult solveConstraint(IConstraint constraint) {
+	public ISolution solveConstraint(IPathConstraints constraint) {
 		// TODO Auto-generated method stub
 		return null;
 	}

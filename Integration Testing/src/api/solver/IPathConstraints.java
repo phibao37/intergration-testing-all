@@ -4,13 +4,13 @@ import java.util.List;
 
 import api.expression.IArrayIndexExpression;
 import api.expression.IExpression;
-import api.models.IBasisPath;
+import api.models.ITestpath;
 import api.models.IVariable;
 
 /**
  * Các ràng buộc cần được giải để sinh testcase
  */
-public interface IConstraint extends Cloneable{
+public interface IPathConstraints extends Cloneable{
 	
 	/**
 	 * Lấy danh sách các ràng buộc dạng biểu thức logic (đúng/sai), là các phương trình
@@ -40,17 +40,17 @@ public interface IConstraint extends Cloneable{
 	 */
 	public IExpression getReturnExpression();
 	
-	public IConstraint setReturnExpression(IExpression returnExpression);
+	public IPathConstraints setReturnExpression(IExpression returnExpression);
 	
-	public IBasisPath getPath();
-	public void setPath(IBasisPath path);
+	public ITestpath getPath();
+	public void setPath(ITestpath path);
 	
 	/**
 	 * Trả về kiểu của hệ ràng buộc. Một số hệ ràng buộc tương ứng với kết quả lỗi
 	 */
 	public int getConstraintType();
 	
-	public IConstraint setConstraintType(int type);
+	public IPathConstraints setConstraintType(int type);
 	
 	final int
 			TYPE_NORMAL = 0,
@@ -61,5 +61,5 @@ public interface IConstraint extends Cloneable{
 	/**
 	 * Tạo bản sao hệ ràng buộc
 	 */
-	public IConstraint clone();
+	public IPathConstraints clone();
 }

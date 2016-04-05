@@ -5,20 +5,20 @@ import java.util.List;
 
 import api.expression.IArrayIndexExpression;
 import api.expression.IExpression;
-import api.models.IBasisPath;
+import api.models.ITestpath;
 import api.models.IVariable;
-import api.solver.IConstraint;
+import api.solver.IPathConstraints;
 
-public class Constraint implements IConstraint {
+public class PathConstraints implements IPathConstraints {
 
 	private List<IExpression> listLogic;
 	private List<IArrayIndexExpression> listArray;
 	private IVariable[] params;
-	private IBasisPath path;
+	private ITestpath path;
 	private IExpression returnExpression;
 	private int type;
 	
-	public Constraint(IVariable[] params, IBasisPath path) {
+	public PathConstraints(IVariable[] params, ITestpath path) {
 		this.listLogic = new ArrayList<>();
 		this.listArray = new ArrayList<>();
 		this.params = params;
@@ -47,18 +47,18 @@ public class Constraint implements IConstraint {
 	}
 
 	@Override
-	public IConstraint setReturnExpression(IExpression returnExpression) {
+	public IPathConstraints setReturnExpression(IExpression returnExpression) {
 		this.returnExpression = returnExpression;
 		return this;
 	}
 
 	@Override
-	public IBasisPath getPath() {
+	public ITestpath getPath() {
 		return path;
 	}
 	
 	@Override
-	public void setPath(IBasisPath path) {
+	public void setPath(ITestpath path) {
 		this.path = path;
 	}
 
@@ -68,15 +68,15 @@ public class Constraint implements IConstraint {
 	}
 
 	@Override
-	public IConstraint setConstraintType(int type) {
+	public IPathConstraints setConstraintType(int type) {
 		this.type = type;
 		return this;
 	}
 
 	@Override
-	public IConstraint clone() {
+	public IPathConstraints clone() {
 		try {
-			Constraint clone = (Constraint) super.clone();
+			PathConstraints clone = (PathConstraints) super.clone();
 			clone.listLogic = new ArrayList<>(listLogic);
 			return clone;
 		} catch (CloneNotSupportedException e) {

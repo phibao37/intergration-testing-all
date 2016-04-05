@@ -13,12 +13,12 @@ import api.expression.INameExpression;
 import api.expression.INumberExpression;
 import api.expression.IReturnExpression;
 import api.expression.IUnaryExpression;
-import api.models.IBasisPath;
+import api.models.ITestpath;
 import api.models.IStatement;
 import api.models.IType;
 import api.models.IVariable;
-import api.parser.ConstraintParser;
-import api.solver.IConstraint;
+import api.parser.ISymbolicExecutor;
+import api.solver.IPathConstraints;
 import api.solver.IVariableTable;
 import core.Utils;
 import core.expression.BinaryExpression;
@@ -32,25 +32,25 @@ import core.models.statement.ScopeStatement;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
 
-public class BaseConstraintParser extends ExpressionVisitor
-		implements ConstraintParser {
+public class SymbolicExecutor extends ExpressionVisitor
+		implements ISymbolicExecutor {
 
 	private boolean parseError;
 	private IVariableTable varTable;
-	private IConstraint constraint;
-	private List<IConstraint> listConstraint;
+	private IPathConstraints constraint;
+	private List<IPathConstraints> listConstraint;
 	
 	private int iter;
-	private IBasisPath path;
+	private ITestpath path;
 	private IExpressionGroup rootgroup;
 	
 	@Override
-	public List<IConstraint> parseBasisPath(IBasisPath path, IVariable[] params,
+	public List<IPathConstraints> execPath(ITestpath path, IVariable[] params,
 			int options) {
 		
 		boolean parseError = Utils.hasFlag(options, PARSE_ERROR_PATH);
 		varTable = createVariableTable();
-		constraint = new Constraint(params, path);
+		constraint = new PathConstraints(params, path);
 		listConstraint = new ArrayList<>();
 		this.path = path;
 		listConstraint.add(constraint);
@@ -264,7 +264,7 @@ public class BaseConstraintParser extends ExpressionVisitor
 		//Tạo hệ ràng buộc bắt lỗi thương = 0
 		cloneConstraint(new BinaryExpression(
 					fdown, BinaryExpression.EQUALS, NumberExpression.ZERO),
-				IConstraint.TYPE_DIVIDE_ZERO);
+				IPathConstraints.TYPE_DIVIDE_ZERO);
 	}
 	
 	/**
@@ -273,7 +273,7 @@ public class BaseConstraintParser extends ExpressionVisitor
 	 */
 	protected void cloneConstraint(IExpression extraConstraint, int errorType){
 		if (parseError){
-			IConstraint clone = constraint.clone();
+			IPathConstraints clone = constraint.clone();
 			clone.setConstraintType(errorType);
 			clone.setPath(path.cloneAt(iter));
 			listConstraint.add(clone);
@@ -295,7 +295,7 @@ public class BaseConstraintParser extends ExpressionVisitor
 			//Kiểm tra index < 0
 			cloneConstraint(new BinaryExpression(
 					findex, BinaryExpression.LESS, NumberExpression.ZERO), 
-				IConstraint.TYPE_OUT_OF_BOUND);
+				IPathConstraints.TYPE_OUT_OF_BOUND);
 		}
 		
 		//Scope = 1, tương ứng với các biến tham số
@@ -313,7 +313,7 @@ public class BaseConstraintParser extends ExpressionVisitor
 			pointer = varTable.fill(pointer);
 			cloneConstraint(new BinaryExpression(
 					pointer, BinaryExpression.EQUALS, NumberExpression.ZERO), 
-				IConstraint.TYPE_NULL_POINTER);
+				IPathConstraints.TYPE_NULL_POINTER);
 		}
 	}
 

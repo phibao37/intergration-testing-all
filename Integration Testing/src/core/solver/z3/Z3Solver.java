@@ -14,8 +14,8 @@ import api.expression.IMemberAccessExpression;
 import api.expression.IUnaryExpression;
 import api.models.IType;
 import api.models.IVariable;
-import api.solver.IConstraint;
-import api.solver.ISolveResult;
+import api.solver.IPathConstraints;
+import api.solver.ISolution;
 import api.solver.ISolver;
 import api.solver.IVariableTable;
 import core.expression.BinaryExpression;
@@ -24,7 +24,7 @@ import core.expression.StringExpression;
 import core.expression.UnaryExpression;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
-import core.solver.SolveResult;
+import core.solver.Solution;
 import core.solver.VariableTable;
 import core.solver.z3.Z3.Func;
 
@@ -38,14 +38,14 @@ public class Z3Solver implements ISolver {
 	private IVariableTable varTable;
 	
 	@Override
-	public ISolveResult solveConstraint(IConstraint constraint) {
+	public ISolution solveConstraint(IPathConstraints constraint) {
 		IVariable[] solution = null;
-		int code = ISolveResult.UNKNOWN;
+		int code = ISolution.UNKNOWN;
 		String message = RESULT_UNKNOWN;
 		List<IArrayIndexExpression> array = constraint.getArrayAccess();
 		IExpression returnValue = null;
 		boolean isNormalConstraint = 
-				constraint.getConstraintType() == IConstraint.TYPE_NORMAL;
+				constraint.getConstraintType() == IPathConstraints.TYPE_NORMAL;
 		
 		z3 = new Z3();
 		varTable = createVariableTable();
@@ -153,16 +153,16 @@ try{
 			
 			if (isNormalConstraint && constraint.getReturnExpression() != null){
 				returnValue = str2Expression(z3.getLine());    				//(IV)
-				code = ISolveResult.SATISFY;
+				code = ISolution.SATISFY;
 			} 
 			
 			//Với các hệ ràng buộc gây ra lỗi, sẽ không có biểu thức return
 			else {
-				code = ISolveResult.ERROR;
+				code = ISolution.ERROR;
 				String error = null;
 				
 				switch (constraint.getConstraintType()){
-				case IConstraint.TYPE_DIVIDE_ZERO:
+				case IPathConstraints.TYPE_DIVIDE_ZERO:
 					error = "Division by 0"; break;
 				}
 				returnValue = new StringExpression(error);
@@ -173,7 +173,7 @@ try{
 			message = summarySolution(varTable);
 			
 		} else if (RESULT_UNSAT.equals(result)){
-			code = ISolveResult.UNSATISFIED;
+			code = ISolution.UNSATISFIED;
 			message = RESULT_UNSAT;
 		} 
 		
@@ -182,7 +182,7 @@ try{
 	//Co van de xay ra, return UNKNOWN
 }
 		
-		return new SolveResult(solution, code, message, returnValue, this);
+		return new Solution(solution, code, message, returnValue, this);
 	}
 	
 	/**

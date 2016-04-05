@@ -7,6 +7,10 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.lang.reflect.Constructor;
 
 import javax.swing.Icon;
@@ -14,8 +18,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 
 /**
  * Đối tượng đồ họa điều khiển các thành phần con theo các tab đóng mở được
@@ -77,21 +83,21 @@ public class LightTabbedPane extends JTabbedPane {
 		    	}
 			});
 			
-//			addMouseListener(new MouseAdapter() {
-//
-//				@Override
-//				public void mouseClicked(MouseEvent e) {
-//					int button = e.getButton();
-//					
-//					if (button == MouseEvent.BUTTON1){
-//						tab.setSelectedIndex(tab.indexOfTabComponent(Panel.this));
-//					}
-//					else if (button == MouseEvent.BUTTON2){
-//						closeThisTab();
-//					}
-//				}
-//				
-//			});
+			LightMouseAdapter listener = new LightMouseAdapter(){
+				@Override
+				public void mousePressed(MouseEvent e) {
+					int button = e.getButton();
+					
+					if (button == MouseEvent.BUTTON1){
+						super.mousePressed(e);
+					}
+					else if (button == MouseEvent.BUTTON2){
+						closeThisTab();
+					}
+				}
+			};
+			addMouseListener(listener);
+			addMouseMotionListener(listener);
 			
 			setCloseable(closeable);
 		}
@@ -243,5 +249,51 @@ public class LightTabbedPane extends JTabbedPane {
 		
 		/** Trả về đúng nếu <b>constructItem</b> bằng các thành phần trong hàm khởi tạo*/
 		public boolean equalsConstruct(Object... constructItem);
+	}
+	
+	static class LightMouseAdapter implements MouseListener,
+			MouseWheelListener, MouseMotionListener{
+
+	    public void mouseClicked(MouseEvent e) {
+	        redispatchToParent(e);
+	    }
+
+	    public void mousePressed(MouseEvent e) {
+	        redispatchToParent(e);
+	    }
+
+	    public void mouseReleased(MouseEvent e) {
+	        redispatchToParent(e);
+	    }
+
+	    public void mouseEntered(MouseEvent e) {
+	        redispatchToParent(e);
+	    }
+
+	    public void mouseExited(MouseEvent e) {
+	        redispatchToParent(e);
+	    }
+
+	    public void mouseWheelMoved(MouseWheelEvent e){
+	        redispatchToParent(e);
+	    }
+
+	    public void mouseDragged(MouseEvent e){
+	        redispatchToParent(e);
+	    }
+
+	    public void mouseMoved(MouseEvent e) {
+	        redispatchToParent(e);
+	    }
+
+	    private void redispatchToParent(MouseEvent e){
+	        Component source = (Component) e.getSource(),
+	        		parent = source.getParent().getParent();
+	        
+	        MouseEvent parentEvent = SwingUtilities.convertMouseEvent(
+	        		source, e, parent);
+	        parent.dispatchEvent(parentEvent);
+	        
+	    }
 	}
 }

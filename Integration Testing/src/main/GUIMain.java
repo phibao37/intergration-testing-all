@@ -11,11 +11,11 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 
 import api.IProject;
-import api.models.IBasisPath;
+import api.models.ITestpath;
 import api.models.ICFG;
 import api.models.IFunction;
-import api.models.ITestResult;
-import api.solver.ISolveResult;
+import api.models.IFunctionTestResult;
+import api.solver.ISolution;
 import cdt.CProject;
 import cdt.models.CProjectNode;
 import core.Utils;
@@ -255,19 +255,19 @@ public class GUIMain {
 	public void test() throws InterruptedException {
 		//Thread.sleep(5000);
 		
-		Map<Integer, List<IBasisPath>> r = currentProject.testFunction(fn)
+		Map<Integer, List<ITestpath>> r = currentProject.testFunction(fn)
 				.getMapPathResult();
-		ArrayList<IBasisPath> show = new ArrayList<>();
+		ArrayList<ITestpath> show = new ArrayList<>();
 		DefaultTableModel model = (DefaultTableModel) table_simple_result.getModel();
 		
-		show.addAll(r.get(ITestResult.BRANCH));
-		show.addAll(r.get(ITestResult.ERROR));
+		show.addAll(r.get(IFunctionTestResult.BRANCH));
+		show.addAll(r.get(IFunctionTestResult.ERROR));
 		
 		checkStop();
 		model.setRowCount(0);
 		for (int i = 0; i < show.size(); i++){
-			IBasisPath path = show.get(i);
-			ISolveResult sr = path.getSolveResult();
+			ITestpath path = show.get(i);
+			ISolution sr = path.getSolution();
 			
 			model.addRow(new Object[]{
 				i+1,

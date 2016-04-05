@@ -5,7 +5,7 @@ public interface ISolver {
 	/**
 	 * Từ một hệ ràng buộc, giải ra kết quả tương ứng
 	 */
-	ISolveResult solveConstraint(IConstraint constraint);
+	ISolution solveConstraint(IPathConstraints constraint);
 	
 	/**
 	 * Trả về tên của bộ giải

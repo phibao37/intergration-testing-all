@@ -46,10 +46,10 @@ import core.expression.UnaryExpression;
  * @author ducvu
  *
  */
-public class ExpressionUtils {
+public class ExpressionConverter {
 	
 	public static void main(String[] args){
-		System.out.println(ExpressionUtils.getExpression("test(maaa)"));
+		System.out.println(ExpressionConverter.getExpression("test(maaa)"));
 		
 	}
 	
@@ -62,7 +62,7 @@ public class ExpressionUtils {
 	
 	private IProject mProject;
 	
-	public ExpressionUtils(IProject project){
+	public ExpressionConverter(IProject project){
 		mProject = project;
 	}
 	
@@ -243,7 +243,7 @@ public class ExpressionUtils {
 				source += ";";
 			source = String.format("void main(){%s}", source);
 			try {
-				CUnitParser.getIASTTranslationUnit(source).accept(this);
+				CProjectParser.getIASTTranslationUnit(source).accept(this);
 				return mExpression;
 			} catch (IOException e) {
 				return null;

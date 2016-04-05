@@ -2,7 +2,7 @@ package core.models;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import api.models.IBasisPath;
+import api.models.ITestpath;
 import api.models.ICFG;
 import api.models.IStatement;
 
@@ -15,7 +15,7 @@ import api.models.IStatement;
 public class CFG implements ICFG{
 	
 	private IStatement[] mList;
-	private ArrayList<IBasisPath> mPaths;
+	private ArrayList<ITestpath> mPaths;
 	
 	/**
 	 * Khởi tạo một đồ thị từ danh sách các câu lệnh
@@ -31,7 +31,7 @@ public class CFG implements ICFG{
 	 * @return danh sách các đường thi hành tuyến tính độc lập, mỗi đường là một 
 	 * đường đi duy nhất qua các câu lệnh để đi hết chương trình
 	 */
-	public ArrayList<IBasisPath> getAllBasisPaths(){
+	public ArrayList<ITestpath> getAllBasisPaths(){
 		if (mPaths == null)
 			mPaths = parseBasisPaths(mList);
 		return mPaths;
@@ -45,10 +45,10 @@ public class CFG implements ICFG{
 	}
 	
 	@Override
-	public ArrayList<IBasisPath> getCoverStatementPaths(){
+	public ArrayList<ITestpath> getCoverStatementPaths(){
 		
 		//Tạo bản sao danh sách các đường thi hành
-		ArrayList<IBasisPath> copy = new ArrayList<>(getAllBasisPaths());
+		ArrayList<ITestpath> copy = new ArrayList<>(getAllBasisPaths());
 		
 		//Duyệt lần lượt các đường thi hành
 		for (int i = copy.size() - 1; i >= 0; i--){
@@ -59,7 +59,7 @@ public class CFG implements ICFG{
 			
 			//Duyệt lần lượt các đường thi hành còn lại, đánh dấu các câu lệnh trên
 			//các đường thi hành này là đã được thăm
-			for (IBasisPath path: copy){
+			for (ITestpath path: copy){
 				if (path == copy.get(i)) continue;
 				for (IStatement stm: path)
 					stm.setVisit(true);
@@ -81,9 +81,9 @@ public class CFG implements ICFG{
 	}
 	
 	@Override
-	public ArrayList<IBasisPath> getCoverBranchPaths(){
+	public ArrayList<ITestpath> getCoverBranchPaths(){
 		//Tạo bản sao danh sách các đường thi hành
-		ArrayList<IBasisPath> copy = new ArrayList<>(getAllBasisPaths());
+		ArrayList<ITestpath> copy = new ArrayList<>(getAllBasisPaths());
 		
 		//Tập các cạnh trong đồ thị
 		HashSet<Edge> edgeList = new HashSet<>();
@@ -106,7 +106,7 @@ public class CFG implements ICFG{
 
 			//Duyệt lần lượt các đường thi hành còn lại, thêm các cạnh trên các
 			//đường này vào danh sách
-			for (IBasisPath path : copy) {
+			for (ITestpath path : copy) {
 				if (path == copy.get(i))
 					continue;
 				for (int j = 0; j < path.size() - 1; j++)
@@ -129,9 +129,9 @@ public class CFG implements ICFG{
 	 * @return danh sách các đường thi hành tuyến tính độc lập, mỗi đường 
 	 * là một đường đi duy nhất qua các câu lệnh để đi hết chương trình
 	 */
-	protected ArrayList<IBasisPath> parseBasisPaths(IStatement[] statementList){
+	protected ArrayList<ITestpath> parseBasisPaths(IStatement[] statementList){
 		mPaths = new ArrayList<>();
-		travel(new BasisPath(), statementList[0]);
+		travel(new Testpath(), statementList[0]);
 		return mPaths;
 	}
 	
@@ -141,7 +141,7 @@ public class CFG implements ICFG{
 	 * @param current câu lệnh cần được thêm vào đường đi
 	 * @refer Anh DucAnh
 	 */
-	private void travel(IBasisPath path, IStatement current){
+	private void travel(ITestpath path, IStatement current){
 		if (current == null)
 			mPaths.add(path.clone());
 		else if (checkStatement(path, current)){
@@ -159,7 +159,7 @@ public class CFG implements ICFG{
 	 * Kiểm tra một câu lệnh trong đường thi hành không xuất hiện quá 1 lần 
 	 * @refer Anh DucAnh
 	 */
-	private boolean checkStatement(IBasisPath path, IStatement current){
+	private boolean checkStatement(ITestpath path, IStatement current){
 		int dem = 0;
 		
 		for (IStatement stm: path)

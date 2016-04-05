@@ -24,7 +24,7 @@ import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 
 import api.IProject;
 import api.models.IStatement;
-import api.parser.BodyParser;
+import api.parser.IFunctionParser;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
@@ -34,17 +34,17 @@ import core.models.statement.ScopeStatement;
  * @author ducvu
  *
  */
-public class CBodyParser implements BodyParser {
+public class CFunctionParser implements IFunctionParser {
 
 	private Statement END;
 	private ArrayList<IStatement> stmList = new ArrayList<>();
 	private boolean mSubCondition;
-	private ExpressionUtils mUtils;
+	private ExpressionConverter mUtils;
 	
 	@Override
 	public IStatement[] parseBody(Object body, boolean subCondition, 
 			IProject project){
-		mUtils = new ExpressionUtils(project);
+		mUtils = new ExpressionConverter(project);
 		Statement BEGIN = FlagStatement.newBeginFlag();
 		END = FlagStatement.newEndFlag();
 		mSubCondition = subCondition;
@@ -326,7 +326,7 @@ public class CBodyParser implements BodyParser {
 				join += String.format("||%s==%s", control,
 								astCase.getExpression().getRawSignature());
 			
-			visitCondition(ExpressionUtils.getExpression(join.substring(2)), 
+			visitCondition(ExpressionConverter.getExpression(join.substring(2)), 
 					mid[i], pair.getValue(), mid[i+1]);
 		}
 	}
@@ -422,7 +422,7 @@ public class CBodyParser implements BodyParser {
 	/**
 	 * Bộ duyệt mặc định
 	 */
-	public static CBodyParser DEFAULT = new CBodyParser();
+	public static CFunctionParser DEFAULT = new CFunctionParser();
 	
 	/**
 	 * Câu lệnh C
