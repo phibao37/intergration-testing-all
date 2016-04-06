@@ -15,7 +15,14 @@ public abstract class TestProcess extends Thread {
 			test();
 			checkStop();
 			testEnd(true);
-		} catch (InterruptedException e) {
+		} 
+		
+		catch (InterruptedException e) {
+			testEnd(false);
+		}
+		
+		catch (Exception e){
+			e.printStackTrace();
 			testEnd(false);
 		}
 	}

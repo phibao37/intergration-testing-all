@@ -64,6 +64,9 @@ public interface IFunction extends IElement {
 			LOADED = 0,
 			TESTED = 1;
 	
+	void setTestResult(IFunctionTestResult result);
+	IFunctionTestResult getTestResult();
+	
 	/**
 	 * Duyệt lần lượt qua các câu lệnh (và các biểu thức gốc ở bên trong câu lệnh) 
 	 * ở trong phần thân hàm

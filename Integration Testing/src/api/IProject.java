@@ -11,6 +11,7 @@ import api.models.IFunctionTestResult;
 import api.models.IType;
 import api.models.IVariable;
 import api.parser.IProjectParser;
+import api.parser.ISymbolicExecutor;
 import api.solver.ISolver;
 
 /**
@@ -19,11 +20,6 @@ import api.solver.ISolver;
 public interface IProject extends FileFilter {
 	
 	public File getRoot();
-	
-	/**
-	 * Nạp các cấu trúc và tạo các liên kết
-	 */
-	public void loadProject();
 	
 	/**
 	 * Kiểm thử một hàm nhất định
@@ -60,6 +56,11 @@ public interface IProject extends FileFilter {
 	 * Tạo đối tượng phân tích mã nguồn
 	 */
 	public IProjectParser getProjectParser();
+	
+	/**
+	 * Tạo đối tượng phân tích hệ ràng buộc từ đường thi hành
+	 */
+	public ISymbolicExecutor getConstraintParser();
 	
 	/**
 	 * Trả về bộ giải hệ

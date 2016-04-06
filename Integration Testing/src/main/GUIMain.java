@@ -11,6 +11,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 
 import api.IProject;
+import api.graph.IProjectNode;
 import api.models.ITestpath;
 import api.models.ICFG;
 import api.models.IFunction;
@@ -28,6 +29,7 @@ import graph.swing.ProjectExplorer;
 import graph.swing.tablelayout.TableLayout;
 
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.UIManager;
 
@@ -51,6 +53,7 @@ import java.util.Map;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -129,26 +132,11 @@ public class GUIMain {
 			
 			CProject project = new CProject(root);
 			currentProject = project;
-			project.loadProject();
 			
 			CProjectNode rootNode = new CProjectNode(root, 
 					CProjectNode.TYPE_PROJECT, project); 
 			
-			tree_project = new ProjectExplorer(rootNode);
-			tree_project.addItemClickListener((item, count) -> {
-				if (count == 2){
-					CProjectNode node = (CProjectNode) item;
-					int type = node.getType();
-					
-					if (type == CProjectNode.TYPE_FILE){
-						openSourceView(node.getFile());
-					}
-					
-					else if (type == CProjectNode.TYPE_FUNCTION){
-						openCFGView(node.getFunction(), ICFG.COVER_BRANCH);
-					}
-				}
-			});
+			tree_project = new GUIProjectExplorer(rootNode);
 			scroll_project_tree.setViewportView(tree_project);
 			clearAllView();
 	 	}
@@ -530,5 +518,83 @@ public class GUIMain {
 		frmCProjectTesting.getContentPane().setLayout(groupLayout);
 		
 		init2();
+	}
+	
+	class GUIProjectExplorer extends ProjectExplorer{
+		private static final long serialVersionUID = 1L;
+		
+		ArrayList<CProjectNode> retainSelect(int type){
+			ArrayList<CProjectNode> list = new ArrayList<>();
+			
+			for (IProjectNode n: getSelectedItems()){
+				CProjectNode node = (CProjectNode) n;
+				if (node.getType() == type)
+					list.add(node);
+			}
+			
+			return list;
+		}
+		
+		public GUIProjectExplorer(IProjectNode root) {
+			super(root);
+			
+			addItemClickListener((item, count) -> {
+				if (count == 2){
+					CProjectNode node = (CProjectNode) item;
+					int type = node.getType();
+					
+					if (type == CProjectNode.TYPE_FILE){
+						openSourceView(node.getFile());
+					}
+					
+					else if (type == CProjectNode.TYPE_FUNCTION){
+						openCFGView(node.getFunction(), ICFG.COVER_BRANCH);
+					}
+				}
+			});
+			
+			setMenuHandle(new MenuHandle<IProjectNode>() {
+
+				JMenuItem openCFG, viewSource;
+				
+				@Override
+				public void accept(JPopupMenu t) {
+					
+					openCFG = new JMenuItem("Open CFG");
+					openCFG.addActionListener(e -> {
+						retainSelect(CProjectNode.TYPE_FUNCTION).forEach(n -> 
+						openCFGView(n.getFunction(), ICFG.COVER_BRANCH));
+					});
+					
+					
+					viewSource = new JMenuItem("View source");
+					viewSource.addActionListener(e -> {
+						retainSelect(CProjectNode.TYPE_FILE).forEach(n -> 
+						openSourceView(n.getFile()));
+					});
+					
+					t.add(openCFG);
+					t.add(viewSource);
+				}
+
+				@Override
+				public void acceptList(List<IProjectNode> items) {
+					openCFG.setVisible(false);
+					viewSource.setVisible(false);
+					
+					for (IProjectNode n: items){
+						int type = ((CProjectNode) n).getType();
+						if (type == CProjectNode.TYPE_FUNCTION){
+							openCFG.setVisible(true);
+						}
+						
+						else if (type == CProjectNode.TYPE_FILE){
+							viewSource.setVisible(true);
+						}
+					}
+				}
+				
+			});
+		}
 	}
 }

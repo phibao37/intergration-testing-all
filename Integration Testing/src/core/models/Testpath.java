@@ -3,10 +3,9 @@ package core.models;
 import java.util.ArrayList;
 
 import api.models.ITestpath;
+import api.expression.IExpression;
 import api.models.IStatement;
-import api.parser.ISymbolicExecutor;
 import api.solver.ISolution;
-import core.solver.SymbolicExecutor;
 
 /**
  * Mô tả một đường thi hành cơ bản, đó là một dãy có thứ tự duy nhất các câu lệnh
@@ -18,6 +17,7 @@ public class Testpath extends ArrayList<IStatement> implements ITestpath {
 	private static final long serialVersionUID = 8275921168369912688L;
 	
 	private ISolution result;
+	private IExpression returnEx;
 	
 	public String toString(){
 		String content = "";
@@ -56,10 +56,14 @@ public class Testpath extends ArrayList<IStatement> implements ITestpath {
 	public ISolution getSolution() {
 		return result;
 	}
-	
+
 	@Override
-	public ISymbolicExecutor getConstraintParser() {
-		return new SymbolicExecutor();
+	public void setReturnExpression(IExpression returnEx) {
+		this.returnEx = returnEx;
 	}
-	
+
+	@Override
+	public IExpression getReturnExpression() {
+		return returnEx;
+	}
 }

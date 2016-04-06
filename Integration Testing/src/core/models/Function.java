@@ -8,6 +8,7 @@ import core.Utils;
 import api.IProject;
 import api.models.ICFG;
 import api.models.IFunction;
+import api.models.IFunctionTestResult;
 import api.models.IType;
 import api.models.IVariable;
 
@@ -24,6 +25,7 @@ public abstract class Function<T> extends Element implements IFunction {
 	private IProject project;
 	private int status;
 	private boolean testing;
+	private IFunctionTestResult testResult;
 	
 	public Function(String name, IVariable[] paras, IType returnType, T body, 
 			IProject project){
@@ -143,4 +145,15 @@ public abstract class Function<T> extends Element implements IFunction {
 		return mFile;
 	}
 
+	@Override
+	public void setTestResult(IFunctionTestResult result) {
+		testResult = result;
+	}
+
+	@Override
+	public IFunctionTestResult getTestResult() {
+		return testResult;
+	}
+
+	
 }

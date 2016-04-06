@@ -13,7 +13,8 @@ public interface IFunctionTestResult {
 		BRANCH = 2,
 		SUBCONDITION = 3,
 		ALLPATH = 4,
-		ERROR = 5;
+		ERROR = 5,
+		LOOP = 6;
 	
 	Map<Integer, List<ITestpath>> getMapPathResult();
 }

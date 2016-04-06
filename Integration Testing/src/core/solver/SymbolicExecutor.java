@@ -204,8 +204,11 @@ public class SymbolicExecutor extends ExpressionVisitor
 	public void leave(IReturnExpression rt) {
 		IExpression value = rt.getReturnExpression();
 		
-		if (value != null)
-			constraint.setReturnExpression(varTable.fill(value));
+		if (value != null){
+			value = varTable.fill(value);
+			constraint.setReturnExpression(value);
+			path.setReturnExpression(value);
+		}
 	}
 
 	protected void handleAssignment(IBinaryExpression assign){

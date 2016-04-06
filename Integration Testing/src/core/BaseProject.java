@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import core.expression.FunctionCallExpression;
-import core.solver.FunctionTestResult;
+import core.models.FunctionTestResult;
+import core.solver.SymbolicExecutor;
 import core.solver.z3.Z3Solver;
 import api.IProject;
 import api.models.ITestpath;
@@ -29,11 +30,13 @@ public abstract class BaseProject implements IProject {
 	private List<IType> listType;
 	private File root;
 
-	public BaseProject(File root){
+	protected BaseProject(File root){
 		listFunction = new ArrayList<>();
 		listGlobalVar = new ArrayList<>();
 		listType = new ArrayList<>();
 		this.root = root;
+		
+		loadProject();
 	}
 	
 	@Override
@@ -41,8 +44,7 @@ public abstract class BaseProject implements IProject {
 		return root;
 	}
 
-	@Override
-	public void loadProject() {
+	protected void loadProject() {
 		
 		//Lọc các hàm từ các tập tin mã nguồn
 		parseEachSource(root);
@@ -75,9 +77,10 @@ public abstract class BaseProject implements IProject {
 		for (IStatement stm: cfg_3.getStatements())
 			stm.setVisit(false);
 		
+		//Phân tích và giải các ràng buộc phủ câu lệnh/nhánh
 		for (ITestpath path: allPath_12){
 			checkStop();
-			List<IPathConstraints> cnts = path.getConstraintParser()
+			List<IPathConstraints> cnts = getConstraintParser()
 					.execPath(path, params, ISymbolicExecutor.PARSE_ERROR_PATH);
 			
 			for (IPathConstraints cnt: cnts){
@@ -92,13 +95,16 @@ public abstract class BaseProject implements IProject {
 			}
 		}
 		
+		//Phân tích và giải các ràng buộc phủ điều kiện con
 		for (ITestpath path: coverPath_3){
-			IPathConstraints cnt = path.getConstraintParser()
+			IPathConstraints cnt = getConstraintParser()
 					.execPath(path, params, ISymbolicExecutor.DEFAULT).get(0);
 			checkStop();
 			ISolution r = getSolver().solveConstraint(cnt);
 			path.setSolution(r);
 		}
+		
+		//TODO phân tích và giải các ràng buộc cho vòng lặp
 		
 		errorPath.removeIf(p -> p.getSolution().getCode() != ISolution.ERROR);
 		
@@ -108,7 +114,10 @@ public abstract class BaseProject implements IProject {
 		result.put(IFunctionTestResult.SUBCONDITION, coverPath_3);
 		result.put(IFunctionTestResult.ALLPATH, allPath_12);
 		result.put(IFunctionTestResult.ERROR, errorPath);
-		return new FunctionTestResult(result);
+		FunctionTestResult r = new FunctionTestResult(result);
+		
+		func.setTestResult(r);
+		return r;
 	}
 
 
@@ -172,6 +181,12 @@ public abstract class BaseProject implements IProject {
 	public void addLoadedType(IType type) {
 		listType.add(type);
 	}
+	
+	@Override
+	public ISymbolicExecutor getConstraintParser() {
+		return new SymbolicExecutor();
+	}
+	
 
 	@Override
 	public ISolver getSolver() {

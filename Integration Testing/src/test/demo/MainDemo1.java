@@ -11,7 +11,6 @@ public class MainDemo1 {
 	public static void main(String[] args) throws InterruptedException {
 		
 		IProject project = new CProject(new File("D:/Documents/C/test.cpp"));
-		project.loadProject();
 		
 		IFunction test = project.getFunctions().get(0);
 		IFunctionTestResult result = project.testFunction(test);

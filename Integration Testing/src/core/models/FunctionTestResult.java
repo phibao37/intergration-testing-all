@@ -1,4 +1,4 @@
-package core.solver;
+package core.models;
 
 import java.util.List;
 import java.util.Map;

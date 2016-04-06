@@ -227,7 +227,7 @@ public abstract class TreeExplorer<E> extends JTree
 		
 		for (int i = 0; i < paths.length; i++){
 			TreeNode node = (TreeNode) paths[i].getLastPathComponent();
-			items.set(i, node.getItem());
+			items.add(node.getItem());
 		}
 		return items;
 	}

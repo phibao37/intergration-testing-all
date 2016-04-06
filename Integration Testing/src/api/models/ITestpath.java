@@ -2,7 +2,7 @@ package api.models;
 
 import java.util.List;
 
-import api.parser.ISymbolicExecutor;
+import api.expression.IExpression;
 import api.solver.ISolution;
 
 /**
@@ -22,8 +22,6 @@ public interface ITestpath extends List<IStatement> {
 	
 	ISolution getSolution();
 	
-	/**
-	 * Tạo đối tượng phân tích hệ ràng buộc từ đường thi hành
-	 */
-	public ISymbolicExecutor getConstraintParser();
+	void setReturnExpression(IExpression returnEx);
+	IExpression getReturnExpression();
 }
