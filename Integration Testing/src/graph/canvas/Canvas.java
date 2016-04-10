@@ -77,6 +77,7 @@ public abstract class Canvas<E extends IElement> extends JPanel
 		}
 		
 		setPreferredSize(new Dimension(maxX + PADDING_X, maxY + PADDING_Y));
+		
 		revalidate();
 	}
 	

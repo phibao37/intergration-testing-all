@@ -4,9 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import api.IProject;
-import api.expression.IExpressionVisitor;
 import api.parser.IFunctionParser;
-import core.models.Statement;
 
 public interface IFunction extends IElement {
 	
@@ -75,22 +73,22 @@ public interface IFunction extends IElement {
 	 * câu lệnh được duyệt vào
 	 * @throws NullPointerException chưa có đồ thị CFG
 	 */
-	public default void accept(IExpressionVisitor visitor) 
-			throws NullPointerException{
-		int process;
-		
-		for (IStatement stm: getCFG(ICFG.COVER_STATEMENT).getStatements()){
-			process = visitor.visit(stm);
-			
-			if (process == IExpressionVisitor.PROCESS_ABORT)
-				break;
-			else if (process == IExpressionVisitor.PROCESS_CONTINUE
-					&& stm.isNormal()){
-				
-				process = stm.getRoot().accept(visitor);
-				if (process == IExpressionVisitor.PROCESS_ABORT)
-					break;
-			}
-		}
-	}
+//	public default void accept(IExpressionVisitor visitor) 
+//			throws NullPointerException{
+//		int process;
+//		
+//		for (IStatement stm: getCFG(ICFG.COVER_STATEMENT).getStatements()){
+//			process = visitor.visit(stm);
+//			
+//			if (process == IExpressionVisitor.PROCESS_ABORT)
+//				break;
+//			else if (process == IExpressionVisitor.PROCESS_CONTINUE
+//					&& stm.isNormal()){
+//				
+//				process = stm.getRoot().accept(visitor);
+//				if (process == IExpressionVisitor.PROCESS_ABORT)
+//					break;
+//			}
+//		}
+//	}
 }

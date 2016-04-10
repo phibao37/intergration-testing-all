@@ -16,14 +16,21 @@ public class CProject extends BaseProject {
 	
 	public CProject(File root){
 		super(root);
-		mapMarco = new HashMap<>();
-		mapProjectNode = new HashMap<>();
-		
-		for (BasicType type: BasicType.LIST_BASIC_TYPE)
-			addLoadedType(type);
 	}
 
-	
+	@Override
+	protected void loadProject() {
+		mapMarco = new HashMap<>();
+		mapProjectNode = new HashMap<>();
+
+		for (BasicType type: BasicType.LIST_BASIC_TYPE)
+			addLoadedType(type);
+		
+		super.loadProject();
+	}
+
+
+
 	public void addMarco(String key, String value){
 		mapMarco.put(key, value);
 	}

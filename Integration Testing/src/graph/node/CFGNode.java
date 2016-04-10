@@ -14,7 +14,8 @@ import core.Utils;
 public class CFGNode extends Node<IStatement> {
 	private static final long serialVersionUID = 1L;
 	public static final int NORMAL = 0, CONDITION = 1, MARK = 2,
-			PADDING_X = 20, PADDING_Y = 10, MARK_SIZE = 25;
+			PADDING_X = 20, PADDING_Y = 10, MARK_SIZE = 25,
+			MAX_IN_BLOCK = 10;
 	
 	private int type;
 	private Color borderColor;
@@ -48,14 +49,29 @@ public class CFGNode extends Node<IStatement> {
 		setElement(stmList.get(0));
 		type = NORMAL;
 		
-		String txt = "", s;
+		StringBuilder txt = new StringBuilder(), real = new StringBuilder();
+		boolean large = false;
+		int count = 0;
+		
 		for (IStatement stm: stmList){
-			s = stm.getContent();
-			txt += s.length() <= MAX_STR_LEN ? s : 
-				s.substring(0, MAX_STR_LEN-3) + "...";
-			txt += "<br>";
+			String s = stm.getContent();
+			real.append(s).append("<br>");
+			
+			if (count++ < MAX_IN_BLOCK){
+				if (s.length() <= MAX_STR_LEN)
+					txt.append(s);
+				else {
+					txt.append(s.substring(0, MAX_STR_LEN-3)).append("...");
+					large = true;
+				}
+				txt.append("<br>");
+			}
+			else
+				large = true;
 		}
-		setText(Utils.htmlCenter(txt));
+		setText(Utils.htmlCenter(txt.toString()));
+		if (large)
+			setToolTipText(Utils.html(real.toString()));
 		
 		Dimension size = getPreferredSize();
 		size.width += PADDING_X;
@@ -100,12 +116,13 @@ public class CFGNode extends Node<IStatement> {
 		case NORMAL:
 			return x >= 0 && x < width && y >= 0 && y < height;
 		case CONDITION:
-			int w21 = width/2, h21 = height/2, 
+			long w21 = width/2, h21 = height/2, 
 			X = (x - w21)*h21, Y = (y - h21)*w21, Z = w21*h21;
 			return X + Y < Z && X - Y < Z
 				&& -X + Y < Z && -X - Y < Z;
 		case MARK:
-			int w2 = width/2, h2 = height/2, W2 = w2*w2, H2 = h2*h2;
+			long w2 = width/2, h2 = height/2,
+				W2 = w2*w2, H2 = h2*h2;
 			return H2*(x-w2)*(x-w2) + W2*(y-h2)*(y-h2) <= W2*H2;
 		default: return false;
 		}

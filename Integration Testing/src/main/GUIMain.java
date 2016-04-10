@@ -76,6 +76,7 @@ public class GUIMain {
 	private ProcessManager processMgr; 
 	private TableLayout layout_process_mgr;
 	private Hashtable<IFunction, TableLayout.TableRow> mapProcess;
+	private SettingDialog settingDialog;
 	
 	private JFrame frmCProjectTesting;
 	private JScrollPane scroll_project_tree;
@@ -507,6 +508,14 @@ public class GUIMain {
 		gbc_btnSetting.gridx = 4;
 		gbc_btnSetting.gridy = 0;
 		panel.add(btnSetting, gbc_btnSetting);
+		btnSetting.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (settingDialog == null)
+					settingDialog = new SettingDialog(frmCProjectTesting);
+				settingDialog.setVisible(true);
+			}
+		});
 		
 		JButton btnAbout = new JButton("About");
 		GridBagConstraints gbc_btnAbout = new GridBagConstraints();
