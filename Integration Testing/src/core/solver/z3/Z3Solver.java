@@ -151,8 +151,9 @@ try{
 				} catch (ArrayIndexOutOfBoundsException e) {}
 			}
 			
-			if (isNormalConstraint && constraint.getReturnExpression() != null){
-				returnValue = str2Expression(z3.getLine());    				//(IV)
+			if (isNormalConstraint){
+				if (constraint.getReturnExpression() != null)
+					returnValue = str2Expression(z3.getLine());   		//(IV)
 				code = ISolution.SATISFY;
 			} 
 			

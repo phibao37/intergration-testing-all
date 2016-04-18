@@ -4,9 +4,10 @@ import java.util.List;
 
 import api.expression.IExpression;
 import api.expression.IExpressionEval;
+import api.expression.IExpressionGroup;
 import api.models.IVariable;
 
-public interface IVariableTable extends List<IVariable> {
+public interface IVariableTable extends List<IVariable>, Cloneable {
 
 	void increaseScope();
 	void decreaseScope();
@@ -27,6 +28,7 @@ public interface IVariableTable extends List<IVariable> {
 	 * </pre>
 	 */
 	IExpression fill(IExpression expression);
+	IExpression fillInside(IExpressionGroup group);
 	IExpressionEval getExpressionEval();
 	
 	/**
@@ -45,4 +47,6 @@ public interface IVariableTable extends List<IVariable> {
 	default int getScope(String name){
 		return find(name).getScope();
 	}
+	
+	public IVariableTable clone();
 }

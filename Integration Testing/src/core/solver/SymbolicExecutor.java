@@ -304,7 +304,7 @@ public class SymbolicExecutor extends ExpressionVisitor
 		//Scope = 1, tương ứng với các biến tham số
 		if (varTable.getScope(array.getName()) == 1){
 			constraint.addArrayAccess((IArrayIndexExpression) 
-					varTable.fill(array.clone()));
+					varTable.fillInside(array));
 		}
 	}
 

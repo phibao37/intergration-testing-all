@@ -8,7 +8,9 @@ import java.util.Map;
 
 import core.expression.FunctionCallExpression;
 import core.models.FunctionTestResult;
+import core.solver.Solution;
 import core.solver.SymbolicExecutor;
+import core.solver.random.RandomSolver;
 import core.solver.z3.Z3Solver;
 import api.IProject;
 import api.models.ITestpath;
@@ -86,7 +88,7 @@ public abstract class BaseProject implements IProject {
 			for (IPathConstraints cnt: cnts){
 				//System.out.println("\nHe rang buoc: " + cnt);
 				checkStop();
-				ISolution r = getSolver().solveConstraint(cnt);
+				ISolution r = solveConstraintByList(cnt);
 				cnt.getPath().setSolution(r);
 				//System.out.println("=> Ket qua: " + r);
 				
@@ -100,7 +102,7 @@ public abstract class BaseProject implements IProject {
 			IPathConstraints cnt = getConstraintParser()
 					.execPath(path, params, ISymbolicExecutor.DEFAULT).get(0);
 			checkStop();
-			ISolution r = getSolver().solveConstraint(cnt);
+			ISolution r = solveConstraintByList(cnt);
 			path.setSolution(r);
 		}
 		
@@ -187,10 +189,43 @@ public abstract class BaseProject implements IProject {
 		return new SymbolicExecutor();
 	}
 	
-
+	private static final String Z3 = "Z3", RANDOM = "Random";
+	public static final String[] BASE_LIST_SOLVER = {Z3, RANDOM};
+	
+	
 	@Override
-	public ISolver getSolver() {
-		return new Z3Solver();
+	public List<ISolver> getListSolver() {
+		List<ISolver> list_solver = new ArrayList<>(Config.LIST_SOLVER.length);
+			for (String solver: Config.LIST_SOLVER)
+				switch (solver){
+				case Z3:
+					list_solver.add(new Z3Solver());
+					break;
+				case RANDOM:
+					list_solver.add(new RandomSolver());
+					break;
+				}
+		
+		return list_solver;
+	}
+	
+	protected ISolution solveConstraintByList(IPathConstraints cnt){
+		Exception e = null;
+		
+		for (ISolver solver: getListSolver()){
+			try {
+				ISolution r = solver.solveConstraint(cnt);
+				
+				if (r.getCode() != ISolution.UNKNOWN)
+					return r;
+			} catch (Exception ex){
+				e = ex;
+			}
+		}
+		
+		if (e != null)
+			throw new RuntimeException(e);
+		return Solution.DEFAULT;
 	}
 
 }

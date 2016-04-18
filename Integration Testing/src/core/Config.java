@@ -38,6 +38,30 @@ public class Config {
 	public static File DIR_GCC = new File(
 			"C:/Program Files (x86)/Dev-Cpp/MinGW64/bin");
 	
+	/**
+	 * Số lượng lần lặp tối đa khi kiểm thử một vòng lặp
+	 */
+	public static int MAX_LOOP_TEST = 8;
+	
+	/**
+	 * Số lần lặp tối đa để giải hệ random
+	 */
+	public static int RAND_LOOP = 500;
+	
+	/**
+	 * Cận dưới khi sinh random cho các kiểu số
+	 */
+	public static int RAND_MIN = -50;
+	
+	/**
+	 * Cận trên khi sinh random cho các kiểu số
+	 */
+	public static int RAND_MAX = 50;
+	
+	/**
+	 * Danh sách các bộ giải hệ ràng buộc
+	 */
+	public static String[] LIST_SOLVER = BaseProject.BASE_LIST_SOLVER;
 	
 	/*---------------------------------------------------------------------*/
 	

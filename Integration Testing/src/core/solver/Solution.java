@@ -50,4 +50,7 @@ public class Solution implements ISolution {
 	public String toString(){
 		return getMessage() + ",return " + returnValue;
 	}
+	
+	public static final Solution DEFAULT = 
+			new Solution(null, Solution.UNKNOWN, "Unknown", null, null);
 }

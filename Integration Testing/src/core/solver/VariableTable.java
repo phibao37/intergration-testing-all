@@ -117,17 +117,31 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 				removeRange(oldSize, size());
 		}
 		else
-			fill(ex, true);
+			fill(ex, true, false);
 		
 	}
 
 	@Override
 	public IExpression fill(IExpression expression) {
-		return fill(expression, false);
+		return fill(expression, false, false);
+	}
+	
+	@Override
+	public IExpression fillInside(IExpressionGroup group) {
+		return fill(group, false, true);
 	}
 
-	protected IExpression fill(IExpression expression, boolean injectType){
-		IExpressionGroup group = expression.clone().group();
+	/**
+	 * Fill in the expression
+	 * @param expression
+	 * @param injectType
+	 * @param inside fill inside childs only
+	 * @return
+	 */
+	protected IExpression fill(IExpression expression, boolean injectType,
+			boolean inside){
+		IExpressionGroup group = inside ? (IExpressionGroup) expression.clone() :
+			expression.clone().group();
 		ArrayList<IExpression> justReplace = new ArrayList<>();
 		
 		group.accept(new ExpressionVisitor() {
@@ -186,7 +200,7 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 		});
 		
 		justReplace.forEach(ex -> ex.blockReplace(false));
-		return group.ungroup();
+		return inside ? group : group.ungroup();
 	}
 
 	@Override
@@ -202,6 +216,15 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 	@Override
 	public IExpressionEval getExpressionEval() {
 		return exEval;
+	}
+	
+	public VariableTable clone(){
+		VariableTable v = (VariableTable) super.clone();
+		
+		for (int i = 0; i < v.size(); i++)
+			v.set(i, get(i).clone());
+		
+		return v;
 	}
 
 }

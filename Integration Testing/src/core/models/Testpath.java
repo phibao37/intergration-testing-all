@@ -6,6 +6,7 @@ import api.models.ITestpath;
 import api.expression.IExpression;
 import api.models.IStatement;
 import api.solver.ISolution;
+import core.solver.Solution;
 
 /**
  * Mô tả một đường thi hành cơ bản, đó là một dãy có thứ tự duy nhất các câu lệnh
@@ -16,7 +17,7 @@ import api.solver.ISolution;
 public class Testpath extends ArrayList<IStatement> implements ITestpath {
 	private static final long serialVersionUID = 8275921168369912688L;
 	
-	private ISolution result;
+	private ISolution result = Solution.DEFAULT;
 	private IExpression returnEx;
 	
 	public String toString(){

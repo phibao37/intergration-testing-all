@@ -65,7 +65,7 @@ public interface IProject extends FileFilter {
 	/**
 	 * Trả về bộ giải hệ
 	 */
-	public ISolver getSolver();
+	public List<ISolver> getListSolver();
 	
 	public Map<File, IProjectNode> getMapProjectStruct();
 	
