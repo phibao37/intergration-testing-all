@@ -7,13 +7,13 @@ import java.awt.Stroke;
 
 import api.models.IFunction;
 import api.models.IStatement;
+import core.Config;
 import graph.node.CFGNode;
 import graph.node.Node;
 import graph.node.NodeAdapter;
 
 public class CFGCanvas extends Canvas<IStatement> {
 	private static final long serialVersionUID = 1L;
-	protected static final int MARGIN_X = 120, MARGIN_Y = 80;
 	public static final Color DEFAULT = Color.BLACK;
 	public static final Color TRUE = Color.BLUE;
 	public static final Color FALSE = new Color(0, 153, 51);
@@ -31,6 +31,8 @@ public class CFGCanvas extends Canvas<IStatement> {
 	@Override
 	protected void parseAdapter(NodeAdapter<IStatement> adapter) {
 		adapter.get(0).setLocation(getWidth()/2, PADDING_Y);
+		
+		final int MARGIN_X = Config.CFG_MARGIN_X, MARGIN_Y = Config.CFG_MARGIN_Y;
 		
 		for (Node<IStatement> n: adapter){
 			CFGNode node = (CFGNode) n;

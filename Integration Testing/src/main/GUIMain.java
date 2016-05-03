@@ -564,7 +564,7 @@ public class GUIMain {
 			
 			setMenuHandle(new MenuHandle<IProjectNode>() {
 
-				JMenuItem openCFG, viewSource;
+				JMenuItem openCFG, openCFG3, viewSource;
 				
 				@Override
 				public void accept(JPopupMenu t) {
@@ -575,6 +575,11 @@ public class GUIMain {
 						openCFGView(n.getFunction(), ICFG.COVER_BRANCH));
 					});
 					
+					openCFG3 = new JMenuItem("Open CFG3");
+					openCFG3.addActionListener(e -> {
+						retainSelect(CProjectNode.TYPE_FUNCTION).forEach(n -> 
+						openCFGView(n.getFunction(), ICFG.COVER_SUBCONDITION));
+					});
 					
 					viewSource = new JMenuItem("View source");
 					viewSource.addActionListener(e -> {
@@ -583,18 +588,21 @@ public class GUIMain {
 					});
 					
 					t.add(openCFG);
+					t.add(openCFG3);
 					t.add(viewSource);
 				}
 
 				@Override
 				public void acceptList(List<IProjectNode> items) {
 					openCFG.setVisible(false);
+					openCFG3.setVisible(false);
 					viewSource.setVisible(false);
 					
 					for (IProjectNode n: items){
 						int type = ((CProjectNode) n).getType();
 						if (type == CProjectNode.TYPE_FUNCTION){
 							openCFG.setVisible(true);
+							openCFG3.setVisible(true);
 						}
 						
 						else if (type == CProjectNode.TYPE_FILE){

@@ -63,6 +63,9 @@ public class Config {
 	 */
 	public static String[] LIST_SOLVER = BaseProject.BASE_LIST_SOLVER;
 	
+	public static int CFG_MARGIN_X = 150;
+	public static int CFG_MARGIN_Y = 120;
+	
 	/*---------------------------------------------------------------------*/
 	
 	private static void setupInit(){
