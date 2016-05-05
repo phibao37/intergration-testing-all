@@ -11,6 +11,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 
 import api.IProject;
+import api.graph.IFileInfo;
 import api.graph.IProjectNode;
 import api.models.ITestpath;
 import api.models.ICFG;
@@ -22,6 +23,7 @@ import cdt.models.CProjectNode;
 import core.Utils;
 import core.process.ProcessManager;
 import core.process.TestProcess;
+import graph.node.CFGNode;
 import graph.swing.CFGView;
 import graph.swing.FileView;
 import graph.swing.LightTabbedPane;
@@ -45,6 +47,8 @@ import javax.swing.JToolBar;
 import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -119,11 +123,29 @@ public class GUIMain {
 	
 	void openCFGView(IFunction fn, int cover){
 		try {
-			tab_graph.openTab("CFG: " + fn.getName(), null, fn.toString(), 
+			CFGView v = (CFGView) tab_graph.openTab("CFG: " + fn.getName(), 
+					null, fn.toString(), 
 					CFGView.class.getConstructor(IFunction.class, int.class),
 					fn, cover);
+			v.setNodeMouseListener(cfgMouseAdapter);
 		} catch (Exception e) { } 
 	}
+	
+	private MouseAdapter cfgMouseAdapter = new MouseAdapter() {
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (e.getClickCount() == 2){
+				CFGNode node = (CFGNode) e.getComponent();
+				IFileInfo info = node.getElement().getSourceInfo();
+				if (info == null) return;
+				
+				FileView fv = openSourceView(info.getFile());
+				fv.setHightLight(info);
+			}
+		}
+		
+	};
 
 	void openProjectFolder(){
 		int result = chooserProject.showDialog(frmCProjectTesting, "Open project folder");
@@ -151,13 +173,22 @@ public class GUIMain {
 		//Clear process manager
 	}
 	
-	void openSourceView(File file){
+	FileView openSourceView(File file){
 		try {
-			tab_source_view.openTab(file.getName(), null, file.getAbsolutePath(), 
+			return (FileView) tab_source_view.openTab(file.getName(), null, 
+					file.getAbsolutePath(), 
 					FileView.class.getConstructor(File.class), file);
 		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		} 
+	}
+	
+	void openSourceView(IFunction fn){
+		IFileInfo info = fn.getSourceInfo();
+		FileView fv = openSourceView(info.getFile());
+		
+		fv.setHightLight(info);
 	}
 	
 	void removeActionListener(AbstractButton btn){
@@ -225,7 +256,8 @@ public class GUIMain {
 			action.setContentAreaFilled(false);
 			status = new JLabel();
 			
-			String name = Utils.relative(fn.getSourceFile(), currentProject.getRoot())
+			String name = Utils.relative(fn.getSourceInfo().getFile(), 
+					currentProject.getRoot())
 					+ "::" + fn.getName();
 			
 			updateProcessView(fn, status, action, this);
@@ -583,8 +615,14 @@ public class GUIMain {
 					
 					viewSource = new JMenuItem("View source");
 					viewSource.addActionListener(e -> {
-						retainSelect(CProjectNode.TYPE_FILE).forEach(n -> 
-						openSourceView(n.getFile()));
+						ArrayList<CProjectNode> fns = retainSelect(
+								CProjectNode.TYPE_FUNCTION);
+						
+						if (fns.size() == 1)
+							openSourceView(fns.get(0).getFunction());
+						else
+							retainSelect(CProjectNode.TYPE_FILE).forEach(n -> 
+							openSourceView(n.getFile()));
 					});
 					
 					t.add(openCFG);
@@ -603,6 +641,7 @@ public class GUIMain {
 						if (type == CProjectNode.TYPE_FUNCTION){
 							openCFG.setVisible(true);
 							openCFG3.setVisible(true);
+							viewSource.setVisible(true);
 						}
 						
 						else if (type == CProjectNode.TYPE_FILE){

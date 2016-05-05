@@ -87,6 +87,10 @@ public abstract class Canvas<E extends IElement> extends JPanel
 		return adapter != null;
 	}
 	
+	public NodeAdapter<E> getAdapter(){
+		return adapter;
+	}
+	
 	/**
 	 * Vẽ một đường thẳng chứa mũi tên giữa 2 điểm
 	 * 

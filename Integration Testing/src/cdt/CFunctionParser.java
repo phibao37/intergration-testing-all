@@ -12,6 +12,7 @@ import org.eclipse.cdt.core.dom.ast.IASTContinueStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDefaultStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDoStatement;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTForStatement;
 import org.eclipse.cdt.core.dom.ast.IASTIfStatement;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
@@ -23,8 +24,10 @@ import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 
 import api.IProject;
+import api.models.IFunction;
 import api.models.IStatement;
 import api.parser.IFunctionParser;
+import cdt.models.FileInfo;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;
@@ -38,18 +41,20 @@ public class CFunctionParser implements IFunctionParser {
 
 	private Statement END;
 	private ArrayList<IStatement> stmList = new ArrayList<>();
+	private IFunction fn;
 	private boolean mSubCondition;
 	private ExpressionConverter mUtils;
 	
 	@Override
-	public IStatement[] parseBody(Object body, boolean subCondition, 
+	public IStatement[] parseFunction(IFunction fn, boolean subCondition, 
 			IProject project){
+		this.fn = fn;
 		mUtils = new ExpressionConverter(project);
 		Statement BEGIN = FlagStatement.newBeginFlag();
 		END = FlagStatement.newEndFlag();
 		mSubCondition = subCondition;
 		
-		visitBlock((IASTCompoundStatement) body, BEGIN, END, null, null);
+		visitBlock((IASTCompoundStatement) fn.getBody(), BEGIN, END, null, null);
 		
 		stmList.clear();
 		linkStatement(BEGIN, stmList);
@@ -432,6 +437,10 @@ public class CFunctionParser implements IFunctionParser {
 		public CStatement(IASTNode node) {
 			super(node.getRawSignature());
 			setRoot(mUtils.parseNode(node));
+			
+			IASTFileLocation loc = node.getFileLocation();
+			setSourceInfo(new FileInfo(loc.getNodeOffset(),
+					loc.getNodeLength(), fn.getSourceInfo().getFile()));
 			//try{getRoot().printTree("  ");} catch (Exception e) {}
 		}
 		

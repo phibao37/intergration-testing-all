@@ -2,12 +2,13 @@ package api.models;
 
 import core.models.Statement;
 import api.expression.IExpression;
+import api.graph.IHasFileInfo;
 
 /**
  * Giao diện cho một câu lệnh, nó có chứa một biểu thức gốc ứng với nội dung của nó.<br/>
  * Mỗi câu lệnh còn có liên kết tới 2 nhánh đúng/sai ứng với dòng điều khiển chương trình
  */
-public interface IStatement extends IElement {
+public interface IStatement extends IElement, IHasFileInfo {
 
 	/**
 	 * Gán biểu thức gốc cho câu lệnh này

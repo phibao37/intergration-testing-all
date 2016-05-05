@@ -1,12 +1,12 @@
 package api.models;
 
-import java.io.File;
 import java.util.List;
 
 import api.IProject;
+import api.graph.IHasFileInfo;
 import api.parser.IFunctionParser;
 
-public interface IFunction extends IElement {
+public interface IFunction extends IElement, IHasFileInfo {
 	
 	/**
 	 * Trả về tên của hàm
@@ -45,10 +45,6 @@ public interface IFunction extends IElement {
 	 * Trả về danh sách các hàm được tham chiếu
 	 */
 	public List<IFunction> getRefers();
-	
-	public void setSourceFile(File file);
-	
-	public File getSourceFile();
 	
 	public IProject getProject();
 	

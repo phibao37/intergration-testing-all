@@ -1,6 +1,7 @@
 package core.models;
 
 import api.expression.IExpression;
+import api.graph.IFileInfo;
 import api.models.IStatement;
 
 /**
@@ -33,6 +34,7 @@ public class Statement extends Element implements IStatement {
 	private IExpression mRoot;
 	private boolean mVisit;
 	private int id;
+	private IFileInfo fInfo;
 	
 	/**
 	 * Tạo một câu lệnh với nội dung của nó
@@ -106,6 +108,16 @@ public class Statement extends Element implements IStatement {
 	@Override
 	public int getId() {
 		return id;
+	}
+
+	@Override
+	public void setSourceInfo(IFileInfo info) {
+		fInfo = info;
+	}
+
+	@Override
+	public IFileInfo getSourceInfo() {
+		return fInfo;
 	}
 
 }

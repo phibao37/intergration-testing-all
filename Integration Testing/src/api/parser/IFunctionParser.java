@@ -3,6 +3,7 @@ package api.parser;
 import java.util.List;
 
 import api.IProject;
+import api.models.IFunction;
 import api.models.IStatement;
 import core.models.Statement;
 import core.models.statement.ScopeStatement;
@@ -18,7 +19,7 @@ public interface IFunctionParser {
 	
 	/**
 	 * Phân tích nội dung của một hàm và tạo ra cấu trúc các câu lệnh liên kết với nhau
-	 * @param body đối tượng liên kết với thân của hàm số, thường là một nút trong
+	 * @param fn hàm có chứa phần thân cần phân tích, thường là một nút trong
 	 * cây AST ứng với thân hàm, hoặc có thể chỉ là chuỗi mã nguồn ({@link String})
 	 * của phần thân
 	 * @param subCondition có phân tích và "bóc" các điều kiện phức hợp thành các
@@ -28,7 +29,7 @@ public interface IFunctionParser {
 	 * là câu lệnh được thực hiện trước tiên khi hàm số được chạy trong chương trình.<br/>
 	 * Thông thường, nó sẽ phải là "câu lệnh" mở khối thân hàm { - {@link ScopeStatement}
 	 */
-	public IStatement[] parseBody(Object body, boolean subCondition, 
+	public IStatement[] parseFunction(IFunction fn, boolean subCondition, 
 			IProject project);
 	
 	

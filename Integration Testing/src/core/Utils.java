@@ -25,15 +25,13 @@ public class Utils {
 	 * Lấy chuỗi nội dung từ một inputstream
 	 */
 	public static String getContentStream(InputStream stream) throws IOException{
-		StringBuilder content = new StringBuilder();
-		String line;
-
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
-			while ((line = br.readLine()) != null)
-				content.append(line).append('\n');
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int length;
+		while ((length = stream.read(buffer)) != -1) {
+		    result.write(buffer, 0, length);
 		}
-		
-		return content.toString();
+		return result.toString("UTF-8");
 	}
 	
 	public static String relative(File file, File base){

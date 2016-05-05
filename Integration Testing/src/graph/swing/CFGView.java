@@ -2,6 +2,7 @@ package graph.swing;
 
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseListener;
 
 import api.models.IFunction;
 import graph.canvas.CFGCanvas;
@@ -14,6 +15,7 @@ public class CFGView extends DragScrollPane
 	private IFunction fn;
 	private int cover;
 	private CFGCanvas canvas;
+	private MouseListener nodeListener;
 	
 	public CFGView(IFunction fn, int cover) {
 		this.fn = fn;
@@ -25,6 +27,19 @@ public class CFGView extends DragScrollPane
 		addComponentListener(this);
 	}
 	
+	public void setNodeMouseListener(MouseListener nodeListener){
+		this.nodeListener = nodeListener;
+		if (isShowing())
+			addNodeListenerImidiately();
+	}
+	
+	private void addNodeListenerImidiately(){
+		if (nodeListener != null){
+			canvas.getAdapter().forEach(n -> n.addMouseListener(nodeListener));
+			nodeListener = null;
+		}
+	}
+	
 	@Override
 	public boolean equalsConstruct(Object... c) {
 		return fn == c[0] && cover == (Integer)c[1];
@@ -32,8 +47,10 @@ public class CFGView extends DragScrollPane
 
 	@Override
 	public void componentShown(ComponentEvent e) {
-		if (!canvas.hasAdapter())
+		if (!canvas.hasAdapter()){
 			canvas.setAdapter(new CFGNodeAdapter(fn.getCFG(cover)));
+			addNodeListenerImidiately();
+		}
 	}
 	
 	@Override

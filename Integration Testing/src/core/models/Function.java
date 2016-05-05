@@ -1,11 +1,11 @@
 package core.models;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import core.Utils;
 import api.IProject;
+import api.graph.IFileInfo;
 import api.models.ICFG;
 import api.models.IFunction;
 import api.models.IFunctionTestResult;
@@ -21,7 +21,7 @@ public abstract class Function<T> extends Element implements IFunction {
 	private ICFG mCFG_12, mCFG_3;
 	private List<IFunction> mRefers;
 	
-	private File mFile;
+	private IFileInfo mFile;
 	private IProject project;
 	private int status;
 	private boolean testing;
@@ -97,14 +97,14 @@ public abstract class Function<T> extends Element implements IFunction {
 		case ICFG.COVER_STATEMENT:
 		case ICFG.COVER_BRANCH:
 			if (mCFG_12 == null){
-				mCFG_12 = new CFG(getFunctionParser().parseBody(
-						getBody(), false, getProject()));
+				mCFG_12 = new CFG(getFunctionParser().parseFunction(
+						this, false, getProject()));
 			}
 			return mCFG_12;
 		case ICFG.COVER_SUBCONDITION:
 			if (mCFG_3 == null){
-				mCFG_3 = new CFG(getFunctionParser().parseBody(
-						getBody(), true, getProject()));
+				mCFG_3 = new CFG(getFunctionParser().parseFunction(
+						this, true, getProject()));
 			}
 			return mCFG_3;
 		default:
@@ -123,7 +123,7 @@ public abstract class Function<T> extends Element implements IFunction {
 	}
 
 	@Override
-	public void setSourceFile(File file) {
+	public void setSourceInfo(IFileInfo file) {
 		mFile = file;
 	}
 	
@@ -141,7 +141,7 @@ public abstract class Function<T> extends Element implements IFunction {
 	}
 
 	@Override
-	public File getSourceFile() {
+	public IFileInfo getSourceInfo() {
 		return mFile;
 	}
 

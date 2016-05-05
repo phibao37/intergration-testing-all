@@ -16,6 +16,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTInitializer;
@@ -49,6 +50,7 @@ import api.models.IType;
 import api.parser.IProjectParser;
 import cdt.models.CFunction;
 import cdt.models.CProjectNode;
+import cdt.models.FileInfo;
 import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Variable;
@@ -197,7 +199,11 @@ public class CProjectParser extends ASTVisitor implements IProjectParser{
 			
 			fn = new CFunction(name, para, mMain.findType(type), fnBody, mMain)
 				.setDeclareStr(type + " " + fnDeclare.getRawSignature());
-			fn.setSourceFile(mFile);
+			
+			IASTFileLocation loc = fnDeclare.getFileLocation();
+			fn.setSourceInfo(new FileInfo(loc.getNodeOffset(),
+					loc.getNodeLength(), mFile));
+			
 			mMain.addFunction(fn);
 			stackTreeNode.peek().addChild(new CProjectNode(fn));
 		}
