@@ -29,6 +29,8 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class FunctionView extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -36,7 +38,7 @@ public class FunctionView extends JDialog {
 	private JSplitPane split_main;
 	private JTabbedPane tab_coverage;
 	private IFunction fn;
-	private CFGView cfg;
+	private CFGView cfg, cfg3, current_cfg;
 	
 	/**
 	 * Launch the application.
@@ -57,19 +59,42 @@ public class FunctionView extends JDialog {
 		});
 	}
 	
+	private void toggleType(int coverage){
+		
+		if (coverage == ICFG.COVER_BRANCH){
+			if (cfg == null)
+				cfg = new CFGView(fn, coverage);
+			if (current_cfg != cfg){
+				current_cfg = cfg;
+				int loc = split_main.getDividerLocation();
+				split_main.setLeftComponent(current_cfg);
+				split_main.setDividerLocation(loc);
+			}
+		}
+		else if (coverage == ICFG.COVER_SUBCONDITION){
+			if (cfg3 == null)
+				cfg3 = new CFGView(fn, coverage);
+			if (current_cfg != cfg3){
+				current_cfg = cfg3;
+				int loc = split_main.getDividerLocation();
+				split_main.setLeftComponent(current_cfg);
+				split_main.setDividerLocation(loc);
+			}
+		}
+		
+	}
+	
 	private void toggleCFGView(boolean show){
 		if (show){
 			split_main.setDividerSize(4);
 			split_main.setDividerLocation(370);
-			if (fn == null) return;
 			
-			cfg = new CFGView(fn, ICFG.COVER_BRANCH);
-			split_main.setLeftComponent(cfg);
+			toggleType(getCoverageTypeFromSelected());
 		} else {
 			split_main.setDividerSize(0);
 			split_main.setDividerLocation(0);
 			
-			cfg = null;
+			current_cfg = null;
 			split_main.setLeftComponent(null);
 		}
 	}
@@ -128,6 +153,15 @@ public class FunctionView extends JDialog {
 		}
 		
 	}
+	
+	private int getCoverageTypeFromSelected(){
+		int selected = tab_coverage.getSelectedIndex();
+		
+		if (selected == IFunctionTestResult.SUBCONDITION)
+			return ICFG.COVER_SUBCONDITION;
+		else
+			return ICFG.COVER_BRANCH;
+	}
 
 	/**
 	 * Create the dialog.
@@ -169,14 +203,21 @@ public class FunctionView extends JDialog {
 		);
 		
 		tab_coverage = new JTabbedPane(JTabbedPane.TOP);
+		tab_coverage.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (!Config.SHOW_CFG_DETAILS) return;
+				toggleType(getCoverageTypeFromSelected());
+			}
+		});
+		
 		split_main.setRightComponent(tab_coverage);
 		
 		JToggleButton toggleButton = new JToggleButton("");
 		toggleButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				toggleCFGView(toggleButton.isSelected());
 				Config.SHOW_CFG_DETAILS = toggleButton.isSelected();
 				Config.save();
+				toggleCFGView(toggleButton.isSelected());
 			}
 		});
 		toggleButton.setToolTipText("Show/hide CFG");
