@@ -2,10 +2,7 @@ package core;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import core.expression.FunctionCallExpression;
 import core.models.FunctionTestResult;
 import core.solver.Solution;
@@ -109,15 +106,14 @@ public abstract class BaseProject implements IProject {
 		//TODO phân tích và giải các ràng buộc cho vòng lặp
 		
 		errorPath.removeIf(p -> p.getSolution().getCode() != ISolution.ERROR);
-		
-		Map<Integer, List<ITestpath>> result = new HashMap<>();
-		result.put(IFunctionTestResult.STATEMENT, cfg_12.getCoverStatementPaths());
-		result.put(IFunctionTestResult.BRANCH, cfg_12.getCoverBranchPaths());
-		result.put(IFunctionTestResult.SUBCONDITION, coverPath_3);
-		result.put(IFunctionTestResult.ALLPATH, allPath_12);
-		result.put(IFunctionTestResult.ERROR, errorPath);
-		result.put(IFunctionTestResult.LOOP, loopPath);
-		FunctionTestResult r = new FunctionTestResult(result);
+
+		FunctionTestResult r = new FunctionTestResult();
+		r.setTestpaths(IFunctionTestResult.STATEMENT, cfg_12.getCoverStatementPaths());
+		r.setTestpaths(IFunctionTestResult.BRANCH, cfg_12.getCoverBranchPaths());
+		r.setTestpaths(IFunctionTestResult.SUBCONDITION, coverPath_3);
+		r.setTestpaths(IFunctionTestResult.ALLPATH, allPath_12);
+		r.setTestpaths(IFunctionTestResult.ERROR, errorPath);
+		r.setTestpaths(IFunctionTestResult.LOOP, loopPath);
 		
 		func.setTestResult(r);
 		return r;

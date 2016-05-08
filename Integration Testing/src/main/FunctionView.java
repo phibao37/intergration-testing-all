@@ -27,7 +27,6 @@ import javax.swing.JButton;
 import javax.swing.JSplitPane;
 import java.awt.event.ActionListener;
 import java.util.List;
-import java.util.Map;
 import java.awt.event.ActionEvent;
 import javax.swing.JTabbedPane;
 
@@ -81,8 +80,6 @@ public class FunctionView extends JDialog {
 		String[] COVER_NAMES = {"Statement coverage", "Branch coverage",
 				"Sub condition coverage", "All path"};
 		IFunctionTestResult r = fn.getTestResult();
-		Map<Integer, List<ITestpath>> map = r == null ?
-				null : r.getMapPathResult();
 		
 		for (int i = IFunctionTestResult.STATEMENT;
 				i <= IFunctionTestResult.ALLPATH; i++){
@@ -94,7 +91,7 @@ public class FunctionView extends JDialog {
 				name = Utils.htmlCenter(name + "<br/>("
 						+ r.getPercent(i)
 						+ "%)");
-				cv.setModel(map.get(i));
+				cv.setModel(r.getTestpaths(i));
 			}
 			
 			tab_coverage.add(name, cv);
@@ -105,7 +102,8 @@ public class FunctionView extends JDialog {
 			String name = "Error path";
 			
 			if (r != null){
-				List<ITestpath> list_path = map.get(IFunctionTestResult.ERROR);
+				List<ITestpath> list_path = r.getTestpaths(
+						IFunctionTestResult.ERROR);
 				name = Utils.htmlCenter(name + "<br/>("
 				+ list_path.size() + ")");
 				cv.setModel(list_path);
@@ -119,7 +117,8 @@ public class FunctionView extends JDialog {
 			String name = "Loop path";
 			
 			if (r != null){
-				List<ITestpath> list_path = map.get(IFunctionTestResult.LOOP);
+				List<ITestpath> list_path = r.getTestpaths(
+						IFunctionTestResult.LOOP);
 				name = Utils.htmlCenter(name + "<br/>("
 				+ list_path.size() + ")");
 				cv.setModel(list_path);

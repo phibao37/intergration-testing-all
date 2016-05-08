@@ -54,7 +54,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
 import javax.swing.JLabel;
@@ -289,13 +288,12 @@ public class GUIMain {
 	public void test() throws InterruptedException {
 		//Thread.sleep(5000);
 		
-		Map<Integer, List<ITestpath>> r = currentProject.testFunction(fn)
-				.getMapPathResult();
+		IFunctionTestResult r = currentProject.testFunction(fn);
 		ArrayList<ITestpath> show = new ArrayList<>();
 		DefaultTableModel model = (DefaultTableModel) table_simple_result.getModel();
 		
-		show.addAll(r.get(IFunctionTestResult.BRANCH));
-		show.addAll(r.get(IFunctionTestResult.ERROR));
+		show.addAll(r.getTestpaths(IFunctionTestResult.BRANCH));
+		show.addAll(r.getTestpaths(IFunctionTestResult.ERROR));
 		
 		checkStop();
 		model.setRowCount(0);
