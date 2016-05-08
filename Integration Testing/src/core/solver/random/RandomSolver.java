@@ -360,6 +360,11 @@ public class RandomSolver implements ISolver {
 		return "Random";
 	}
 	
+	@Override
+	public String toString() {
+		return getName();
+	}
+	
 	/**
 	 * Trả về chuỗi tóm tắt các nghiệm sau khi đã giải, dạng
 	 * (name1, name2, ...) = (value1, value2, ...)

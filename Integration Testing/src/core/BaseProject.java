@@ -69,7 +69,7 @@ public abstract class BaseProject implements IProject {
 			cfg_3 = func.getCFG(ICFG.COVER_SUBCONDITION);
 		List<ITestpath> allPath_12 = cfg_12.getAllBasisPaths(),
 				coverPath_3 = cfg_3.getCoverBranchPaths(),
-				errorPath = new ArrayList<>();
+				errorPath = new ArrayList<>(), loopPath = new ArrayList<>();
 		IVariable[] params = func.getParameters();
 		checkStop();
 		
@@ -116,6 +116,7 @@ public abstract class BaseProject implements IProject {
 		result.put(IFunctionTestResult.SUBCONDITION, coverPath_3);
 		result.put(IFunctionTestResult.ALLPATH, allPath_12);
 		result.put(IFunctionTestResult.ERROR, errorPath);
+		result.put(IFunctionTestResult.LOOP, loopPath);
 		FunctionTestResult r = new FunctionTestResult(result);
 		
 		func.setTestResult(r);

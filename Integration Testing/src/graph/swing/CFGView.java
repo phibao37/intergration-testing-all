@@ -23,7 +23,6 @@ public class CFGView extends DragScrollPane
 		
 		canvas = new CFGCanvas(fn);
 		setViewportView(canvas);
-		
 		addComponentListener(this);
 	}
 	
@@ -40,6 +39,10 @@ public class CFGView extends DragScrollPane
 		}
 	}
 	
+	public int getCover(){
+		return cover;
+	}
+	
 	@Override
 	public boolean equalsConstruct(Object... c) {
 		return fn == c[0] && cover == (Integer)c[1];
@@ -47,14 +50,15 @@ public class CFGView extends DragScrollPane
 
 	@Override
 	public void componentShown(ComponentEvent e) {
-		if (!canvas.hasAdapter()){
+	}
+	
+	@Override
+	public void componentResized(ComponentEvent e) {
+		if (getSize().width > 0 && !canvas.hasAdapter()){
 			canvas.setAdapter(new CFGNodeAdapter(fn.getCFG(cover)));
 			addNodeListenerImidiately();
 		}
 	}
-	
-	@Override
-	public void componentResized(ComponentEvent e) {}
 
 	@Override
 	public void componentMoved(ComponentEvent e) {}

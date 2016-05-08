@@ -66,6 +66,13 @@ public class Config {
 	public static int CFG_MARGIN_X = 150;
 	public static int CFG_MARGIN_Y = 120;
 	
+	/**
+	 * Đường dẫn project đang được ghim
+	 */
+	public static File PINNED_PROJECT = null;
+	
+	public static boolean SHOW_CFG_DETAILS = true;
+	
 	/*---------------------------------------------------------------------*/
 	
 	private static void setupInit(){
@@ -172,11 +179,14 @@ public class Config {
 	 */
 	public static void save(){
 		try{
-			for (Entry<String, Field> entry: prop_map.entrySet())
-				prop.setProperty(
-						entry.getKey(), 
-						pushValue(entry.getValue().get(null))
-				);
+			for (Entry<String, Field> entry: prop_map.entrySet()){
+				Object value = entry.getValue().get(null);
+				
+				if (value != null)
+					prop.setProperty(entry.getKey(), pushValue(value));
+				else
+					prop.remove(entry.getKey());
+			}
 			prop_file.getParentFile().mkdirs();
 			FileOutputStream file = new FileOutputStream(prop_file);
 

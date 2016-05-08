@@ -20,6 +20,7 @@ import api.models.IFunctionTestResult;
 import api.solver.ISolution;
 import cdt.CProject;
 import cdt.models.CProjectNode;
+import core.Config;
 import core.Utils;
 import core.process.ProcessManager;
 import core.process.TestProcess;
@@ -119,6 +120,11 @@ public class GUIMain {
 		
 		processMgr = new ProcessManager();
 		mapProcess = new Hashtable<>();
+		
+		if (Config.PINNED_PROJECT != null){
+			toggle_pin.setSelected(true);
+			openProject(Config.PINNED_PROJECT);
+		}
 	}
 	
 	void openCFGView(IFunction fn, int cover){
@@ -146,23 +152,32 @@ public class GUIMain {
 		}
 		
 	};
+	private JToggleButton toggle_pin;
 
 	void openProjectFolder(){
 		int result = chooserProject.showDialog(frmCProjectTesting, "Open project folder");
 		
 		if (result == JFileChooser.APPROVE_OPTION){
 			File root = chooserProject.getSelectedFile();
-			
-			CProject project = new CProject(root);
-			currentProject = project;
-			
-			CProjectNode rootNode = new CProjectNode(root, 
-					CProjectNode.TYPE_PROJECT, project); 
-			
-			tree_project = new GUIProjectExplorer(rootNode);
-			scroll_project_tree.setViewportView(tree_project);
-			clearAllView();
+			openProject(root);
 	 	}
+	}
+	
+	void openProject(File root){
+		CProject project = new CProject(root);
+		currentProject = project;
+		
+		CProjectNode rootNode = new CProjectNode(root, 
+				CProjectNode.TYPE_PROJECT, project); 
+		
+		tree_project = new GUIProjectExplorer(rootNode);
+		scroll_project_tree.setViewportView(tree_project);
+		clearAllView();
+	}
+	
+	void openFunctionDetails(IFunction fn){
+		FunctionView fv = new FunctionView(frmCProjectTesting, fn);
+		fv.setVisible(true);
 	}
 	
 	void clearAllView(){
@@ -215,9 +230,7 @@ public class GUIMain {
 			action.setToolTipText("View details");
 			
 			removeActionListener(action);
-			action.addActionListener(e -> {
-				//Open details window
-			});
+			action.addActionListener(e -> openFunctionDetails(fn));
 		}
 		
 		else if (fn.getStatus() == IFunction.LOADED){
@@ -392,20 +405,34 @@ public class GUIMain {
 		panel_3.setBackground(Color.WHITE);
 		scroll_project_tree.setViewportView(panel_3);
 		
-		JButton button = new JButton("");
-		button.setToolTipText("Refresh project");
-		button.setIcon(new ImageIcon(GUIMain.class.getResource("/image/refresh.png")));
-		toolBar.add(button);
+		JButton btn_refresh = new JButton("");
+		btn_refresh.setToolTipText("Refresh project");
+		btn_refresh.setIcon(new ImageIcon(GUIMain.class.getResource("/image/refresh.png")));
+		toolBar.add(btn_refresh);
 		
-		JToggleButton toggleButton = new JToggleButton("");
-		toggleButton.setToolTipText("Filter source file");
-		toggleButton.setIcon(new ImageIcon(GUIMain.class.getResource("/image/filter.png")));
-		toolBar.add(toggleButton);
+		JToggleButton toggle_filter = new JToggleButton("");
+		toggle_filter.setToolTipText("Filter source file");
+		toggle_filter.setIcon(new ImageIcon(GUIMain.class.getResource("/image/filter.png")));
+		toolBar.add(toggle_filter);
 		
-		JToggleButton toggleButton_1 = new JToggleButton("");
-		toggleButton_1.setToolTipText("Pin project");
-		toggleButton_1.setIcon(new ImageIcon(GUIMain.class.getResource("/image/pin.png")));
-		toolBar.add(toggleButton_1);
+		toggle_pin = new JToggleButton("");
+		toggle_pin.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (currentProject == null){
+					toggle_pin.setSelected(false);
+					return;
+				}
+				
+				if (toggle_pin.isSelected())
+					Config.PINNED_PROJECT = currentProject.getRoot();
+				else
+					Config.PINNED_PROJECT = null;
+				Config.save();
+			}
+		});
+		toggle_pin.setToolTipText("Pin project");
+		toggle_pin.setIcon(new ImageIcon(GUIMain.class.getResource("/image/pin.png")));
+		toolBar.add(toggle_pin);
 		panel_1.setLayout(gl_panel_1);
 		
 		JSplitPane splitPane_1 = new JSplitPane();
@@ -596,7 +623,7 @@ public class GUIMain {
 			
 			setMenuHandle(new MenuHandle<IProjectNode>() {
 
-				JMenuItem openCFG, openCFG3, viewSource;
+				JMenuItem openCFG, openCFG3, viewSource, viewTestdata;
 				
 				@Override
 				public void accept(JPopupMenu t) {
@@ -625,9 +652,17 @@ public class GUIMain {
 							openSourceView(n.getFile()));
 					});
 					
+					viewTestdata = new JMenuItem("View test data");
+					viewTestdata.addActionListener(e -> {
+						openFunctionDetails(retainSelect(
+								CProjectNode.TYPE_FUNCTION).get(0)
+								.getFunction());
+					});
+					
 					t.add(openCFG);
 					t.add(openCFG3);
 					t.add(viewSource);
+					t.add(viewTestdata);
 				}
 
 				@Override
@@ -635,6 +670,7 @@ public class GUIMain {
 					openCFG.setVisible(false);
 					openCFG3.setVisible(false);
 					viewSource.setVisible(false);
+					viewTestdata.setVisible(false);
 					
 					for (IProjectNode n: items){
 						int type = ((CProjectNode) n).getType();
@@ -642,6 +678,7 @@ public class GUIMain {
 							openCFG.setVisible(true);
 							openCFG3.setVisible(true);
 							viewSource.setVisible(true);
+							viewTestdata.setVisible(true);
 						}
 						
 						else if (type == CProjectNode.TYPE_FILE){
