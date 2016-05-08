@@ -46,8 +46,16 @@ public class CoverageView extends JScrollPane {
 			new String[] {
 				"Id", "Testpath", "Argument", "Return", "Expected", "Solver"
 			}
-		));
-		model = (DefaultTableModel) table.getModel();
+		) {
+			private static final long serialVersionUID = 1L;
+			
+			boolean[] columnEditables = new boolean[] {
+				false, false, false, false, true, false
+			};
+			public boolean isCellEditable(int row, int column) {
+				return columnEditables[column];
+			}
+		});
 		table.getColumnModel().getColumn(0).setResizable(false);
 		table.getColumnModel().getColumn(0).setPreferredWidth(30);
 		table.getColumnModel().getColumn(0).setMinWidth(30);
@@ -58,6 +66,7 @@ public class CoverageView extends JScrollPane {
 		table.getColumnModel().getColumn(5).setResizable(false);
 		table.getColumnModel().getColumn(5).setPreferredWidth(45);
 		table.getColumnModel().getColumn(5).setMinWidth(45);
+		model = (DefaultTableModel) table.getModel();
 		setViewportView(table);
 
 		viewport.setBackground(Color.WHITE);

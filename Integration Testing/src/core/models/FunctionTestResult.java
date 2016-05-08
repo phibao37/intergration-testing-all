@@ -17,7 +17,7 @@ public class FunctionTestResult implements IFunctionTestResult {
 
 	@Override
 	public void setTestpaths(int coverage, List<ITestpath> testpaths) {
-		this.testpaths.set(coverage, testpaths);
+		this.testpaths.add(coverage, testpaths);
 	}
 
 	@Override
