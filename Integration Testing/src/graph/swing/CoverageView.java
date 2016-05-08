@@ -14,9 +14,11 @@ public class CoverageView extends JScrollPane {
 	private static final long serialVersionUID = 1L;
 	private JTable table;
 	private DefaultTableModel model;
+	private int modelCount;
 
 	public void setModel(List<ITestpath> list_path){
 		model.setRowCount(0);
+		modelCount = list_path.size();
 		
 		for (int i = 0; i < list_path.size(); i++){
 			ITestpath tp = list_path.get(i);
@@ -31,6 +33,7 @@ public class CoverageView extends JScrollPane {
 					sln.getSolver()
 			});
 		}
+		model.addRow((Object[])null);
 	}
 	
 	/**
@@ -53,7 +56,7 @@ public class CoverageView extends JScrollPane {
 				false, false, false, false, true, false
 			};
 			public boolean isCellEditable(int row, int column) {
-				return columnEditables[column];
+				return row < modelCount && columnEditables[column];
 			}
 		});
 		table.getColumnModel().getColumn(0).setResizable(false);

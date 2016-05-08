@@ -480,7 +480,15 @@ public class GUIMain {
 			new String[] {
 				"ID", "Test path", "Input", "Output"
 			}
-		));
+		){
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isCellEditable(int row, int column) {
+				return false;
+			}
+			
+		});
 		table_simple_result.getColumnModel().getColumn(0).setResizable(false);
 		table_simple_result.getColumnModel().getColumn(0).setPreferredWidth(30);
 		table_simple_result.getColumnModel().getColumn(0).setMaxWidth(30);
