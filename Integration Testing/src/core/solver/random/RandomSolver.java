@@ -11,6 +11,7 @@ import api.expression.IExpressionGroup;
 import api.expression.IMemberAccessExpression;
 import api.expression.INameExpression;
 import api.expression.INumberExpression;
+import api.expression.IObjectExpression;
 import api.models.IType;
 import api.models.IVariable;
 import api.solver.IPathConstraints;
@@ -113,7 +114,7 @@ public class RandomSolver implements ISolver {
 						if (input.getType() instanceof BasicType)
 							input.setValue(randomForVariableData(input));
 						else
-							input.setValue(input.getType().getDefaultValue());
+							input.initValueIfNotSet();
 					}
 				
 				for (IArrayIndexExpression arrayAccess: array)
@@ -208,9 +209,21 @@ public class RandomSolver implements ISolver {
 	/**
 	 * Trả về giá trị hiện thời hoặc random giá trị mới cho thuộc tính đối tượng
 	 */
-	protected IExpression getValue(IMemberAccessExpression memberAccess){
+	protected IExpression getValue(IMemberAccessExpression member){
+		IVariable find = varTable.find(member.getName()).initValueIfNotSet();
+		String name = member.getMemberName();
+		IObjectExpression object = find.object();
 		
-		return null;
+		if (object.isMemberSet(name))
+			return object.getMember(name);
+		
+		IExpression ep = randomForType(object.getMemberType(name));
+		try {
+			object.setMember(name, ep);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return ep;
 	}
 	
 	protected IExpression randomForVariableData(IVariable var){

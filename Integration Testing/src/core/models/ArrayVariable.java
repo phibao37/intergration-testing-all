@@ -8,11 +8,15 @@ import java.util.LinkedList;
 import api.expression.IArrayExpression;
 import api.expression.IExpression;
 import api.expression.IExpressionGroup;
+import api.expression.IObjectExpression;
 import api.models.IType;
 import core.Utils;
 import core.expression.ArrayExpression;
 import core.expression.NumberExpression;
+import core.expression.ObjectExpression;
 import core.models.type.ArrayType;
+import core.models.type.BasicType;
+import core.models.type.ObjectType;
 
 /**
  * Mô tả kiểu biến mảng
@@ -21,7 +25,7 @@ import core.models.type.ArrayType;
 public class ArrayVariable extends Variable {
 	
 	private HashMap<ArrayList<IExpression>, IExpression> mMapData = new HashMap<>();
-	//private ObjectExpression mObject;
+	private IObjectExpression mObject;
 	
 	/**
 	 * Tạo một biến mảng với tên và kiểu biến
@@ -40,6 +44,8 @@ public class ArrayVariable extends Variable {
 	 */
 	public ArrayVariable(String name, ArrayType type, IArrayExpression value){
 		super(name, type, value);
+		
+		setSupportObject();
 		//TODO tạo một mảng các biểu thức để lưu kích thước phần tử
 	}
 	
@@ -218,29 +224,28 @@ public class ArrayVariable extends Variable {
 		return value;
 	}
 	
-//	private static ObjectType ARRAY_LENGTH_TYPE;
-//	
-//	/**
-//	 * Kích hoạt chế độ đối tượng cho biến mảng, biến sẽ có thêm thuộc tính "length"
-//	 * tương ứng với kích thước của mảng
-//	 */
-//	public void setSupportObject(){
-//		if (ARRAY_LENGTH_TYPE == null){
-//			LinkedHashMap<String, Type> schema = new LinkedHashMap<>();
-//			Type finalInt = (Type) BasicType.INT.clone();
-//			
-//			finalInt.addModifier(Modifier.FINAL_MODIFIER);
-//			schema.put("length", finalInt);
-//			ARRAY_LENGTH_TYPE = new ObjectType(getType().getContent(), schema);
-//		}
-//		
-//		mObject = new ObjectExpression(ARRAY_LENGTH_TYPE);
-//	}
-//
-//	@Override
-//	public ObjectExpression object(){
-//		return mObject;
-//	}
+	private static ObjectType ARRAY_LENGTH_TYPE;
+	
+	/**
+	 * Kích hoạt chế độ đối tượng cho biến mảng, biến sẽ có thêm thuộc tính "length"
+	 * tương ứng với kích thước của mảng
+	 */
+	private void setSupportObject(){
+		if (ARRAY_LENGTH_TYPE == null){
+			LinkedHashMap<String, IType> schema = new LinkedHashMap<>();
+			IType finalInt = BasicType.INT;
+			
+			schema.put("length", finalInt);
+			ARRAY_LENGTH_TYPE = new ObjectType(getType().getContent(), schema);
+		}
+		
+		mObject = new ObjectExpression(ARRAY_LENGTH_TYPE);
+	}
+
+	@Override
+	public IObjectExpression object(){
+		return mObject;
+	}
 
 	@Override
 	public IArrayExpression getValue() {
@@ -274,8 +279,8 @@ public class ArrayVariable extends Variable {
 	public ArrayVariable clone() {
 		ArrayVariable clone = (ArrayVariable) super.clone();
 		clone.mMapData = new HashMap<>(mMapData);
-		//if (mObject != null)
-			//clone.mObject = (ObjectExpression) mObject.clone();
+		if (mObject != null)
+			clone.mObject = (IObjectExpression) mObject.clone();
 		return clone;
 	}
 

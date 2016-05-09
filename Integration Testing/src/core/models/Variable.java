@@ -80,15 +80,6 @@ public class Variable extends Element implements IVariable {
 	public String getHTML() {
 		return getType().getHTML() + " " + getName();
 	}
-	
-	/**
-	 * Thiết đặt giá trị cho biến nếu như nó chưa có giá trị
-	 */
-	public Variable initValueIfNotSet(){
-		if (!isValueSet())
-			setValue(getType().getDefaultValue());
-		return this;
-	}
 
 	@Override
 	public Variable clone() {

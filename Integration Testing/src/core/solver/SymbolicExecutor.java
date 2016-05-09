@@ -239,7 +239,8 @@ public class SymbolicExecutor extends ExpressionVisitor
 		
 		//Truy cập thuộc tính đối tượng
 		else if (left instanceof IMemberAccessExpression){
-			
+			IMemberAccessExpression ma = (IMemberAccessExpression) left;
+			varTable.updateMemberValue(ma, right);
 		}
 		
 		//Thay thế biểu thức gốc bằng vế trái:

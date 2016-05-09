@@ -22,8 +22,10 @@ import core.expression.BinaryExpression;
 import core.expression.NumberExpression;
 import core.expression.StringExpression;
 import core.expression.UnaryExpression;
+import core.models.Variable;
 import core.models.type.ArrayType;
 import core.models.type.BasicType;
+import core.models.type.ObjectType;
 import core.solver.Solution;
 import core.solver.VariableTable;
 import core.solver.z3.Z3.Func;
@@ -36,6 +38,8 @@ public class Z3Solver implements ISolver {
 
 	private Z3 z3;
 	private IVariableTable varTable;
+	private ArrayList<LinkMemberVariable> linkMembers;
+	private boolean mSolveOk;
 	
 	@Override
 	public ISolution solveConstraint(IPathConstraints constraint) {
@@ -49,6 +53,8 @@ public class Z3Solver implements ISolver {
 		
 		z3 = new Z3();
 		varTable = createVariableTable();
+		linkMembers = new ArrayList<>();
+		mSolveOk = false;
 		
 		//Thêm các khai báo biến vào bảng biến
 		for (IVariable input: constraint.getParameters())
@@ -72,6 +78,7 @@ try{
 			
 			//Bỏ qua dòng đầu: (model
 			z3.getLine(); 
+			mSolveOk = true;
 			
 			while (z3.hasFunction()){
 				Func func = z3.getFunction();
@@ -88,16 +95,16 @@ try{
 			z3.getLine();
 			
 			for (IVariable var: nonResult){
-//				if (var.getType().isObjectType()){
-//					var.initValueIfNotSet();
-//				}
-//				else{
+				if (var.getType() instanceof ObjectType){
+					var.initValueIfNotSet();
+				}
+				else{
 				Func func = toZ3Func(var, false);
 				
 				//Với các biến không được z3 giải, tạo khai báo mặc định theo kiểu
 				func.setValueFromType();
 				z3.addFunction(func);
-				//}
+				}
 			}
 			
 			for (IVariable v: varTable)
@@ -168,6 +175,13 @@ try{
 				}
 				returnValue = new StringExpression(error);
 			}
+			
+			//Gán các giá trị dạng đối tượng
+			for (LinkMemberVariable var: linkMembers){
+				IMemberAccessExpression member = var.getLinkedExpression();
+				varTable.updateMemberValue(member, var.getValue());
+			}
+			varTable.removeIf(t -> t instanceof LinkMemberVariable);
 			
 			solution = new IVariable[varTable.size()];
 			varTable.toArray(solution);
@@ -259,7 +273,7 @@ try{
 		varTable.addVariable(clone ? var.clone() : var);
 		
 		//Thêm khai báo hàm vào z3 từ biến testcase
-		//TODO if (!(var.getType().isObjectType()))
+		if (!(var.getType() instanceof ObjectType))
 			z3.addFunction(toZ3Func(var, true));
 		return this;
 	}
@@ -376,22 +390,21 @@ try{
 		
 		//Biểu thức truy cập thuộc tính đối tượng, chuyển đổi sang biến trung gian
 		else if (ex instanceof IMemberAccessExpression){
-			/*TODO
-			 * MemberAccessExpression member = (MemberAccessExpression) ex;
+			IMemberAccessExpression member = (IMemberAccessExpression) ex;
 			
 			//Tìm biểu thức trong danh sách hiện thời
-			for (LinkMemberVariable var: linkList)
+			for (LinkMemberVariable var: linkMembers)
 				if (var.getLinkedExpression().equals(member))
 					return var.getName();
 			
 			//Không tìm thấy, tạo biến trung gian mới
-			String name = "___" + linkList.size() + "___";
-			Variable find = mTable.find(member.getName());
+			String name = "___" + linkMembers.size() + "___";
+			IVariable find = varTable.find(member.getName());
 			find.initValueIfNotSet();
 			LinkMemberVariable var = new LinkMemberVariable(name, 
 					find.object().getMemberType(member.getMemberName()), member);
 			
-			linkList.add(var);
+			linkMembers.add(var);
 			if (mSolveOk){
 				Func func = toZ3Func(var, false);
 				func.setValueFromType();
@@ -401,11 +414,31 @@ try{
 			else
 				addVariable(var, false);
 			return name;
-			*/
+			
 		}
 		
 		//Kiểu bình thường (tên biến, giá trị hằng), trả về nội dung của biểu thức
 		return ex.getContent();
+	}
+	
+	/**
+	 * Biến trung gian, được liên kết đến một biểu thức truy cập thuộc tính
+	 */
+	private static class LinkMemberVariable extends Variable{
+
+		private IMemberAccessExpression mLink;
+		
+		public LinkMemberVariable(String name, IType type, IMemberAccessExpression link) {
+			super(name, type);
+			mLink = link;
+		}
+		
+		/**
+		 * Trả về biểu thức truy cập thuộc tính được liên kết đến
+		 */
+		public IMemberAccessExpression getLinkedExpression(){
+			return mLink;
+		}
 	}
 	
 	protected IVariableTable createVariableTable(){

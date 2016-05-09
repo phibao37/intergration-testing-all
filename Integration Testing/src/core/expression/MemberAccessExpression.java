@@ -26,7 +26,7 @@ public class MemberAccessExpression extends ExpressionGroup implements IMemberAc
 	 * @param member tên của thuộc tính
 	 * @param dot biểu thức truy cập theo dấu "." thay vì "->"
 	 */
-	public MemberAccessExpression(Expression parent, String member, boolean dot) {
+	public MemberAccessExpression(IExpression parent, String member, boolean dot) {
 		super(parent);
 		mMember = member;
 		isDot = dot;

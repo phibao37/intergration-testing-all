@@ -43,6 +43,7 @@ public interface IExpressionVisitor {
 	int visit(IMemberAccessExpression member);
 	int visit(IStringExpression string);
 	int visit(IReturnExpression rt);
+	int visit(IObjectExpression obj);
 	
 	void leave(INameExpression name);
 	void leave(IFunctionCallExpression call);
@@ -55,6 +56,7 @@ public interface IExpressionVisitor {
 	void leave(IMemberAccessExpression member);
 	void leave(IStringExpression string);
 	void leave(IReturnExpression rt);
+	void leave(IObjectExpression obj);
 
 	/**
 	 * Được gọi khi đang duyệt qua các câu lệnh trong hàm số

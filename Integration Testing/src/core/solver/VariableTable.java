@@ -11,6 +11,7 @@ import api.expression.IExpressionGroup;
 import api.expression.IMemberAccessExpression;
 import api.expression.INameExpression;
 import api.expression.INumberExpression;
+import api.expression.IObjectExpression;
 import api.models.IType;
 import api.models.IVariable;
 import api.solver.IVariableTable;
@@ -59,6 +60,19 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 			newIndexes[i] = eval(indexes[i]);
 		
 		((ArrayVariable)find(name)).setValueAt(value, newIndexes);
+	}
+	
+	@Override
+	public void updateMemberValue(IMemberAccessExpression access, IExpression value) {
+		value = fill(value);
+		//System.out.println(" => " + value);
+		
+		//Normal Access
+		IVariable v = find(access.getName());
+		v.initValueIfNotSet();
+		v.object().setMember(access.getMemberName(), value);
+		
+		//Array Access...
 	}
 	
 	@Override
@@ -193,7 +207,22 @@ public class VariableTable extends ArrayList<IVariable> implements IVariableTabl
 
 			@Override
 			public void leave(IMemberAccessExpression member) {
-				//
+				IVariable find = find(member.getName());
+				String name = member.getMemberName();
+				IObjectExpression object = find.initValueIfNotSet().object();
+				
+				if (injectType){
+					member.setType(object.getMemberType(name));
+					return;
+				}
+				
+				if (object.isMemberSet(name)){
+					IExpression value = object.getMember(name).clone()
+							.blockReplace(true);
+					justReplace.add(value);
+					group.replaceChild(member, value);
+				}
+				
 				member.notifyValueUsed();
 			}
 			

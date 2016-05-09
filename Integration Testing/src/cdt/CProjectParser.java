@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -55,6 +56,7 @@ import core.Utils;
 import core.models.ArrayVariable;
 import core.models.Variable;
 import core.models.type.ArrayType;
+import core.models.type.ObjectType;
 
 public class CProjectParser extends ASTVisitor implements IProjectParser{
 	
@@ -135,24 +137,18 @@ public class CProjectParser extends ASTVisitor implements IProjectParser{
 					stackTreeNode.peek().addChild(cl);
 					stackTreeNode.push(cl);
 				}
-				
-				return PROCESS_CONTINUE;
-			}
 			
-			/*
-			 * Duyệt qua các khai báo struct 
-			 */
-			/*else if (spec instanceof IASTCompositeTypeSpecifier){
-				IASTCompositeTypeSpecifier comp = (IASTCompositeTypeSpecifier) spec;
-				if (comp.getKey() == IASTCompositeTypeSpecifier.k_struct){
-					LinkedHashMap<String, Type> schema = new LinkedHashMap<>();
-					String name = comp.getName().toString();
+				if (key == IASTCompositeTypeSpecifier.k_struct
+						|| key == ICPPASTCompositeTypeSpecifier.k_class){
+					LinkedHashMap<String, IType> schema = new LinkedHashMap<>();
 					
 					//Thêm các khai báo thuộc tính thành phần
 					for (IASTDeclaration member: comp.getMembers()){
+						if (!(member instanceof IASTSimpleDeclaration)) continue;
+						
 						IASTSimpleDeclaration sd = (IASTSimpleDeclaration) member;
-						Type type = CType.parse(
-								sd.getDeclSpecifier().getRawSignature(), mProcess);
+						IType type = mMain.findType(sd.getDeclSpecifier()
+								.getRawSignature());
 						
 						for (IASTDeclarator dc: sd.getDeclarators())
 							schema.put(dc.getName().toString(), type);
@@ -160,15 +156,17 @@ public class CProjectParser extends ASTVisitor implements IProjectParser{
 					
 					//if: Phòng trường hợp khai báo anonymous
 					if (!name.isEmpty())
-						objectType.add(new ObjectType(name, schema));
+						mMain.addLoadedType(new ObjectType(name, schema));
 					
 					//Có từ khóa typedef, thêm các tên được định nghĩa
 					if (comp.getStorageClass() == IASTDeclSpecifier.sc_typedef){
 						for (IASTDeclarator dc: declare.getDeclarators())
-							objectType.add(new ObjectType(dc.getName().toString(), schema));
+							mMain.addLoadedType(new ObjectType(dc.getName().toString(), schema));
 					} 
 				}
-			}*/
+
+				return PROCESS_CONTINUE;
+			}
 		}
 		
 		//Duyệt các khai báo hàm

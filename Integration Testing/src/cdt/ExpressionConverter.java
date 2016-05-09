@@ -14,6 +14,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTExpression;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
+import org.eclipse.cdt.core.dom.ast.IASTFieldReference;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionCallExpression;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTInitializer;
@@ -35,6 +36,7 @@ import core.expression.ArrayIndexExpression;
 import core.expression.BinaryExpression;
 import core.expression.DeclareExpression;
 import core.expression.FunctionCallExpression;
+import core.expression.MemberAccessExpression;
 import core.expression.NumberExpression;
 import core.expression.NameExpression;
 import core.expression.ReturnExpression;
@@ -212,12 +214,12 @@ public class ExpressionConverter {
 			return new ReturnExpression(rt);
 		}
 		
-//		if (node instanceof IASTFieldReference){
-//			IASTFieldReference field = (IASTFieldReference) node;
-//			IExpression object = parseNode(field.getFieldOwner());
-//			return new MemberAccessExpression(object, 
-//					field.getFieldName().getRawSignature(), !field.isPointerDereference());
-//		}
+		if (node instanceof IASTFieldReference){
+			IASTFieldReference field = (IASTFieldReference) node;
+			IExpression object = parseNode(field.getFieldOwner());
+			return new MemberAccessExpression(object, 
+					field.getFieldName().getRawSignature(), !field.isPointerDereference());
+		}
 		
 		if (node instanceof IASTExpressionStatement){
 			return parseNode(((IASTExpressionStatement) node).getExpression());
