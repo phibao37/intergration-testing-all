@@ -16,7 +16,7 @@ public class BasicType extends Type {
 	 * @param defaultValue giá trị mặc định
 	 * @param size cỡ của kiểu
 	 */
-	protected BasicType(String content, Object defaultValue, int size){
+	public BasicType(String content, Object defaultValue, int size){
 		super(content, size);
 		mDefault = defaultValue;
 	}

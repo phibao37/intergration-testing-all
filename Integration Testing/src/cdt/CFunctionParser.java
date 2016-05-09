@@ -27,7 +27,7 @@ import api.IProject;
 import api.models.IFunction;
 import api.models.IStatement;
 import api.parser.IFunctionParser;
-import cdt.models.FileInfo;
+import core.models.FileInfo;
 import core.models.Statement;
 import core.models.statement.FlagStatement;
 import core.models.statement.ScopeStatement;

@@ -2,7 +2,10 @@ package core;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import core.expression.FunctionCallExpression;
 import core.models.FunctionTestResult;
 import core.solver.Solution;
@@ -10,6 +13,7 @@ import core.solver.SymbolicExecutor;
 import core.solver.random.RandomSolver;
 import core.solver.z3.Z3Solver;
 import api.IProject;
+import api.graph.IProjectNode;
 import api.models.ITestpath;
 import api.models.ICFG;
 import api.models.IFunction;
@@ -27,12 +31,14 @@ public abstract class BaseProject implements IProject {
 	private List<IFunction> listFunction;
 	private List<IVariable> listGlobalVar;
 	private List<IType> listType;
+	private Map<File, IProjectNode> mapProjectNode;
 	private File root;
 
 	protected BaseProject(File root){
 		listFunction = new ArrayList<>();
 		listGlobalVar = new ArrayList<>();
 		listType = new ArrayList<>();
+		mapProjectNode = new HashMap<>();
 		this.root = root;
 		
 		loadProject();
@@ -58,6 +64,15 @@ public abstract class BaseProject implements IProject {
 				getProjectParser().parseSource(f, this);
 			}
 		}
+	}
+	
+	public void putMapProjectStruct(File source, IProjectNode node){
+		mapProjectNode.put(source, node);
+	}
+
+	@Override
+	public Map<File, IProjectNode> getMapProjectStruct() {
+		return mapProjectNode;
 	}
 
 	@Override
