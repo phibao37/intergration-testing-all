@@ -207,6 +207,7 @@ public class GUIMain {
 		tab_source_view.closeAllTab();
 		((DefaultTableModel) table_simple_result.getModel()).setRowCount(0);
 		layout_process_mgr.clearRows();
+		mapProcess.clear();
 	}
 	
 	FileView openSourceView(File file){
