@@ -107,7 +107,7 @@ public class FunctionView extends JDialog {
 				"Sub condition coverage", "All path"};
 		IFunctionTestResult r = fn.getTestResult();
 		TableSelectionListener listener = (t, row) -> {
-			if (row == -1) return;
+			if (row == -1 || current_cfg == null) return;
 			current_cfg.setHightLightTestpath((ITestpath) t.getValueAt(row, 1));
 		};
 		
