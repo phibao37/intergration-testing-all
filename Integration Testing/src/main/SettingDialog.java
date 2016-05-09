@@ -33,6 +33,7 @@ import core.BaseProject;
 import core.Config;
 import graph.swing.SelectList;
 import java.awt.Font;
+import javax.swing.JCheckBox;
 
 public class SettingDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -43,6 +44,9 @@ public class SettingDialog extends JDialog {
 	private JSpinner entry_rand_loop;
 	private JSpinner entry_rand_min;
 	private JSpinner entry_rand_max;
+	private JSpinner entry_cfg_mgx;
+	private JSpinner entry_cfg_mgy;
+	private JCheckBox entry_cfg_details;
 	
 	/**
 	 * Launch the application.
@@ -67,6 +71,10 @@ public class SettingDialog extends JDialog {
 		entry_rand_loop.setValue(Config.RAND_LOOP);
 		entry_rand_min.setValue(Config.RAND_MIN);
 		entry_rand_max.setValue(Config.RAND_MAX);
+		
+		entry_cfg_mgx.setValue(Config.CFG_MARGIN_X);
+		entry_cfg_mgy.setValue(Config.CFG_MARGIN_Y);
+		entry_cfg_details.setSelected(Config.SHOW_CFG_DETAILS);
 	}
 	
 	private void validateSettings() throws Exception {
@@ -88,6 +96,11 @@ public class SettingDialog extends JDialog {
 		Config.RAND_LOOP = (int) entry_rand_loop.getValue();
 		Config.RAND_MIN = (int) entry_rand_min.getValue();
 		Config.RAND_MAX = (int) entry_rand_max.getValue();
+		
+		Config.CFG_MARGIN_X = (int) entry_cfg_mgx.getValue();
+		Config.CFG_MARGIN_Y = (int) entry_cfg_mgy.getValue();
+		Config.SHOW_CFG_DETAILS = entry_cfg_details.isSelected();
+		
 		Config.save();
 	}
 
@@ -322,6 +335,88 @@ public class SettingDialog extends JDialog {
 						JLabel label = new JLabel("]");
 						panel_1.add(label);
 					}
+				}
+			}
+		}
+		{
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setBorder(null);
+			tabPanel.addTab("Graphic", null, scrollPane, null);
+			{
+				JPanel panel = new JPanel();
+				panel.setBackground(Color.WHITE);
+				scrollPane.setViewportView(panel);
+				GridBagLayout gbl_panel = new GridBagLayout();
+				gbl_panel.columnWidths = new int[]{30, 130, 0, 30, 0};
+				gbl_panel.rowHeights = new int[]{30, 30, 30, 30, 30, 30, 0};
+				gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+				panel.setLayout(gbl_panel);
+				{
+					JLabel lblCfgDisplay = new JLabel("CFG Display");
+					lblCfgDisplay.setFont(lblCfgDisplay.getFont().deriveFont(lblCfgDisplay.getFont().getStyle() | Font.BOLD));
+					GridBagConstraints gbc_lblCfgDisplay = new GridBagConstraints();
+					gbc_lblCfgDisplay.anchor = GridBagConstraints.SOUTHWEST;
+					gbc_lblCfgDisplay.insets = new Insets(0, 0, 5, 5);
+					gbc_lblCfgDisplay.gridx = 1;
+					gbc_lblCfgDisplay.gridy = 1;
+					panel.add(lblCfgDisplay, gbc_lblCfgDisplay);
+				}
+				{
+					JLabel lblMarginX = new JLabel("Margin X");
+					GridBagConstraints gbc_lblMarginX = new GridBagConstraints();
+					gbc_lblMarginX.anchor = GridBagConstraints.WEST;
+					gbc_lblMarginX.insets = new Insets(0, 0, 5, 5);
+					gbc_lblMarginX.gridx = 1;
+					gbc_lblMarginX.gridy = 2;
+					panel.add(lblMarginX, gbc_lblMarginX);
+				}
+				{
+					entry_cfg_mgx = new JSpinner();
+					entry_cfg_mgx.setModel(new SpinnerNumberModel(new Integer(100), new Integer(40), null, new Integer(5)));
+					GridBagConstraints gbc_entry_cfg_mgx = new GridBagConstraints();
+					gbc_entry_cfg_mgx.anchor = GridBagConstraints.WEST;
+					gbc_entry_cfg_mgx.insets = new Insets(0, 0, 5, 5);
+					gbc_entry_cfg_mgx.gridx = 2;
+					gbc_entry_cfg_mgx.gridy = 2;
+					panel.add(entry_cfg_mgx, gbc_entry_cfg_mgx);
+				}
+				{
+					JLabel lblMarginY = new JLabel("Margin Y");
+					GridBagConstraints gbc_lblMarginY = new GridBagConstraints();
+					gbc_lblMarginY.anchor = GridBagConstraints.WEST;
+					gbc_lblMarginY.insets = new Insets(0, 0, 5, 5);
+					gbc_lblMarginY.gridx = 1;
+					gbc_lblMarginY.gridy = 3;
+					panel.add(lblMarginY, gbc_lblMarginY);
+				}
+				{
+					entry_cfg_mgy = new JSpinner();
+					entry_cfg_mgy.setModel(new SpinnerNumberModel(new Integer(100), new Integer(40), null, new Integer(5)));
+					GridBagConstraints gbc_entry_cfg_mgy = new GridBagConstraints();
+					gbc_entry_cfg_mgy.anchor = GridBagConstraints.WEST;
+					gbc_entry_cfg_mgy.insets = new Insets(0, 0, 5, 5);
+					gbc_entry_cfg_mgy.gridx = 2;
+					gbc_entry_cfg_mgy.gridy = 3;
+					panel.add(entry_cfg_mgy, gbc_entry_cfg_mgy);
+				}
+				{
+					JLabel lblShowInDetails = new JLabel("Show in details view");
+					GridBagConstraints gbc_lblShowInDetails = new GridBagConstraints();
+					gbc_lblShowInDetails.anchor = GridBagConstraints.WEST;
+					gbc_lblShowInDetails.insets = new Insets(0, 0, 5, 5);
+					gbc_lblShowInDetails.gridx = 1;
+					gbc_lblShowInDetails.gridy = 4;
+					panel.add(lblShowInDetails, gbc_lblShowInDetails);
+				}
+				{
+					entry_cfg_details = new JCheckBox("");
+					GridBagConstraints gbc_entry_cfg_details = new GridBagConstraints();
+					gbc_entry_cfg_details.anchor = GridBagConstraints.WEST;
+					gbc_entry_cfg_details.insets = new Insets(0, 0, 5, 5);
+					gbc_entry_cfg_details.gridx = 2;
+					gbc_entry_cfg_details.gridy = 4;
+					panel.add(entry_cfg_details, gbc_entry_cfg_details);
 				}
 			}
 		}
