@@ -159,6 +159,12 @@ public class LightTabbedPane extends JTabbedPane {
 	public Panel getTabComponentAt(int index){
 		return (Panel) super.getTabComponentAt(index);
 	}
+	
+	public void closeAllTab(){
+		for (int i = 0; i < getTabCount(); i++)
+			getTabComponentAt(i).closeThisTab();
+	}
+	
 	@Override
 	public void insertTab(String title, Icon icon, Component component, 
 			String tip, int index){

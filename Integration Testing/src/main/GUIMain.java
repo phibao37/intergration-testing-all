@@ -198,10 +198,15 @@ public class GUIMain {
 	
 	void clearAllView(){
 		//Clear Call Graph and CFG
+		tab_graph.closeAllTab();
 		
 		//Clear function overview
+		lblFunctionName.setText(null);
 		
 		//Clear process manager
+		tab_source_view.closeAllTab();
+		((DefaultTableModel) table_simple_result.getModel()).setRowCount(0);
+		layout_process_mgr.clearRows();
 	}
 	
 	FileView openSourceView(File file){

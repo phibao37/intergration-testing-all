@@ -158,6 +158,9 @@ public class CFG implements ICFG{
 			if (stm.isCondition())
 				countBranch++;
 		
+		if (countBranch == 0)
+			return 100;
+		
 		for (ITestpath tp: list_path)
 			if (tp.getSolution().hasData()){
 				for (int i = 0; i < tp.size(); i++)

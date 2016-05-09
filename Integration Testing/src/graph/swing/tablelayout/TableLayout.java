@@ -705,6 +705,15 @@ private static int parseAlign(String token){
 		containter.revalidate();
 		containter.repaint();
 	}
+	
+	public void clearRows(){
+		listRow.clear();
+		for (int i = 0; i < getNumRow(); i++)
+			deleteRow(i);
+		containter.removeAll();
+		containter.revalidate();
+		containter.repaint();
+	}
 
 
 /**
