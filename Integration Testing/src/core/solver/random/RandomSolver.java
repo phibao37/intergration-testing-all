@@ -135,6 +135,10 @@ public class RandomSolver implements ISolver {
 					switch (constraint.getConstraintType()){
 					case IPathConstraints.TYPE_DIVIDE_ZERO:
 						error = "Division by 0"; break;
+					case IPathConstraints.TYPE_OUT_OF_BOUND:
+						error = "Out of bound"; break;
+					case IPathConstraints.TYPE_NULL_POINTER:
+						error = "Null pointer"; break;
 					}
 					returnValue = new StringExpression(error);
 				}
