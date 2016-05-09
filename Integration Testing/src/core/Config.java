@@ -65,13 +65,13 @@ public class Config {
 	
 	public static int CFG_MARGIN_X = 150;
 	public static int CFG_MARGIN_Y = 120;
+	public static boolean SHOW_CFG_DETAILS = true;
+	public static boolean SHOW_CFG_STATEMENT_POS = true;
 	
 	/**
 	 * Đường dẫn project đang được ghim
 	 */
 	public static File PINNED_PROJECT = null;
-	
-	public static boolean SHOW_CFG_DETAILS = true;
 	
 	/*---------------------------------------------------------------------*/
 	

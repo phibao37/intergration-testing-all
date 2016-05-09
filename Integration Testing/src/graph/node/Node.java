@@ -12,10 +12,12 @@ import api.models.IElement;
 public class Node<E extends IElement> extends JLabel {
 	private static final long serialVersionUID = 1L;
 	protected static final int MAX_STR_LEN = 30;
+	public static final int FLAG_ALL = -1;
 	
 	private E element;
 	private Node<E>[] refer;
 	private int x, y;
+	private int flags;
 	
 	protected Node(){
 		setHorizontalAlignment(CENTER);
@@ -94,6 +96,18 @@ public class Node<E extends IElement> extends JLabel {
 		}
 		
 		setText(content);
+	}
+	
+	public void addFlag(int flag){
+		flags = flags | flag;
+	}
+	
+	public void removeFlag(int flag){
+		flags = flags & (~flag);
+	}
+	
+	public boolean hasFlag(int flag){
+		return (flags & flag) != 0;
 	}
 	
 	public boolean isLocationSet(){

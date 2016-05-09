@@ -1,22 +1,28 @@
 package graph.canvas;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 
 import api.models.IFunction;
 import api.models.IStatement;
+import api.models.ITestpath;
 import core.Config;
 import graph.node.CFGNode;
+import graph.node.CFGNodeAdapter;
 import graph.node.Node;
 import graph.node.NodeAdapter;
 
 public class CFGCanvas extends Canvas<IStatement> {
 	private static final long serialVersionUID = 1L;
-	public static final Color DEFAULT = Color.BLACK;
-	public static final Color TRUE = Color.BLUE;
-	public static final Color FALSE = new Color(0, 153, 51);
+	public static final Color 
+			DEFAULT = Color.BLACK,
+			TRUE = Color.BLUE,
+			FALSE = new Color(0, 153, 51),
+			SELECTED = Color.RED;
+	private static final Font FONT_LABEL = new Font("TimesRoman", Font.BOLD, 12);
 	
 	private IFunction function;
 	
@@ -26,6 +32,63 @@ public class CFGCanvas extends Canvas<IStatement> {
 	
 	public IFunction getFunction(){
 		return function;
+	}
+	
+	public CFGNodeAdapter getAdapter(){
+		return (CFGNodeAdapter) super.getAdapter();
+	}
+	
+	public void setHightLightTestpath(ITestpath tp){
+		if (!hasAdapter()) return;
+
+		resetAllHightLight();
+		if (tp == null){
+			repaint();
+			return;
+		}
+		
+		int pos = 0;
+		for (int i = 0; i < tp.size(); i++){
+			IStatement stm = tp.get(i);
+			CFGNode n = (CFGNode) adapter.getNodeByElement(stm);
+			if (n == null) continue;
+			
+			if (stm.isNormal()){
+				pos++;
+				n.setLabel(pos);
+			}
+			
+			if (i + 1 < tp.size()){
+				if (stm.isCondition()){
+					n.addFlag(stm.getTrue() == tp.get(i + 1) ?
+							CFGNode.FLAG_SELECT_TRUE :
+							CFGNode.FLAG_SELECT_FALSE);
+				} else{
+					//Kiêm tra node ở nhánh true tồn tại trong testpath
+					boolean found = false;
+					CFGNode n2 = (CFGNode) n.getRefer()[0];
+					IStatement stm2 = n2.getElement();
+					for (int j = i + 1; j < tp.size(); j++)
+						if (tp.get(j) == stm2){
+							found = true;
+							break;
+						}
+					
+					if (found)
+						n.addFlag(CFGNode.FLAG_SELECT_TRUE);
+				}
+			}
+		}
+		
+		repaint();
+	}
+	
+	private void resetAllHightLight(){
+		for (int i = 0; i < adapter.size(); i++){
+			CFGNode n = (CFGNode) adapter.get(i);
+			n.removeFlag(CFGNode.FLAG_SELECT_TRUE | CFGNode.FLAG_SELECT_FALSE);
+			n.setLabel(-1);
+		}
 	}
 	
 	@Override
@@ -96,7 +159,7 @@ public class CFGCanvas extends Canvas<IStatement> {
 		Stroke oldStroke = g2.getStroke();
 		
 		g2.setStroke(NORMAL_STROKE);
-		// g2.setFont(FONT_LABEL);
+		g2.setFont(FONT_LABEL);
 		for (Node<IStatement> n1 : adapter) {
 			refer = n1.getRefer();
 			xs = n1.getX() + n1.getWidth() / 2;
@@ -116,12 +179,10 @@ public class CFGCanvas extends Canvas<IStatement> {
 					Color color;
 					int[] marks = null;
 
-//					if (n1.hasFlag(
-//							isTrue ? StatementNode.FLAG_SELECT_TRUE_EXTRA : StatementNode.FLAG_SELECT_FALSE_EXTRA))
-//						color = SELECTED_EXTRA;
-//					else if (n1.hasFlag(isTrue ? StatementNode.FLAG_SELECT_TRUE : StatementNode.FLAG_SELECT_FALSE))
-//						color = SELECTED;
-//					else 
+					if (n1.hasFlag(isTrue ? 
+							CFGNode.FLAG_SELECT_TRUE : CFGNode.FLAG_SELECT_FALSE))
+						color = SELECTED;
+					else 
 					if (isCondition)
 						color = isTrue ? TRUE : FALSE;
 					else
@@ -178,19 +239,20 @@ public class CFGCanvas extends Canvas<IStatement> {
 				}
 			}
 
-//			if (mShowLabel.isSelected() && !n1.getLabel().isEmpty()) {
-//				int x = n1.getX() + n1.getWidth();
-//				int y = n1.getY();
-//				String str = n1.getLabel();
-//				int lbr = (str.length() - str.replace(", ", "").length()) / 2;
-//				int w = 7 * str.length() - 8 * lbr - 1;
-//
-//				g2.setColor(Color.YELLOW);
-//				g2.fillOval(x, y - 17, w + 8, 17);
-//				g2.setColor(Color.BLACK);
-//				g2.drawString(n1.getLabel(), x + 4, y - 4);
-//
-//			}
+			CFGNode cn1 = (CFGNode) n1;
+			if (Config.SHOW_CFG_STATEMENT_POS && !cn1.getLabel().isEmpty()) {
+				int x = n1.getX() + n1.getWidth();
+				int y = n1.getY();
+				String str = cn1.getLabel();
+				int lbr = (str.length() - str.replace(", ", "").length()) / 2;
+				int w = 7 * str.length() - 8 * lbr - 1;
+
+				g2.setColor(Color.YELLOW);
+				g2.fillOval(x, y - 17, w + 8, 17);
+				g2.setColor(Color.BLACK);
+				g2.drawString(cn1.getLabel(), x + 4, y - 4);
+
+			}
 		}
 		g2.setStroke(oldStroke);
 	}

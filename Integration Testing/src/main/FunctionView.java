@@ -15,6 +15,7 @@ import core.Config;
 import core.Utils;
 import graph.swing.CFGView;
 import graph.swing.CoverageView;
+import graph.swing.CoverageView.TableSelectionListener;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -63,7 +64,7 @@ public class FunctionView extends JDialog {
 		
 		if (coverage == ICFG.COVER_BRANCH){
 			if (cfg == null)
-				cfg = new CFGView(fn, coverage);
+				cfg = new CFGView(fn, coverage, null);
 			if (current_cfg != cfg){
 				current_cfg = cfg;
 				int loc = split_main.getDividerLocation();
@@ -73,7 +74,7 @@ public class FunctionView extends JDialog {
 		}
 		else if (coverage == ICFG.COVER_SUBCONDITION){
 			if (cfg3 == null)
-				cfg3 = new CFGView(fn, coverage);
+				cfg3 = new CFGView(fn, coverage, null);
 			if (current_cfg != cfg3){
 				current_cfg = cfg3;
 				int loc = split_main.getDividerLocation();
@@ -105,6 +106,10 @@ public class FunctionView extends JDialog {
 		String[] COVER_NAMES = {"Statement coverage", "Branch coverage",
 				"Sub condition coverage", "All path"};
 		IFunctionTestResult r = fn.getTestResult();
+		TableSelectionListener listener = (t, row) -> {
+			if (row == -1) return;
+			current_cfg.setHightLightTestpath((ITestpath) t.getValueAt(row, 1));
+		};
 		
 		for (int i = IFunctionTestResult.STATEMENT;
 				i <= IFunctionTestResult.ALLPATH; i++){
@@ -120,6 +125,7 @@ public class FunctionView extends JDialog {
 			}
 			
 			tab_coverage.add(name, cv);
+			cv.setTableSelectListener(listener);
 		}
 		
 		{
@@ -135,6 +141,7 @@ public class FunctionView extends JDialog {
 			}
 			
 			tab_coverage.add(name, cv);
+			cv.setTableSelectListener(listener);
 		}
 		
 		{
@@ -150,6 +157,7 @@ public class FunctionView extends JDialog {
 			}
 			
 			tab_coverage.add(name, cv);
+			cv.setTableSelectListener(listener);
 		}
 		
 	}

@@ -14,11 +14,15 @@ import core.Utils;
 public class CFGNode extends Node<IStatement> {
 	private static final long serialVersionUID = 1L;
 	public static final int NORMAL = 0, CONDITION = 1, MARK = 2,
-			PADDING_X = 20, PADDING_Y = 10, MARK_SIZE = 25,
-			MAX_IN_BLOCK = 10;
+			PADDING_X = 20, PADDING_Y = 10, 
+			MARK_SIZE = 25,
+			MAX_IN_BLOCK = 10,
+			FLAG_SELECT_TRUE = 1,
+			FLAG_SELECT_FALSE = 2;
 	
 	private int type;
 	private Color borderColor;
+	private String mLabel = "";
 	
 	public CFGNode(IStatement stm) {
 		super(stm);
@@ -152,6 +156,25 @@ public class CFGNode extends Node<IStatement> {
 			g.drawOval(x, y, width, height);
 			break;
 		}
+	}
+	
+	/**
+	 * Thêm nhãn thứ tự cho nút
+	 * @param label số thứ tự vị trí của nút trong đường đi, hoặc -1
+	 * nếu muốn hủy bỏ toàn bộ 
+	 */
+	public void setLabel(int label){
+		if (label == -1)
+			mLabel = "";
+		else
+			mLabel += (mLabel.isEmpty() ? "" : ", ") + label;
+	}
+	
+	/**
+	 * Trả về nhãn thứ tự cho nút
+	 */
+	public String getLabel(){
+		return mLabel;
 	}
 	
 	@Override

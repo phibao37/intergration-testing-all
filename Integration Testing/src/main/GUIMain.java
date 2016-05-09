@@ -50,6 +50,7 @@ import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -77,6 +78,7 @@ public class GUIMain {
 					"/image/complete.png"));
 	
 	private IProject currentProject;
+	private IFunction currentFunction;
 	private ProcessManager processMgr; 
 	private TableLayout layout_process_mgr;
 	private Hashtable<IFunction, TableLayout.TableRow> mapProcess;
@@ -126,14 +128,17 @@ public class GUIMain {
 		}
 	}
 	
-	void openCFGView(IFunction fn, int cover){
+	CFGView openCFGView(IFunction fn, int cover){
 		try {
 			CFGView v = (CFGView) tab_graph.openTab("CFG: " + fn.getName(), 
-					null, fn.toString(), 
-					CFGView.class.getConstructor(IFunction.class, int.class),
-					fn, cover);
-			v.setNodeMouseListener(cfgMouseAdapter);
-		} catch (Exception e) { } 
+					null, fn.toString(),  CFGView.class.getConstructor(
+							IFunction.class, int.class, MouseListener.class),
+					fn, cover, cfgMouseAdapter);
+			return v;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		} 
 	}
 	
 	private MouseAdapter cfgMouseAdapter = new MouseAdapter() {
@@ -158,6 +163,9 @@ public class GUIMain {
 		
 		if (result == JFileChooser.APPROVE_OPTION){
 			File root = chooserProject.getSelectedFile();
+			toggle_pin.setSelected(false);
+			Config.PINNED_PROJECT = null;
+			Config.save();
 			openProject(root);
 	 	}
 	}
@@ -244,6 +252,12 @@ public class GUIMain {
 		}
 	}
 	
+	void hightLightTestpath(ITestpath tp){
+		if (currentFunction == null) return;
+		CFGView cv = openCFGView(currentFunction, ICFG.COVER_BRANCH);
+		cv.setHightLightTestpath(tp);
+	}
+	
 	void testFunction(IFunction fn){
 		if (fn.isTesting() || 
 				fn.getStatus() == IFunction.UNSUPPORT)
@@ -309,6 +323,7 @@ public class GUIMain {
 			});
 		}
 		model.addRow(new Object[]{});
+		currentFunction = fn;
 	}
 			
 	@Override
@@ -495,6 +510,14 @@ public class GUIMain {
 		table_simple_result.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table_simple_result.getColumnModel().getColumn(2).setPreferredWidth(100);
 		table_simple_result.getColumnModel().getColumn(3).setPreferredWidth(50);
+		
+		table_simple_result.getSelectionModel().addListSelectionListener(e -> {
+			int row = table_simple_result.getSelectedRow();
+			if (row >= 0)
+				hightLightTestpath((ITestpath) table_simple_result
+					.getValueAt(row, 1));
+		});
+		
 		scrollPane_1.setViewportView(table_simple_result);
 		panel_2.setLayout(gl_panel_2);
 		

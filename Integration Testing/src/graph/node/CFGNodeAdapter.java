@@ -95,4 +95,5 @@ public class CFGNodeAdapter extends NodeAdapter<IStatement> {
 			stm = stm.getTrue();
 		return stm;
 	}
+
 }

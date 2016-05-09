@@ -5,6 +5,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.MouseListener;
 
 import api.models.IFunction;
+import api.models.ITestpath;
 import graph.canvas.CFGCanvas;
 import graph.node.CFGNodeAdapter;
 
@@ -17,19 +18,18 @@ public class CFGView extends DragScrollPane
 	private CFGCanvas canvas;
 	private MouseListener nodeListener;
 	
-	public CFGView(IFunction fn, int cover) {
+	public CFGView(IFunction fn, int cover, MouseListener nodeListener) {
 		this.fn = fn;
 		this.cover = cover;
+		this.nodeListener = nodeListener;
 		
 		canvas = new CFGCanvas(fn);
 		setViewportView(canvas);
 		addComponentListener(this);
 	}
 	
-	public void setNodeMouseListener(MouseListener nodeListener){
-		this.nodeListener = nodeListener;
-		if (isShowing())
-			addNodeListenerImidiately();
+	public void setHightLightTestpath(ITestpath tp){
+		canvas.setHightLightTestpath(tp);
 	}
 	
 	private void addNodeListenerImidiately(){

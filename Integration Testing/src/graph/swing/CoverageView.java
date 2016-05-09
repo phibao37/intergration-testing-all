@@ -36,6 +36,11 @@ public class CoverageView extends JScrollPane {
 		model.addRow((Object[])null);
 	}
 	
+	public void setTableSelectListener(TableSelectionListener l){
+		table.getSelectionModel().addListSelectionListener(e -> 
+		l.selectChanged(table, table.getSelectedRow()));
+	}
+	
 	/**
 	 * Create the panel.
 	 */
@@ -73,6 +78,11 @@ public class CoverageView extends JScrollPane {
 		setViewportView(table);
 
 		viewport.setBackground(Color.WHITE);
+	}
+	
+	public interface TableSelectionListener{
+		
+		void selectChanged(JTable table, int row);
 	}
 
 }
