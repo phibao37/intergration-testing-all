@@ -2,6 +2,8 @@ package core.models;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+
 import api.models.ITestpath;
 import api.models.ICFG;
 import api.models.IStatement;
@@ -44,6 +46,25 @@ public class CFG implements ICFG{
 		return mList;
 	}
 	
+	/**
+	 * Đánh dấu tất cả câu lệnh là chưa được thăm
+	 */
+	private void resetVisit(){
+		for (IStatement stm: mList)
+			stm.setVisit(false);
+	}
+	
+	/**
+	 * Đếm số câu lệnh đã được thăm
+	 */
+	private int countVisit(){
+		int sum = 0;
+		for (IStatement stm: mList)
+			if (stm.isVisited())
+				sum++;
+		return sum;
+	}
+	
 	@Override
 	public ArrayList<ITestpath> getCoverStatementPaths(){
 		
@@ -54,8 +75,7 @@ public class CFG implements ICFG{
 		for (int i = copy.size() - 1; i >= 0; i--){
 			
 			//Đánh dấu tất cả các câu lệnh là chưa được thăm
-			for (IStatement stm: mList)
-				stm.setVisit(false);
+			resetVisit();
 			
 			//Duyệt lần lượt các đường thi hành còn lại, đánh dấu các câu lệnh trên
 			//các đường thi hành này là đã được thăm
@@ -65,14 +85,9 @@ public class CFG implements ICFG{
 					stm.setVisit(true);
 			}
 			
-			int sum = 0;
-			for (IStatement stm: mList)
-				if (stm.isVisited())
-					sum++;
-			
 			//Nếu tổng các câu lệnh được thăm bằng đúng tổng tất cả câu lệnh, việc 
 			//bỏ đi đường thi hành đang xét vẫn làm thỏa mản cấp độ phủ câu lệnh
-			if (sum == mList.length)
+			if (countVisit() == mList.length)
 				copy.remove(i);
 		}
 		
@@ -121,7 +136,37 @@ public class CFG implements ICFG{
 		
 		return copy;
 	}
-	
+
+	@Override
+	public int coverageStatement(List<ITestpath> list_path) {
+		resetVisit();
+		
+		for (ITestpath tp: list_path)
+			if (tp.getSolution().hasData())
+				for (IStatement stm: tp)
+					stm.setVisit(true);
+		
+		return countVisit() * 100 / mList.length;
+	}
+
+	@Override
+	public int coverageBranch(List<ITestpath> list_path) {
+		int countBranch = 0;
+		HashSet<Edge> branchSet = new HashSet<>();
+		
+		for (IStatement stm: mList)
+			if (stm.isCondition())
+				countBranch++;
+		
+		for (ITestpath tp: list_path)
+			if (tp.getSolution().hasData()){
+				for (int i = 0; i < tp.size(); i++)
+					if (tp.get(i).isCondition())
+						branchSet.add(new Edge(tp.get(i), tp.get(i+1)));
+			}
+		
+		return branchSet.size() * 50 / countBranch;
+	}
 	
 	/**
 	 * Phân tích danh sách các đường thi hành
@@ -203,6 +248,7 @@ public class CFG implements ICFG{
 		}
 		
 	}
+
 }
 
 

@@ -30,6 +30,16 @@ public interface ICFG {
 	 */
 	List<ITestpath> getCoverBranchPaths();
 	
+	/**
+	 * Phần trăm số câu lệnh được duyệt sau khi các testpath được thực thi
+	 */
+	int coverageStatement(List<ITestpath> list_path);
+	
+	/**
+	 * Phần trăm số nhánh đúng/sai được thăm sau khi các testpath được thực thi
+	 */
+	int coverageBranch(List<ITestpath> list_path);
+	
 	public static final int COVER_STATEMENT = 1;
 	public static final int COVER_BRANCH = 2;
 	public static final int COVER_SUBCONDITION = 3;

@@ -115,6 +115,19 @@ public abstract class BaseProject implements IProject {
 		r.setTestpaths(IFunctionTestResult.ERROR, errorPath);
 		r.setTestpaths(IFunctionTestResult.LOOP, loopPath);
 		
+		//Tính toán % độ phủ
+		r.setPercent(IFunctionTestResult.STATEMENT, 
+				cfg_12.coverageStatement(cfg_12.getCoverStatementPaths()));
+		r.setPercent(IFunctionTestResult.BRANCH, 
+				cfg_12.coverageBranch(cfg_12.getCoverBranchPaths()));
+		r.setPercent(IFunctionTestResult.SUBCONDITION, 
+				cfg_3.coverageBranch(cfg_3.getCoverBranchPaths()));
+		int all = 0;
+		for (ITestpath tp: allPath_12)
+			if (tp.getSolution().hasData())
+				all++;
+		r.setPercent(IFunctionTestResult.ALLPATH, all * 100 / allPath_12.size());
+		
 		func.setTestResult(r);
 		return r;
 	}

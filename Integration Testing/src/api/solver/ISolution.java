@@ -30,6 +30,10 @@ public interface ISolution {
 	 */
 	ISolver getSolver();
 	
+	default boolean hasData(){
+		return getCode() == ERROR || getCode() == SATISFY;
+	}
+	
 	final int 
 			UNKNOWN = 0,
 			ERROR = -1,
