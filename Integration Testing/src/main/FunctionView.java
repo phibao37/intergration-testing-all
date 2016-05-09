@@ -6,11 +6,13 @@ import java.awt.Toolkit;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import api.models.ICFG;
 import api.models.IFunction;
 import api.models.IFunctionTestResult;
 import api.models.ITestpath;
+import api.parser.IExporter;
 import core.Config;
 import core.Utils;
 import graph.swing.CFGView;
@@ -27,6 +29,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 import javax.swing.JSplitPane;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import javax.swing.JTabbedPane;
@@ -50,7 +53,7 @@ public class FunctionView extends JDialog {
 				try {
 					UIManager.setLookAndFeel(
 							 "javax.swing.plaf.nimbus.NimbusLookAndFeel");
-					FunctionView dialog = new FunctionView(null, null);
+					FunctionView dialog = new FunctionView(null, null, null);
 					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 					dialog.setVisible(true);
 				} catch (Exception e) {
@@ -174,7 +177,7 @@ public class FunctionView extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public FunctionView(JFrame owner, IFunction fn) {
+	public FunctionView(JFrame owner, IFunction fn, IExporter export) {
 		super(owner, fn.getContent(), true);
 		this.fn = fn;
 		
@@ -234,6 +237,24 @@ public class FunctionView extends JDialog {
 		toolBar.add(toggleButton);
 		
 		JButton button = new JButton("");
+		button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (fn.getTestResult() == null) return;
+				
+				export.addFunction(fn);
+				try {
+					export.export();
+					JOptionPane.showMessageDialog(FunctionView.this, 
+							"Export success", "Message", 
+							JOptionPane.INFORMATION_MESSAGE);
+				} catch (IOException e1) {
+					JOptionPane.showMessageDialog(FunctionView.this, 
+							e1.getMessage(), "Error", 
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 		button.setToolTipText("Export test data");
 		button.setIcon(new ImageIcon(FunctionView.class.getResource("/image/export.png")));
 		toolBar.add(button);

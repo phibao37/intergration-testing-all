@@ -14,6 +14,7 @@ import api.IProject;
 import api.graph.IFileInfo;
 import api.graph.IProjectNode;
 import api.models.ITestpath;
+import api.parser.IExporter;
 import api.models.ICFG;
 import api.models.IFunction;
 import api.models.IFunctionTestResult;
@@ -22,6 +23,7 @@ import cdt.CProject;
 import cdt.models.CProjectNode;
 import core.Config;
 import core.Utils;
+import core.export.ExcelExporter;
 import core.process.ProcessManager;
 import core.process.TestProcess;
 import graph.node.CFGNode;
@@ -52,6 +54,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -59,6 +62,7 @@ import java.awt.event.ActionEvent;
 import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -79,6 +83,7 @@ public class GUIMain {
 	
 	private IProject currentProject;
 	private IFunction currentFunction;
+	private IExporter currentExport;
 	private ProcessManager processMgr; 
 	private TableLayout layout_process_mgr;
 	private Hashtable<IFunction, TableLayout.TableRow> mapProcess;
@@ -174,6 +179,10 @@ public class GUIMain {
 		CProject project = new CProject(root);
 		currentProject = project;
 		
+		if (currentExport != null)
+			currentExport.close();
+		currentExport = new ExcelExporter(currentProject);
+		
 		CProjectNode rootNode = new CProjectNode(root, 
 				CProjectNode.TYPE_PROJECT, project); 
 		
@@ -183,7 +192,7 @@ public class GUIMain {
 	}
 	
 	void openFunctionDetails(IFunction fn){
-		FunctionView fv = new FunctionView(frmCProjectTesting, fn);
+		FunctionView fv = new FunctionView(frmCProjectTesting, fn, currentExport);
 		fv.setVisible(true);
 	}
 	
@@ -561,6 +570,31 @@ public class GUIMain {
 		panel.add(btnOpen, gbc_btnOpen);
 		
 		JButton btnExport = new JButton("Export");
+		btnExport.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (currentProject == null) return;
+				ArrayList<IFunction> listTested = new ArrayList<>(
+						currentProject.getFunctions());
+				listTested.removeIf(f -> (f.getTestResult() == null));
+				if (listTested.size() == 0) return;
+				
+				for (IFunction fn: listTested)
+					currentExport.addFunction(fn);
+				
+				try {
+					currentExport.export();
+					JOptionPane.showMessageDialog(frmCProjectTesting, 
+							"Export success: " + listTested.size(), "Message", 
+							JOptionPane.INFORMATION_MESSAGE);
+				} catch (IOException e1) {
+					JOptionPane.showMessageDialog(frmCProjectTesting, 
+							e1.getMessage(), "Error", 
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 		GridBagConstraints gbc_btnExport = new GridBagConstraints();
 		gbc_btnExport.insets = new Insets(0, 0, 0, 5);
 		gbc_btnExport.fill = GridBagConstraints.HORIZONTAL;

@@ -38,6 +38,8 @@ public class Config {
 	public static File DIR_GCC = new File(
 			"C:/Program Files (x86)/Dev-Cpp/MinGW64/bin");
 	
+	public static File DIR_EXPORT = new File("local/export").getAbsoluteFile();
+	
 	/**
 	 * Số lượng lần lặp tối đa khi kiểm thử một vòng lặp
 	 */
@@ -77,6 +79,7 @@ public class Config {
 	
 	private static void setupInit(){
 		DIR_TEMP.mkdirs();
+		DIR_EXPORT.mkdirs();
 	}
 
 /*---------------------------NON-SETTING-------------------------------*/
