@@ -27,10 +27,12 @@ import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.UIManager;
 import javax.swing.filechooser.FileFilter;
 
 import core.BaseProject;
 import core.Config;
+import core.Utils;
 import graph.swing.SelectList;
 import java.awt.Font;
 import javax.swing.JCheckBox;
@@ -47,12 +49,17 @@ public class SettingDialog extends JDialog {
 	private JSpinner entry_cfg_mgx;
 	private JSpinner entry_cfg_mgy;
 	private JCheckBox entry_cfg_details;
+	private JLabel r_entry_temp_dir;
+	private JCheckBox entry_cfg_node_hightlight;
 	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
 		try {
+			UIManager.setLookAndFeel(
+					 "javax.swing.plaf.nimbus.NimbusLookAndFeel");
+			
 			SettingDialog dialog = new SettingDialog(null);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
@@ -75,6 +82,11 @@ public class SettingDialog extends JDialog {
 		entry_cfg_mgx.setValue(Config.CFG_MARGIN_X);
 		entry_cfg_mgy.setValue(Config.CFG_MARGIN_Y);
 		entry_cfg_details.setSelected(Config.SHOW_CFG_DETAILS);
+		entry_cfg_node_hightlight.setSelected(Config.SHOW_CFG_STATEMENT_POS);
+		
+		//ready only view
+		r_entry_temp_dir.setText(Config.DIR_TEMP.getAbsolutePath());
+		r_entry_temp_dir.setToolTipText(Config.DIR_TEMP.getAbsolutePath());
 	}
 	
 	private void validateSettings() throws Exception {
@@ -100,6 +112,7 @@ public class SettingDialog extends JDialog {
 		Config.CFG_MARGIN_X = (int) entry_cfg_mgx.getValue();
 		Config.CFG_MARGIN_Y = (int) entry_cfg_mgy.getValue();
 		Config.SHOW_CFG_DETAILS = entry_cfg_details.isSelected();
+		Config.SHOW_CFG_STATEMENT_POS = entry_cfg_node_hightlight.isSelected();
 		
 		Config.save();
 	}
@@ -125,18 +138,60 @@ public class SettingDialog extends JDialog {
 				panel.setBackground(Color.WHITE);
 				scrollPane.setViewportView(panel);
 				GridBagLayout gbl_panel = new GridBagLayout();
-				gbl_panel.columnWidths = new int[]{30, 123, 0, 30, 0};
-				gbl_panel.rowHeights = new int[]{30, 30, 0};
-				gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-				gbl_panel.rowWeights = new double[]{0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.columnWidths = new int[]{30, 123, 0, 0, 30, 0};
+				gbl_panel.rowHeights = new int[]{30, 30, 30, 0};
+				gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 				panel.setLayout(gbl_panel);
+				{
+					JLabel lblTemporaryFolder = new JLabel("Temporary folder");
+					GridBagConstraints gbc_lblTemporaryFolder = new GridBagConstraints();
+					gbc_lblTemporaryFolder.anchor = GridBagConstraints.WEST;
+					gbc_lblTemporaryFolder.insets = new Insets(0, 0, 5, 5);
+					gbc_lblTemporaryFolder.gridx = 1;
+					gbc_lblTemporaryFolder.gridy = 1;
+					panel.add(lblTemporaryFolder, gbc_lblTemporaryFolder);
+				}
+				{
+					r_entry_temp_dir = new JLabel("");
+					r_entry_temp_dir.setOpaque(true);
+					r_entry_temp_dir.setPreferredSize(new Dimension(0, 0));
+					GridBagConstraints gbc_entry_temp_dir = new GridBagConstraints();
+					gbc_entry_temp_dir.fill = GridBagConstraints.BOTH;
+					gbc_entry_temp_dir.insets = new Insets(0, 0, 5, 5);
+					gbc_entry_temp_dir.gridx = 2;
+					gbc_entry_temp_dir.gridy = 1;
+					panel.add(r_entry_temp_dir, gbc_entry_temp_dir);
+				}
+				{
+					JButton btnDelete = new JButton("Delete ("
+							+ Utils.getSizeDesc(Utils.getFileSize(
+									Config.DIR_TEMP)) + ")");
+					btnDelete.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							int confirm = JOptionPane.showConfirmDialog(SettingDialog.this, 
+									"Are you sure want to delete all file(s) in this folder?", "Confirm empty folder",
+									JOptionPane.OK_CANCEL_OPTION);
+							
+							if (confirm == JOptionPane.OK_OPTION){
+								Utils.deleteFile(Config.DIR_TEMP, false);
+								btnDelete.setText("Delete (0 B)");
+							}
+						}
+					});
+					GridBagConstraints gbc_btnDelete = new GridBagConstraints();
+					gbc_btnDelete.insets = new Insets(0, 0, 5, 5);
+					gbc_btnDelete.gridx = 3;
+					gbc_btnDelete.gridy = 1;
+					panel.add(btnDelete, gbc_btnDelete);
+				}
 				{
 					JLabel lblMaxLoop = new JLabel("Max loop");
 					GridBagConstraints gbc_lblMaxLoop = new GridBagConstraints();
 					gbc_lblMaxLoop.anchor = GridBagConstraints.WEST;
 					gbc_lblMaxLoop.insets = new Insets(0, 0, 0, 5);
 					gbc_lblMaxLoop.gridx = 1;
-					gbc_lblMaxLoop.gridy = 1;
+					gbc_lblMaxLoop.gridy = 2;
 					panel.add(lblMaxLoop, gbc_lblMaxLoop);
 				}
 				{
@@ -149,7 +204,7 @@ public class SettingDialog extends JDialog {
 					gbc_entry_max_loop.anchor = GridBagConstraints.WEST;
 					gbc_entry_max_loop.insets = new Insets(0, 0, 0, 5);
 					gbc_entry_max_loop.gridx = 2;
-					gbc_entry_max_loop.gridy = 1;
+					gbc_entry_max_loop.gridy = 2;
 					panel.add(entry_max_loop, gbc_entry_max_loop);
 				}
 			}
@@ -347,10 +402,10 @@ public class SettingDialog extends JDialog {
 				panel.setBackground(Color.WHITE);
 				scrollPane.setViewportView(panel);
 				GridBagLayout gbl_panel = new GridBagLayout();
-				gbl_panel.columnWidths = new int[]{30, 130, 0, 30, 0};
-				gbl_panel.rowHeights = new int[]{30, 30, 30, 30, 30, 30, 0};
+				gbl_panel.columnWidths = new int[]{30, 150, 0, 30, 0};
+				gbl_panel.rowHeights = new int[]{30, 30, 30, 30, 30, 30, 30, 0};
 				gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
-				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 				panel.setLayout(gbl_panel);
 				{
 					JLabel lblCfgDisplay = new JLabel("CFG Display");
@@ -417,6 +472,24 @@ public class SettingDialog extends JDialog {
 					gbc_entry_cfg_details.gridx = 2;
 					gbc_entry_cfg_details.gridy = 4;
 					panel.add(entry_cfg_details, gbc_entry_cfg_details);
+				}
+				{
+					JLabel lblShowHightlightPosition = new JLabel("Show hightlight position");
+					GridBagConstraints gbc_lblShowHightlightPosition = new GridBagConstraints();
+					gbc_lblShowHightlightPosition.anchor = GridBagConstraints.WEST;
+					gbc_lblShowHightlightPosition.insets = new Insets(0, 0, 5, 5);
+					gbc_lblShowHightlightPosition.gridx = 1;
+					gbc_lblShowHightlightPosition.gridy = 5;
+					panel.add(lblShowHightlightPosition, gbc_lblShowHightlightPosition);
+				}
+				{
+					entry_cfg_node_hightlight = new JCheckBox("");
+					GridBagConstraints gbc_entry_cfg_node_hightlight = new GridBagConstraints();
+					gbc_entry_cfg_node_hightlight.anchor = GridBagConstraints.WEST;
+					gbc_entry_cfg_node_hightlight.insets = new Insets(0, 0, 5, 5);
+					gbc_entry_cfg_node_hightlight.gridx = 2;
+					gbc_entry_cfg_node_hightlight.gridy = 5;
+					panel.add(entry_cfg_node_hightlight, gbc_entry_cfg_node_hightlight);
 				}
 			}
 		}

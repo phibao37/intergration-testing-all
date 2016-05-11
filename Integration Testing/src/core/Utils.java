@@ -241,18 +241,31 @@ public class Utils {
 		return size;
 	}
 	
+	public static String getSizeDesc(long size){
+		String[] units = {"B", "KB", "MB", "GB", "TB"};
+		int i = 0;
+		
+		while (size >= 1024 && i + 1 < units.length){
+			size /= 1024;
+			i++;
+		}
+		
+		return size + " " + units[i];
+	}
+	
 	/**
 	 * Xóa một tập tin hoặc một thư mục
 	 */
-	public static void deleteFile(File file){
+	public static void deleteFile(File file, boolean itself){
 		if (file.isDirectory()){
 			File[] childs = file.listFiles();
 			assert childs != null;
 			for (File child: childs)
-				deleteFile(child);
+				deleteFile(child, true);
 		}
 		
-		file.delete();
+		if (itself)
+			file.delete();
 	}
 	
 	/**
