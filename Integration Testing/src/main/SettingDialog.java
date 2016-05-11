@@ -19,6 +19,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JScrollPane;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -33,9 +34,11 @@ import javax.swing.filechooser.FileFilter;
 import core.BaseProject;
 import core.Config;
 import core.Utils;
+import graph.swing.LightButtonGroup;
 import graph.swing.SelectList;
 import java.awt.Font;
 import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 
 public class SettingDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
@@ -51,6 +54,8 @@ public class SettingDialog extends JDialog {
 	private JCheckBox entry_cfg_details;
 	private JLabel r_entry_temp_dir;
 	private JCheckBox entry_cfg_node_hightlight;
+	private JLabel r_entry_export_folder;
+	private LightButtonGroup entry_excel_format;
 	
 	/**
 	 * Launch the application.
@@ -83,10 +88,13 @@ public class SettingDialog extends JDialog {
 		entry_cfg_mgy.setValue(Config.CFG_MARGIN_Y);
 		entry_cfg_details.setSelected(Config.SHOW_CFG_DETAILS);
 		entry_cfg_node_hightlight.setSelected(Config.SHOW_CFG_STATEMENT_POS);
+		entry_excel_format.setSelectedButton(Config.EXPORT_FORMAT);
 		
 		//ready only view
 		r_entry_temp_dir.setText(Config.DIR_TEMP.getAbsolutePath());
 		r_entry_temp_dir.setToolTipText(Config.DIR_TEMP.getAbsolutePath());
+		r_entry_export_folder.setText(Config.DIR_EXPORT.getAbsolutePath());
+		r_entry_export_folder.setToolTipText(Config.DIR_EXPORT.getAbsolutePath());
 	}
 	
 	private void validateSettings() throws Exception {
@@ -114,6 +122,7 @@ public class SettingDialog extends JDialog {
 		Config.SHOW_CFG_DETAILS = entry_cfg_details.isSelected();
 		Config.SHOW_CFG_STATEMENT_POS = entry_cfg_node_hightlight.isSelected();
 		
+		Config.EXPORT_FORMAT = entry_excel_format.getSelectedAction();
 		Config.save();
 	}
 
@@ -390,6 +399,100 @@ public class SettingDialog extends JDialog {
 						JLabel label = new JLabel("]");
 						panel_1.add(label);
 					}
+				}
+			}
+		}
+		{
+			JScrollPane scrollPane = new JScrollPane();
+			scrollPane.setBorder(null);
+			tabPanel.addTab("Export", null, scrollPane, null);
+			{
+				entry_excel_format = new LightButtonGroup();
+				
+				JPanel panel = new JPanel();
+				panel.setBackground(Color.WHITE);
+				scrollPane.setViewportView(panel);
+				GridBagLayout gbl_panel = new GridBagLayout();
+				gbl_panel.columnWidths = new int[]{30, 100, 0, 0, 30, 0};
+				gbl_panel.rowHeights = new int[]{30, 30, 30, 30, 30, 30, 0};
+				gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+				panel.setLayout(gbl_panel);
+				{
+					JLabel lblExportFolder = new JLabel("Export folder");
+					GridBagConstraints gbc_lblExportFolder = new GridBagConstraints();
+					gbc_lblExportFolder.anchor = GridBagConstraints.WEST;
+					gbc_lblExportFolder.insets = new Insets(0, 0, 5, 5);
+					gbc_lblExportFolder.gridx = 1;
+					gbc_lblExportFolder.gridy = 1;
+					panel.add(lblExportFolder, gbc_lblExportFolder);
+				}
+				{
+					r_entry_export_folder = new JLabel("");
+					r_entry_export_folder.setOpaque(true);
+					r_entry_export_folder.setPreferredSize(new Dimension());
+					GridBagConstraints gbc_r_entry_export_folder = new GridBagConstraints();
+					gbc_r_entry_export_folder.fill = GridBagConstraints.BOTH;
+					gbc_r_entry_export_folder.insets = new Insets(0, 0, 5, 5);
+					gbc_r_entry_export_folder.gridx = 2;
+					gbc_r_entry_export_folder.gridy = 1;
+					panel.add(r_entry_export_folder, gbc_r_entry_export_folder);
+				}
+				{
+					JButton btnOpen = new JButton("Open folder");
+					btnOpen.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							try{
+								Desktop.getDesktop().open(Config.DIR_EXPORT);
+							} catch (Exception ex) {}
+						}
+					});
+					GridBagConstraints gbc_btnOpen = new GridBagConstraints();
+					gbc_btnOpen.insets = new Insets(0, 0, 5, 5);
+					gbc_btnOpen.gridx = 3;
+					gbc_btnOpen.gridy = 1;
+					panel.add(btnOpen, gbc_btnOpen);
+				}
+				{
+					JLabel lblExcelExport = new JLabel("Excel export");
+					lblExcelExport.setFont(lblExcelExport.getFont().deriveFont(lblExcelExport.getFont().getStyle() | Font.BOLD));
+					GridBagConstraints gbc_lblExcelExport = new GridBagConstraints();
+					gbc_lblExcelExport.anchor = GridBagConstraints.SOUTHWEST;
+					gbc_lblExcelExport.insets = new Insets(0, 0, 5, 5);
+					gbc_lblExcelExport.gridx = 1;
+					gbc_lblExcelExport.gridy = 2;
+					panel.add(lblExcelExport, gbc_lblExcelExport);
+				}
+				{
+					JLabel lblFileFormat = new JLabel("File format");
+					GridBagConstraints gbc_lblFileFormat = new GridBagConstraints();
+					gbc_lblFileFormat.anchor = GridBagConstraints.WEST;
+					gbc_lblFileFormat.insets = new Insets(0, 0, 5, 5);
+					gbc_lblFileFormat.gridx = 1;
+					gbc_lblFileFormat.gridy = 3;
+					panel.add(lblFileFormat, gbc_lblFileFormat);
+				}
+				{
+					JRadioButton rdbtnXls = new JRadioButton("XLS (Excel Binary File)");
+					rdbtnXls.setActionCommand("xls");
+					GridBagConstraints gbc_rdbtnXls = new GridBagConstraints();
+					gbc_rdbtnXls.anchor = GridBagConstraints.WEST;
+					gbc_rdbtnXls.insets = new Insets(0, 0, 5, 5);
+					gbc_rdbtnXls.gridx = 2;
+					gbc_rdbtnXls.gridy = 3;
+					panel.add(rdbtnXls, gbc_rdbtnXls);
+					entry_excel_format.add(rdbtnXls);
+				}
+				{
+					JRadioButton rdbtnXlsx = new JRadioButton("XLSX (Open XML SpreadsheetML File)");
+					rdbtnXlsx.setActionCommand("xlsx");
+					GridBagConstraints gbc_rdbtnXlsx = new GridBagConstraints();
+					gbc_rdbtnXlsx.anchor = GridBagConstraints.WEST;
+					gbc_rdbtnXlsx.insets = new Insets(0, 0, 5, 5);
+					gbc_rdbtnXlsx.gridx = 2;
+					gbc_rdbtnXlsx.gridy = 4;
+					panel.add(rdbtnXlsx, gbc_rdbtnXlsx);
+					entry_excel_format.add(rdbtnXlsx);
 				}
 			}
 		}

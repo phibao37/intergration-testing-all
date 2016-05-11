@@ -75,6 +75,8 @@ public class Config {
 	 */
 	public static File PINNED_PROJECT = null;
 	
+	public static String EXPORT_FORMAT = "xlsx";
+	
 	/*---------------------------------------------------------------------*/
 	
 	private static void setupInit(){

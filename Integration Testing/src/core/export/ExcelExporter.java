@@ -7,13 +7,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import api.IProject;
@@ -27,7 +28,7 @@ import core.Config;
 public class ExcelExporter implements IExporter {
 
 	private IProject project;
-	private XSSFWorkbook workbook;
+	private Workbook workbook;
 	private File out;
 	
 	public ExcelExporter(IProject project) {
@@ -39,13 +40,22 @@ public class ExcelExporter implements IExporter {
 		return project;
 	}
 	
-	protected XSSFWorkbook getWorkbook(){
+	protected Workbook getWorkbook(){
 		if (workbook == null){
-			workbook = new XSSFWorkbook();
+			
+			switch (Config.EXPORT_FORMAT.toLowerCase()){
+			case "xls":
+				workbook = new HSSFWorkbook();
+				break;
+			case "xlsx":
+				workbook = new XSSFWorkbook();
+				break;
+			}
+			
 			String d = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss")
 					.format(new Date());
 			out = new File(Config.DIR_EXPORT, getProject().getRoot()
-					.getName() + "#" + d + ".xlsx");
+					.getName() + "#" + d + "." + Config.EXPORT_FORMAT);
 		}
 		return workbook;
 	}
@@ -62,7 +72,7 @@ public class ExcelExporter implements IExporter {
 					has(i, TOP), has(i, DOWN), true, true);
 		}
 		
-		XSSFSheet sheet = workbook.createSheet(tested.getSourceInfo()
+		Sheet sheet = workbook.createSheet(tested.getSourceInfo()
 				.getFile().getName() + "#" + tested.getName());
 		String[] COVER_NAMES = {"Statement coverage", "Branch coverage",
 				"Sub condition coverage", "All path", "Error path", "Loop path"};
@@ -73,8 +83,8 @@ public class ExcelExporter implements IExporter {
 		
 		for (int c = 0; c < COVER_NAMES.length; c++){
 			{
-				XSSFRow r = sheet.createRow(row);
-				XSSFCell cell = r.createCell(0);
+				Row r = sheet.createRow(row);
+				Cell cell = r.createCell(0);
 				cell.setCellValue(COVER_NAMES[c]);
 				cell.setCellStyle(_BOLD);
 				sheet.addMergedRegion(
@@ -99,7 +109,7 @@ public class ExcelExporter implements IExporter {
 					break;
 				}
 				
-				XSSFRow r = sheet.createRow(row);
+				Row r = sheet.createRow(row);
 				r.createCell(0).setCellValue(name);
 				sheet.addMergedRegion(
 						new CellRangeAddress(row, row, 0, 1));
@@ -109,9 +119,9 @@ public class ExcelExporter implements IExporter {
 			}
 			
 			{
-				XSSFRow r = sheet.createRow(row++);
+				Row r = sheet.createRow(row++);
 				for (int i = 0; i < colsName.length; i++){
-					XSSFCell cell = r.createCell(i);
+					Cell cell = r.createCell(i);
 					cell.setCellValue(colsName[i]);
 					cell.setCellStyle(STYLE[BOLD|TOP|DOWN]);
 				}
@@ -120,7 +130,7 @@ public class ExcelExporter implements IExporter {
 			List<ITestpath> paths = result.getTestpaths(c);
 			int i = 0;
 			for (ITestpath tp: paths){
-				XSSFRow r = sheet.createRow(row++);
+				Row r = sheet.createRow(row++);
 				ISolution sln = tp.getSolution();
 				
 				r.createCell(0).setCellValue(++i);
@@ -159,11 +169,11 @@ public class ExcelExporter implements IExporter {
 	
 	protected CellStyle createStyle(boolean bold, boolean top, boolean bottom,
 			boolean left, boolean right){
-		XSSFCellStyle style = getWorkbook().createCellStyle();
+		CellStyle style = getWorkbook().createCellStyle();
 		
 		if (bold){
-			XSSFFont f = workbook.createFont();
-			f.setBoldweight(XSSFFont.BOLDWEIGHT_BOLD);
+			Font f = workbook.createFont();
+			f.setBoldweight(Font.BOLDWEIGHT_BOLD);
 			f.setBold(true);
 			style.setFont(f);
 		}
