@@ -4,17 +4,17 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.core.resources_3.10.1.v20150725-1910.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.equinox.common_3.7.0.v20150402-1709.jar"/>
-	<classpathentry kind="lib" path="lib/org.eclipse.cdt.core_5.11.0.201602051005.jar" sourcepath="E:/Store/Source/cdt-8.8.1/plugins/org.eclipse.cdt.core.source_5.11.0.201602051005.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.cdt.core_5.11.0.201602051005.jar" sourcepath="lib-src/org.eclipse.cdt.core.source_5.11.0.201602051005.jar"/>
 	<classpathentry kind="lib" path="lib/poi/poi-ooxml-3.14-20160307.jar"/>
-	<classpathentry kind="lib" path="lib/poi/poi-3.14-20160307.jar"/>
+	<classpathentry kind="lib" path="lib/poi/poi-3.14-20160307.jar" sourcepath="lib-src/poi-src-3.14"/>
 	<classpathentry kind="lib" path="lib/poi/xmlbeans-2.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/poi/poi-ooxml-schemas-3.14-20160307.jar"/>
-	<classpathentry kind="lib" path="lib/jdt/org.eclipse.jdt.core_3.10.2.v20150120-1634.jar"/>
-	<classpathentry kind="lib" path="lib/jdt/org.eclipse.core.jobs_3.6.1.v20141014-1248.jar"/>
 	<classpathentry kind="lib" path="lib/jdt/org.eclipse.core.runtime_3.11.1.v20150903-1804.jar"/>
-	<classpathentry kind="lib" path="lib/jdt/org.eclipse.osgi_3.10.2.v20150203-1939.jar"/>
-	<classpathentry kind="lib" path="lib/jdt/org.eclipse.core.contenttype_3.4.200.v20140207-1251.jar"/>
-	<classpathentry kind="lib" path="lib/jdt/org.eclipse.equinox.preferences_3.5.200.v20140224-1527.jar"/>
+	<classpathentry kind="lib" path="lib/jdt/org.eclipse.core.contenttype_3.5.0.v20150421-2214.jar"/>
+	<classpathentry kind="lib" path="lib/jdt/org.eclipse.core.jobs_3.7.0.v20150330-2103.jar"/>
+	<classpathentry kind="lib" path="lib/jdt/org.eclipse.equinox.preferences_3.5.300.v20150408-1437.jar"/>
+	<classpathentry kind="lib" path="lib/jdt/org.eclipse.jdt.core_3.11.2.v20160128-0629.jar" sourcepath="lib-src/org.eclipse.jdt.core.source_3.11.2.v20160128-0629.jar"/>
+	<classpathentry kind="lib" path="lib/jdt/org.eclipse.osgi_3.10.102.v20160118-1700.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
