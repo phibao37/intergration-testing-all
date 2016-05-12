@@ -234,7 +234,8 @@ public abstract class BaseProject implements IProject {
 		return list_solver;
 	}
 	
-	protected ISolution solveConstraintByList(IPathConstraints cnt){
+	protected ISolution solveConstraintByList(IPathConstraints cnt)
+			throws InterruptedException{
 		Exception e = null;
 		
 		for (ISolver solver: getListSolver()){
@@ -243,7 +244,13 @@ public abstract class BaseProject implements IProject {
 				
 				if (r.getCode() != ISolution.UNKNOWN)
 					return r;
-			} catch (Exception ex){
+			} 
+			
+			catch (InterruptedException ex){
+				throw ex;
+			}
+			
+			catch (Exception ex){
 				e = ex;
 			}
 		}

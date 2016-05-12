@@ -15,21 +15,20 @@ import api.graph.IFileInfo;
 import api.graph.IProjectNode;
 import api.models.ITestpath;
 import api.parser.IExporter;
+import api.solver.ISolution;
 import api.models.ICFG;
 import api.models.IFunction;
 import api.models.IFunctionTestResult;
-import api.solver.ISolution;
 import core.Config;
+import core.RunProcess;
 import core.Utils;
 import core.export.ExcelExporter;
-import core.process.ProcessManager;
-import core.process.TestProcess;
 import graph.node.CFGNode;
 import graph.swing.CFGView;
 import graph.swing.FileView;
 import graph.swing.LightTabbedPane;
+import graph.swing.ProcessView;
 import graph.swing.ProjectExplorer;
-import graph.swing.tablelayout.TableLayout;
 import jdt.JProject;
 import jdt.models.JProjectNode;
 
@@ -56,7 +55,6 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
@@ -84,9 +82,7 @@ public class GUIMain4Java {
 	private IProject currentProject;
 	private IFunction currentFunction;
 	private IExporter currentExport;
-	private ProcessManager processMgr; 
-	private TableLayout layout_process_mgr;
-	private Hashtable<IFunction, TableLayout.TableRow> mapProcess;
+	private ProcessView<IFunction> process_view;
 	private SettingDialog settingDialog;
 	
 	private JFrame frmCProjectTesting;
@@ -123,14 +119,49 @@ public class GUIMain4Java {
 		if (example.exists()){
 			chooserProject.setSelectedFile(example.getAbsoluteFile());
 		}
-		
-		processMgr = new ProcessManager();
-		mapProcess = new Hashtable<>();
-		
+
 		if (Config.PINNED_PROJECT != null){
 			toggle_pin.setSelected(true);
 			openProject(Config.PINNED_PROJECT);
 		}
+		
+		process_view.setStateChanged((p, fn, s, title, status, action)->{
+			if (fn.isTesting()){
+				String name = Utils.relative(fn.getSourceInfo().getFile(), 
+						currentProject.getRoot())
+						+ "::" + fn.getName();
+				title.setText(name);
+				
+				status.setIcon(ICON_LOADING);
+				
+				action.setIcon(ICON_CLOSE);
+				action.setToolTipText("Stop test");
+				removeActionListener(action);
+				action.addActionListener(e -> {
+					p.interrupt();
+				});
+			}
+			
+			else if (fn.getStatus() == IFunction.TESTED){
+				status.setIcon(ICON_COMPLETE);
+				
+				action.setIcon(ICON_DETAILS);
+				action.setToolTipText("View details");
+				removeActionListener(action);
+				action.addActionListener(e -> openFunctionDetails(fn));
+			}
+			
+			else if (fn.getStatus() == IFunction.LOADED){
+				status.setIcon(null);
+				
+				action.setIcon(ICON_TEST);
+				action.setToolTipText("Start test");
+				removeActionListener(action);
+				action.addActionListener(e -> {
+					testFunction(fn);
+				});
+			}
+		});
 	}
 	
 	CFGView openCFGView(IFunction fn, int cover){
@@ -206,8 +237,7 @@ public class GUIMain4Java {
 		//Clear process manager
 		tab_source_view.closeAllTab();
 		((DefaultTableModel) table_simple_result.getModel()).setRowCount(0);
-		layout_process_mgr.clearRows();
-		mapProcess.clear();
+		process_view.removeAll();
 	}
 	
 	FileView openSourceView(File file){
@@ -233,40 +263,6 @@ public class GUIMain4Java {
 			btn.removeActionListener(a);
 	}
 	
-	void updateProcessView(IFunction fn, JLabel status, JButton action, 
-			TestProcess p){
-		if (fn.isTesting()){
-			status.setIcon(ICON_LOADING);
-			action.setIcon(ICON_CLOSE);
-			action.setToolTipText("Stop test");
-			
-			removeActionListener(action);
-			action.addActionListener(e -> {
-				processMgr.stopTest(p);
-			});
-		}
-		
-		else if (fn.getStatus() == IFunction.TESTED){
-			status.setIcon(ICON_COMPLETE);
-			action.setIcon(ICON_DETAILS);
-			action.setToolTipText("View details");
-			
-			removeActionListener(action);
-			action.addActionListener(e -> openFunctionDetails(fn));
-		}
-		
-		else if (fn.getStatus() == IFunction.LOADED){
-			status.setIcon(null);
-			action.setIcon(ICON_TEST);
-			action.setToolTipText("Start test");
-			
-			removeActionListener(action);
-			action.addActionListener(e -> {
-				testFunction(fn);
-			});
-		}
-	}
-	
 	void hightLightTestpath(ITestpath tp){
 		if (currentFunction == null) return;
 		CFGView cv = openCFGView(currentFunction, ICFG.COVER_BRANCH);
@@ -277,85 +273,49 @@ public class GUIMain4Java {
 		if (fn.isTesting() || 
 				fn.getStatus() == IFunction.UNSUPPORT)
 			return;
-		
-		TestProcess p = new TestProcess() {	
-	private TableLayout.TableRow row;
-		
-	@Override
-	public void testStart() {
-		lblFunctionName.setText(Utils.html(fn.getHTML()));
-		tab_source_view.setSelectedIndex(0);
-		fn.setTesting(true);
-		row = mapProcess.get(fn);
-		
-		JLabel status = null;
-		JButton action = null;
-		
-		if (row == null){
-			action = new JButton();
-			action.setBorder(null);
-			action.setContentAreaFilled(false);
-			status = new JLabel();
+		process_view.addAndRun(new RunProcess<IFunction>(fn) {
 			
-			String name = Utils.relative(fn.getSourceInfo().getFile(), 
-					currentProject.getRoot())
-					+ "::" + fn.getName();
-			
-			updateProcessView(fn, status, action, this);
-			row = layout_process_mgr.insertRow(0, 40, true, "c c l c c c l c",
-					null, new JLabel(name), status, action);
-			mapProcess.put(fn, row);
-		} else {
-			status = (JLabel) row.getComponent(2);
-			action = (JButton) row.getComponent(3);
-			updateProcessView(fn, status, action, this);
-		}
-		
-	}
+			@Override
+			public void runStart() {
+				lblFunctionName.setText(Utils.html(fn.getHTML()));
+				tab_source_view.setSelectedIndex(0);
+				fn.setTesting(true);
+			}
 
-	@Override
-	public void test() throws InterruptedException {
-		//Thread.sleep(5000);
-		
-		IFunctionTestResult r = currentProject.testFunction(fn);
-		ArrayList<ITestpath> show = new ArrayList<>();
-		DefaultTableModel model = (DefaultTableModel) table_simple_result.getModel();
-		
-		show.addAll(r.getTestpaths(IFunctionTestResult.BRANCH));
-		show.addAll(r.getTestpaths(IFunctionTestResult.ERROR));
-		
-		checkStop();
-		model.setRowCount(0);
-		for (int i = 0; i < show.size(); i++){
-			ITestpath path = show.get(i);
-			ISolution sr = path.getSolution();
+			@Override
+			public void onRun() throws InterruptedException {
+				IFunctionTestResult r = currentProject.testFunction(fn);
+				ArrayList<ITestpath> show = new ArrayList<>();
+				DefaultTableModel model = (DefaultTableModel) table_simple_result.getModel();
+				
+				show.addAll(r.getTestpaths(IFunctionTestResult.BRANCH));
+				show.addAll(r.getTestpaths(IFunctionTestResult.ERROR));
+				
+				checkStop();
+				model.setRowCount(0);
+				for (int i = 0; i < show.size(); i++){
+					ITestpath path = show.get(i);
+					ISolution sr = path.getSolution();
+					
+					model.addRow(new Object[]{
+						i+1,
+						path,
+						sr.getMessage(),
+						sr.getReturnValue()
+					});
+				}
+				model.addRow(new Object[]{});
+				currentFunction = fn;
+			}
+
+			@Override
+			public void runEnd(boolean finish, Exception e) {
+				fn.setTesting(false);
+				if (finish)
+					fn.setStatus(IFunction.TESTED);
+			}
 			
-			model.addRow(new Object[]{
-				i+1,
-				path,
-				sr.getMessage(),
-				sr.getReturnValue()
-			});
-		}
-		model.addRow(new Object[]{});
-		currentFunction = fn;
-	}
-			
-	@Override
-	public void testEnd(boolean finish) {
-		fn.setTesting(false);
-		if (finish)
-			fn.setStatus(IFunction.TESTED);
-		
-		JLabel status = (JLabel) row.getComponent(2);
-		JButton action = (JButton) row.getComponent(3);
-		
-		updateProcessView(fn, status, action, this);
-	}
-			
-		};
-		processMgr.runTest(p);
-		
+		});
 	}
 	
 	/**
@@ -541,15 +501,9 @@ public class GUIMain4Java {
 		scrollPane.setBorder(null);
 		tab_source_view.addTab("Process Manager", null, scrollPane, null);
 		
-		JPanel panel_5 = new JPanel();
-		panel_5.setBackground(Color.WHITE);
-		
-		layout_process_mgr = new TableLayout(panel_5, new double[][]{
-			{10, TableLayout.FILL, 40, 40, 10}, {}
-		});
-		panel_5.setLayout(layout_process_mgr);
-		
-		scrollPane.setViewportView(panel_5);
+		process_view = new ProcessView<>();
+		process_view.setBackground(Color.WHITE);
+		scrollPane.setViewportView(process_view);
 		splitPane_2.setDividerLocation(370);
 		splitPane_1.setDividerLocation(500);
 		splitPane.setDividerLocation(300);

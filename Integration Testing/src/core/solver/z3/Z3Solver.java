@@ -42,7 +42,8 @@ public class Z3Solver implements ISolver {
 	private boolean mSolveOk;
 	
 	@Override
-	public ISolution solveConstraint(IPathConstraints constraint) {
+	public ISolution solveConstraint(IPathConstraints constraint) 
+			throws InterruptedException {
 		IVariable[] solution = null;
 		int code = ISolution.UNKNOWN;
 		String message = RESULT_UNKNOWN;

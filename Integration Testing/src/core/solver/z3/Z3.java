@@ -207,8 +207,9 @@ public class Z3 {
 	 * thông qua {@link #getLine()} hoặc {@link #getLines()}
 	 * @return đối tượng hiện thời (this)
 	 * @throws IOException thư mục Z3 không tồn tại
+	 * @throws InterruptedException 
 	 */
-	public Z3 execute() throws IOException{
+	public Z3 execute() throws IOException, InterruptedException{
 		try{
 			File BIN_DIR = Config.DIR_Z3_BIN;
 			if (!BIN_DIR.isDirectory())
@@ -254,7 +255,7 @@ public class Z3 {
 			while ((line = in.readLine()) != null) 
 				outBlock.add(line);
 			
-		} catch (IOException | InterruptedException e){
+		} catch (IOException e){
 			e.printStackTrace();
 		}
 		return this;
