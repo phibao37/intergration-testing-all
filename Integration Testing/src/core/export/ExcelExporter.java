@@ -72,8 +72,13 @@ public class ExcelExporter implements IExporter {
 					has(i, TOP), has(i, DOWN), true, true);
 		}
 		
-		Sheet sheet = workbook.createSheet(tested.getSourceInfo()
-				.getFile().getName() + "#" + tested.getName());
+		String sheet_name = tested.getSourceInfo()
+				.getFile().getName() + "#" + tested.getName();
+		Sheet sheet = workbook.getSheet(sheet_name);
+		
+		if (sheet != null)
+			workbook.removeSheetAt(workbook.getSheetIndex(sheet));
+		sheet = workbook.createSheet(sheet_name);
 		String[] COVER_NAMES = {"Statement coverage", "Branch coverage",
 				"Sub condition coverage", "All path", "Error path", "Loop path"};
 		String[] colsName = {"Id", "Testpath", "Argument", "Return", "Expected", 
