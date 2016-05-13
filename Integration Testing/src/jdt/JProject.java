@@ -12,7 +12,7 @@ public class JProject extends BaseProject {
 	}
 
 	@Override
-	protected void loadProject() {
+	public void loadProject() {
 
 		for (BasicType type: BasicType.LIST_BASIC_TYPE)
 			addLoadedType(type);

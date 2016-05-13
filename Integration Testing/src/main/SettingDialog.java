@@ -56,6 +56,7 @@ public class SettingDialog extends JDialog {
 	private JCheckBox entry_cfg_node_hightlight;
 	private JLabel r_entry_export_folder;
 	private LightButtonGroup entry_excel_format;
+	private LightButtonGroup entry_project_type;
 	
 	/**
 	 * Launch the application.
@@ -89,6 +90,7 @@ public class SettingDialog extends JDialog {
 		entry_cfg_details.setSelected(Config.SHOW_CFG_DETAILS);
 		entry_cfg_node_hightlight.setSelected(Config.SHOW_CFG_STATEMENT_POS);
 		entry_excel_format.setSelectedButton(Config.EXPORT_FORMAT);
+		entry_project_type.setSelectedButton(String.valueOf(Config.PROJECT_TYPE));
 		
 		//ready only view
 		r_entry_temp_dir.setText(Config.DIR_TEMP.getAbsolutePath());
@@ -123,6 +125,7 @@ public class SettingDialog extends JDialog {
 		Config.SHOW_CFG_STATEMENT_POS = entry_cfg_node_hightlight.isSelected();
 		
 		Config.EXPORT_FORMAT = entry_excel_format.getSelectedAction();
+		Config.PROJECT_TYPE = Integer.valueOf(entry_project_type.getSelectedAction());
 		Config.save();
 	}
 
@@ -143,22 +146,59 @@ public class SettingDialog extends JDialog {
 			scrollPane.setBorder(null);
 			tabPanel.addTab("General", null, scrollPane, null);
 			{
+				entry_project_type = new LightButtonGroup();
+				
 				JPanel panel = new JPanel();
 				panel.setBackground(Color.WHITE);
 				scrollPane.setViewportView(panel);
 				GridBagLayout gbl_panel = new GridBagLayout();
-				gbl_panel.columnWidths = new int[]{30, 123, 0, 0, 30, 0};
-				gbl_panel.rowHeights = new int[]{30, 30, 30, 0};
-				gbl_panel.columnWeights = new double[]{0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
-				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.columnWidths = new int[]{30, 123, 0, 0, 0, 30, 0};
+				gbl_panel.rowHeights = new int[]{30, 40, 30, 30, 0};
+				gbl_panel.columnWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+				gbl_panel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 				panel.setLayout(gbl_panel);
+				{
+					JLabel lblProjectType = new JLabel("Project type");
+					GridBagConstraints gbc_lblProjectType = new GridBagConstraints();
+					gbc_lblProjectType.anchor = GridBagConstraints.WEST;
+					gbc_lblProjectType.insets = new Insets(0, 0, 5, 5);
+					gbc_lblProjectType.gridx = 1;
+					gbc_lblProjectType.gridy = 1;
+					panel.add(lblProjectType, gbc_lblProjectType);
+				}
+				{
+					JRadioButton radioButton = new JRadioButton(Utils.html("<img src='" + 
+							SettingDialog.class.getResource("/image/c_cpp.png") + "'>"));
+					radioButton.setToolTipText("C/C++ project");
+					radioButton.setActionCommand(String.valueOf(Config.SUPPORT_C_CPP));
+					GridBagConstraints gbc_radioButton = new GridBagConstraints();
+					gbc_radioButton.anchor = GridBagConstraints.WEST;
+					gbc_radioButton.insets = new Insets(0, 0, 5, 20);
+					gbc_radioButton.gridx = 2;
+					gbc_radioButton.gridy = 1;
+					panel.add(radioButton, gbc_radioButton);
+					entry_project_type.add(radioButton);
+				}
+				{
+					JRadioButton radioButton = new JRadioButton(Utils.html("<img src='" + 
+							SettingDialog.class.getResource("/image/java.png") + "'>"));
+					radioButton.setToolTipText("Java project");
+					radioButton.setActionCommand(String.valueOf(Config.SUPPORT_JAVA));
+					GridBagConstraints gbc_radioButton = new GridBagConstraints();
+					gbc_radioButton.anchor = GridBagConstraints.WEST;
+					gbc_radioButton.insets = new Insets(0, 0, 5, 5);
+					gbc_radioButton.gridx = 3;
+					gbc_radioButton.gridy = 1;
+					panel.add(radioButton, gbc_radioButton);
+					entry_project_type.add(radioButton);
+				}
 				{
 					JLabel lblTemporaryFolder = new JLabel("Temporary folder");
 					GridBagConstraints gbc_lblTemporaryFolder = new GridBagConstraints();
 					gbc_lblTemporaryFolder.anchor = GridBagConstraints.WEST;
 					gbc_lblTemporaryFolder.insets = new Insets(0, 0, 5, 5);
 					gbc_lblTemporaryFolder.gridx = 1;
-					gbc_lblTemporaryFolder.gridy = 1;
+					gbc_lblTemporaryFolder.gridy = 2;
 					panel.add(lblTemporaryFolder, gbc_lblTemporaryFolder);
 				}
 				{
@@ -166,10 +206,11 @@ public class SettingDialog extends JDialog {
 					r_entry_temp_dir.setOpaque(true);
 					r_entry_temp_dir.setPreferredSize(new Dimension(0, 0));
 					GridBagConstraints gbc_entry_temp_dir = new GridBagConstraints();
+					gbc_entry_temp_dir.gridwidth = 2;
 					gbc_entry_temp_dir.fill = GridBagConstraints.BOTH;
 					gbc_entry_temp_dir.insets = new Insets(0, 0, 5, 5);
 					gbc_entry_temp_dir.gridx = 2;
-					gbc_entry_temp_dir.gridy = 1;
+					gbc_entry_temp_dir.gridy = 2;
 					panel.add(r_entry_temp_dir, gbc_entry_temp_dir);
 				}
 				{
@@ -190,8 +231,8 @@ public class SettingDialog extends JDialog {
 					});
 					GridBagConstraints gbc_btnDelete = new GridBagConstraints();
 					gbc_btnDelete.insets = new Insets(0, 0, 5, 5);
-					gbc_btnDelete.gridx = 3;
-					gbc_btnDelete.gridy = 1;
+					gbc_btnDelete.gridx = 4;
+					gbc_btnDelete.gridy = 2;
 					panel.add(btnDelete, gbc_btnDelete);
 				}
 				{
@@ -200,7 +241,7 @@ public class SettingDialog extends JDialog {
 					gbc_lblMaxLoop.anchor = GridBagConstraints.WEST;
 					gbc_lblMaxLoop.insets = new Insets(0, 0, 0, 5);
 					gbc_lblMaxLoop.gridx = 1;
-					gbc_lblMaxLoop.gridy = 2;
+					gbc_lblMaxLoop.gridy = 3;
 					panel.add(lblMaxLoop, gbc_lblMaxLoop);
 				}
 				{
@@ -210,10 +251,11 @@ public class SettingDialog extends JDialog {
 					resizeComponentWidth(entry_max_loop, 50);
 					
 					GridBagConstraints gbc_entry_max_loop = new GridBagConstraints();
+					gbc_entry_max_loop.gridwidth = 2;
 					gbc_entry_max_loop.anchor = GridBagConstraints.WEST;
 					gbc_entry_max_loop.insets = new Insets(0, 0, 0, 5);
 					gbc_entry_max_loop.gridx = 2;
-					gbc_entry_max_loop.gridy = 2;
+					gbc_entry_max_loop.gridy = 3;
 					panel.add(entry_max_loop, gbc_entry_max_loop);
 				}
 			}

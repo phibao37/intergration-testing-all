@@ -13,6 +13,7 @@ import core.solver.SymbolicExecutor;
 import core.solver.random.RandomSolver;
 import core.solver.z3.Z3Solver;
 import api.IProject;
+import api.IRunProcess;
 import api.graph.IProjectNode;
 import api.models.ITestpath;
 import api.models.ICFG;
@@ -33,6 +34,7 @@ public abstract class BaseProject implements IProject {
 	private List<IType> listType;
 	private Map<File, IProjectNode> mapProjectNode;
 	private File root;
+	private String status;
 
 	protected BaseProject(File root){
 		listFunction = new ArrayList<>();
@@ -40,8 +42,6 @@ public abstract class BaseProject implements IProject {
 		listType = new ArrayList<>();
 		mapProjectNode = new HashMap<>();
 		this.root = root;
-		
-		loadProject();
 	}
 	
 	@Override
@@ -49,7 +49,7 @@ public abstract class BaseProject implements IProject {
 		return root;
 	}
 
-	protected void loadProject() {
+	public void loadProject() {
 		
 		//Lọc các hàm từ các tập tin mã nguồn
 		parseEachSource(root);
@@ -61,6 +61,8 @@ public abstract class BaseProject implements IProject {
 			if (f.isDirectory())
 				parseEachSource(f);
 			else if (accept(f)) {
+				setStatus(f.getName());
+				getProcess().stateChange(IRunProcess.UPDATE);
 				getProjectParser().parseSource(f, this);
 			}
 		}
@@ -260,4 +262,27 @@ public abstract class BaseProject implements IProject {
 		return Solution.DEFAULT;
 	}
 
+	@Override
+	public String getStatus() {
+		return status;
+	}
+
+	protected void setStatus(String status) {
+		this.status = status;
+	}
+
+	@Override
+	public IRunProcess<?> getProcess() {
+		return (IRunProcess<?>) Thread.currentThread();
+	}
+
+	@Override
+	public String toString() {
+		File parent = root.getParentFile();
+		
+		if (parent == null)
+			return root.getName();
+		else
+			return parent.getName() + "/" + root.getName();
+	}
 }

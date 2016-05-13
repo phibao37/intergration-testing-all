@@ -1,6 +1,8 @@
 package core;
 
-public abstract class RunProcess<E> extends Thread {
+import api.IRunProcess;
+
+public abstract class RunProcess<E> extends Thread implements IRunProcess<E> {
 
 	private E element;
 	private OnStateChange<E> stateChange;
@@ -9,16 +11,10 @@ public abstract class RunProcess<E> extends Thread {
 		this.element = element;
 	}
 	
-	protected final void checkStop() throws InterruptedException{
-		if (isInterrupted())
-			throw new InterruptedException();
-	}
-	
 	@Override
 	public final void run() {
 		runStart();
-		if (stateChange != null)
-			stateChange.stateChanged(this, START);
+		stateChange(START);
 		try {
 			checkStop();
 			onRun();
@@ -33,26 +29,28 @@ public abstract class RunProcess<E> extends Thread {
 		catch (Exception e){
 			runEnd(false, e);
 		}
-		if (stateChange != null)
-			stateChange.stateChanged(this, END);
+		stateChange(END);
 	}
 	
+	@Override
+	public void stateChange(int state){
+		if (stateChange != null)
+			stateChange.stateChanged(this, state);
+	}
+
+	@Override
 	public E getElement(){
 		return element;
 	}
 	
-	
-	public void runStart() {}
-	public abstract void onRun() throws InterruptedException;
-	public void runEnd(boolean finish, Exception e) {}
+	@Override
+	public Thread thread() {
+		return this;
+	}
 
+	@Override
 	public void setStateChange(OnStateChange<E> itemStateChanged) {
 		this.stateChange = itemStateChanged;
 	}
-
-	public interface OnStateChange<T>{
-		void stateChanged(RunProcess<T> p, int state);
-	}
 	
-	public static final int START = 1, END = 2;
 }

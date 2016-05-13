@@ -10,19 +10,11 @@ import javax.swing.ImageIcon;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 
+import api.IProject;
 import api.graph.IProjectNode;
 import api.models.IFunction;
-import cdt.CProject;
 
 public class CProjectNode implements IProjectNode {
-
-	public static final int TYPE_PROJECT = 1;
-	public static final int TYPE_FOLDER = 2;
-	public static final int TYPE_FILE = 3;
-	public static final int TYPE_NAMESPACE = 4;
-	public static final int TYPE_CLASS = 5;
-	public static final int TYPE_STRUCT = 6;
-	public static final int TYPE_FUNCTION = 7;
 	
 	private static final ImageIcon 
 		ICON_FOLDER = 
@@ -44,12 +36,12 @@ public class CProjectNode implements IProjectNode {
 	private List<IProjectNode> childs;
 	private int type;
 	private Icon icon;
-	private CProject project;
+	private IProject project;
 	private String render;
 	
 	public CProjectNode() {}
 	
-	public CProjectNode(File file, int type, CProject project){
+	public CProjectNode(File file, int type, IProject project){
 		value = file;
 		this.type = type;
 		this.project = project;
@@ -92,16 +84,9 @@ public class CProjectNode implements IProjectNode {
 		render = fn.getContent();
 	}
 	
+	@Override
 	public Object getValue() {
 		return value;
-	}
-	
-	public boolean hasFile(){
-		return value instanceof File;
-	}
-	
-	public File getFile() throws ClassCastException{
-		return (File) value;
 	}
 	
 	public List<IProjectNode> childrens() {
@@ -137,22 +122,9 @@ public class CProjectNode implements IProjectNode {
 		return childs;
 	}
 	
+	@Override
 	public int getType(){
 		return type;
-	}
-	
-	public IFunction getFunction() throws ClassCastException {
-		return (IFunction) value;
-	}
-	
-	@Override
-	public int compareTo(IProjectNode other) {
-		CProjectNode o = (CProjectNode) other;
-		if (hasFile() && o.hasFile()){
-			boolean d1 = getFile().isDirectory(), d2 = o.getFile().isDirectory();
-			return d1 ^ d2 ? (d1 ? -1 : 1) : 0;
-		}
-		return 0;
 	}
 	
 	public void addChild(IProjectNode node){

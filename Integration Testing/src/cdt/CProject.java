@@ -17,7 +17,7 @@ public class CProject extends BaseProject {
 	}
 
 	@Override
-	protected void loadProject() {
+	public void loadProject() {
 		mapMarco = new HashMap<>();
 
 		for (BasicType type: BasicType.LIST_BASIC_TYPE)

@@ -21,6 +21,8 @@ public interface IProject extends FileFilter {
 	
 	public File getRoot();
 	
+	public void loadProject();
+	
 	/**
 	 * Kiểm thử một hàm nhất định
 	 */
@@ -78,4 +80,8 @@ public interface IProject extends FileFilter {
 				return item;
 		return null;
 	}
+	
+	public String getStatus();
+	
+	public IRunProcess<?> getProcess();
 }

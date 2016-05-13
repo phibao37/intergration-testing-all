@@ -11,6 +11,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 
 import api.IProject;
+import api.IRunProcess;
 import api.graph.IFileInfo;
 import api.graph.IProjectNode;
 import api.models.ITestpath;
@@ -31,6 +32,9 @@ import graph.swing.FileView;
 import graph.swing.LightTabbedPane;
 import graph.swing.ProcessView;
 import graph.swing.ProjectExplorer;
+import jdt.JProject;
+import jdt.models.JProjectNode;
+
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -67,16 +71,16 @@ import javax.swing.table.DefaultTableModel;
 public class GUIMain {
 	
 	private static final ImageIcon 
-			ICON_CLOSE = new ImageIcon(GUIMain.class.getResource(
-					"/image/close.png")),
-			ICON_DETAILS = new ImageIcon(GUIMain.class.getResource(
-					"/image/details.png")),
-			ICON_TEST = new ImageIcon(GUIMain.class.getResource(
-					"/image/run-test-sm.png")),
-			ICON_LOADING = new ImageIcon(GUIMain.class.getResource(
-					"/image/loading.gif")),
-			ICON_COMPLETE = new ImageIcon(GUIMain.class.getResource(
-					"/image/complete.png"));
+	ICON_CLOSE = new ImageIcon(GUIMain.class.getResource(
+			"/image/close.png")),
+	ICON_DETAILS = new ImageIcon(GUIMain.class.getResource(
+			"/image/details.png")),
+	ICON_TEST = new ImageIcon(GUIMain.class.getResource(
+			"/image/run-test-sm.png")),
+	ICON_LOADING = new ImageIcon(GUIMain.class.getResource(
+			"/image/loading.gif")),
+	ICON_COMPLETE = new ImageIcon(GUIMain.class.getResource(
+			"/image/complete.png"));
 	
 	private IProject currentProject;
 	private IFunction currentFunction;
@@ -89,7 +93,7 @@ public class GUIMain {
 	private JFileChooser chooserProject;
 	private LightTabbedPane tab_source_view, tab_graph;
 	private JLabel lblFunctionName;
-	private ProcessView<IFunction> process_view;
+	private ProcessView<Object> process_view;
 	private JTable table_simple_result;
 
 	/**
@@ -124,7 +128,23 @@ public class GUIMain {
 			openProject(Config.PINNED_PROJECT);
 		}
 		
-		process_view.setStateChanged((p, fn, s, title, status, action)->{
+		process_view.setStateChanged((p, o, s, title, status, action)->{
+			if (o instanceof IProject){
+				IProject pr = (IProject) o;
+				
+				if (s == IRunProcess.UPDATE){
+					title.setText(pr.getStatus());
+				}
+				else if (s == IRunProcess.START){
+					status.setIcon(ICON_LOADING);
+				}
+				else if (s == IRunProcess.END){
+					process_view.clearRow(o);
+				}
+				return;
+			}
+			
+			IFunction fn = (IFunction) o;
 			if (fn.isTesting()){
 				String name = Utils.relative(fn.getSourceInfo().getFile(), 
 						currentProject.getRoot())
@@ -137,11 +157,12 @@ public class GUIMain {
 				action.setToolTipText("Stop test");
 				removeActionListener(action);
 				action.addActionListener(e -> {
-					p.interrupt();
+					p.thread().interrupt();
 				});
 			}
 			
 			else if (fn.getStatus() == IFunction.TESTED){
+				//process_view.clearRow(fn);
 				status.setIcon(ICON_COMPLETE);
 				
 				action.setIcon(ICON_DETAILS);
@@ -191,8 +212,8 @@ public class GUIMain {
 		}
 		
 	};
+	
 	private JToggleButton toggle_pin;
-
 	void openProjectFolder(){
 		int result = chooserProject.showDialog(frmCProjectTesting, "Open project folder");
 		
@@ -205,20 +226,62 @@ public class GUIMain {
 	 	}
 	}
 	
+	private IProject newProject(File root){
+		switch (Config.PROJECT_TYPE){
+		case Config.SUPPORT_C_CPP:
+			return new CProject(root);
+		case Config.SUPPORT_JAVA:
+			return new JProject(root);
+		default:
+			return null;
+		}
+	}
+	
+	private IProjectNode newProjectNode(File root, IProject project){
+		switch (Config.PROJECT_TYPE){
+		case Config.SUPPORT_C_CPP:
+			return new CProjectNode(root, IProjectNode.TYPE_PROJECT, project);
+		case Config.SUPPORT_JAVA:
+			return new JProjectNode(root, IProjectNode.TYPE_PROJECT, project);
+		default:
+			return null;
+		}
+	}
+	
+	private boolean openingProject;
 	void openProject(File root){
-		CProject project = new CProject(root);
-		currentProject = project;
-		
-		if (currentExport != null)
-			currentExport.close();
-		currentExport = new ExcelExporter(currentProject);
-		
-		CProjectNode rootNode = new CProjectNode(root, 
-				CProjectNode.TYPE_PROJECT, project); 
-		
-		tree_project = new GUIProjectExplorer(rootNode);
-		scroll_project_tree.setViewportView(tree_project);
-		clearAllView();
+		if (openingProject) return;
+
+		IProject project = newProject(root);
+		process_view.addAndRun(new RunProcess<Object>(project) {
+
+			@Override
+			public void runStart() {
+				openingProject = true;
+			}
+			
+			@Override
+			public void onRun() throws InterruptedException {
+				project.loadProject();
+				if (currentExport != null)
+					currentExport.close();
+				currentExport = new ExcelExporter(currentProject);
+				
+				IProjectNode rootNode = newProjectNode(root, project); 
+				
+				tree_project = new GUIProjectExplorer(rootNode);
+				scroll_project_tree.setViewportView(tree_project);
+				clearAllView();
+				currentProject = project;
+			}
+			
+			@Override
+			public void runEnd(boolean finish, Exception e) {
+				openingProject = false;
+			}
+			
+		});
+	
 	}
 	
 	void openFunctionDetails(IFunction fn){
@@ -272,7 +335,7 @@ public class GUIMain {
 		if (fn.isTesting() || 
 				fn.getStatus() == IFunction.UNSUPPORT)
 			return;
-		process_view.addAndRun(new RunProcess<IFunction>(fn) {
+		process_view.addAndRun(new RunProcess<Object>(fn) {
 			
 			@Override
 			public void runStart() {
@@ -501,14 +564,7 @@ public class GUIMain {
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBorder(null);
 		tab_source_view.addTab("Process Manager", null, scrollPane, null);
-		
-		/*JPanel panel_5 = new JPanel();
-		panel_5.setBackground(Color.WHITE);
-		
-		layout_process_mgr = new TableLayout(panel_5, new double[][]{
-			{10, TableLayout.FILL, 40, 40, 10}, {}
-		});
-		panel_5.setLayout(layout_process_mgr);*/
+
 		process_view = new ProcessView<>();
 		process_view.setBackground(Color.WHITE);
 		
@@ -574,9 +630,9 @@ public class GUIMain {
 			public void actionPerformed(ActionEvent e) {
 				if (tree_project == null || tree_project.getSelectionCount() == 0)
 					return;
-				CProjectNode node = (CProjectNode) tree_project.getSelectedItem();
+				IProjectNode node = tree_project.getSelectedItem();
 				
-				if (node.getType() == CProjectNode.TYPE_FUNCTION){
+				if (node.getType() == IProjectNode.TYPE_FUNCTION){
 					testFunction(node.getFunction());
 				}
 			}
@@ -621,13 +677,12 @@ public class GUIMain {
 	class GUIProjectExplorer extends ProjectExplorer{
 		private static final long serialVersionUID = 1L;
 		
-		ArrayList<CProjectNode> retainSelect(int type){
-			ArrayList<CProjectNode> list = new ArrayList<>();
+		ArrayList<IProjectNode> retainSelect(int type){
+			ArrayList<IProjectNode> list = new ArrayList<>();
 			
 			for (IProjectNode n: getSelectedItems()){
-				CProjectNode node = (CProjectNode) n;
-				if (node.getType() == type)
-					list.add(node);
+				if (n.getType() == type)
+					list.add(n);
 			}
 			
 			return list;
@@ -636,16 +691,15 @@ public class GUIMain {
 		public GUIProjectExplorer(IProjectNode root) {
 			super(root);
 			
-			addItemClickListener((item, count) -> {
+			addItemClickListener((node, count) -> {
 				if (count == 2){
-					CProjectNode node = (CProjectNode) item;
 					int type = node.getType();
 					
-					if (type == CProjectNode.TYPE_FILE){
+					if (type == IProjectNode.TYPE_FILE){
 						openSourceView(node.getFile());
 					}
 					
-					else if (type == CProjectNode.TYPE_FUNCTION){
+					else if (type == IProjectNode.TYPE_FUNCTION){
 						openCFGView(node.getFunction(), ICFG.COVER_BRANCH);
 					}
 				}
@@ -660,32 +714,32 @@ public class GUIMain {
 					
 					openCFG = new JMenuItem("Open CFG");
 					openCFG.addActionListener(e -> {
-						retainSelect(CProjectNode.TYPE_FUNCTION).forEach(n -> 
+						retainSelect(IProjectNode.TYPE_FUNCTION).forEach(n -> 
 						openCFGView(n.getFunction(), ICFG.COVER_BRANCH));
 					});
 					
 					openCFG3 = new JMenuItem("Open CFG3");
 					openCFG3.addActionListener(e -> {
-						retainSelect(CProjectNode.TYPE_FUNCTION).forEach(n -> 
+						retainSelect(IProjectNode.TYPE_FUNCTION).forEach(n -> 
 						openCFGView(n.getFunction(), ICFG.COVER_SUBCONDITION));
 					});
 					
 					viewSource = new JMenuItem("View source");
 					viewSource.addActionListener(e -> {
-						ArrayList<CProjectNode> fns = retainSelect(
-								CProjectNode.TYPE_FUNCTION);
+						ArrayList<IProjectNode> fns = retainSelect(
+								IProjectNode.TYPE_FUNCTION);
 						
 						if (fns.size() == 1)
 							openSourceView(fns.get(0).getFunction());
 						else
-							retainSelect(CProjectNode.TYPE_FILE).forEach(n -> 
+							retainSelect(IProjectNode.TYPE_FILE).forEach(n -> 
 							openSourceView(n.getFile()));
 					});
 					
 					viewTestdata = new JMenuItem("View test data");
 					viewTestdata.addActionListener(e -> {
 						openFunctionDetails(retainSelect(
-								CProjectNode.TYPE_FUNCTION).get(0)
+								IProjectNode.TYPE_FUNCTION).get(0)
 								.getFunction());
 					});
 					
@@ -703,15 +757,15 @@ public class GUIMain {
 					viewTestdata.setVisible(false);
 					
 					for (IProjectNode n: items){
-						int type = ((CProjectNode) n).getType();
-						if (type == CProjectNode.TYPE_FUNCTION){
+						int type = n.getType();
+						if (type == IProjectNode.TYPE_FUNCTION){
 							openCFG.setVisible(true);
 							openCFG3.setVisible(true);
 							viewSource.setVisible(true);
 							viewTestdata.setVisible(true);
 						}
 						
-						else if (type == CProjectNode.TYPE_FILE){
+						else if (type == IProjectNode.TYPE_FILE){
 							viewSource.setVisible(true);
 						}
 					}

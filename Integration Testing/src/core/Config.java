@@ -29,7 +29,6 @@ import java.util.Map.Entry;
  * @author ducvu
  */
 public class Config {
-
 	
 	public static File DIR_TEMP = new File("local/temp").getAbsoluteFile();
 	
@@ -75,7 +74,12 @@ public class Config {
 	 */
 	public static File PINNED_PROJECT = null;
 	
-	public static String EXPORT_FORMAT = "xlsx";
+	public static final String EXPORT_XLS = "xls", EXPORT_XLSX = "xlsx";
+	public static String EXPORT_FORMAT = EXPORT_XLSX;
+	
+	public static final int SUPPORT_C_CPP = 1,
+			SUPPORT_JAVA = 2;
+	public static int PROJECT_TYPE = SUPPORT_C_CPP;
 	
 	/*---------------------------------------------------------------------*/
 	

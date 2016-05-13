@@ -5,8 +5,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import core.RunProcess;
-import core.RunProcess.OnStateChange;
+import api.IRunProcess;
 import graph.swing.tablelayout.TableLayout;
 import graph.swing.tablelayout.TableLayout.TableRow;
 
@@ -26,9 +25,9 @@ public class ProcessView<E> extends JPanel {
 		mapRow = new HashMap<>();
 	}
 	
-	public void addAndRun(RunProcess<E> p){
+	public void addAndRun(IRunProcess<E> p){
 		p.setStateChange(itemStateChanged);
-		p.start();
+		p.thread().start();
 	}
 	
 	@Override
@@ -38,8 +37,15 @@ public class ProcessView<E> extends JPanel {
 		super.removeAll();
 		repaint();
 	}
+	
+	public void clearRow(E element){
+		TableLayout.TableRow row = mapRow.remove(element);
+		
+		if (row != null)
+			layout.deleteRow(row);
+	}
 
-	private OnStateChange<E> itemStateChanged = (p, s) -> {
+	private IRunProcess.OnStateChange<E> itemStateChanged = (p, s) -> {
 		E element = p.getElement();
 		TableLayout.TableRow row = mapRow.get(element);
 		
@@ -56,7 +62,7 @@ public class ProcessView<E> extends JPanel {
 		}
 		
 		if (stateChanged != null)
-			stateChanged.stateChanged(p, element, s,
+			stateChanged.stateChanged(p, element, s, 
 					(JLabel)row.getComponent(1),
 					(JLabel)row.getComponent(2), 
 					(JButton) row.getComponent(3));
@@ -67,7 +73,7 @@ public class ProcessView<E> extends JPanel {
 	}
 
 	public interface ProcessStateChanged<E>{
-		void stateChanged(RunProcess<E> process, E element, int state,
+		void stateChanged(IRunProcess<E> process, E element, int state,
 				JLabel title, JLabel status, JButton action);
 	}
 }

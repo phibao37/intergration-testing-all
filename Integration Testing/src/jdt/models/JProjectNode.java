@@ -7,10 +7,10 @@ import java.util.List;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import api.IProject;
 import api.graph.IProjectNode;
 import api.models.IFunction;
 import core.models.type.ObjectType;
-import jdt.JProject;
 
 public class JProjectNode implements IProjectNode {
 
@@ -36,12 +36,12 @@ public class JProjectNode implements IProjectNode {
 	private List<IProjectNode> childs;
 	private int type;
 	private Icon icon;
-	private JProject project;
+	private IProject project;
 	private String render;
 	
 	public JProjectNode() {}
 	
-	public JProjectNode(File file, int type, JProject project){
+	public JProjectNode(File file, int type, IProject project){
 		value = file;
 		this.type = type;
 		this.project = project;
@@ -76,16 +76,9 @@ public class JProjectNode implements IProjectNode {
 		render = fn.getContent();
 	}
 	
+	@Override
 	public Object getValue() {
 		return value;
-	}
-	
-	public boolean hasFile(){
-		return value instanceof File;
-	}
-	
-	public File getFile() throws ClassCastException{
-		return (File) value;
 	}
 	
 	public List<IProjectNode> childrens() {
@@ -121,22 +114,9 @@ public class JProjectNode implements IProjectNode {
 		return childs;
 	}
 	
+	@Override
 	public int getType(){
 		return type;
-	}
-	
-	public IFunction getFunction() throws ClassCastException {
-		return (IFunction) value;
-	}
-	
-	@Override
-	public int compareTo(IProjectNode other) {
-		JProjectNode o = (JProjectNode) other;
-		if (hasFile() && o.hasFile()){
-			boolean d1 = getFile().isDirectory(), d2 = o.getFile().isDirectory();
-			return d1 ^ d2 ? (d1 ? -1 : 1) : 0;
-		}
-		return 0;
 	}
 	
 	public void addChild(IProjectNode node){

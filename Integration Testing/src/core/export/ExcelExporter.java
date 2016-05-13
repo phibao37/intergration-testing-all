@@ -44,10 +44,10 @@ public class ExcelExporter implements IExporter {
 		if (workbook == null){
 			
 			switch (Config.EXPORT_FORMAT.toLowerCase()){
-			case "xls":
+			case Config.EXPORT_XLS:
 				workbook = new HSSFWorkbook();
 				break;
-			case "xlsx":
+			case Config.EXPORT_XLSX:
 				workbook = new XSSFWorkbook();
 				break;
 			}
