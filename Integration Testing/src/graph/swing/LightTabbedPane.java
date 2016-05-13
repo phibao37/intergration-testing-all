@@ -161,7 +161,7 @@ public class LightTabbedPane extends JTabbedPane {
 	}
 	
 	public void closeAllTab(){
-		for (int i = 0; i < getTabCount(); i++)
+		for (int i = getTabCount() - 1; i >= 0; i--)
 			getTabComponentAt(i).closeThisTab();
 	}
 	

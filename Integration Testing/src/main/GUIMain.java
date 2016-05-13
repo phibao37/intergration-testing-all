@@ -269,6 +269,7 @@ public class GUIMain {
 			
 			@Override
 			public void onRun() throws InterruptedException {
+				tab_source_view.setSelectedIndex(0);
 				project.loadProject();
 				if (currentExport != null)
 					currentExport.close();
