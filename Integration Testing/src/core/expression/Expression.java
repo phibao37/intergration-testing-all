@@ -168,8 +168,7 @@ public abstract class Expression extends Element implements IExpression {
 	 * @param margin khoảng cách đầu dòng
 	 */
 	public void printTree(String margin){
-		System.out.println(margin + this + ", " + this.getClass().getSimpleName() 
-				+ ", " + this.getType());
+		System.out.println(margin + this + ", " + this.getClass().getSimpleName());
 		if (this instanceof ExpressionGroup){
 			IExpression[] g = ((ExpressionGroup)this).g;
 			for (IExpression ep: g)

@@ -8,15 +8,15 @@ Cấu trúc mã nguồn C/C++ được hỗ trợ:
  - Kiểu: 
    * Kiểu cơ bản: bool, int, long, float, double
    * Kiểu mảng
-   * Kiểu struct (later)
+   * Kiểu struct
  - Phép toán: 
    * Gán: =, +=, -=, *=, /=, %=, ++, --
    * Logic: ==, !=, <, <=, >, >=, &&, ||, ! 
    * Số học: +, -, *, /, %
-   * Bitwise: &, |, ~, <<, >> (later)
+   * Bitwise: &, |, ~, <<, >>
  - Bộ giải:
    * Z3
-   * Random (later)
+   * Random
  
 ##Development
 

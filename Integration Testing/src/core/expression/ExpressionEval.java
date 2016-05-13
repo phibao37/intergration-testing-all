@@ -62,6 +62,8 @@ public class ExpressionEval implements IExpressionEval{
 					return new NumberExpression(l.boolValue() && r.boolValue());
 				case BinaryExpression.LOGIC_OR:
 					return new NumberExpression(l.boolValue() || r.boolValue());
+				case BinaryExpression.LOGIC_XOR:
+					return new NumberExpression(l.boolValue() ^ r.boolValue());
 
 				//Các phép toán tính toán (+,-, ...), và so sánh (==, <, ...)
 				default:

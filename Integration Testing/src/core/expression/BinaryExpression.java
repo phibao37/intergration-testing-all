@@ -80,6 +80,15 @@ public class BinaryExpression extends ExpressionGroup implements IBinaryExpressi
 	/** Phép toán logic hoặc */
 	public static final String LOGIC_OR = "||";
 	
+	/** Phép toán logic xor */
+	public static final String LOGIC_XOR = "^";
+	
+	public static final String BIT_AND = "&",
+			BIT_OR = "|",
+			BIT_NOT = "~",
+			BIT_LEFT_SHIFT = "<<",
+			BIT_RIGHT_SHIFT = ">>";
+	
 	private static final String[] ASSIGNS = {ASSIGN, ASSIGN_ADD, ASSIGN_MINUS,
 		ASSIGN_MUL, ASSIGN_DIV, ASSIGN_MOD};
 	

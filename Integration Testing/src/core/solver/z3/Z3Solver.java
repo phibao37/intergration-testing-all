@@ -350,6 +350,10 @@ try{
 			else if (op.equals(BinaryExpression.LOGIC_OR))
 				return String.format("(or %s %s)", op1, op2);
 			
+			//Chuyển ^ sang xor
+			else if (op.equals(BinaryExpression.LOGIC_XOR))
+				return String.format("(xor %s %s)", op1, op2);
+			
 			//Chuyển % sang mod
 			else if (op.equals(BinaryExpression.MOD))
 				return String.format("(rem %s %s)", op1, op2);
