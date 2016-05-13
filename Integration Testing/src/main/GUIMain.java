@@ -137,6 +137,13 @@ public class GUIMain {
 				}
 				else if (s == IRunProcess.START){
 					status.setIcon(ICON_LOADING);
+					
+					action.setIcon(ICON_CLOSE);
+					action.setToolTipText("Stop");
+					removeActionListener(action);
+					action.addActionListener(e -> {
+						p.thread().interrupt();
+					});
 				}
 				else if (s == IRunProcess.END){
 					process_view.clearRow(o);
@@ -276,7 +283,9 @@ public class GUIMain {
 			}
 			
 			@Override
-			public void runEnd(boolean finish, Exception e) {
+			public void runEnd(boolean finish, Throwable e) {
+				if (e != null)
+					e.printStackTrace();
 				openingProject = false;
 			}
 			
@@ -371,7 +380,7 @@ public class GUIMain {
 			}
 
 			@Override
-			public void runEnd(boolean finish, Exception e) {
+			public void runEnd(boolean finish, Throwable e) {
 				fn.setTesting(false);
 				if (finish)
 					fn.setStatus(IFunction.TESTED);

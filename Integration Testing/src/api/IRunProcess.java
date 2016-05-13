@@ -11,7 +11,7 @@ public interface IRunProcess<E> {
 	
 	void onRun() throws InterruptedException;
 	
-	default void runEnd(boolean finish, Exception e) {}
+	default void runEnd(boolean finish, Throwable e) {}
 	
 	Thread thread();
 	

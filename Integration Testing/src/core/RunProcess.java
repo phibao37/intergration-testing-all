@@ -26,7 +26,7 @@ public abstract class RunProcess<E> extends Thread implements IRunProcess<E> {
 			runEnd(false, null);
 		}
 		
-		catch (Exception e){
+		catch (Throwable e){
 			runEnd(false, e);
 		}
 		stateChange(END);
