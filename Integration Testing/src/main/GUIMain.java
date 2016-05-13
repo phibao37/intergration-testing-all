@@ -382,6 +382,8 @@ public class GUIMain {
 
 			@Override
 			public void runEnd(boolean finish, Throwable e) {
+				if (e != null)
+					e.printStackTrace();
 				fn.setTesting(false);
 				if (finish)
 					fn.setStatus(IFunction.TESTED);

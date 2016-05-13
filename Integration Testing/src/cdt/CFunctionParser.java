@@ -22,6 +22,8 @@ import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.cdt.core.dom.ast.IASTSwitchStatement;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
+import org.eclipse.cdt.internal.core.dom.parser.c.CASTBinaryExpression;
+import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
 import api.IProject;
 import api.models.IFunction;
@@ -321,21 +323,36 @@ public class CFunctionParser implements IFunctionParser {
 		for (i = 1; i < mid.length - 1; i++)
 			mid[i] = new ForwardStatement();
 		mid[i] = beforeDefault;
-		String control = cond.getRawSignature();
 		
 		for (i = 0; i < caseLink.size(); i++){
 			Pair<ArrayList<IASTCaseStatement>, Statement> pair = caseLink.get(i);
-			cases = pair.getKey();
-			String join = "";
-			for (IASTCaseStatement astCase: cases)
-				join += String.format("||%s==%s", control,
-								astCase.getExpression().getRawSignature());
-			
-			visitCondition(ExpressionConverter.getExpression(join.substring(2)), 
-					mid[i], pair.getValue(), mid[i+1]);
+			IASTExpression join = joinCaseSwitch(cond, pair.getKey());
+			visitCondition(join, mid[i], pair.getValue(), mid[i+1]);
 		}
 	}
 	
+	static IASTExpression joinCaseSwitch(IASTExpression cond,
+			ArrayList<IASTCaseStatement> cases){
+		IASTExpression build = new CASTBinaryExpression(
+				IASTBinaryExpression.op_equals,
+				cond.copy(),
+				cases.get(0).getExpression().copy()
+		);
+		
+		for (int i = 1; i < cases.size(); i++){
+			IASTExpression build2 = new CASTBinaryExpression(
+					IASTBinaryExpression.op_equals,
+					cond.copy(),
+					cases.get(i).getExpression().copy()
+			);
+			build = new CASTBinaryExpression(
+					IASTBinaryExpression.op_logicalOr,
+					build,
+					build2
+			);
+		}
+		return build;
+	}
 	
 	/**
 	 * Duyệt qua một biểu thức điều kiện và tách các điều kiện con ra
@@ -376,7 +393,8 @@ public class CFunctionParser implements IFunctionParser {
 				midTrue.setBranch(endTrue);
 				visitCondition(op1, begin, midTrue, midFalse);
 				visitCondition(op2, midFalse, endTrue, endFalse);
-			} else
+			}
+			else
 				visitNormalCondition(cond, begin, endTrue, endFalse);
 		} 
 		else if (cond instanceof IASTUnaryExpression){
@@ -429,19 +447,28 @@ public class CFunctionParser implements IFunctionParser {
 	 */
 	public static CFunctionParser DEFAULT = new CFunctionParser();
 	
+	static String convertString(IASTNode node){
+		String txt = node.getRawSignature();
+		if (txt.isEmpty() && node instanceof IASTExpression)
+			return ASTStringUtil.getExpressionString((IASTExpression) node);
+		
+		return txt;
+	}
+	
 	/**
 	 * Câu lệnh C
 	 */
 	class CStatement extends Statement{
-
+		
 		public CStatement(IASTNode node) {
-			super(node.getRawSignature());
+			super(convertString(node));
 			setRoot(mUtils.parseNode(node));
 			
 			IASTFileLocation loc = node.getFileLocation();
+			if (loc != null)
 			setSourceInfo(new FileInfo(loc.getNodeOffset(),
 					loc.getNodeLength(), fn.getSourceInfo().getFile()));
-			//try{getRoot().printTree("  ");} catch (Exception e) {}
+			//getRoot().printTree("   ");
 		}
 		
 	}

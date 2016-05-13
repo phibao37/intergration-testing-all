@@ -3,6 +3,7 @@ package jdt;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BreakStatement;
@@ -318,21 +319,40 @@ public class JFunctionParser implements IFunctionParser {
 		for (i = 1; i < mid.length - 1; i++)
 			mid[i] = new ForwardStatement();
 		mid[i] = beforeDefault;
-		//String control = cond.getRawSignature();
 		
 		for (i = 0; i < caseLink.size(); i++){
 			Pair<ArrayList<SwitchCase>, Statement> pair = caseLink.get(i);
-			cases = pair.getKey();
-			String join = "";
-			for (SwitchCase astCase: cases){
-				join += String.format("||%s==%s", cond,
-								astCase.getExpression());
-			}
-			
-			visitCondition(mUtils.getExpression(join.substring(2)), 
-					mid[i], pair.getValue(), mid[i+1]);
+			Expression join = joinCaseSwitch(cond, pair.getKey());
+			visitCondition(join, mid[i], pair.getValue(), mid[i+1]);
 		}
 	}
+	
+	static Expression joinCaseSwitch(Expression cond, ArrayList<SwitchCase> cases){
+		AST ast = cond.getAST();
+		InfixExpression infix = ast.newInfixExpression();
+		infix.setOperator(InfixExpression.Operator.EQUALS);
+		infix.setLeftOperand((Expression) ASTNode.copySubtree(ast, cond));
+		infix.setRightOperand((Expression) ASTNode.copySubtree(ast, 
+				cases.get(0).getExpression()));
+		Expression build = infix;
+		 
+		for (int i = 1; i < cases.size(); i++){
+			InfixExpression infix2 = ast.newInfixExpression();
+			infix2.setOperator(InfixExpression.Operator.EQUALS);
+			infix2.setLeftOperand((Expression) ASTNode.copySubtree(ast, cond));
+			infix2.setRightOperand((Expression) ASTNode.copySubtree(ast, 
+					cases.get(i).getExpression()));
+			
+			InfixExpression build2 = ast.newInfixExpression();
+			build2.setOperator(InfixExpression.Operator.CONDITIONAL_OR);
+			build2.setLeftOperand(build);
+			build2.setRightOperand(infix2);
+			build = build2;
+		}
+		
+		return build;
+	}
+	
 	/**
 	 * Duyệt qua một biểu thức điều kiện và tách các điều kiện con ra
 	 * @param cond nút điều kiện
@@ -351,6 +371,7 @@ public class JFunctionParser implements IFunctionParser {
 		
 		if (cond instanceof InfixExpression){
 			InfixExpression astBin = (InfixExpression) cond;
+			
 			Expression op1 = astBin.getLeftOperand();
 			Operator op = astBin.getOperator();
 			Expression op2 = astBin.getRightOperand();
@@ -439,7 +460,8 @@ public class JFunctionParser implements IFunctionParser {
 		public JStatement(ASTNode node) {
 			super(node.toString().replaceAll("\n", ""));
 			setRoot(mUtils.parseNode(node));
-			setSourceInfo(new FileInfo(node.getStartPosition(), 
+			if (node.getStartPosition() != -1)
+				setSourceInfo(new FileInfo(node.getStartPosition(), 
 					node.getLength(), fn.getSourceInfo().getFile()));
 		}
 		

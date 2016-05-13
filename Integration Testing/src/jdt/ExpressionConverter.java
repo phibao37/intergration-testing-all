@@ -4,22 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.CharacterLiteral;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Dimension;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NumberLiteral;
@@ -45,44 +40,6 @@ import core.expression.NumberExpression;
 
 public class ExpressionConverter {
 
-	public Expression getExpression(String expression){
-		return SimpleVisitor.DEFAULT.getExpression(expression);
-	}
-	
-	/**
-	 * Phân tích nội dung một nút AST và lấy về biểu thức gốc chứa trong nút
-	 * @param node nút AST, thường là một {@link IASTExpression}
-	 * @return biểu thức tại gốc của nút
-	 */
-	
-	static class SimpleVisitor{
-		
-		Expression mExpression;
-		
-		public Expression getExpression(String source){
-			ASTParser parser = ASTParser.newParser(AST.JLS8);
-			
-			source = String.format("public class test{ public void test{if(%s);}}", source);
-			parser.setSource(source.toCharArray());
-			//parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		
-			CompilationUnit cu = (CompilationUnit) parser.createAST(null);
-			cu.accept(new ASTVisitor(){
-				@Override
-				public boolean visit(IfStatement node) {
-					mExpression = node.getExpression();
-					return true;
-				}
-			}
-			
-			);
-			return mExpression;
-		}
-
-		public static final SimpleVisitor DEFAULT = new SimpleVisitor();
-		
-	}
-	
 	private IProject project;
 	
 	public ExpressionConverter(IProject prj) {

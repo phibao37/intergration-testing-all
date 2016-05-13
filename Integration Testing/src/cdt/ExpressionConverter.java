@@ -1,10 +1,8 @@
 package cdt;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.eclipse.cdt.core.dom.ast.ASTVisitor;
 import org.eclipse.cdt.core.dom.ast.IASTArrayDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTArrayModifier;
 import org.eclipse.cdt.core.dom.ast.IASTArraySubscriptExpression;
@@ -49,18 +47,6 @@ import core.expression.UnaryExpression;
  *
  */
 public class ExpressionConverter {
-	
-	public static void main(String[] args){
-		System.out.println(ExpressionConverter.getExpression("test(maaa)"));
-		
-	}
-	
-	/**
-	 * Chuyển một chuỗi biểu thức sang nút biểu thức 
-	 */
-	public static IASTExpression getExpression(String expression){
-		return SimpleVisitor.DEFAULT.getExpression(expression);
-	}
 	
 	private IProject mProject;
 	
@@ -204,8 +190,12 @@ public class ExpressionConverter {
 		}
 		
 		//Đang thăm 1 tham chiếu tên biến
-		if (node instanceof IASTIdExpression || node instanceof IASTName){
-			return new NameExpression(node.getRawSignature());
+		if (node instanceof IASTIdExpression){
+			return parseNode(((IASTIdExpression) node).getName());
+		}
+		
+		if (node instanceof IASTName){
+			return new NameExpression(node.toString());
 		}
 		
 		//Đang thăm 1 câu lệnh RETURN
@@ -229,37 +219,5 @@ public class ExpressionConverter {
 		System.out.printf("Un-support: %s - %s\n",node.getRawSignature(), 
 				node.getClass().getSimpleName());
 		return null;
-	}
-	
-	static class SimpleVisitor extends ASTVisitor{
-		{
-			shouldVisitExpressions = true;
-			
-		}
-		
-		IASTExpression mExpression;
-		
-		public IASTExpression getExpression(String source){
-			mExpression = null;
-			if (!source.endsWith(";"))
-				source += ";";
-			source = String.format("void main(){%s}", source);
-			try {
-				CProjectParser.getIASTTranslationUnit(source).accept(this);
-				return mExpression;
-			} catch (IOException e) {
-				return null;
-			}
-			
-		}
-
-		@Override
-		public int visit(IASTExpression expression) {
-			mExpression = expression; 
-			return PROCESS_ABORT;
-		}
-		
-		public static final SimpleVisitor DEFAULT = new SimpleVisitor();
-		
 	}
 }
