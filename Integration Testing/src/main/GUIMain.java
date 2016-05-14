@@ -192,9 +192,12 @@ public class GUIMain {
 	}
 	
 	CFGView openCFGView(IFunction fn, int cover){
+		String name = (cover == ICFG.COVER_SUBCONDITION ? "CFG-3: " : "CFG: ") 
+				+ fn.getName();
+		
 		try {
-			CFGView v = (CFGView) tab_graph.openTab("CFG: " + fn.getName(), 
-					null, fn.toString(),  CFGView.class.getConstructor(
+			CFGView v = (CFGView) tab_graph.openTab(name, null, fn.toString(), 
+					CFGView.class.getConstructor(
 							IFunction.class, int.class, MouseListener.class),
 					fn, cover, cfgMouseAdapter);
 			return v;

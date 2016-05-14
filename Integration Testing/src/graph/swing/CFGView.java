@@ -26,6 +26,8 @@ public class CFGView extends DragScrollPane
 		canvas = new CFGCanvas(fn);
 		setViewportView(canvas);
 		addComponentListener(this);
+		
+		setBorder(null);
 	}
 	
 	public void setHightLightTestpath(ITestpath tp){
