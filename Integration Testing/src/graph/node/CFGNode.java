@@ -16,9 +16,10 @@ public class CFGNode extends Node<IStatement> {
 	public static final int NORMAL = 0, CONDITION = 1, MARK = 2,
 			PADDING_X = 20, PADDING_Y = 10, 
 			MARK_SIZE = 25,
-			MAX_IN_BLOCK = 10,
+			MAX_LINE = 3,
 			FLAG_SELECT_TRUE = 1,
 			FLAG_SELECT_FALSE = 2;
+	static final String MORE = "...", NEW_LINE = "<br>";
 	
 	private int type;
 	private Color borderColor;
@@ -54,27 +55,30 @@ public class CFGNode extends Node<IStatement> {
 		type = NORMAL;
 		
 		StringBuilder txt = new StringBuilder(), real = new StringBuilder();
-		boolean large = false;
+		boolean overWidth = false, overLine = false;
 		int count = 0;
 		
 		for (IStatement stm: stmList){
 			String s = stm.getContent();
-			real.append(s).append("<br>");
+			real.append(s).append(NEW_LINE);
 			
-			if (count++ < MAX_IN_BLOCK){
+			if (count++ < MAX_LINE){
 				if (s.length() <= MAX_STR_LEN)
 					txt.append(s);
 				else {
-					txt.append(s.substring(0, MAX_STR_LEN-3)).append("...");
-					large = true;
+					txt.append(s.substring(0, MAX_STR_LEN-3)).append(MORE);
+					overWidth = true;
 				}
-				txt.append("<br>");
+				txt.append(NEW_LINE);
 			}
 			else
-				large = true;
+				overLine = true;
 		}
+		
+		if (overLine)
+			txt.append(MORE);
 		setText(Utils.htmlCenter(txt.toString()));
-		if (large)
+		if (overWidth || overLine)
 			setToolTipText(Utils.html(real.toString()));
 		
 		Dimension size = getPreferredSize();
@@ -154,6 +158,12 @@ public class CFGNode extends Node<IStatement> {
 			g.fillOval(x, y, width, height);
 			g.setColor(getBorderColor());
 			g.drawOval(x, y, width, height);
+			
+			//Câu lệnh cuối được tô đen
+			if (getElement().getTrue() == null){
+				g.setColor(getBorderColor());
+				g.fillOval(x + 3, y + 3, width - 6, height - 6);
+			} 
 			break;
 		}
 	}

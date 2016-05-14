@@ -19,8 +19,8 @@ public class CFGCanvas extends Canvas<IStatement> {
 	private static final long serialVersionUID = 1L;
 	public static final Color 
 			DEFAULT = Color.BLACK,
-			TRUE = Color.BLUE,
-			FALSE = new Color(0, 153, 51),
+			TRUE = new Color(30, 144, 255),
+			FALSE = new Color(50, 205, 50),
 			SELECTED = Color.RED;
 	private static final Font FONT_LABEL = new Font("TimesRoman", Font.BOLD, 12);
 	
