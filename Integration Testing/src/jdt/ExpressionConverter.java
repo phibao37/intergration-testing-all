@@ -188,9 +188,8 @@ public class ExpressionConverter {
 				//Có khai báo mảng ở sau biến?? int[][] a, b[], làm sau
 				
 				if (init != null)
-					vars[i] = new BinaryExpression(
+					vars[i] = new BinaryExpression.DeclarePartExpression(
 							vars[i], 
-							BinaryExpression.ASSIGN, 
 							parseNode(init));
 			}
 			return new DeclareExpression(project.findType(type.toString()), vars);

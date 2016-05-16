@@ -3,7 +3,6 @@ package cdt;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -341,15 +340,7 @@ public class CProjectParser extends ASTVisitor implements IProjectParser{
 						GCCLanguage.getDefault() : GPPLanguage.getDefault());
 	}
 	
-	/**
-	 * Trả về cây cú pháp trừu tượng với mã nguồn C đơn giản
-	 */
-	static IASTTranslationUnit getIASTTranslationUnit(String source) throws IOException{
-		return getIASTTranslationUnit(source.toCharArray(), "", 
-				new HashMap<>(), GCCLanguage.getDefault());
-	}
-	
-	private static IASTTranslationUnit getIASTTranslationUnit(char[] source, 
+	public static IASTTranslationUnit getIASTTranslationUnit(char[] source, 
 			String filePath, Map<String, String> macroList, AbstractLanguage lang) {
 		FileContent reader = FileContent.create(filePath, source);
 		String[] includeSearchPaths = new String[0];

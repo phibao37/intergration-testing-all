@@ -235,7 +235,7 @@ public class JFunctionParser implements IFunctionParser {
 			Statement scopeIn = ScopeStatement.newOpenScope();
 			Statement scopeOut = ScopeStatement.newCloseScope(end);
 			begin.setBranch(scopeIn);
-			visitSwitch(astSw.getExpression(),astSw, scopeIn, scopeOut);
+			visitSwitch(astSw.getExpression(),astSw, scopeIn, scopeOut, _continue);
 		}
 		else if (stm instanceof Block){
 			visitBlock((Block) stm, begin, end, _break, _continue);
@@ -269,7 +269,7 @@ public class JFunctionParser implements IFunctionParser {
 	 */
 	@SuppressWarnings("unchecked")
 	private void visitSwitch(Expression cond, SwitchStatement body,
-			Statement begin, Statement end){
+			Statement begin, Statement end, Statement _continue){
 		ArrayList<Pair<ArrayList<SwitchCase>, Statement>> caseLink = 
 				new ArrayList<>();
 		ArrayList<SwitchCase> cases = new ArrayList<>();
@@ -298,7 +298,7 @@ public class JFunctionParser implements IFunctionParser {
 				}
 				
 				after = new ForwardStatement();
-				visitStatement(stm, before, after, end, null);
+				visitStatement(stm, before, after, end, _continue);
 				before = after;
 			}
 			i++;

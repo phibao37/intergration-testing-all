@@ -239,7 +239,8 @@ public class CFunctionParser implements IFunctionParser {
 			Statement scopeOut = ScopeStatement.newCloseScope(end);
 			begin.setBranch(scopeIn);
 			visitSwitch(astSw.getControllerExpression(), 
-					(IASTCompoundStatement) astSw.getBody(), scopeIn, scopeOut);
+					(IASTCompoundStatement) astSw.getBody(), 
+					scopeIn, scopeOut, _continue);
 		}
 		
 		else if (stm instanceof IASTCompoundStatement){
@@ -275,7 +276,7 @@ public class CFunctionParser implements IFunctionParser {
 	 * @param end câu lệnh kết thúc, cũng là câu lệnh mà break đi tới
 	 */
 	private void visitSwitch(IASTExpression cond, IASTCompoundStatement body,
-			Statement begin, Statement end){
+			Statement begin, Statement end, Statement _continue){
 		ArrayList<Pair<ArrayList<IASTCaseStatement>, Statement>> caseLink = 
 				new ArrayList<>();
 		ArrayList<IASTCaseStatement> cases = new ArrayList<>();
@@ -302,7 +303,7 @@ public class CFunctionParser implements IFunctionParser {
 				}
 				
 				after = new ForwardStatement();
-				visitStatement(stm, before, after, end, null);
+				visitStatement(stm, before, after, end, _continue);
 				before = after;
 			}
 			i++;
