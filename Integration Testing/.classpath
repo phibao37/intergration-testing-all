@@ -16,6 +16,7 @@
 	<classpathentry kind="lib" path="lib/jdt/org.eclipse.jdt.core_3.11.2.v20160128-0629.jar" sourcepath="lib-src/org.eclipse.jdt.core.source_3.11.2.v20160128-0629.jar"/>
 	<classpathentry kind="lib" path="lib/jdt/org.eclipse.osgi_3.10.102.v20160118-1700.jar"/>
 	<classpathentry kind="lib" path="lib/org.eclipse.core.filesystem_1.5.0.v20150725-1910.jar"/>
+	<classpathentry kind="lib" path="lib/com.ibm.icu_57.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

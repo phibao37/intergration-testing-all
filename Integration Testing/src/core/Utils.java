@@ -318,6 +318,10 @@ public class Utils {
 		return extension;
 	}
 	
+	public static String htmlEscape(String text){
+		return text.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+	}
+	
 	/**
 	 * Đưa một nội dung trong body vào một trang html hoàn chỉnh
 	 */

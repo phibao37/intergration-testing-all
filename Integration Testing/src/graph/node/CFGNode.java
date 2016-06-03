@@ -60,13 +60,14 @@ public class CFGNode extends Node<IStatement> {
 		
 		for (IStatement stm: stmList){
 			String s = stm.getContent();
-			real.append(s).append(NEW_LINE);
+			real.append(Utils.htmlEscape(s)).append(NEW_LINE);
 			
 			if (count++ < MAX_LINE){
 				if (s.length() <= MAX_STR_LEN)
-					txt.append(s);
+					txt.append(Utils.htmlEscape(s));
 				else {
-					txt.append(s.substring(0, MAX_STR_LEN-3)).append(MORE);
+					txt.append(Utils.htmlEscape(s.substring(0, MAX_STR_LEN-3)))
+						.append(MORE);
 					overWidth = true;
 				}
 				txt.append(NEW_LINE);
