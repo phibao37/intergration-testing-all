@@ -177,11 +177,11 @@ public class Utils {
 	 * @param list2 danh sách bên phải
 	 */
 	public static <T extends Collection<V>, V> void addMultiply(
-			List<ArrayList<V>> list1, List<T> list2){
-		List<ArrayList<V>> lists = new ArrayList<>(list1);
+			List<List<V>> list1, List<T> list2){
+		List<List<V>> lists = new ArrayList<>(list1);
 		list1.clear();
 		
-		for (ArrayList<V> item1: lists)
+		for (List<V> item1: lists)
 			for (T item2: list2){
 				ArrayList<V> list = new ArrayList<>();
 				list.addAll(item1);
