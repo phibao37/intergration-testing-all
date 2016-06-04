@@ -66,6 +66,13 @@ public interface IStatement extends IElement, IHasFileInfo {
 	}
 	
 	/**
+	 * Có nên được nhóm lại trong một nhóm câu lệnh không
+	 */
+	public default boolean shouldInGroup(){
+		return !isCondition();
+	}
+	
+	/**
 	 * Thiết đặt các nhánh liên kết
 	 * @param trueBranch câu lệnh tiếp theo khi điều kiện câu lệnh đúng
 	 * @param falseBranch câu lệnh tiếp theo khi điều kiện câu lệnh sai

@@ -80,11 +80,16 @@ public class ScopeStatement extends Statement {
 		return SCOPE_OPEN.equals(mContent);
 	}
 	
-
 	@Override
 	public boolean isNormal() {
 		return false;
 	}
+
+	@Override
+	public boolean shouldInGroup() {
+		return false;
+	}
+	
 }
 
 

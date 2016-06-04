@@ -79,8 +79,7 @@ public class CFGNodeAdapter extends NodeAdapter<IStatement> {
 		
 		while (next != null 
 				&& receiveCount[next.getId()] == 1 //chỉ nhận từ 1 câu lệnh
-				&& (next.isNormal() || !next.shouldDisplay()) //câu lệnh thường,{}
-				&& !next.isCondition()){ //bỏ qua câu lệnh điều kiện
+				&& next.shouldInGroup()){ //câu lệnh có thể nhóm được
 			stm = next;
 			next = stm.getTrue();
 		}

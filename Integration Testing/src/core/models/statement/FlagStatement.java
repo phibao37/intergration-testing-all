@@ -51,6 +51,11 @@ public class FlagStatement extends Statement {
 	public boolean shouldDisplay() {
 		return true;
 	}
+
+	@Override
+	public boolean shouldInGroup() {
+		return false;
+	}
 	
 	
 }
