@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import sdv.testingall.core.loader.ILoaderConfig;
+import sdv.testingall.core.logger.ILogger;
 
 /**
  * Configuration during load C/C++ project
@@ -26,6 +27,8 @@ public class CppLoaderConfig implements ILoaderConfig {
 
 	private List<String>	listCExt;
 	private List<String>	listCppExt;
+
+	private ILogger logger;
 
 	/**
 	 * Construct default C/C++ loader configuration
@@ -110,5 +113,22 @@ public class CppLoaderConfig implements ILoaderConfig {
 	public void setListCppExt(List<String> listCppExt)
 	{
 		this.listCppExt = listCppExt;
+	}
+
+	@Override
+	public ILogger getLogger()
+	{
+		return logger;
+	}
+
+	/**
+	 * Set the logger
+	 * 
+	 * @param logger
+	 *            the logger object to set
+	 */
+	public void setLogger(ILogger logger)
+	{
+		this.logger = logger;
 	}
 }

@@ -20,6 +20,8 @@ import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
 
+import sdv.testingall.cdt.node.CppFileNode;
+import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
 
 /**
@@ -87,10 +89,12 @@ public class CppFileLoader {
 			IParserLogService log = new DefaultLogService();
 
 			lang.getASTTranslationUnit(content, scanInfo, fileCreator, null, options, log);
+			// TODO parse deeper
+			CppFileNode fileNode = new CppFileNode(source.getName(), isCpp);
 
-			return null;
+			return fileNode;
 		} catch (Exception e) {
-			// TODO log to logger
+			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s\n", source.getPath(), e.getMessage());
 			return null;
 		}
 

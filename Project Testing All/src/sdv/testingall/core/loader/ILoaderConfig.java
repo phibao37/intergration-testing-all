@@ -10,6 +10,8 @@ import java.nio.charset.Charset;
 
 import com.sun.istack.internal.Nullable;
 
+import sdv.testingall.core.logger.ILogger;
+
 /**
  * Configuration during loader task
  * 
@@ -29,4 +31,11 @@ public interface ILoaderConfig {
 	{
 		return null;
 	}
+
+	/**
+	 * Get the logger
+	 * 
+	 * @return the logger to log event
+	 */
+	ILogger getLogger();
 }

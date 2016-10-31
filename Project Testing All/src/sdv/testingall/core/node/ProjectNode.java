@@ -31,11 +31,6 @@ public class ProjectNode extends INode {
 		super(projectName);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see sdv.testingall.core.node.INode#getIcon()
-	 */
 	@Override
 	public Icon getIcon()
 	{

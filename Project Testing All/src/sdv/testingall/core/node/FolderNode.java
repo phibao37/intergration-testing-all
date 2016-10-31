@@ -31,11 +31,6 @@ public class FolderNode extends INode {
 		super(name);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see sdv.testingall.core.node.INode#getIcon()
-	 */
 	@Override
 	public Icon getIcon()
 	{
