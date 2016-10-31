@@ -6,6 +6,10 @@
  */
 package sdv.testingall.core.loader;
 
+import java.nio.charset.Charset;
+
+import com.sun.istack.internal.Nullable;
+
 /**
  * Configuration during loader task
  * 
@@ -14,5 +18,15 @@ package sdv.testingall.core.loader;
  * @date 2016-10-25 VuSD created
  */
 public interface ILoaderConfig {
-	// loader properties
+
+	/**
+	 * Get the encoding to read the source file
+	 * 
+	 * @return encoding to read source code or <code>null</code> to use system default
+	 */
+	@Nullable
+	default Charset getFileCharset()
+	{
+		return null;
+	}
 }
