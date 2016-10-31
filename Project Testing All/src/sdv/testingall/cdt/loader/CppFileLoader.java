@@ -23,6 +23,7 @@ import org.eclipse.cdt.core.parser.ScannerInfo;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
+import sdv.testingall.util.SDVUtils;
 
 /**
  * Load a C/C++ source file
@@ -94,7 +95,8 @@ public class CppFileLoader {
 
 			return fileNode;
 		} catch (Exception e) {
-			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s\n", source.getPath(), e.getMessage());
+			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s\n", source.getPath(),
+					SDVUtils.gxceptionMsg(e));
 			return null;
 		}
 

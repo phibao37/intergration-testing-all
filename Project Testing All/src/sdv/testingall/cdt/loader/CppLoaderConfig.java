@@ -67,7 +67,7 @@ public class CppLoaderConfig implements ILoaderConfig {
 	 */
 	public String[] getIncludeDirs()
 	{
-		return includeDirs.toArray(new String[includeDirs.size()]);
+		return includeDirs == null ? null : includeDirs.toArray(new String[includeDirs.size()]);
 	}
 
 	/**
