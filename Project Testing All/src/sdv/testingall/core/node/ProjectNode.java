@@ -37,4 +37,10 @@ public class ProjectNode extends INode {
 		return ICON;
 	}
 
+	@Override
+	public int compareTo(INode o)
+	{
+		return 0;
+	}
+
 }

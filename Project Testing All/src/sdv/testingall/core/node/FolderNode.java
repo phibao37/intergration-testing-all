@@ -37,4 +37,20 @@ public class FolderNode extends INode {
 		return ICON;
 	}
 
+	@Override
+	public int compareTo(INode o)
+	{
+		// If o is a file, then this folder go first
+		if (o instanceof FileNode) {
+			return -1;
+		}
+
+		// If o is a folder, compare with its name
+		else if (o instanceof FolderNode) {
+			return toString().compareTo(o.toString());
+		}
+
+		return 0;
+	}
+
 }

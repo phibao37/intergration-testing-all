@@ -17,7 +17,7 @@ import javax.swing.Icon;
  *
  * @date 2016-10-25 VuSD created
  */
-public abstract class INode extends ArrayList<INode> implements Cloneable {
+public abstract class INode extends ArrayList<INode> implements Cloneable, Comparable<INode> {
 
 	private String content;
 
@@ -44,6 +44,8 @@ public abstract class INode extends ArrayList<INode> implements Cloneable {
 	}
 
 	/**
+	 * Return the node content
+	 * 
 	 * @return the content of the node to be display in the project tree
 	 */
 	@Override
@@ -67,4 +69,10 @@ public abstract class INode extends ArrayList<INode> implements Cloneable {
 	{
 		return (INode) super.clone();
 	}
+
+	/**
+	 * Compare with other node for sorting in tree display
+	 */
+	@Override
+	public abstract int compareTo(INode o);
 }
