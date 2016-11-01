@@ -6,6 +6,7 @@
  */
 package sdv.testingall.test;
 
+import sdv.testingall.core.logger.BaseLogger;
 import sdv.testingall.core.logger.ILogger;
 
 /**
@@ -15,14 +16,14 @@ import sdv.testingall.core.logger.ILogger;
  *
  * @date 2016-10-31 VuSD created
  */
-public class ConsoleLogger implements ILogger {
+public class ConsoleLogger extends BaseLogger {
 
 	@Override
 	public ILogger log(int type, String message, Object... args)
 	{
-		String formatted = String.format(message, args);
-		System.out.printf("[%s]: %s", type == ERROR ? "ERROR" : "INFO", formatted);
-		return this;
+		System.out.print(type == ERROR ? "[ERROR]: " : "[INFO]: ");
+		System.out.printf(message, args);
+		return super.log(type, message, args);
 	}
 
 }

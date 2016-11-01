@@ -9,6 +9,7 @@ package sdv.testingall.cdt.loader;
 import java.io.File;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
 import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
 import org.eclipse.cdt.core.model.AbstractLanguage;
@@ -89,10 +90,10 @@ public class CppFileLoader {
 			int options = ILanguage.OPTION_IS_SOURCE_UNIT;
 			IParserLogService log = new DefaultLogService();
 
-			lang.getASTTranslationUnit(content, scanInfo, fileCreator, null, options, log);
-			// TODO parse deeper
 			CppFileNode fileNode = new CppFileNode(source.getName(), isCpp);
+			IASTTranslationUnit u = lang.getASTTranslationUnit(content, scanInfo, fileCreator, null, options, log);
 
+			u.accept(new TranslationUnitParser(fileNode, config));
 			return fileNode;
 		} catch (Exception e) {
 			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s\n", source.getPath(),

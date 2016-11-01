@@ -28,6 +28,43 @@ public interface ILogger {
 	 */
 	ILogger log(int type, String message, Object... args);
 
+	/**
+	 * Plug another logger so that when this logger is called, the plugged logger also be called
+	 * 
+	 * @param plugger
+	 *            logger to plug
+	 */
+	void plug(ILogger plugger);
+
+	/**
+	 * Get the plugged logger
+	 * 
+	 * @return logger
+	 */
+	ILogger getPlug();
+
+	/**
+	 * Test whether a logger is plugged
+	 * 
+	 * @return plugged state
+	 */
+	default boolean isPlugged()
+	{
+		return getPlug() != null;
+	}
+
+	/**
+	 * Release current plugged logger
+	 * 
+	 * @return removed logger
+	 */
+	default ILogger unplug()
+	{
+		ILogger last = getPlug();
+		plug(null);
+		return last;
+	}
+
 	/** Indicate the log is an error */
 	int	ERROR	= 0;
 	/** Indicate the log is an information */
