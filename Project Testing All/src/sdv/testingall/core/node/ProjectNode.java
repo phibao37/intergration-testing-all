@@ -16,7 +16,7 @@ import javax.swing.ImageIcon;
  *
  * @date 2016-10-25 VuSD created
  */
-public class ProjectNode extends INode {
+public class ProjectNode extends BaseNode {
 
 	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/project.png"));
 

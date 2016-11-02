@@ -6,7 +6,7 @@
  */
 package sdv.testingall.core.node;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Icon;
 
@@ -17,20 +17,7 @@ import javax.swing.Icon;
  *
  * @date 2016-10-25 VuSD created
  */
-public abstract class INode extends ArrayList<INode> implements Cloneable, Comparable<INode> {
-
-	private String content;
-
-	/**
-	 * Create new node
-	 * 
-	 * @param content
-	 *            node content
-	 */
-	public INode(String content)
-	{
-		setContent(content);
-	}
+public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 
 	/**
 	 * Set the node content to be display in the project tree
@@ -38,10 +25,7 @@ public abstract class INode extends ArrayList<INode> implements Cloneable, Compa
 	 * @param content
 	 *            node content
 	 */
-	public void setContent(String content)
-	{
-		this.content = content;
-	}
+	void setContent(String content);
 
 	/**
 	 * Return the node content
@@ -49,30 +33,23 @@ public abstract class INode extends ArrayList<INode> implements Cloneable, Compa
 	 * @return the content of the node to be display in the project tree
 	 */
 	@Override
-	public String toString()
-	{
-		return content;
-	}
+	String toString();
 
 	/**
 	 * Get the image icon to be display in the left of node content
 	 * 
 	 * @return image icon
 	 */
-	public abstract Icon getIcon();
+	Icon getIcon();
 
 	/**
 	 * Get the copy of the node
 	 */
-	@Override
-	public INode clone()
-	{
-		return (INode) super.clone();
-	}
+	INode clone();
 
 	/**
 	 * Compare with other node for sorting in tree display
 	 */
 	@Override
-	public abstract int compareTo(INode o);
+	int compareTo(INode o);
 }
