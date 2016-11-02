@@ -21,8 +21,8 @@ public class ConsoleLogger extends BaseLogger {
 	@Override
 	public ILogger log(int type, String message, Object... args)
 	{
-		System.out.print(type == ERROR ? "[ERROR]: " : "[INFO]: ");
-		System.out.printf(message, args);
+		System.err.print(type == ERROR ? "[ERROR]: " : "[INFO]: ");
+		System.err.printf(message, args);
 		return super.log(type, message, args);
 	}
 
