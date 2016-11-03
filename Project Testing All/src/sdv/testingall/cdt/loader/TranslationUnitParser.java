@@ -9,6 +9,7 @@ package sdv.testingall.cdt.loader;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTProblem;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 
@@ -44,6 +45,20 @@ public class TranslationUnitParser extends ASTVisitor {
 
 		stackNode = new Stack<>();
 		stackNode.push(rootNode);
+	}
+
+	@Override
+	public int visit(IASTDeclaration declaration)
+	{
+		// TODO Auto-generated method stub
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public int leave(IASTDeclaration declaration)
+	{
+		// TODO Auto-generated method stub
+		return PROCESS_CONTINUE;
 	}
 
 	/**
