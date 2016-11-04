@@ -13,7 +13,7 @@ package sdv.testingall.core.type;
  *
  * @date 2016-11-02 VuSD created
  */
-public interface ITypeModifier {
+public interface ITypeModifier extends Cloneable {
 
 	/**
 	 * Check whether this type variable is constant
@@ -22,4 +22,10 @@ public interface ITypeModifier {
 	 */
 	boolean isConst();
 
+	/**
+	 * Create a copy of modifier
+	 * 
+	 * @return cloned modifier
+	 */
+	ITypeModifier clone();
 }

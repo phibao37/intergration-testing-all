@@ -75,4 +75,15 @@ public class BaseType implements IType {
 		return mdf;
 	}
 
+	@Override
+	public BaseType clone()
+	{
+		try {
+			BaseType clone = (BaseType) super.clone();
+			clone.mdf = mdf.clone();
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
 }

@@ -89,4 +89,13 @@ public class CppTypeModifier implements ITypeModifier {
 		this.pointerLevel = pointerLevel;
 	}
 
+	@Override
+	public CppTypeModifier clone()
+	{
+		try {
+			return (CppTypeModifier) super.clone();
+		} catch (CloneNotSupportedException e) {
+			return null;
+		}
+	}
 }

@@ -17,10 +17,10 @@ import sdv.testingall.core.node.INode;
  *
  * @date 2016-11-02 VuSD created
  */
-public interface IType {
+public interface IType extends Cloneable {
 
 	/**
-	 * Get the full-qualified name of the type
+	 * Get the name of the type
 	 * 
 	 * @return type name
 	 */
@@ -68,7 +68,7 @@ public interface IType {
 	}
 
 	/**
-	 * Get the list of name-part construct to this name
+	 * Get the list of name-part construct to this name (exclusion the name)
 	 * 
 	 * @return list of name-part or <code>null</code> if this name has only one part (as {@link #getName()})
 	 */
@@ -87,4 +87,11 @@ public interface IType {
 	{
 		return getNameParts() != null;
 	}
+
+	/**
+	 * Get a clone of type
+	 * 
+	 * @return cloned type
+	 */
+	IType clone();
 }
