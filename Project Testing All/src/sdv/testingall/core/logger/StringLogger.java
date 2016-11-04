@@ -4,10 +4,7 @@
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.test;
-
-import sdv.testingall.core.logger.BaseLogger;
-import sdv.testingall.core.logger.ILogger;
+package sdv.testingall.core.logger;
 
 /**
  * Log into a string builder

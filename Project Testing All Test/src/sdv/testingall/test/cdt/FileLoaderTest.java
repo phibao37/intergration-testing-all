@@ -15,9 +15,9 @@ import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.CppLoaderConfig;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.NamespaceNode;
+import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.logger.ILogger;
-import sdv.testingall.test.ConsoleLogger;
-import sdv.testingall.test.StringLogger;
+import sdv.testingall.core.logger.StringLogger;
 
 /**
  * Test for loading each C/C++ source code file

@@ -4,10 +4,9 @@
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.test;
+package sdv.testingall.core.logger;
 
-import sdv.testingall.core.logger.BaseLogger;
-import sdv.testingall.core.logger.ILogger;
+import java.io.PrintStream;
 
 /**
  * Log into standard output stream
@@ -21,8 +20,11 @@ public class ConsoleLogger extends BaseLogger {
 	@Override
 	public ILogger log(int type, String message, Object... args)
 	{
-		System.err.print(type == ERROR ? "[ERROR]: " : "[INFO]: ");
-		System.err.printf(message, args);
+		@SuppressWarnings("resource")
+		PrintStream ss = type == ERROR ? System.err : System.out;
+
+		ss.print(type == ERROR ? "[ERROR]: " : "[INFO]: ");
+		ss.printf(message, args);
 		return super.log(type, message, args);
 	}
 

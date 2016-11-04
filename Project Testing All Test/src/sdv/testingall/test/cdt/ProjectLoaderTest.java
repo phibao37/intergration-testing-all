@@ -14,11 +14,11 @@ import org.junit.Test;
 
 import sdv.testingall.cdt.loader.CppLoaderConfig;
 import sdv.testingall.cdt.loader.CppProjectLoader;
+import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.node.FileNode;
 import sdv.testingall.core.node.FolderNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
-import sdv.testingall.test.ConsoleLogger;
 
 /**
  * Test for loading C/C++ project

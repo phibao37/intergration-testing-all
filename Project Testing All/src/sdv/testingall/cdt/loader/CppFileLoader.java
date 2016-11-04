@@ -79,21 +79,40 @@ public class CppFileLoader {
 		return isCpp || isC ? loadSourceCode(config, isCpp) : null;
 	}
 
+	/**
+	 * Get the translation unit from source code
+	 * 
+	 * @param source
+	 *            source code object
+	 * @param config
+	 *            loader configuration
+	 * @param isCpp
+	 *            is this a C++ source file
+	 * @return translation unit node
+	 * @throws Exception
+	 *             error during load source code
+	 */
+	public static IASTTranslationUnit getTranslationUnit(File source, CppLoaderConfig config, boolean isCpp)
+			throws Exception
+	{
+		AbstractLanguage lang = isCpp ? GPPLanguage.getDefault() : GCCLanguage.getDefault();
+		char[] chars = FileUtils.readFileToString(source, config.getFileCharset()).toCharArray();
+		FileContent content = FileContent.create(source.getAbsolutePath(), chars);
+		IScannerInfo scanInfo = new ScannerInfo(config.getMarcoMap(), config.getIncludeDirs());
+		IncludeFileContentProvider fileCreator = IncludeFileContentProvider.getSavedFilesProvider();
+		int options = ILanguage.OPTION_IS_SOURCE_UNIT;
+		IParserLogService log = new DefaultLogService();
+
+		return lang.getASTTranslationUnit(content, scanInfo, fileCreator, null, options, log);
+	}
+
 	private INode loadSourceCode(CppLoaderConfig config, boolean isCpp)
 	{
 		try {
-			AbstractLanguage lang = isCpp ? GPPLanguage.getDefault() : GCCLanguage.getDefault();
-			char[] chars = FileUtils.readFileToString(source, config.getFileCharset()).toCharArray();
-			FileContent content = FileContent.create(source.getAbsolutePath(), chars);
-			IScannerInfo scanInfo = new ScannerInfo(config.getMarcoMap(), config.getIncludeDirs());
-			IncludeFileContentProvider fileCreator = IncludeFileContentProvider.getSavedFilesProvider();
-			int options = ILanguage.OPTION_IS_SOURCE_UNIT;
-			IParserLogService log = new DefaultLogService();
-
 			CppFileNode fileNode = new CppFileNode(source.getName(), isCpp);
-			IASTTranslationUnit u = lang.getASTTranslationUnit(content, scanInfo, fileCreator, null, options, log);
-
+			IASTTranslationUnit u = getTranslationUnit(source, config, isCpp);
 			u.accept(new TranslationUnitParser(fileNode, config));
+
 			return fileNode;
 		} catch (Exception e) {
 			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s\n", source.getPath(),
