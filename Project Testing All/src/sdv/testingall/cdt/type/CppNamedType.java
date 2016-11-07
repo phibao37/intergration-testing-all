@@ -6,7 +6,9 @@
  */
 package sdv.testingall.cdt.type;
 
+import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTName;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTElaboratedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNameSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 
@@ -23,7 +25,7 @@ import sdv.testingall.core.type.ITypeModifier;
 public class CppNamedType extends BaseType {
 
 	private boolean	isFullQualified;
-	private int		elaborated;
+	private int		elaborated	= ELA_NONE;
 
 	/**
 	 * Create new C/C++ use-defined type name
@@ -40,6 +42,22 @@ public class CppNamedType extends BaseType {
 		if (name.isQualified()) {
 			isFullQualified = ((ICPPASTQualifiedName) name).isFullyQualified();
 		}
+	}
+
+	/**
+	 * Create new C/C++ use-defined type name with elaborated type
+	 * 
+	 * @param name
+	 *            AST name node
+	 * @param mdf
+	 *            extra type modifier
+	 * @param elaborated
+	 *            elaborated type
+	 */
+	public CppNamedType(IASTName name, ITypeModifier mdf, int elaborated)
+	{
+		this(name, mdf);
+		this.elaborated = elaborated;
 	}
 
 	/**
@@ -83,29 +101,18 @@ public class CppNamedType extends BaseType {
 		return elaborated;
 	}
 
-	/**
-	 * Set the exact type (enum/class/struct/union) that this name should belong to
-	 * 
-	 * @param elaborated
-	 *            exact elaborated type
-	 */
-	public void setElaborated(int elaborated)
-	{
-		this.elaborated = elaborated;
-	}
-
 	/** This name does not explicit define exact type */
-	public static final int ELA_NONE = 0;
+	public static final int ELA_NONE = -1;
 
 	/** This name must be a struct */
-	public static final int ELA_STRUCT = 1;
+	public static final int ELA_STRUCT = IASTElaboratedTypeSpecifier.k_struct;
 
 	/** This name must be a union */
-	public static final int ELA_UNION = 2;
+	public static final int ELA_UNION = IASTElaboratedTypeSpecifier.k_union;
 
 	/** This name must be a enum */
-	public static final int ELA_ENUM = 3;
+	public static final int ELA_ENUM = IASTElaboratedTypeSpecifier.k_enum;
 
 	/** This name must be a class */
-	public static final int ELA_CLASS = 4;
+	public static final int ELA_CLASS = ICPPASTElaboratedTypeSpecifier.k_class;
 }

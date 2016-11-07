@@ -36,6 +36,7 @@ public class ASTUtil {
 	 */
 	public static void printTree(IASTNode node, String margin)
 	{
+		// [SAFE_CHECKED] getRawSignature() //
 		String content = node.getRawSignature().replaceAll("\\s", " ");
 		if (content.length() > 40) {
 			content = content.substring(0, 37) + "...";

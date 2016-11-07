@@ -9,19 +9,23 @@ package sdv.testingall.cdt.loader;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTProblem;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTElaboratedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 
+import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.NamespaceNode;
+import sdv.testingall.cdt.type.CppBasicType;
 import sdv.testingall.cdt.type.CppNamedType;
 import sdv.testingall.cdt.type.CppTypeModifier;
 import sdv.testingall.core.logger.ILogger;
@@ -38,8 +42,10 @@ import sdv.testingall.core.type.ITypeModifier;
  */
 public class TranslationUnitParser extends ASTVisitor {
 
-	private Stack<INode>	stackNode;
-	private ILogger			logger;
+	private Stack<INode>			stackNode;
+	private Stack<IASTDeclaration>	stackAST;
+
+	private CppLoaderConfig config;
 
 	/**
 	 * Parse a translation unit to get a full-tree of node
@@ -52,10 +58,12 @@ public class TranslationUnitParser extends ASTVisitor {
 	public TranslationUnitParser(CppFileNode rootNode, CppLoaderConfig config)
 	{
 		super(true);
-		this.logger = config.getLogger();
+		this.config = config;
 
 		stackNode = new Stack<>();
+		stackAST = new Stack<>();
 		stackNode.push(rootNode);
+		stackAST.push(null);
 	}
 
 	@Override
@@ -69,17 +77,32 @@ public class TranslationUnitParser extends ASTVisitor {
 			IASTSimpleDeclaration smpDec = (IASTSimpleDeclaration) declaration;
 			IASTDeclSpecifier decType = smpDec.getDeclSpecifier();
 			ITypeModifier mdf = parseBaseModifier(decType);
-			IType type = parseInlineType(decType, mdf);
+			INode complex = null;
+			boolean isTypedef = decType.getStorageClass() == IASTDeclSpecifier.sc_typedef;
 
+			IType type = parseInlineType(decType, mdf);
 			if (type == null) {
-				// Enum or composite type, parse to bind a node
+				if (decType instanceof IASTEnumerationSpecifier) {
+					// Enum
+				} else if (decType instanceof IASTCompositeTypeSpecifier) {
+					IASTCompositeTypeSpecifier comType = (IASTCompositeTypeSpecifier) decType;
+					type = new CppNamedType(comType.getName(), mdf);
+					complex = new ComplexTypeNode(comType);
+					type.setBind(complex);
+				} else {
+					throw new RuntimeException("Unsupported type: " + decType.getClass().getName());
+				}
 			}
 
-			// SimpleType
-			// NamedType
-			// Elaborate
-			// Enumeration
-			// Composite
+			// Check is typedef
+			for (IASTDeclarator dector : smpDec.getDeclarators()) {
+				//
+			}
+
+			if (complex != null) {
+				stackNode.push(complex);
+				stackAST.push(smpDec);
+			}
 		}
 
 		return PROCESS_CONTINUE;
@@ -102,33 +125,12 @@ public class TranslationUnitParser extends ASTVisitor {
 	static IType parseInlineType(IASTDeclSpecifier decType, ITypeModifier mdf)
 	{
 		if (decType instanceof IASTSimpleDeclSpecifier) {
-			// Build-int type, map to node
+			return new CppBasicType((IASTSimpleDeclSpecifier) decType, mdf);
 		} else if (decType instanceof IASTNamedTypeSpecifier) {
 			return new CppNamedType(((IASTNamedTypeSpecifier) decType).getName(), mdf);
 		} else if (decType instanceof IASTElaboratedTypeSpecifier) {
 			IASTElaboratedTypeSpecifier elaType = (IASTElaboratedTypeSpecifier) decType;
-			CppNamedType type = new CppNamedType(elaType.getName(), mdf);
-			int fixedType;
-
-			switch (elaType.getKind()) {
-			case IASTElaboratedTypeSpecifier.k_struct:
-				fixedType = CppNamedType.ELA_STRUCT;
-				break;
-			case IASTElaboratedTypeSpecifier.k_enum:
-				fixedType = CppNamedType.ELA_ENUM;
-				break;
-			case IASTElaboratedTypeSpecifier.k_union:
-				fixedType = CppNamedType.ELA_UNION;
-				break;
-			case ICPPASTElaboratedTypeSpecifier.k_class:
-				fixedType = CppNamedType.ELA_CLASS;
-				break;
-			default:
-				fixedType = CppNamedType.ELA_NONE;
-			}
-
-			type.setElaborated(fixedType);
-			return type;
+			return new CppNamedType(elaType.getName(), mdf, elaType.getKind());
 		}
 
 		return null;
@@ -151,7 +153,10 @@ public class TranslationUnitParser extends ASTVisitor {
 	@Override
 	public int leave(IASTDeclaration declaration)
 	{
-		// TODO Auto-generated method stub
+		if (stackAST.peek() == declaration) {
+			stackAST.pop();
+			stackNode.pop();
+		}
 		return PROCESS_CONTINUE;
 	}
 
@@ -161,7 +166,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	@Override
 	public int visit(IASTProblem problem)
 	{
-		logger.log(ILogger.ERROR, problem.getMessageWithLocation());
+		config.getLogger().log(ILogger.ERROR, problem.getMessageWithLocation());
 		return PROCESS_SKIP;
 	}
 
@@ -174,6 +179,7 @@ public class TranslationUnitParser extends ASTVisitor {
 		INode ns = new NamespaceNode(namespaceDefinition.getName().toString());
 		stackNode.peek().add(ns);
 		stackNode.push(ns);
+		stackAST.push(namespaceDefinition);
 		return PROCESS_CONTINUE;
 	}
 
@@ -184,6 +190,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	public int leave(ICPPASTNamespaceDefinition namespaceDefinition)
 	{
 		stackNode.pop();
+		stackAST.pop();
 		return PROCESS_CONTINUE;
 	}
 
