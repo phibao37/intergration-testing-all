@@ -14,13 +14,16 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTPointer;
+import org.eclipse.cdt.core.dom.ast.IASTPointerOperator;
 import org.eclipse.cdt.core.dom.ast.IASTProblem;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
 
 import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
@@ -30,6 +33,7 @@ import sdv.testingall.cdt.type.CppNamedType;
 import sdv.testingall.cdt.type.CppTypeModifier;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
+import sdv.testingall.core.node.VariableNode;
 import sdv.testingall.core.type.IType;
 import sdv.testingall.core.type.ITypeModifier;
 
@@ -82,21 +86,48 @@ public class TranslationUnitParser extends ASTVisitor {
 
 			IType type = parseInlineType(decType, mdf);
 			if (type == null) {
-				if (decType instanceof IASTEnumerationSpecifier) {
-					// Enum
-				} else if (decType instanceof IASTCompositeTypeSpecifier) {
+				if (decType instanceof IASTCompositeTypeSpecifier) {
 					IASTCompositeTypeSpecifier comType = (IASTCompositeTypeSpecifier) decType;
 					type = new CppNamedType(comType.getName(), mdf);
 					complex = new ComplexTypeNode(comType);
 					type.setBind(complex);
-				} else {
+				}
+				// else if (decType instanceof IASTEnumerationSpecifier) {
+				//
+				// }
+				else {
 					throw new RuntimeException("Unsupported type: " + decType.getClass().getName());
 				}
 			}
 
-			// Check is typedef
 			for (IASTDeclarator dector : smpDec.getDeclarators()) {
-				//
+				IType typeClone = type.clone();
+				CppTypeModifier cppMdf = (CppTypeModifier) typeClone.getTypeModifier();
+				INode decNode;
+
+				int pointerLevel = 0;
+				for (IASTPointerOperator pointer : dector.getPointerOperators()) {
+					if (pointer instanceof IASTPointer) {
+						pointerLevel++;
+					} else if (pointer instanceof ICPPASTReferenceOperator) {
+						cppMdf.setReference(true);
+					}
+				}
+				cppMdf.setPointerLevel(pointerLevel);
+
+				if (isTypedef) {
+					// Create typedef node
+					decNode = null;
+				} else {
+					VariableNode var = new VariableNode(typeClone, dector.getName().toString());
+					IASTInitializer init = dector.getInitializer();
+					decNode = var;
+
+					if (init != null) {
+						// Assign init expression
+					}
+				}
+				stackNode.peek().add(decNode);
 			}
 
 			if (complex != null) {

@@ -124,12 +124,7 @@ public class CppLoaderConfig implements ILoaderConfig {
 		return logger;
 	}
 
-	/**
-	 * Set the logger
-	 * 
-	 * @param logger
-	 *            the logger object to set
-	 */
+	@Override
 	public void setLogger(ILogger logger)
 	{
 		this.logger = logger;
