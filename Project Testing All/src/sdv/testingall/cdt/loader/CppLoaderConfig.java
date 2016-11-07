@@ -41,6 +41,9 @@ public class CppLoaderConfig implements ILoaderConfig {
 		listCExt.add(".c");
 		listCppExt.add(".cpp");
 		listCppExt.add(".cc");
+		listCppExt.add(".cxx");
+		listCppExt.add(".c++");
+		listCppExt.add(".cp");
 	}
 
 	/**

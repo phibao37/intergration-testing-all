@@ -25,6 +25,7 @@ public class ConsoleLogger extends BaseLogger {
 
 		ss.print(type == ERROR ? "[ERROR]: " : "[INFO]: ");
 		ss.printf(message, args);
+		ss.println();
 		return super.log(type, message, args);
 	}
 

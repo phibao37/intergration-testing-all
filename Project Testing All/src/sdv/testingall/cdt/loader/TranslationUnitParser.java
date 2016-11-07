@@ -100,6 +100,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			}
 
 			if (complex != null) {
+				stackNode.peek().add(complex);
 				stackNode.push(complex);
 				stackAST.push(smpDec);
 			}

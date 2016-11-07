@@ -52,4 +52,18 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	 */
 	@Override
 	int compareTo(INode o);
+
+	/**
+	 * Print the node structure
+	 * 
+	 * @param margin
+	 *            left-alignment to print
+	 */
+	default void printTree(String margin)
+	{
+		System.out.printf("%s%s [%s]\n", margin, this, getClass().getSimpleName());
+		for (INode child : this) {
+			child.printTree(margin + "   ");
+		}
+	}
 }
