@@ -19,13 +19,16 @@ import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.CppLoaderConfig;
 import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
+import sdv.testingall.cdt.node.CppFunctionNode;
 import sdv.testingall.cdt.node.CppVariableNode;
 import sdv.testingall.cdt.node.NamespaceNode;
 import sdv.testingall.cdt.type.CppBasicType;
+import sdv.testingall.cdt.type.CppNamedType;
 import sdv.testingall.cdt.type.CppTypeModifier;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.logger.StringLogger;
+import sdv.testingall.core.node.VariableNode;
 
 /**
  * Test for loading each C/C++ source code file
@@ -398,4 +401,163 @@ public class FileLoaderTest {
 
 	}
 
+	/**
+	 * @CHECKPOINT Load a file with function
+	 * 
+	 * @SUCCESS correct tree structure returned
+	 */
+	@Test
+	public void testLoadFunction()
+	{
+		CONFIG.setLogger(new ConsoleLogger());
+
+		File source = new File("data-test/cdt/ProjectLoader2/Function.cpp");
+		CppFileLoader loader = new CppFileLoader(source);
+		CppFileNode root = (CppFileNode) loader.loadFile(CONFIG);
+
+		assertNotNull(root);
+		assertEquals(3, root.size());
+
+		{
+			int index = 0;
+			assertTrue(root.get(index) instanceof CppFunctionNode);
+			CppFunctionNode fn = (CppFunctionNode) root.get(index);
+
+			assertEquals(0, fn.size());
+			assertFalse(fn.isDeclare());
+			assertEquals("fn1", fn.getName());
+			assertEquals("fn1", fn.getNameType().getName());
+			assertFalse(fn.getNameType().isMultipleNamePart());
+
+			assertTrue(fn.getType() instanceof CppBasicType);
+			CppBasicType type = (CppBasicType) fn.getType();
+			assertEquals("int", type.getName());
+			assertEquals(CppBasicType.INT, type.getType());
+			assertFalse(type.isSigned() || type.isUnsigned() || type.isShort() || type.isLong() || type.isLongLong());
+			assertFalse(type.isMultipleNamePart());
+
+			assertTrue(type.getTypeModifier() instanceof CppTypeModifier);
+			CppTypeModifier mdf = (CppTypeModifier) type.getTypeModifier();
+			assertEquals(0, mdf.getPointerLevel());
+			assertFalse(mdf.isConst());
+			assertFalse(mdf.isStatic());
+			assertFalse(mdf.isReference());
+
+			VariableNode[] params = fn.getParameter();
+			assertEquals(0, params.length);
+		}
+
+		{
+			int index = 1;
+			assertTrue(root.get(index) instanceof CppFunctionNode);
+			CppFunctionNode fn = (CppFunctionNode) root.get(index);
+
+			{
+				assertEquals(0, fn.size());
+				assertFalse(fn.isDeclare());
+				assertEquals("fn2", fn.getName());
+				assertEquals("fn2", fn.getNameType().getName());
+				assertFalse(fn.getNameType().isMultipleNamePart());
+
+				assertTrue(fn.getType() instanceof CppBasicType);
+				CppBasicType type = (CppBasicType) fn.getType();
+				assertEquals("void", type.getName());
+				assertEquals(CppBasicType.VOID, type.getType());
+				assertFalse(
+						type.isSigned() || type.isUnsigned() || type.isShort() || type.isLong() || type.isLongLong());
+				assertFalse(type.isMultipleNamePart());
+
+				assertTrue(type.getTypeModifier() instanceof CppTypeModifier);
+				CppTypeModifier mdf = (CppTypeModifier) type.getTypeModifier();
+				assertEquals(1, mdf.getPointerLevel());
+				assertFalse(mdf.isConst());
+				assertFalse(mdf.isStatic());
+				assertFalse(mdf.isReference());
+			}
+
+			VariableNode[] params = fn.getParameter();
+			assertEquals(2, params.length);
+
+			{
+				int iindex = 0;
+				VariableNode param = params[iindex];
+				assertEquals(0, param.size());
+				assertEquals("x", param.getName());
+
+				assertTrue(param.getType() instanceof CppBasicType);
+				CppBasicType type = (CppBasicType) param.getType();
+				assertEquals("int", type.getName());
+				assertEquals(CppBasicType.INT, type.getType());
+				assertFalse(
+						type.isSigned() || type.isUnsigned() || type.isShort() || type.isLong() || type.isLongLong());
+				assertFalse(type.isMultipleNamePart());
+
+				assertTrue(type.getTypeModifier() instanceof CppTypeModifier);
+				CppTypeModifier mdf = (CppTypeModifier) type.getTypeModifier();
+				assertEquals(0, mdf.getPointerLevel());
+				assertFalse(mdf.isConst());
+				assertFalse(mdf.isStatic());
+				assertFalse(mdf.isReference());
+			}
+
+			{
+				int iindex = 1;
+				VariableNode param = params[iindex];
+				assertEquals(0, param.size());
+				assertEquals("y", param.getName());
+
+				assertTrue(param.getType() instanceof CppBasicType);
+				CppBasicType type = (CppBasicType) param.getType();
+				assertEquals("const char", type.getName());
+				assertEquals(CppBasicType.CHAR, type.getType());
+				assertFalse(
+						type.isSigned() || type.isUnsigned() || type.isShort() || type.isLong() || type.isLongLong());
+				assertFalse(type.isMultipleNamePart());
+
+				assertTrue(type.getTypeModifier() instanceof CppTypeModifier);
+				CppTypeModifier mdf = (CppTypeModifier) type.getTypeModifier();
+				assertEquals(1, mdf.getPointerLevel());
+				assertTrue(mdf.isConst());
+				assertFalse(mdf.isStatic());
+				assertFalse(mdf.isReference());
+			}
+		}
+
+		{
+			int index = 2;
+			assertTrue(root.get(index) instanceof CppFunctionNode);
+			CppFunctionNode fn = (CppFunctionNode) root.get(index);
+
+			assertEquals(0, fn.size());
+			assertFalse(fn.isDeclare());
+			assertEquals("getX", fn.getName());
+			assertEquals("getX", fn.getNameType().getName());
+
+			assertTrue(fn.getNameType() instanceof CppNamedType);
+			CppNamedType nameType = (CppNamedType) fn.getNameType();
+			assertTrue(nameType.isMultipleNamePart());
+			assertFalse(nameType.isFullQualified());
+
+			assertTrue(fn.getType() instanceof CppNamedType);
+			CppNamedType type = (CppNamedType) fn.getType();
+			assertEquals("string", type.getName());
+			assertTrue(type.isMultipleNamePart());
+			assertTrue(type.isFullQualified());
+
+			String[] namePart = type.getNameParts();
+			assertEquals(1, namePart.length);
+			assertEquals("std", namePart[0]);
+
+			assertTrue(type.getTypeModifier() instanceof CppTypeModifier);
+			CppTypeModifier mdf = (CppTypeModifier) type.getTypeModifier();
+			assertEquals(0, mdf.getPointerLevel());
+			assertFalse(mdf.isConst());
+			assertFalse(mdf.isStatic());
+			assertFalse(mdf.isReference());
+
+			VariableNode[] params = fn.getParameter();
+			assertEquals(0, params.length);
+		}
+
+	}
 }

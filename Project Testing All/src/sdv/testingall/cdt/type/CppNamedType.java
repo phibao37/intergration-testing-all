@@ -39,7 +39,7 @@ public class CppNamedType extends BaseType {
 	{
 		super(name.getLastName().toString(), parseNamePart(name), mdf);
 
-		if (name.isQualified()) {
+		if (name instanceof ICPPASTQualifiedName) {
 			isFullQualified = ((ICPPASTQualifiedName) name).isFullyQualified();
 		}
 	}
@@ -69,7 +69,7 @@ public class CppNamedType extends BaseType {
 	 */
 	static String[] parseNamePart(IASTName name)
 	{
-		if (name.isQualified()) {
+		if (name instanceof ICPPASTQualifiedName) {
 			ICPPASTNameSpecifier[] listQualified = ((ICPPASTQualifiedName) name).getQualifier();
 			String[] listPart = new String[listQualified.length];
 

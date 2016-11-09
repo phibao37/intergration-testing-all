@@ -6,6 +6,7 @@
  */
 package sdv.testingall.cdt.loader;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
@@ -16,18 +17,24 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTPointer;
 import org.eclipse.cdt.core.dom.ast.IASTPointerOperator;
 import org.eclipse.cdt.core.dom.ast.IASTProblem;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
+import org.eclipse.cdt.core.dom.ast.IASTStandardFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
+import org.eclipse.cdt.core.dom.ast.gnu.c.ICASTKnRFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.IASTAmbiguousDeclarator;
 
+import javafx.util.Pair;
 import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
+import sdv.testingall.cdt.node.CppFunctionNode;
 import sdv.testingall.cdt.node.CppVariableNode;
 import sdv.testingall.cdt.node.NamespaceNode;
 import sdv.testingall.cdt.type.CppBasicType;
@@ -35,6 +42,7 @@ import sdv.testingall.cdt.type.CppNamedType;
 import sdv.testingall.cdt.type.CppTypeModifier;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
+import sdv.testingall.core.node.VariableNode;
 import sdv.testingall.core.type.IType;
 import sdv.testingall.core.type.ITypeModifier;
 
@@ -47,10 +55,8 @@ import sdv.testingall.core.type.ITypeModifier;
  */
 public class TranslationUnitParser extends ASTVisitor {
 
-	private Stack<INode>			stackNode;
-	private Stack<IASTDeclaration>	stackAST;
-
-	private CppLoaderConfig config;
+	private Stack<Pair<INode, IASTDeclaration>>	stackNode;
+	private CppLoaderConfig						config;
 
 	/**
 	 * Parse a translation unit to get a full-tree of node
@@ -66,16 +72,40 @@ public class TranslationUnitParser extends ASTVisitor {
 		this.config = config;
 
 		stackNode = new Stack<>();
-		stackAST = new Stack<>();
-		stackNode.push(rootNode);
-		stackAST.push(null);
+		stackNode.push(new Pair<>(rootNode, null));
 	}
 
 	@Override
 	public int visit(IASTDeclaration declaration)
 	{
 		if (declaration instanceof IASTFunctionDefinition) {
-			//
+			IASTFunctionDefinition fnDef = (IASTFunctionDefinition) declaration;
+			IASTDeclSpecifier decType = fnDef.getDeclSpecifier();
+			IASTFunctionDeclarator fnDecA = fnDef.getDeclarator();
+			IASTName fnName = fnDecA.getName();
+			CppTypeModifier mdf = parseBaseModifier(decType);
+			IType type = parseInlineType(decType, mdf);
+			if (fnDecA instanceof ICASTKnRFunctionDeclarator) {
+				config.getLogger().log(ILogger.ERROR, "%s(): K&R C Function will not be supported!", fnName);
+				return PROCESS_SKIP;
+			}
+			IASTStandardFunctionDeclarator fnDec = (IASTStandardFunctionDeclarator) fnDecA;
+			ArrayList<CppVariableNode> listParam = new ArrayList<>();
+
+			parseDeclaratorModifier(mdf, fnDec);
+			for (IASTParameterDeclaration paramDec : fnDec.getParameters()) {
+				IASTDeclSpecifier pDecType = paramDec.getDeclSpecifier();
+				IASTDeclarator pDector = paramDec.getDeclarator();
+				CppTypeModifier pMdf = parseBaseModifier(pDecType);
+
+				parseDeclaratorModifier(pMdf, pDector);
+				listParam
+						.add(new CppVariableNode(parseInlineType(pDecType, pMdf), pDector.getName().toString(), false));
+			}
+
+			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
+					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
+			stackNode.peek().getKey().add(fnNode);
 		}
 
 		else if (declaration instanceof IASTSimpleDeclaration) {
@@ -104,19 +134,9 @@ public class TranslationUnitParser extends ASTVisitor {
 
 			for (IASTDeclarator dector : smpDec.getDeclarators()) {
 				IType typeClone = type.clone();
-				CppTypeModifier cppMdf = (CppTypeModifier) typeClone.getTypeModifier();
 				INode decNode;
 
-				int pointerLevel = 0;
-				for (IASTPointerOperator pointer : dector.getPointerOperators()) {
-					if (pointer instanceof IASTPointer) {
-						pointerLevel++;
-					} else if (pointer instanceof ICPPASTReferenceOperator) {
-						cppMdf.setReference(true);
-					}
-				}
-				cppMdf.setPointerLevel(pointerLevel);
-
+				parseDeclaratorModifier((CppTypeModifier) typeClone.getTypeModifier(), dector);
 				if (dector instanceof IASTFunctionDeclarator) {
 					// Parse function declarator
 					decNode = null;
@@ -124,9 +144,6 @@ public class TranslationUnitParser extends ASTVisitor {
 					// Ambiguous declare will be ignored
 					decNode = null;
 				} else {
-					// Parse array [] to modifier
-					// Parse bit field to modifier
-
 					if (isTypedef) {
 						// Parse typedef
 						decNode = null;
@@ -141,14 +158,13 @@ public class TranslationUnitParser extends ASTVisitor {
 				}
 
 				if (decNode != null) {
-					stackNode.peek().add(decNode);
+					stackNode.peek().getKey().add(decNode);
 				}
 			}
 
 			if (complex != null) {
-				stackNode.peek().add(complex);
-				stackNode.push(complex);
-				stackAST.push(smpDec);
+				stackNode.peek().getKey().add(complex);
+				stackNode.push(new Pair<>(complex, smpDec));
 			}
 		}
 
@@ -190,7 +206,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            AST type to parse
 	 * @return base modifier
 	 */
-	static ITypeModifier parseBaseModifier(IASTDeclSpecifier decType)
+	static CppTypeModifier parseBaseModifier(IASTDeclSpecifier decType)
 	{
 		CppTypeModifier mdf = new CppTypeModifier();
 		mdf.setConst(decType.isConst());
@@ -198,11 +214,37 @@ public class TranslationUnitParser extends ASTVisitor {
 		return mdf;
 	}
 
+	/**
+	 * Parse a modifier attached to the declare name
+	 * 
+	 * @param mdf
+	 *            modifier to edit
+	 * @param dec
+	 *            the declarator node
+	 * @return the modifier (same as <code>mdf</code>)
+	 */
+	static CppTypeModifier parseDeclaratorModifier(CppTypeModifier mdf, IASTDeclarator dec)
+	{
+		int pointerLevel = 0;
+		for (IASTPointerOperator pointer : dec.getPointerOperators()) {
+			if (pointer instanceof IASTPointer) {
+				pointerLevel++;
+			} else if (pointer instanceof ICPPASTReferenceOperator) {
+				mdf.setReference(true);
+			}
+		}
+		mdf.setPointerLevel(pointerLevel);
+
+		// Parse array [] to modifier
+		// Parse bit field to modifier
+
+		return mdf;
+	}
+
 	@Override
 	public int leave(IASTDeclaration declaration)
 	{
-		if (stackAST.peek() == declaration) {
-			stackAST.pop();
+		if (stackNode.peek().getValue() == declaration) {
 			stackNode.pop();
 		}
 		return PROCESS_CONTINUE;
@@ -225,9 +267,8 @@ public class TranslationUnitParser extends ASTVisitor {
 	public int visit(ICPPASTNamespaceDefinition namespaceDefinition)
 	{
 		INode ns = new NamespaceNode(namespaceDefinition.getName().toString());
-		stackNode.peek().add(ns);
-		stackNode.push(ns);
-		stackAST.push(namespaceDefinition);
+		stackNode.peek().getKey().add(ns);
+		stackNode.push(new Pair<>(ns, namespaceDefinition));
 		return PROCESS_CONTINUE;
 	}
 
@@ -238,7 +279,6 @@ public class TranslationUnitParser extends ASTVisitor {
 	public int leave(ICPPASTNamespaceDefinition namespaceDefinition)
 	{
 		stackNode.pop();
-		stackAST.pop();
 		return PROCESS_CONTINUE;
 	}
 
