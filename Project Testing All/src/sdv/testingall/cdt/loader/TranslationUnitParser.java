@@ -14,8 +14,8 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
-import org.eclipse.cdt.core.dom.ast.IASTInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTPointer;
 import org.eclipse.cdt.core.dom.ast.IASTPointerOperator;
@@ -24,16 +24,17 @@ import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
+import org.eclipse.cdt.internal.core.dom.parser.IASTAmbiguousDeclarator;
 
 import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
+import sdv.testingall.cdt.node.CppVariableNode;
 import sdv.testingall.cdt.node.NamespaceNode;
 import sdv.testingall.cdt.type.CppBasicType;
 import sdv.testingall.cdt.type.CppNamedType;
 import sdv.testingall.cdt.type.CppTypeModifier;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
-import sdv.testingall.core.node.VariableNode;
 import sdv.testingall.core.type.IType;
 import sdv.testingall.core.type.ITypeModifier;
 
@@ -83,6 +84,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			ITypeModifier mdf = parseBaseModifier(decType);
 			INode complex = null;
 			boolean isTypedef = decType.getStorageClass() == IASTDeclSpecifier.sc_typedef;
+			boolean isExtern = decType.getStorageClass() == IASTDeclSpecifier.sc_extern;
 
 			IType type = parseInlineType(decType, mdf);
 			if (type == null) {
@@ -115,19 +117,32 @@ public class TranslationUnitParser extends ASTVisitor {
 				}
 				cppMdf.setPointerLevel(pointerLevel);
 
-				if (isTypedef) {
-					// Create typedef node
+				if (dector instanceof IASTFunctionDeclarator) {
+					// Parse function declarator
+					decNode = null;
+				} else if (dector instanceof IASTAmbiguousDeclarator) {
+					// Ambiguous declare will be ignored
 					decNode = null;
 				} else {
-					VariableNode var = new VariableNode(typeClone, dector.getName().toString());
-					IASTInitializer init = dector.getInitializer();
-					decNode = var;
+					// Parse array [] to modifier
+					// Parse bit field to modifier
 
-					if (init != null) {
-						// Assign init expression
+					if (isTypedef) {
+						// Parse typedef
+						decNode = null;
+					} else {
+						CppVariableNode var = new CppVariableNode(typeClone, dector.getName().toString(), isExtern);
+						decNode = var;
+
+						if (dector.getInitializer() != null) {
+							// Assign init expression
+						}
 					}
 				}
-				stackNode.peek().add(decNode);
+
+				if (decNode != null) {
+					stackNode.peek().add(decNode);
+				}
 			}
 
 			if (complex != null) {
@@ -179,6 +194,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	{
 		CppTypeModifier mdf = new CppTypeModifier();
 		mdf.setConst(decType.isConst());
+		mdf.setStatic(decType.getStorageClass() == IASTDeclSpecifier.sc_static);
 		return mdf;
 	}
 

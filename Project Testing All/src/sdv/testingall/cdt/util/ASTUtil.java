@@ -8,6 +8,7 @@ package sdv.testingall.cdt.util;
 
 import java.io.File;
 
+import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 
@@ -38,10 +39,35 @@ public class ASTUtil {
 	{
 		// [SAFE_CHECKED] getRawSignature() //
 		String content = node.getRawSignature().replaceAll("\\s", " ");
+		String attr = node.getClass().getSimpleName();
 		if (content.length() > 40) {
 			content = content.substring(0, 37) + "...";
 		}
-		System.out.printf("%s%s [%s]\n", margin, content, node.getClass().getSimpleName());
+
+		if (node instanceof IASTDeclSpecifier) {
+			switch (((IASTDeclSpecifier) node).getStorageClass()) {
+			case IASTDeclSpecifier.sc_typedef:
+				attr += "-typedef";
+				break;
+			case IASTDeclSpecifier.sc_extern:
+				attr += "-extern";
+				break;
+			case IASTDeclSpecifier.sc_static:
+				attr += "-static";
+				break;
+			case IASTDeclSpecifier.sc_auto:
+				attr += "-auto";
+				break;
+			case IASTDeclSpecifier.sc_register:
+				attr += "-register";
+				break;
+			case IASTDeclSpecifier.sc_mutable:
+				attr += "-mutable";
+				break;
+			}
+		}
+
+		System.out.printf("%s%s [%s]\n", margin, content, attr);
 
 		for (IASTNode child : node.getChildren()) {
 			printTree(child, margin + "   ");

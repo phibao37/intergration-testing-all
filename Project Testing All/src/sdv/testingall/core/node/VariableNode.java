@@ -17,7 +17,7 @@ import sdv.testingall.core.type.IType;
  *
  * @date 2016-11-02 VuSD created
  */
-public class VariableNode extends BaseNode {
+public abstract class VariableNode extends BaseNode {
 
 	private IType	type;
 	private String	name;

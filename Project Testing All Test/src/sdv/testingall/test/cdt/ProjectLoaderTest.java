@@ -6,10 +6,12 @@
  */
 package sdv.testingall.test.cdt;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.util.Comparator;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import sdv.testingall.cdt.loader.CppLoaderConfig;
@@ -49,8 +51,8 @@ public class ProjectLoaderTest {
 		loader.setLoaderConfig(CONFIG);
 
 		ProjectNode node = loader.loadProject();
-		Assert.assertNotNull(node);
-		Assert.assertEquals(0, node.size());
+		assertNotNull(node);
+		assertEquals(0, node.size());
 	}
 
 	/**
@@ -66,19 +68,19 @@ public class ProjectLoaderTest {
 		loader.setLoaderConfig(CONFIG);
 
 		ProjectNode node = loader.loadProject();
-		Assert.assertNotNull(node);
-		Assert.assertEquals(2, node.size());
+		assertNotNull(node);
+		assertEquals(2, node.size());
 
 		node.sort(NODE_COMPARE);
 		FolderNode node1 = (FolderNode) node.get(0);
 		FileNode node2 = (FileNode) node.get(1);
 
-		Assert.assertEquals("B", node1.toString());
-		Assert.assertEquals("A.cpp", node2.toString());
+		assertEquals("B", node1.toString());
+		assertEquals("A.cpp", node2.toString());
 
-		Assert.assertEquals(1, node1.size());
+		assertEquals(1, node1.size());
 		FileNode node11 = (FileNode) node1.get(0);
-		Assert.assertEquals("C.cpp", node11.toString());
+		assertEquals("C.cpp", node11.toString());
 	}
 
 }

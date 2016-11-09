@@ -42,6 +42,11 @@ public class CppBasicType extends BaseType {
 		isLong = simpleType.isLong();
 		isLongLong = simpleType.isLongLong();
 		typeFlag = simpleType.getType();
+
+		// Re-sync type "int" if omitted
+		if (typeFlag == UNSPECIFIED && (isSigned || isUnsigned || isShort || isLong || isLongLong)) {
+			typeFlag = INT;
+		}
 	}
 
 	/**
@@ -106,8 +111,7 @@ public class CppBasicType extends BaseType {
 	}
 
 	/**
-	 * Used for omitted declaration specifiers. E.g. for declaration of constructors, or in plain c, where this defaults
-	 * to an integer.
+	 * Used for declaration of constructors, destructors
 	 */
 	public static final int UNSPECIFIED = IASTSimpleDeclSpecifier.t_unspecified;
 

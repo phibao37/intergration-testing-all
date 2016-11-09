@@ -18,7 +18,7 @@ import sdv.testingall.core.type.IType;
  *
  * @date 2016-11-02 VuSD created
  */
-public class FunctionNode extends BaseNode {
+public abstract class FunctionNode extends BaseNode {
 
 	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/function.png"));
 

@@ -19,6 +19,7 @@ public class CppTypeModifier implements ITypeModifier {
 
 	private boolean	isConst;
 	private boolean	isRef;
+	private boolean	isStatic;
 	private int		pointerLevel;
 
 	/**
@@ -97,5 +98,25 @@ public class CppTypeModifier implements ITypeModifier {
 		} catch (CloneNotSupportedException e) {
 			return null;
 		}
+	}
+
+	/**
+	 * Check whether this variable type is static
+	 * 
+	 * @return static state
+	 */
+	public boolean isStatic()
+	{
+		return isStatic;
+	}
+
+	/**
+	 * Set whether this variable type is static
+	 * 
+	 * @return static state
+	 */
+	public void setStatic(boolean isStatic)
+	{
+		this.isStatic = isStatic;
 	}
 }
