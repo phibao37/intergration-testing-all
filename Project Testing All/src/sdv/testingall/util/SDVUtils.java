@@ -27,4 +27,18 @@ public class SDVUtils {
 		String msg = e.getMessage();
 		return msg == null || msg.isEmpty() ? e.getClass().getSimpleName() : msg;
 	}
+
+	/**
+	 * Remove the comment flag, retain only the text
+	 * 
+	 * @param comment
+	 *            string to be format
+	 * @return formatted comment
+	 */
+	public static String removeCommentFlag(String comment)
+	{
+		return comment.replaceAll("(?m)(^\\/{2,}[ \\t]?)|(^\\/\\*+)|(^ *\\*(?!\\/) ?)|(\\*+\\/$)", "")
+				.replaceAll("(?m)(^[\\n\\x0B\\f\\r]+)", "");
+	}
+
 }

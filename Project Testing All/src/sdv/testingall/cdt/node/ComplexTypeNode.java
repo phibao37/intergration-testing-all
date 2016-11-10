@@ -14,6 +14,7 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 
 import sdv.testingall.core.node.BaseNode;
 import sdv.testingall.core.node.INode;
+import sdv.testingall.util.SDVUtils;
 
 /**
  * Represent composite data type: struct, union, class
@@ -106,5 +107,11 @@ public class ComplexTypeNode extends BaseNode {
 	 * Composite type: <code>class</code>
 	 */
 	public static final int CLASS = ICPPASTCompositeTypeSpecifier.k_class;
+
+	@Override
+	public void setDescription(String description)
+	{
+		super.setDescription(SDVUtils.removeCommentFlag(description));
+	}
 
 }

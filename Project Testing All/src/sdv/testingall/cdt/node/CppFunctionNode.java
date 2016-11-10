@@ -13,6 +13,7 @@ import com.sun.istack.internal.Nullable;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.VariableNode;
 import sdv.testingall.core.type.IType;
+import sdv.testingall.util.SDVUtils;
 
 /**
  * C/C++ function node
@@ -59,6 +60,12 @@ public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 	public IType getNameType()
 	{
 		return nameType;
+	}
+
+	@Override
+	public void setDescription(String description)
+	{
+		super.setDescription(SDVUtils.removeCommentFlag(description));
 	}
 
 }

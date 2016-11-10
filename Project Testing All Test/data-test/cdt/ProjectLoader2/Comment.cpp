@@ -19,6 +19,8 @@ float fn1(int x, float y)
  *
  * @date 2016-11-10 VuSD created
  */
+ // Note this is final class
+ // Note2 this is base class
 class Animal {
 
 };
