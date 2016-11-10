@@ -20,6 +20,8 @@ import org.eclipse.cdt.core.parser.IParserLogService;
 import org.eclipse.cdt.core.parser.IScannerInfo;
 import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
 
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.core.logger.ILogger;
@@ -111,8 +113,9 @@ public class CppFileLoader {
 		try {
 			CppFileNode fileNode = new CppFileNode(source.getName(), isCpp);
 			IASTTranslationUnit u = getTranslationUnit(source, config, isCpp);
-			u.accept(new TranslationUnitParser(fileNode, config));
+			NodeCommentMap commentMap = ASTCommenter.getCommentedNodeMap(u);
 
+			u.accept(new TranslationUnitParser(fileNode, config, commentMap));
 			return fileNode;
 		} catch (Exception e) {
 			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s\n", source.getPath(),

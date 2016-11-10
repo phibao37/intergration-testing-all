@@ -560,4 +560,38 @@ public class FileLoaderTest {
 		}
 
 	}
+
+	/**
+	 * @CHECKPOINT Load a file with comment inside
+	 * 
+	 * @SUCCESS correct comment returned
+	 */
+	@Test
+	public void testLoadComment()
+	{
+		CONFIG.setLogger(new ConsoleLogger());
+
+		File source = new File("data-test/cdt/ProjectLoader2/Comment.cpp");
+		CppFileLoader loader = new CppFileLoader(source);
+		CppFileNode root = (CppFileNode) loader.loadFile(CONFIG);
+
+		assertNotNull(root);
+		assertEquals(2, root.size());
+
+		{
+			assertTrue(root.get(0) instanceof CppFunctionNode);
+			String cmt = root.get(0).getDescription();
+
+			assertNotNull(cmt);
+			System.out.println(cmt);
+		}
+
+		{
+			assertTrue(root.get(1) instanceof ComplexTypeNode);
+			String cmt = root.get(1).getDescription();
+
+			assertNotNull(cmt);
+			System.out.println(cmt);
+		}
+	}
 }

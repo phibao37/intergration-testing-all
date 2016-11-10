@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.swing.Icon;
 
+import com.sun.istack.internal.Nullable;
+
 /**
  * Base for all node in a project structure
  * 
@@ -52,6 +54,22 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	 */
 	@Override
 	int compareTo(INode o);
+
+	/**
+	 * Set the description details for this node
+	 * 
+	 * @param des
+	 *            description about node
+	 */
+	void setDescription(String des);
+
+	/**
+	 * Get the description details for this node
+	 * 
+	 * @return description about node
+	 */
+	@Nullable
+	String getDescription();
 
 	/**
 	 * Print the node structure

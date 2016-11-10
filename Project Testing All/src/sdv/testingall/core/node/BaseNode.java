@@ -17,7 +17,8 @@ import java.util.ArrayList;
  */
 public abstract class BaseNode extends ArrayList<INode> implements INode {
 
-	private String content;
+	private String	content;
+	private String	description;
 
 	/**
 	 * Create new node
@@ -46,6 +47,18 @@ public abstract class BaseNode extends ArrayList<INode> implements INode {
 	public BaseNode clone()
 	{
 		return (BaseNode) super.clone();
+	}
+
+	@Override
+	public String getDescription()
+	{
+		return description;
+	}
+
+	@Override
+	public void setDescription(String description)
+	{
+		this.description = description;
 	}
 
 }

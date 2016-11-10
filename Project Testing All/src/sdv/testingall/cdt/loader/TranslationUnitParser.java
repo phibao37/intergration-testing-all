@@ -7,9 +7,11 @@
 package sdv.testingall.cdt.loader;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 import org.eclipse.cdt.core.dom.ast.ASTVisitor;
+import org.eclipse.cdt.core.dom.ast.IASTComment;
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
@@ -17,8 +19,10 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
+import org.eclipse.cdt.core.dom.ast.IASTInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNamedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTParameterDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTPointer;
 import org.eclipse.cdt.core.dom.ast.IASTPointerOperator;
@@ -30,6 +34,9 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNamespaceDefinition;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
 import org.eclipse.cdt.core.dom.ast.gnu.c.ICASTKnRFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.IASTAmbiguousDeclarator;
+import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
+
+import com.sun.istack.internal.Nullable;
 
 import javafx.util.Pair;
 import sdv.testingall.cdt.node.ComplexTypeNode;
@@ -40,6 +47,7 @@ import sdv.testingall.cdt.node.NamespaceNode;
 import sdv.testingall.cdt.type.CppBasicType;
 import sdv.testingall.cdt.type.CppNamedType;
 import sdv.testingall.cdt.type.CppTypeModifier;
+import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.VariableNode;
@@ -47,7 +55,9 @@ import sdv.testingall.core.type.IType;
 import sdv.testingall.core.type.ITypeModifier;
 
 /**
- * Parse a C/C++ translation unit
+ * Parse a C/C++ translation unit.
+ * 
+ * @note TODO parse as IASTName.resolveBinding() to IType for faster parser
  * 
  * @author VuSD
  *
@@ -55,8 +65,10 @@ import sdv.testingall.core.type.ITypeModifier;
  */
 public class TranslationUnitParser extends ASTVisitor {
 
-	private Stack<Pair<INode, IASTDeclaration>>	stackNode;
-	private CppLoaderConfig						config;
+	private Stack<Pair<INode, IASTDeclaration>> stackNode;
+
+	private CppLoaderConfig	config;
+	private NodeCommentMap	commentMap;
 
 	/**
 	 * Parse a translation unit to get a full-tree of node
@@ -66,13 +78,43 @@ public class TranslationUnitParser extends ASTVisitor {
 	 * @param config
 	 *            load configuration
 	 */
-	public TranslationUnitParser(CppFileNode rootNode, CppLoaderConfig config)
+	public TranslationUnitParser(CppFileNode rootNode, CppLoaderConfig config, NodeCommentMap commentMap)
 	{
 		super(true);
 		this.config = config;
+		this.commentMap = commentMap;
 
 		stackNode = new Stack<>();
 		stackNode.push(new Pair<>(rootNode, null));
+	}
+
+	/**
+	 * Add a node to last parent node in a stack
+	 * 
+	 * @param node
+	 *            node to be add
+	 * @param commentNode
+	 *            AST node to find the comment
+	 */
+	private void addToCurrentStack(INode node, @Nullable IASTNode commentNode)
+	{
+		stackNode.peek().getKey().add(node);
+		if (commentNode == null) {
+			return;
+		}
+
+		List<IASTComment> list = commentMap.getLeadingCommentsForNode(commentNode);
+		if (list.size() == 0) {
+			return;
+		}
+
+		StringBuilder build = new StringBuilder();
+		build.append(list.get(0).getComment());
+
+		for (int i = 1; i < list.size(); i++) {
+			build.append('\n').append(list.get(i).getComment());
+		}
+		node.setDescription(build.toString());
 	}
 
 	@Override
@@ -105,7 +147,7 @@ public class TranslationUnitParser extends ASTVisitor {
 
 			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
 					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
-			stackNode.peek().getKey().add(fnNode);
+			addToCurrentStack(fnNode, fnDef);
 		}
 
 		else if (declaration instanceof IASTSimpleDeclaration) {
@@ -152,7 +194,7 @@ public class TranslationUnitParser extends ASTVisitor {
 						decNode = var;
 
 						if (dector.getInitializer() != null) {
-							// Assign init expression
+							var.setValue(parseInitialer(dector.getInitializer()));
 						}
 					}
 				}
@@ -163,7 +205,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			}
 
 			if (complex != null) {
-				stackNode.peek().getKey().add(complex);
+				addToCurrentStack(complex, smpDec);
 				stackNode.push(new Pair<>(complex, smpDec));
 			}
 		}
@@ -239,6 +281,18 @@ public class TranslationUnitParser extends ASTVisitor {
 		// Parse bit field to modifier
 
 		return mdf;
+	}
+
+	/**
+	 * Parse the initialer and convert to the expression
+	 * 
+	 * @param init
+	 *            the initialer
+	 * @return expression
+	 */
+	static IExpression parseInitialer(IASTInitializer init)
+	{
+		return null;
 	}
 
 	@Override

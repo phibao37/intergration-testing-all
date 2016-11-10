@@ -8,6 +8,7 @@ package sdv.testingall.core.node;
 
 import javax.swing.Icon;
 
+import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.type.IType;
 
 /**
@@ -19,8 +20,9 @@ import sdv.testingall.core.type.IType;
  */
 public abstract class VariableNode extends BaseNode {
 
-	private IType	type;
-	private String	name;
+	private IType		type;
+	private String		name;
+	private IExpression	value;
 
 	/**
 	 * Create new variable node from type and name
@@ -70,6 +72,37 @@ public abstract class VariableNode extends BaseNode {
 	public String getName()
 	{
 		return name;
+	}
+
+	/**
+	 * Get the value of the variable
+	 * 
+	 * @return the value
+	 */
+	public IExpression getValue()
+	{
+		return value;
+	}
+
+	/**
+	 * Set the value of the variable
+	 * 
+	 * @param value
+	 *            the value to set
+	 */
+	public void setValue(IExpression value)
+	{
+		this.value = value;
+	}
+
+	/**
+	 * Check whether this variable has set the value
+	 * 
+	 * @return has value or not
+	 */
+	public boolean hasValue()
+	{
+		return value != null;
 	}
 
 	@Override
