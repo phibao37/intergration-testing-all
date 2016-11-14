@@ -8,7 +8,8 @@ package sdv.testingall.core.loader;
 
 import java.nio.charset.Charset;
 
-import com.sun.istack.internal.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import sdv.testingall.core.logger.ILogger;
 
@@ -19,6 +20,7 @@ import sdv.testingall.core.logger.ILogger;
  *
  * @date 2016-10-25 VuSD created
  */
+@NonNullByDefault
 public interface ILoaderConfig {
 
 	/**

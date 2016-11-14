@@ -6,6 +6,9 @@
  */
 package sdv.testingall.core.expression;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import sdv.testingall.core.type.IType;
 
 /**
@@ -15,6 +18,7 @@ import sdv.testingall.core.type.IType;
  *
  * @date 2016-11-10 VuSD created
  */
+@NonNullByDefault
 public interface IExpression extends Cloneable {
 
 	/**
@@ -45,6 +49,7 @@ public interface IExpression extends Cloneable {
 	 * 
 	 * @return corresponding type
 	 */
+	@Nullable
 	IType bind();
 
 }

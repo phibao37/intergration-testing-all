@@ -8,7 +8,8 @@ package sdv.testingall.core.loader;
 
 import java.io.File;
 
-import com.sun.istack.internal.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import sdv.testingall.core.node.FolderNode;
 import sdv.testingall.core.node.INode;
@@ -21,10 +22,11 @@ import sdv.testingall.core.node.ProjectNode;
  *
  * @date 2016-10-25 VuSD created
  */
+@NonNullByDefault
 public abstract class BaseProjectLoader {
 
-	private File			root;
-	private ILoaderConfig	config;
+	private File					root;
+	private @Nullable ILoaderConfig	config;
 
 	/**
 	 * Create new project loader from specified root
@@ -109,6 +111,7 @@ public abstract class BaseProjectLoader {
 	/**
 	 * @return the loader configuration
 	 */
+	@Nullable
 	public ILoaderConfig getLoaderConfig()
 	{
 		return config;

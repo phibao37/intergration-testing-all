@@ -6,6 +6,8 @@
  */
 package sdv.testingall.util;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Utility method used in project
  * 
@@ -13,6 +15,7 @@ package sdv.testingall.util;
  *
  * @date 2016-10-31 VuSD created
  */
+@NonNullByDefault
 public class SDVUtils {
 
 	/**

@@ -22,6 +22,8 @@ import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.core.logger.ILogger;
@@ -35,6 +37,7 @@ import sdv.testingall.util.SDVUtils;
  *
  * @date 2016-10-27 VuSD created
  */
+@NonNullByDefault
 public class CppFileLoader {
 
 	private File source;
@@ -57,8 +60,13 @@ public class CppFileLoader {
 	 *            configuration to load file
 	 * @return a file node contains the full-tree loaded component inside
 	 */
-	public INode loadFile(CppLoaderConfig config)
+	@Nullable
+	public INode loadFile(@Nullable CppLoaderConfig config)
 	{
+		if (config == null) {
+			return null;
+		}
+
 		boolean isC = false, isCpp = false;
 		String lowerName = source.getName().toLowerCase();
 
@@ -108,6 +116,7 @@ public class CppFileLoader {
 		return lang.getASTTranslationUnit(content, scanInfo, fileCreator, null, options, log);
 	}
 
+	@Nullable
 	private INode loadSourceCode(CppLoaderConfig config, boolean isCpp)
 	{
 		try {

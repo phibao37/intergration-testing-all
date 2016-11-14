@@ -545,6 +545,7 @@ public class FileLoaderTest {
 			assertTrue(type.isFullQualified());
 
 			String[] namePart = type.getNameParts();
+			assertNotNull(namePart);
 			assertEquals(1, namePart.length);
 			assertEquals("std", namePart[0]);
 

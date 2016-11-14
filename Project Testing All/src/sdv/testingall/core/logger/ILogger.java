@@ -6,6 +6,9 @@
  */
 package sdv.testingall.core.logger;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Interface for all logger event used in "Project Testing All" application
  * 
@@ -13,6 +16,7 @@ package sdv.testingall.core.logger;
  *
  * @date 2016-10-31 VuSD created
  */
+@NonNullByDefault
 public interface ILogger {
 
 	/**
@@ -26,7 +30,7 @@ public interface ILogger {
 	 *            optional argument in formatted message
 	 * @return current logger
 	 */
-	ILogger log(int type, String message, Object... args);
+	ILogger log(int type, String message, @Nullable Object... args);
 
 	/**
 	 * Plug another logger so that when this logger is called, the plugged logger also be called
@@ -34,13 +38,14 @@ public interface ILogger {
 	 * @param plugger
 	 *            logger to plug
 	 */
-	void plug(ILogger plugger);
+	void plug(@Nullable ILogger plugger);
 
 	/**
 	 * Get the plugged logger
 	 * 
 	 * @return logger
 	 */
+	@Nullable
 	ILogger getPlug();
 
 	/**
@@ -58,7 +63,7 @@ public interface ILogger {
 	 * 
 	 * @return removed logger
 	 */
-	default ILogger unplug()
+	default @Nullable ILogger unplug()
 	{
 		ILogger last = getPlug();
 		plug(null);

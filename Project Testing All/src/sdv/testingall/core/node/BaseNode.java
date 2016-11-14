@@ -8,6 +8,9 @@ package sdv.testingall.core.node;
 
 import java.util.ArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Base implementation for node
  * 
@@ -15,10 +18,18 @@ import java.util.ArrayList;
  *
  * @date 2016-11-02 VuSD created
  */
+@NonNullByDefault
 public abstract class BaseNode extends ArrayList<INode> implements INode {
 
-	private String	content;
-	private String	description;
+	private String				content	= "";
+	private @Nullable String	description;
+
+	/**
+	 * Create empty new node
+	 */
+	protected BaseNode()
+	{
+	}
 
 	/**
 	 * Create new node
@@ -50,6 +61,7 @@ public abstract class BaseNode extends ArrayList<INode> implements INode {
 	}
 
 	@Override
+	@Nullable
 	public String getDescription()
 	{
 		return description;

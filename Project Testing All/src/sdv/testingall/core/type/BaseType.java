@@ -83,7 +83,7 @@ public class BaseType implements IType {
 			clone.mdf = mdf.clone();
 			return clone;
 		} catch (CloneNotSupportedException e) {
-			return null;
+			return this;
 		}
 	}
 }

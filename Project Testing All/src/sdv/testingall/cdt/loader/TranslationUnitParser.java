@@ -35,8 +35,8 @@ import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTReferenceOperator;
 import org.eclipse.cdt.core.dom.ast.gnu.c.ICASTKnRFunctionDeclarator;
 import org.eclipse.cdt.internal.core.dom.parser.IASTAmbiguousDeclarator;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
-
-import com.sun.istack.internal.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import javafx.util.Pair;
 import sdv.testingall.cdt.node.ComplexTypeNode;
@@ -63,9 +63,10 @@ import sdv.testingall.core.type.ITypeModifier;
  *
  * @date 2016-11-01 VuSD created
  */
+@NonNullByDefault
 public class TranslationUnitParser extends ASTVisitor {
 
-	private Stack<Pair<INode, IASTDeclaration>> stackNode;
+	private Stack<Pair<INode, @Nullable IASTDeclaration>> stackNode;
 
 	private CppLoaderConfig	config;
 	private NodeCommentMap	commentMap;
@@ -118,7 +119,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	}
 
 	@Override
-	public int visit(IASTDeclaration declaration)
+	public int visit(@Nullable IASTDeclaration declaration)
 	{
 		if (declaration instanceof IASTFunctionDefinition) {
 			IASTFunctionDefinition fnDef = (IASTFunctionDefinition) declaration;
@@ -145,6 +146,7 @@ public class TranslationUnitParser extends ASTVisitor {
 						.add(new CppVariableNode(parseInlineType(pDecType, pMdf), pDector.getName().toString(), false));
 			}
 
+			assert (type != null);
 			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
 					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
 			addToCurrentStack(fnNode, fnDef);
@@ -194,7 +196,7 @@ public class TranslationUnitParser extends ASTVisitor {
 						decNode = var;
 
 						if (dector.getInitializer() != null) {
-							var.setValue(parseInitialer(dector.getInitializer()));
+							// TODO var.setValue(parseInitialer(dector.getInitializer()));
 						}
 					}
 				}
@@ -227,7 +229,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            base modifier attached to the type
 	 * @return parsed type, or <code>null</code> if this is a enum/composite type
 	 */
-	static IType parseInlineType(IASTDeclSpecifier decType, ITypeModifier mdf)
+	static @Nullable IType parseInlineType(IASTDeclSpecifier decType, ITypeModifier mdf)
 	{
 		if (decType instanceof IASTSimpleDeclSpecifier) {
 			return new CppBasicType((IASTSimpleDeclSpecifier) decType, mdf);
@@ -290,13 +292,13 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            the initialer
 	 * @return expression
 	 */
-	static IExpression parseInitialer(IASTInitializer init)
+	static @Nullable IExpression parseInitialer(IASTInitializer init)
 	{
 		return null;
 	}
 
 	@Override
-	public int leave(IASTDeclaration declaration)
+	public int leave(@Nullable IASTDeclaration declaration)
 	{
 		if (stackNode.peek().getValue() == declaration) {
 			stackNode.pop();
@@ -308,8 +310,10 @@ public class TranslationUnitParser extends ASTVisitor {
 	 * Log all syntax-problem to the logger
 	 */
 	@Override
-	public int visit(IASTProblem problem)
+	public int visit(@Nullable IASTProblem problem)
 	{
+		assert (problem != null);
+
 		config.getLogger().log(ILogger.ERROR, problem.getMessageWithLocation());
 		return PROCESS_SKIP;
 	}
@@ -318,8 +322,10 @@ public class TranslationUnitParser extends ASTVisitor {
 	 * Visit a namespace, add it to stack
 	 */
 	@Override
-	public int visit(ICPPASTNamespaceDefinition namespaceDefinition)
+	public int visit(@Nullable ICPPASTNamespaceDefinition namespaceDefinition)
 	{
+		assert (namespaceDefinition != null);
+
 		INode ns = new NamespaceNode(namespaceDefinition.getName().toString());
 		stackNode.peek().getKey().add(ns);
 		stackNode.push(new Pair<>(ns, namespaceDefinition));
@@ -330,7 +336,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	 * Leave a namespace, pop back from stack
 	 */
 	@Override
-	public int leave(ICPPASTNamespaceDefinition namespaceDefinition)
+	public int leave(@Nullable ICPPASTNamespaceDefinition namespaceDefinition)
 	{
 		stackNode.pop();
 		return PROCESS_CONTINUE;

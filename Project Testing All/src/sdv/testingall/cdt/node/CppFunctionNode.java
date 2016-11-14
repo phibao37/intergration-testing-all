@@ -7,8 +7,8 @@
 package sdv.testingall.cdt.node;
 
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
-
-import com.sun.istack.internal.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.VariableNode;
@@ -22,10 +22,12 @@ import sdv.testingall.util.SDVUtils;
  *
  * @date 2016-11-03 VuSD created
  */
+@NonNullByDefault
 public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 
-	private IASTStatement	body;
-	private IType			nameType;
+	private @Nullable IASTStatement body;
+
+	private IType nameType;
 
 	/**
 	 * Create new C/C++ function node

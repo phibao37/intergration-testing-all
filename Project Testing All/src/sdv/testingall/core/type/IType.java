@@ -6,7 +6,8 @@
  */
 package sdv.testingall.core.type;
 
-import com.sun.istack.internal.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import sdv.testingall.core.node.INode;
 
@@ -17,6 +18,7 @@ import sdv.testingall.core.node.INode;
  *
  * @date 2016-11-02 VuSD created
  */
+@NonNullByDefault
 public interface IType extends Cloneable {
 
 	/**
@@ -72,8 +74,7 @@ public interface IType extends Cloneable {
 	 * 
 	 * @return list of name-part or <code>null</code> if this name has only one part (as {@link #getName()})
 	 */
-	@Nullable
-	default String[] getNameParts()
+	default String @Nullable [] getNameParts()
 	{
 		return null;
 	}

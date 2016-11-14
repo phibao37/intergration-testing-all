@@ -11,6 +11,7 @@ import java.io.File;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.CppLoaderConfig;
@@ -25,6 +26,7 @@ import sdv.testingall.util.SDVUtils;
  *
  * @date 2016-11-04 VuSD created
  */
+@NonNullByDefault
 public class ASTUtil {
 
 	/**

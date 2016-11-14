@@ -10,7 +10,8 @@ import java.util.List;
 
 import javax.swing.Icon;
 
-import com.sun.istack.internal.Nullable;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Base for all node in a project structure
@@ -19,6 +20,7 @@ import com.sun.istack.internal.Nullable;
  *
  * @date 2016-10-25 VuSD created
  */
+@NonNullByDefault
 public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 
 	/**
@@ -42,6 +44,7 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	 * 
 	 * @return image icon
 	 */
+	@Nullable
 	Icon getIcon();
 
 	/**

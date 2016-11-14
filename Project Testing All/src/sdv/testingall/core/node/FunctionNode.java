@@ -9,6 +9,9 @@ package sdv.testingall.core.node;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import sdv.testingall.core.type.IType;
 
 /**
@@ -18,6 +21,7 @@ import sdv.testingall.core.type.IType;
  *
  * @date 2016-11-02 VuSD created
  */
+@NonNullByDefault
 public abstract class FunctionNode extends BaseNode {
 
 	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/function.png"));
@@ -38,7 +42,6 @@ public abstract class FunctionNode extends BaseNode {
 	 */
 	public FunctionNode(IType type, String name, VariableNode[] params)
 	{
-		super(null);
 		this.type = type;
 		this.name = name;
 		this.params = params;
@@ -101,6 +104,7 @@ public abstract class FunctionNode extends BaseNode {
 	}
 
 	@Override
+	@Nullable
 	public Icon getIcon()
 	{
 		return ICON;

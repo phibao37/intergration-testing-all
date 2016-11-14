@@ -6,6 +6,8 @@
  */
 package sdv.testingall.core.type;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Extra modifier for the type name
  * 
@@ -13,6 +15,7 @@ package sdv.testingall.core.type;
  *
  * @date 2016-11-02 VuSD created
  */
+@NonNullByDefault
 public interface ITypeModifier extends Cloneable {
 
 	/**

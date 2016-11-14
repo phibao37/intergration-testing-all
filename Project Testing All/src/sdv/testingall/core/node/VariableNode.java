@@ -8,6 +8,9 @@ package sdv.testingall.core.node;
 
 import javax.swing.Icon;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.type.IType;
 
@@ -18,11 +21,12 @@ import sdv.testingall.core.type.IType;
  *
  * @date 2016-11-02 VuSD created
  */
+@NonNullByDefault
 public abstract class VariableNode extends BaseNode {
 
-	private IType		type;
-	private String		name;
-	private IExpression	value;
+	private IType					type;
+	private String					name;
+	private @Nullable IExpression	value;
 
 	/**
 	 * Create new variable node from type and name
@@ -34,7 +38,6 @@ public abstract class VariableNode extends BaseNode {
 	 */
 	public VariableNode(IType type, String name)
 	{
-		super(null);
 		this.type = type;
 		this.name = name;
 		setContent(generateContent(type, name));
@@ -79,6 +82,7 @@ public abstract class VariableNode extends BaseNode {
 	 * 
 	 * @return the value
 	 */
+	@Nullable
 	public IExpression getValue()
 	{
 		return value;
@@ -106,6 +110,7 @@ public abstract class VariableNode extends BaseNode {
 	}
 
 	@Override
+	@Nullable
 	public Icon getIcon()
 	{
 		// This node will not be display in tree

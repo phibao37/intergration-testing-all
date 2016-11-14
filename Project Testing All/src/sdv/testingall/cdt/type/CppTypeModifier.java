@@ -96,7 +96,7 @@ public class CppTypeModifier implements ITypeModifier {
 		try {
 			return (CppTypeModifier) super.clone();
 		} catch (CloneNotSupportedException e) {
-			return null;
+			return this;
 		}
 	}
 
