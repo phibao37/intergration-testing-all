@@ -15,7 +15,7 @@ package sdv.testingall.core.logger;
  */
 public class StringLogger extends BaseLogger {
 
-	private StringBuilder build;
+	private final StringBuilder build;
 
 	/**
 	 * Create new logger that log into a string
@@ -36,6 +36,8 @@ public class StringLogger extends BaseLogger {
 
 	/**
 	 * Get the logged string
+	 * 
+	 * @return logged string
 	 */
 	@Override
 	public String toString()

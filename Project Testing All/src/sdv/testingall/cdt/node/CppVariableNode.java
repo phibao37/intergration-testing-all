@@ -18,7 +18,7 @@ import sdv.testingall.core.type.IType;
  */
 public class CppVariableNode extends VariableNode implements ICppDeclarable {
 
-	private boolean isDeclare;
+	private final boolean isDeclare;
 
 	/**
 	 * Create new C/C++ variable node

@@ -66,10 +66,10 @@ import sdv.testingall.core.type.ITypeModifier;
 @NonNullByDefault
 public class TranslationUnitParser extends ASTVisitor {
 
-	private Stack<Pair<INode, @Nullable IASTDeclaration>> stackNode;
+	private final Stack<Pair<INode, @Nullable IASTDeclaration>> stackNode;
 
-	private CppLoaderConfig	config;
-	private NodeCommentMap	commentMap;
+	private final CppLoaderConfig	config;
+	private final NodeCommentMap	commentMap;
 
 	/**
 	 * Parse a translation unit to get a full-tree of node
@@ -78,6 +78,8 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            a file node to be a root of full-tree
 	 * @param config
 	 *            load configuration
+	 * @param commentMap
+	 *            map from node to list of comment
 	 */
 	public TranslationUnitParser(CppFileNode rootNode, CppLoaderConfig config, NodeCommentMap commentMap)
 	{
@@ -105,7 +107,7 @@ public class TranslationUnitParser extends ASTVisitor {
 		}
 
 		List<IASTComment> list = commentMap.getLeadingCommentsForNode(commentNode);
-		if (list.size() == 0) {
+		if (list.isEmpty()) {
 			return;
 		}
 
@@ -308,6 +310,10 @@ public class TranslationUnitParser extends ASTVisitor {
 
 	/**
 	 * Log all syntax-problem to the logger
+	 * 
+	 * @param problem
+	 *            AST problem node
+	 * @return travel flag
 	 */
 	@Override
 	public int visit(@Nullable IASTProblem problem)
@@ -320,6 +326,10 @@ public class TranslationUnitParser extends ASTVisitor {
 
 	/**
 	 * Visit a namespace, add it to stack
+	 * 
+	 * @param namespaceDefinition
+	 *            AST namespace node
+	 * @return travel flag
 	 */
 	@Override
 	public int visit(@Nullable ICPPASTNamespaceDefinition namespaceDefinition)
@@ -334,6 +344,10 @@ public class TranslationUnitParser extends ASTVisitor {
 
 	/**
 	 * Leave a namespace, pop back from stack
+	 * 
+	 * @param namespaceDefinition
+	 *            AST namespace node
+	 * @return travel flag
 	 */
 	@Override
 	public int leave(@Nullable ICPPASTNamespaceDefinition namespaceDefinition)

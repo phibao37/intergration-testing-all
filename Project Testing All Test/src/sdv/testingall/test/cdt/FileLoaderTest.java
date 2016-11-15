@@ -584,7 +584,7 @@ public class FileLoaderTest {
 			String cmt = root.get(0).getDescription();
 
 			assertNotNull(cmt);
-			System.out.printf("'%s'\n\n", cmt);
+			System.out.printf("'%s'%n%n", cmt);
 		}
 
 		{
@@ -592,7 +592,7 @@ public class FileLoaderTest {
 			String cmt = root.get(1).getDescription();
 
 			assertNotNull(cmt);
-			System.out.printf("'%s'\n\n", cmt);
+			System.out.printf("'%s'%n%n", cmt);
 		}
 	}
 }

@@ -20,8 +20,8 @@ import sdv.testingall.core.type.ITypeModifier;
  */
 public class CppBasicType extends BaseType {
 
-	private boolean	isSigned, isUnsigned, isShort, isLong, isLongLong;
-	private int		typeFlag;
+	private final boolean	isSigned, isUnsigned, isShort, isLong, isLongLong;
+	private final int		typeFlag;
 
 	/**
 	 * Create new basic data type
@@ -41,12 +41,14 @@ public class CppBasicType extends BaseType {
 		isShort = simpleType.isShort();
 		isLong = simpleType.isLong();
 		isLongLong = simpleType.isLongLong();
-		typeFlag = simpleType.getType();
+		int typeFlag = simpleType.getType();
 
 		// Re-sync type "int" if omitted
 		if (typeFlag == UNSPECIFIED && (isSigned || isUnsigned || isShort || isLong || isLongLong)) {
 			typeFlag = INT;
 		}
+
+		this.typeFlag = typeFlag;
 	}
 
 	/**

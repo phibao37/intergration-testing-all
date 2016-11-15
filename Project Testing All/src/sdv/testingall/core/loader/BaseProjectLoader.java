@@ -25,7 +25,7 @@ import sdv.testingall.core.node.ProjectNode;
 @NonNullByDefault
 public abstract class BaseProjectLoader {
 
-	private File					root;
+	private final File				root;
 	private @Nullable ILoaderConfig	config;
 
 	/**

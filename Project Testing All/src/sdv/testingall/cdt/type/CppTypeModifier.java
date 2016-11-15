@@ -113,7 +113,8 @@ public class CppTypeModifier implements ITypeModifier {
 	/**
 	 * Set whether this variable type is static
 	 * 
-	 * @return static state
+	 * @param isStatic
+	 *            static state
 	 */
 	public void setStatic(boolean isStatic)
 	{

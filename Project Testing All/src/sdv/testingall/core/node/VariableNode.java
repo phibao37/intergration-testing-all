@@ -24,8 +24,8 @@ import sdv.testingall.core.type.IType;
 @NonNullByDefault
 public abstract class VariableNode extends BaseNode {
 
-	private IType					type;
-	private String					name;
+	private final IType				type;
+	private final String			name;
 	private @Nullable IExpression	value;
 
 	/**

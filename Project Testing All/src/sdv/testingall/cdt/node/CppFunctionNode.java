@@ -25,9 +25,9 @@ import sdv.testingall.util.SDVUtils;
 @NonNullByDefault
 public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 
-	private @Nullable IASTStatement body;
+	private final @Nullable IASTStatement body;
 
-	private IType nameType;
+	private final IType nameType;
 
 	/**
 	 * Create new C/C++ function node

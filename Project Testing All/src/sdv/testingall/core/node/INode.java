@@ -49,6 +49,8 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 
 	/**
 	 * Get the copy of the node
+	 * 
+	 * @return the cloned node
 	 */
 	INode clone();
 
@@ -82,9 +84,9 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	 */
 	default void printTree(String margin)
 	{
-		System.out.printf("%s%s [%s]\n", margin, this, getClass().getSimpleName());
-		for (INode child : this) {
+		System.out.printf("%s%s [%s]%n", margin, this, getClass().getSimpleName());
+		this.forEach((child) -> {
 			child.printTree(margin + "   ");
-		}
+		});
 	}
 }

@@ -23,7 +23,7 @@ public class CppFileNode extends FileNode {
 	private static final ImageIcon ICON_C = new ImageIcon(ImageIcon.class.getResource("/node/c.png")),
 			ICON_CPP = new ImageIcon(ImageIcon.class.getResource("/node/cpp.png"));
 
-	private ImageIcon icon;
+	private final ImageIcon icon;
 
 	/**
 	 * Create new C/C++ file node

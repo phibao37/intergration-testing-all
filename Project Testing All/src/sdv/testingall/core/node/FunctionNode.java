@@ -26,9 +26,9 @@ public abstract class FunctionNode extends BaseNode {
 
 	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/function.png"));
 
-	private IType			type;
-	private String			name;
-	private VariableNode[]	params;
+	private final IType				type;
+	private final String			name;
+	private final VariableNode[]	params;
 
 	/**
 	 * Create new function node
@@ -61,16 +61,18 @@ public abstract class FunctionNode extends BaseNode {
 	 */
 	protected String generateContent(IType type, String name, VariableNode[] params)
 	{
-		String b = String.format("%s %s(", type, name);
+		// String b = String.format("%s %s(", type, name);
+		StringBuilder b = new StringBuilder();
 
+		b.append(type).append(' ').append(name).append('(');
 		if (params.length > 0) {
-			b += params[0];
+			b.append(params[0]);
 			for (int i = 1; i < params.length; i++) {
-				b += ", " + params[i];
+				b.append(", ").append(params[i]);
 			}
 		}
 
-		return b + ")";
+		return b.append(')').toString();
 	}
 
 	/**

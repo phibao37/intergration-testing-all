@@ -69,7 +69,7 @@ public class ASTUtil {
 			}
 		}
 
-		System.out.printf("%s%s [%s]\n", margin, content, attr);
+		System.out.printf("%s%s [%s]%n", margin, content, attr);
 
 		for (IASTNode child : node.getChildren()) {
 			printTree(child, margin + "   ");

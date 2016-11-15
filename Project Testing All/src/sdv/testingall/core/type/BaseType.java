@@ -17,8 +17,8 @@ import sdv.testingall.core.node.INode;
  */
 public class BaseType implements IType {
 
-	private String			name;
-	private String[]		namePart;
+	private final String	name;
+	private final String[]	namePart;
 	private INode			bindNode;
 	private ITypeModifier	mdf;
 

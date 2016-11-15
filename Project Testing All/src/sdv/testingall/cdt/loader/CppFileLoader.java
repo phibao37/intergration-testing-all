@@ -7,6 +7,7 @@
 package sdv.testingall.cdt.loader;
 
 import java.io.File;
+import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
@@ -40,7 +41,7 @@ import sdv.testingall.util.SDVUtils;
 @NonNullByDefault
 public class CppFileLoader {
 
-	private File source;
+	private final File source;
 
 	/**
 	 * Create a C/C++ source file loader
@@ -60,15 +61,14 @@ public class CppFileLoader {
 	 *            configuration to load file
 	 * @return a file node contains the full-tree loaded component inside
 	 */
-	@Nullable
-	public INode loadFile(@Nullable CppLoaderConfig config)
+	public @Nullable INode loadFile(@Nullable CppLoaderConfig config)
 	{
 		if (config == null) {
 			return null;
 		}
 
 		boolean isC = false, isCpp = false;
-		String lowerName = source.getName().toLowerCase();
+		String lowerName = source.getName().toLowerCase(Locale.ENGLISH);
 
 		for (String cppExt : config.getListCppExt()) {
 			if (lowerName.endsWith(cppExt)) {
