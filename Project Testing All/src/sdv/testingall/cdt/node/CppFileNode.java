@@ -6,6 +6,8 @@
  */
 package sdv.testingall.cdt.node;
 
+import java.io.File;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
@@ -28,14 +30,14 @@ public class CppFileNode extends FileNode {
 	/**
 	 * Create new C/C++ file node
 	 * 
-	 * @param name
-	 *            file name
+	 * @param file
+	 *            file object
 	 * @param isCpp
 	 *            this is C++ source file (rather than C source file)
 	 */
-	public CppFileNode(String name, boolean isCpp)
+	public CppFileNode(File file, boolean isCpp)
 	{
-		super(name);
+		super(file);
 		this.icon = isCpp ? ICON_CPP : ICON_C;
 	}
 

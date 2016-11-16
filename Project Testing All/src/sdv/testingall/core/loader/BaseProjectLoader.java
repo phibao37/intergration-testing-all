@@ -46,7 +46,7 @@ public abstract class BaseProjectLoader {
 	 */
 	public ProjectNode loadProject()
 	{
-		ProjectNode rootNode = new ProjectNode(root.getName());
+		ProjectNode rootNode = new ProjectNode(root);
 		recurseLoadProject(root, rootNode);
 		return rootNode;
 	}
@@ -95,7 +95,7 @@ public abstract class BaseProjectLoader {
 	 */
 	protected INode loadDirItem(File folder)
 	{
-		return new FolderNode(folder.getName());
+		return new FolderNode(folder);
 	}
 
 	/**

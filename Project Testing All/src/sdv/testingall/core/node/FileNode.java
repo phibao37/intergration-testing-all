@@ -6,6 +6,8 @@
  */
 package sdv.testingall.core.node;
 
+import java.io.File;
+
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
@@ -15,20 +17,24 @@ import javax.swing.ImageIcon;
  * @author VuSD
  *
  * @date 2016-10-31 VuSD created
+ * @date 2016-11-16 VuSD implement IFileNode
  */
-public class FileNode extends BaseNode {
+public class FileNode extends BaseNode implements IFileNode {
 
 	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/text-file.png"));
+
+	private File mFile;
 
 	/**
 	 * Create new file node
 	 * 
-	 * @param name
-	 *            file name
+	 * @param file
+	 *            file object
 	 */
-	public FileNode(String name)
+	public FileNode(File file)
 	{
-		super(name);
+		super(file.getName());
+		this.mFile = file;
 	}
 
 	@Override
@@ -51,6 +57,12 @@ public class FileNode extends BaseNode {
 		}
 
 		return 0;
+	}
+
+	@Override
+	public File getFile()
+	{
+		return mFile;
 	}
 
 }

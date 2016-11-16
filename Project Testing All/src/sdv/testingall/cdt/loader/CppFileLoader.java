@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.Locale;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.cdt.core.dom.ast.IASTProblem;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
 import org.eclipse.cdt.core.dom.ast.gnu.cpp.GPPLanguage;
@@ -120,9 +121,16 @@ public class CppFileLoader {
 	private INode loadSourceCode(CppLoaderConfig config, boolean isCpp)
 	{
 		try {
-			CppFileNode fileNode = new CppFileNode(source.getName(), isCpp);
+			CppFileNode fileNode = new CppFileNode(source, isCpp);
 			IASTTranslationUnit u = getTranslationUnit(source, config, isCpp);
 			NodeCommentMap commentMap = ASTCommenter.getCommentedNodeMap(u);
+
+			// Find #error directive and log error
+			if (config.shouldLogErrorDirective()) {
+				for (IASTProblem p : u.getPreprocessorProblems()) {
+					config.getLogger().log(ILogger.ERROR, p.getMessageWithLocation());
+				}
+			}
 
 			u.accept(new TranslationUnitParser(fileNode, config, commentMap));
 			return fileNode;

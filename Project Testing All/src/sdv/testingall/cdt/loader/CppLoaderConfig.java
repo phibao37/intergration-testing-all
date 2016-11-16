@@ -28,7 +28,8 @@ public class CppLoaderConfig implements ILoaderConfig {
 	private List<String>	listCExt;
 	private List<String>	listCppExt;
 
-	private ILogger logger;
+	private boolean	logErrorDrt;
+	private ILogger	logger;
 
 	/**
 	 * Construct default C/C++ loader configuration
@@ -128,5 +129,26 @@ public class CppLoaderConfig implements ILoaderConfig {
 	public void setLogger(ILogger logger)
 	{
 		this.logger = logger;
+	}
+
+	/**
+	 * Get whether to log error when C/C++ <code>#error</code> directive is active
+	 * 
+	 * @return log state
+	 */
+	public boolean shouldLogErrorDirective()
+	{
+		return logErrorDrt;
+	}
+
+	/**
+	 * Set whether to log error when C/C++ <code>#error</code> directive is active
+	 * 
+	 * @param logErrorDrt
+	 *            log state
+	 */
+	public void setLogErrorDirective(boolean logErrorDrt)
+	{
+		this.logErrorDrt = logErrorDrt;
 	}
 }

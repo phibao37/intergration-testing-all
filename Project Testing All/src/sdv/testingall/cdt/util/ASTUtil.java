@@ -81,15 +81,14 @@ public class ASTUtil {
 	{
 		CppLoaderConfig config = new CppLoaderConfig();
 		config.setLogger(new ConsoleLogger());
+		config.setLogErrorDirective(true);
 
 		try {
 			File source = new File("data-test/ASTView.cpp");
 			IASTTranslationUnit u = CppFileLoader.getTranslationUnit(source, config, true);
 			printTree(u, "-");
 
-			CppLoaderConfig CONFIG = new CppLoaderConfig();
-			CONFIG.setLogger(new ConsoleLogger());
-			INode root = new CppFileLoader(source).loadFile(CONFIG);
+			INode root = new CppFileLoader(source).loadFile(config);
 			assert (root != null);
 			root.printTree("*");
 		} catch (Exception e) {
