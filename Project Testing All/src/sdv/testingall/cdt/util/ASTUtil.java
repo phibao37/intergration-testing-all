@@ -17,6 +17,7 @@ import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.CppLoaderConfig;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.logger.ILogger;
+import sdv.testingall.core.node.INode;
 import sdv.testingall.util.SDVUtils;
 
 /**
@@ -85,6 +86,12 @@ public class ASTUtil {
 			File source = new File("data-test/ASTView.cpp");
 			IASTTranslationUnit u = CppFileLoader.getTranslationUnit(source, config, true);
 			printTree(u, "-");
+
+			CppLoaderConfig CONFIG = new CppLoaderConfig();
+			CONFIG.setLogger(new ConsoleLogger());
+			INode root = new CppFileLoader(source).loadFile(CONFIG);
+			assert (root != null);
+			root.printTree("*");
 		} catch (Exception e) {
 			e.printStackTrace();
 			config.getLogger().log(ILogger.ERROR, SDVUtils.gxceptionMsg(e));
