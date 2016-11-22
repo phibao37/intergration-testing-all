@@ -6,9 +6,7 @@
  */
 package sdv.testingall.cdt.node;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
+import javafx.scene.image.Image;
 import sdv.testingall.core.node.BaseNode;
 import sdv.testingall.core.node.INode;
 
@@ -21,7 +19,7 @@ import sdv.testingall.core.node.INode;
  */
 public class NamespaceNode extends BaseNode {
 
-	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/namespace.png"));
+	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/namespace.png"));
 
 	private boolean isAnonymous;
 
@@ -52,7 +50,7 @@ public class NamespaceNode extends BaseNode {
 	}
 
 	@Override
-	public Icon getIcon()
+	public Image getIcon()
 	{
 		return ICON;
 	}

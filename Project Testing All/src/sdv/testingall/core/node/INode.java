@@ -8,10 +8,10 @@ package sdv.testingall.core.node;
 
 import java.util.List;
 
-import javax.swing.Icon;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+
+import javafx.scene.image.Image;
 
 /**
  * Base for all node in a project structure
@@ -45,7 +45,7 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	 * @return image icon
 	 */
 	@Nullable
-	Icon getIcon();
+	Image getIcon();
 
 	/**
 	 * Get the copy of the node

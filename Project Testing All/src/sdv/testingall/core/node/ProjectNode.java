@@ -8,8 +8,7 @@ package sdv.testingall.core.node;
 
 import java.io.File;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
+import javafx.scene.image.Image;
 
 /**
  * A node to represent a root of project
@@ -21,7 +20,7 @@ import javax.swing.ImageIcon;
  */
 public class ProjectNode extends BaseNode implements IFileNode {
 
-	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/project.png"));
+	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/project.png"));
 
 	private File mFile;
 
@@ -38,7 +37,7 @@ public class ProjectNode extends BaseNode implements IFileNode {
 	}
 
 	@Override
-	public Icon getIcon()
+	public Image getIcon()
 	{
 		return ICON;
 	}

@@ -8,9 +8,7 @@ package sdv.testingall.cdt.node;
 
 import java.io.File;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
+import javafx.scene.image.Image;
 import sdv.testingall.core.node.FileNode;
 
 /**
@@ -22,10 +20,10 @@ import sdv.testingall.core.node.FileNode;
  */
 public class CppFileNode extends FileNode {
 
-	private static final ImageIcon ICON_C = new ImageIcon(ImageIcon.class.getResource("/node/c.png")),
-			ICON_CPP = new ImageIcon(ImageIcon.class.getResource("/node/cpp.png"));
+	private static final Image	ICON_C		= new Image(FileNode.class.getResourceAsStream("/node/c.png"));
+	private static final Image	ICON_CPP	= new Image(FileNode.class.getResourceAsStream("/node/cpp.png"));
 
-	private final ImageIcon icon;
+	private final Image icon;
 
 	/**
 	 * Create new C/C++ file node
@@ -42,7 +40,7 @@ public class CppFileNode extends FileNode {
 	}
 
 	@Override
-	public Icon getIcon()
+	public Image getIcon()
 	{
 		return icon;
 	}

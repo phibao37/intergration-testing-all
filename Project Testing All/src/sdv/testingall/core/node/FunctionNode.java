@@ -6,12 +6,10 @@
  */
 package sdv.testingall.core.node;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import javafx.scene.image.Image;
 import sdv.testingall.core.type.IType;
 
 /**
@@ -24,7 +22,7 @@ import sdv.testingall.core.type.IType;
 @NonNullByDefault
 public abstract class FunctionNode extends BaseNode {
 
-	private static final ImageIcon ICON = new ImageIcon(ImageIcon.class.getResource("/node/function.png"));
+	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/function.png"));
 
 	private final IType				type;
 	private final String			name;
@@ -106,8 +104,7 @@ public abstract class FunctionNode extends BaseNode {
 	}
 
 	@Override
-	@Nullable
-	public Icon getIcon()
+	public @Nullable Image getIcon()
 	{
 		return ICON;
 	}

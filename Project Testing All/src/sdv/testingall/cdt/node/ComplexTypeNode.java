@@ -6,12 +6,10 @@
  */
 package sdv.testingall.cdt.node;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-
 import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 
+import javafx.scene.image.Image;
 import sdv.testingall.core.node.BaseNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.util.SDVUtils;
@@ -25,12 +23,12 @@ import sdv.testingall.util.SDVUtils;
  */
 public class ComplexTypeNode extends BaseNode {
 
-	private static final ImageIcon ICON_STRUCT = new ImageIcon(ImageIcon.class.getResource("/node/struct.png")),
-			ICON_UNION = new ImageIcon(ImageIcon.class.getResource("/node/union.png")),
-			ICON_CLASS = new ImageIcon(ImageIcon.class.getResource("/node/class.png"));
+	private static final Image	ICON_STRUCT	= new Image(BaseNode.class.getResourceAsStream("/node/struct.png"));
+	private static final Image	ICON_UNION	= new Image(BaseNode.class.getResourceAsStream("/node/union.png"));
+	private static final Image	ICON_CLASS	= new Image(BaseNode.class.getResourceAsStream("/node/class.png"));
 
 	private int		type;
-	private Icon	icon;
+	private Image	icon;
 
 	/**
 	 * Create new complex type node
@@ -82,7 +80,7 @@ public class ComplexTypeNode extends BaseNode {
 	}
 
 	@Override
-	public Icon getIcon()
+	public Image getIcon()
 	{
 		return icon;
 	}

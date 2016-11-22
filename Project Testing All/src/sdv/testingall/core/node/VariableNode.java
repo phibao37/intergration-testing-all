@@ -6,11 +6,10 @@
  */
 package sdv.testingall.core.node;
 
-import javax.swing.Icon;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import javafx.scene.image.Image;
 import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.type.IType;
 
@@ -110,8 +109,7 @@ public abstract class VariableNode extends BaseNode {
 	}
 
 	@Override
-	@Nullable
-	public Icon getIcon()
+	public @Nullable Image getIcon()
 	{
 		// This node will not be display in tree
 		return null;
