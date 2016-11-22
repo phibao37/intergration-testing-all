@@ -19,11 +19,11 @@
       <menus>
         <Menu mnemonicParsing="false" text="%menu.file">
           <items>
-            <MenuItem mnemonicParsing="false" text="%menu.file.open" />
-            <Menu mnemonicParsing="false" text="%menu.file.open.recent" />
+            <MenuItem mnemonicParsing="false" onAction="#handleMenuOpen" text="%menu.file.open" />
+            <Menu fx:id="menu_open_recent" mnemonicParsing="false" text="%menu.file.open.recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="%menu.file.preferences" />
-            <MenuItem mnemonicParsing="false" text="%menu.file.quit" />
+            <MenuItem mnemonicParsing="false" onAction="#handleMenuQuit" text="%menu.file.quit" />
           </items>
         </Menu>
         <Menu mnemonicParsing="false" text="%menu.help">
