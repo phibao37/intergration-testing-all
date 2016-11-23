@@ -26,3 +26,22 @@
 	-fx-font-size: 11px;
 	-fx-text-fill: #a0a0a0;
 }
+
+/* Project explorer */
+#project-tree .tree-cell {
+	-fx-padding: 5;
+}
+#project-tree .tree-cell:hover {
+	-fx-background-color: #dff4ff;
+}
+#project-tree .tree-cell:selected {
+	-fx-background-color: #0080c0;
+}
+#project-tree .tree-cell:empty {
+	-fx-background-color: transparent;
+}
+#project-tree .tree-cell .tooltip {
+	-fx-text-fill: black;
+    -fx-background-color: #ecf5ff;
+    -fx-font-size: 12px;
+}
