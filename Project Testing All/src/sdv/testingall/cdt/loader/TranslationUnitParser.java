@@ -152,6 +152,8 @@ public class TranslationUnitParser extends ASTVisitor {
 			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
 					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
 			addToCurrentStack(fnNode, fnDef);
+
+			return PROCESS_SKIP;
 		}
 
 		else if (declaration instanceof IASTSimpleDeclaration) {
