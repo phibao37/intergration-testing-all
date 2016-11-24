@@ -10,15 +10,19 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Menu;
+import javafx.scene.control.TextArea;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import sdv.testingall.cdt.loader.CppLoaderConfig;
 import sdv.testingall.cdt.loader.CppProjectLoader;
-import sdv.testingall.core.logger.ConsoleLogger;
+import sdv.testingall.core.logger.BaseLogger;
+import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.IFileNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
@@ -38,9 +42,21 @@ public class MainView implements Initializable {
 	private @FXML Menu				menu_open_recent;
 	private @FXML ProjectExplorer	project_tree;
 	private @FXML LightTabPane		source_view;
+	private @FXML TextArea			consoleArea;
 
 	private Stage				primaryStage;
 	private DirectoryChooser	fileOpenChooser;
+
+	private ILogger APP_LOGGER = new BaseLogger() {
+
+		@Override
+		public @NonNull ILogger log(int type, @NonNull String message, Object @NonNull... args)
+		{
+			consoleArea.appendText(String.format(message, args));
+			return super.log(type, message, args);
+		}
+
+	};
 
 	@Override
 	public void initialize(URL location, ResourceBundle res)
@@ -77,7 +93,7 @@ public class MainView implements Initializable {
 	public void openProject(File root)
 	{
 		CppLoaderConfig config = new CppLoaderConfig();
-		config.setLogger(new ConsoleLogger());
+		config.setLogger(APP_LOGGER);
 
 		CppProjectLoader loader = new CppProjectLoader(root);
 		loader.setLoaderConfig(config);

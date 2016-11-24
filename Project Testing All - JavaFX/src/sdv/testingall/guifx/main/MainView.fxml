@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.net.URL?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -8,11 +9,15 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
+<?import sdv.testingall.guifx.node.LightTabPane?>
 <?import sdv.testingall.guifx.node.ProjectExplorer?>
 
 <VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sdv.testingall.guifx.main.MainView">
@@ -46,7 +51,26 @@
             <SplitPane dividerPositions="0.37" orientation="VERTICAL">
               <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
-                  <sdv.testingall.guifx.node.LightTabPane fx:id="source_view" tabClosingPolicy="ALL_TABS" />
+                  <sdv.testingall.guifx.node.LightTabPane fx:id="source_view" tabClosingPolicy="ALL_TABS">
+                     <tabs>
+                        <Tab closable="false" text="%app.console">
+                           <content>
+                              <BorderPane>
+                                 <center>
+                                    <TextArea id="console-area" fx:id="consoleArea" editable="false" wrapText="true" BorderPane.alignment="CENTER" />
+                                 </center>
+                                 <bottom>
+                                    <ToolBar BorderPane.alignment="CENTER">
+                                      <items>
+                                          <Pane HBox.hgrow="ALWAYS" />
+                                        <Button mnemonicParsing="false" text="%button.clear" />
+                                      </items>
+                                    </ToolBar>
+                                 </bottom>
+                              </BorderPane>
+                           </content>
+                        </Tab>
+                     </tabs></sdv.testingall.guifx.node.LightTabPane>
               </items>
             </SplitPane>
       </items>

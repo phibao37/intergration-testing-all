@@ -65,3 +65,10 @@
 .syntax-area .scroll-bar .thumb:pressed {
     -fx-background-color: #a3a3a3;
 }
+
+/* Console view */
+#console-area {
+	-fx-padding: 8px;
+	-fx-background-color: white;
+	
+}
