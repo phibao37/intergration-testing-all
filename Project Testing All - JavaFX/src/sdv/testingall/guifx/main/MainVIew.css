@@ -17,6 +17,11 @@
     -fx-padding: 0;
 }
 
+/* Global setting */
+.tooltip {
+	-fx-text-fill: black;
+    -fx-background-color: #ecf5ff;
+}
 
 /* Status bar */
 #status-view {
@@ -36,12 +41,16 @@
 }
 #project-tree .tree-cell:selected {
 	-fx-background-color: #0080c0;
+	-fx-text-fill: white;
 }
 #project-tree .tree-cell:empty {
 	-fx-background-color: transparent;
 }
 #project-tree .tree-cell .tooltip {
-	-fx-text-fill: black;
-    -fx-background-color: #ecf5ff;
     -fx-font-size: 12px;
+}
+
+/* Code view */
+.code-area {
+    -fx-highlight-fill: #dff4ff;
 }

@@ -1,0 +1,12 @@
+.code-area .keyword {
+    -fx-fill: blue;
+}
+.code-area .string {
+    -fx-fill: #a36914;
+}
+.code-area .comment {
+    -fx-fill: #3f7f5f;
+}
+.code-area .number {
+    -fx-fill: #149696;
+}

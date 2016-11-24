@@ -8,11 +8,12 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
-<?import sdv.testingall.guifx.node.TreeExplorer?>
+<?import sdv.testingall.guifx.node.ProjectExplorer?>
 
 <VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sdv.testingall.guifx.main.MainView">
   <children>
@@ -34,15 +35,20 @@
         </Menu>
       </menus>
     </MenuBar>
-    <SplitPane dividerPositions="0.2506, 0.75" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.2506, 0.7" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <items>
-            <sdv.testingall.guifx.node.ProjectExplorer fx:id="project_tree" id="project-tree" prefHeight="200.0" prefWidth="200.0" />
+            <sdv.testingall.guifx.node.ProjectExplorer id="project-tree" fx:id="project_tree" prefHeight="200.0" prefWidth="200.0" />
         <ScrollPane prefHeight="-1.0" prefWidth="-1.0">
           <content>
             <AnchorPane minHeight="-1.0" minWidth="-1.0" prefHeight="545.0" prefWidth="430.0" />
           </content>
         </ScrollPane>
-        <AnchorPane />
+            <SplitPane dividerPositions="0.37" orientation="VERTICAL">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
+                  <sdv.testingall.guifx.node.LightTabPane fx:id="source_view" tabClosingPolicy="ALL_TABS" />
+              </items>
+            </SplitPane>
       </items>
     </SplitPane>
     <HBox id="status-view" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">

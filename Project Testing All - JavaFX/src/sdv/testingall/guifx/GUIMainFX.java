@@ -44,6 +44,7 @@ public class GUIMainFX extends Application {
 		primaryStage.setTitle(appRes.getString("app.title"));
 		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/guifx/application.png")));
 		primaryStage.setScene(scene);
+		primaryStage.setMaximized(true);
 		primaryStage.show();
 	}
 

@@ -19,8 +19,12 @@ import javafx.stage.Stage;
 import sdv.testingall.cdt.loader.CppLoaderConfig;
 import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.core.logger.ConsoleLogger;
+import sdv.testingall.core.node.IFileNode;
+import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.guifx.node.LightTabPane;
 import sdv.testingall.guifx.node.ProjectExplorer;
+import sdv.testingall.guifx.node.SyntaxTextArea;
 
 /**
  * Controller for MainView
@@ -33,6 +37,7 @@ public class MainView implements Initializable {
 
 	private @FXML Menu				menu_open_recent;
 	private @FXML ProjectExplorer	project_tree;
+	private @FXML LightTabPane		source_view;
 
 	private Stage				primaryStage;
 	private DirectoryChooser	fileOpenChooser;
@@ -44,7 +49,18 @@ public class MainView implements Initializable {
 		fileOpenChooser = new DirectoryChooser();
 		fileOpenChooser.setTitle(res.getString("file.openproject"));
 
-		// openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
+		project_tree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+			INode selected = newValue.getValue();
+			if (selected instanceof IFileNode) {
+				File source = ((IFileNode) selected).getFile();
+
+				if (source.isFile()) {
+					openSourceFile(source);
+				}
+			}
+		});
+
+		openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
 	}
 
 	/**
@@ -68,6 +84,22 @@ public class MainView implements Initializable {
 		ProjectNode rootNode = loader.loadProject();
 
 		project_tree.setRoot(rootNode);
+	}
+
+	/**
+	 * Open a source code view
+	 * 
+	 * @param source
+	 *            source file to open
+	 */
+	public void openSourceFile(File source)
+	{
+		try {
+			source_view.openTab(source.getName(), source.getAbsolutePath(),
+					SyntaxTextArea.class.getConstructor(File.class), source);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@FXML

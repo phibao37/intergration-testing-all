@@ -5,5 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Project Testing All"/>
 	<classpathentry kind="lib" path="/Project Testing All/lib/org.eclipse.jdt.annotation_2.1.0.v20160418-1457.jar"/>
+	<classpathentry kind="lib" path="lib/richtextfx-fat-0.7-M2.jar" sourcepath="lib/richtextfx-0.7-M2-sources.jar"/>
+	<classpathentry kind="lib" path="/Project Testing All/lib/apache/commons-io-2.5.jar" sourcepath="/Project Testing All/lib/src/commons-io-2.5-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
