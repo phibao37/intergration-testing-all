@@ -67,6 +67,7 @@ public class SyntaxTextArea extends VirtualizedScrollPane<CodeArea> implements E
 		super(createNewAreaView(source));
 		sourceFile = source;
 		contentArea = getContent();
+		getStyleClass().add("syntax-area");
 
 		// Get the file content
 		String content = null;

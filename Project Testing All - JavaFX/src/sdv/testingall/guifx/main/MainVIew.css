@@ -54,3 +54,14 @@
 .code-area {
     -fx-highlight-fill: #dff4ff;
 }
+.syntax-area .scroll-bar .thumb {
+    -fx-background-color: #c1c1c1;
+    -fx-background-insets: 2;
+    -fx-background-radius: 2em; 
+}
+.syntax-area .scroll-bar .thumb:hover {
+    -fx-background-color: #b1b1b1;
+}
+.syntax-area .scroll-bar .thumb:pressed {
+    -fx-background-color: #a3a3a3;
+}
