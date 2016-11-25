@@ -64,10 +64,17 @@ public class SyntaxTextArea extends VirtualizedScrollPane<CodeArea> implements E
 	 */
 	public SyntaxTextArea(File source)
 	{
-		super(createNewAreaView(source));
+		super(new CodeArea());
 		sourceFile = source;
 		contentArea = getContent();
 		getStyleClass().add("syntax-area");
+		contentArea.getStyleClass().add("content");
+
+		// Set code view property
+		contentArea.setParagraphGraphicFactory(LineNumberFactory.get(contentArea, digits -> "%" + digits + "d"));
+		contentArea.setEditable(false);
+		contentArea.wrapTextProperty().set(true);
+		contentArea.getStylesheets().add(SyntaxTextArea.class.getResource("SyntaxTextArea.css").toExternalForm());
 
 		// Get the file content
 		String content = null;
@@ -114,26 +121,6 @@ public class SyntaxTextArea extends VirtualizedScrollPane<CodeArea> implements E
 	public boolean equalsConstruct(Object... constructItem)
 	{
 		return sourceFile.equals(constructItem[0]);
-	}
-
-	/**
-	 * Initialize new CodeArea object inside the scroll bar
-	 * 
-	 * @param source
-	 *            source code file
-	 * @return CodeArea object
-	 */
-	static CodeArea createNewAreaView(File source)
-	{
-		// Create object and line number format
-		CodeArea codeArea = new CodeArea();
-		codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea, digits -> "%" + digits + "d"));
-
-		// Set other property
-		codeArea.setEditable(false);
-		codeArea.wrapTextProperty().set(true);
-		codeArea.getStylesheets().add(SyntaxTextArea.class.getResource("SyntaxTextArea.css").toExternalForm());
-		return codeArea;
 	}
 
 	/**

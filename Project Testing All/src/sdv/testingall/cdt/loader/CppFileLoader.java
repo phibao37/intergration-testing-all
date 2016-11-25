@@ -135,7 +135,7 @@ public class CppFileLoader {
 			u.accept(new TranslationUnitParser(fileNode, config, commentMap));
 			return fileNode;
 		} catch (Exception e) {
-			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s\n", source.getPath(),
+			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s", source.getPath(),
 					SDVUtils.gxceptionMsg(e));
 			return null;
 		}

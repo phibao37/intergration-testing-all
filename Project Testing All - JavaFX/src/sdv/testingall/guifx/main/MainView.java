@@ -13,10 +13,13 @@ import java.util.ResourceBundle;
 import org.eclipse.jdt.annotation.NonNull;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
-import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import sdv.testingall.cdt.loader.CppLoaderConfig;
@@ -26,6 +29,7 @@ import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.IFileNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.guifx.node.ConsoleView;
 import sdv.testingall.guifx.node.LightTabPane;
 import sdv.testingall.guifx.node.ProjectExplorer;
 import sdv.testingall.guifx.node.SyntaxTextArea;
@@ -42,21 +46,11 @@ public class MainView implements Initializable {
 	private @FXML Menu				menu_open_recent;
 	private @FXML ProjectExplorer	project_tree;
 	private @FXML LightTabPane		source_view;
-	private @FXML TextArea			consoleArea;
+	private @FXML ConsoleView		console_area;
+	private @FXML Button			btn_console_clear;
 
 	private Stage				primaryStage;
 	private DirectoryChooser	fileOpenChooser;
-
-	private ILogger APP_LOGGER = new BaseLogger() {
-
-		@Override
-		public @NonNull ILogger log(int type, @NonNull String message, Object @NonNull... args)
-		{
-			consoleArea.appendText(String.format(message, args));
-			return super.log(type, message, args);
-		}
-
-	};
 
 	@Override
 	public void initialize(URL location, ResourceBundle res)
@@ -76,7 +70,9 @@ public class MainView implements Initializable {
 			}
 		});
 
-		openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
+		btn_console_clear.setGraphic(new ImageView(new Image(getClass().getResourceAsStream("/guifx/clear.png"))));
+
+		// openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
 	}
 
 	/**
@@ -90,16 +86,65 @@ public class MainView implements Initializable {
 		this.primaryStage = primaryStage;
 	}
 
+	/**
+	 * Open and load project
+	 * 
+	 * @param root
+	 *            root project file
+	 */
 	public void openProject(File root)
 	{
-		CppLoaderConfig config = new CppLoaderConfig();
-		config.setLogger(APP_LOGGER);
+		// Create a worker task
+		Task<ProjectNode> loadProjectTask = new Task<ProjectNode>() {
 
-		CppProjectLoader loader = new CppProjectLoader(root);
-		loader.setLoaderConfig(config);
-		ProjectNode rootNode = loader.loadProject();
+			@Override
+			protected void scheduled()
+			{
+				clearOldData();
+			}
 
-		project_tree.setRoot(rootNode);
+			@Override
+			protected void succeeded()
+			{
+				project_tree.setRoot(getValue());
+			}
+
+			@Override
+			protected ProjectNode call() throws Exception
+			{
+				CppLoaderConfig config = new CppLoaderConfig();
+				config.setLogger(new BaseLogger() {
+
+					@Override
+					public @NonNull ILogger log(int type, @NonNull String message, Object @NonNull... args)
+					{
+						StringBuilder b = new StringBuilder(type == ILogger.ERROR ? "[ERROR] " : "[INFO] ");
+						b.append(String.format(message, args)).append('\n');
+
+						// Must be update from Application thread
+						updateMessage(b.toString());
+						return super.log(type, message, args);
+					}
+
+				});
+				CppProjectLoader loader = new CppProjectLoader(root);
+				loader.setLoaderConfig(config);
+
+				config.getLogger().log(ILogger.INFO, "Loading project %s ...", root.getName());
+				return loader.loadProject();
+			}
+
+		};
+
+		// Register console logger
+		loadProjectTask.messageProperty().addListener((obs, oldValue, newValue) -> {
+			console_area.appendText(newValue);
+		});
+
+		// Start the worker thread
+		Thread thread = new Thread(loadProjectTask);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	/**
@@ -118,6 +163,14 @@ public class MainView implements Initializable {
 		}
 	}
 
+	/**
+	 * Clear all old project data
+	 */
+	protected void clearOldData()
+	{
+		console_area.clear();
+	}
+
 	@FXML
 	protected void handleMenuOpen()
 	{
@@ -132,6 +185,12 @@ public class MainView implements Initializable {
 	{
 		Platform.exit();
 		System.exit(0);
+	}
+
+	@FXML
+	protected void handleBtnClearConsole()
+	{
+		console_area.clear();
 	}
 
 }

@@ -67,8 +67,22 @@
 }
 
 /* Console view */
-#console-area {
+#console-area .content {
 	-fx-padding: 8px;
 	-fx-background-color: white;
-	
+}
+#console-area .content {
+	-fx-font-family: consolas;
+}
+#console-area .content .error {
+	-fx-fill: #ff9797;
+	-fx-font-weight: bold;
+}
+#console-area .content .warning {
+	-fx-fill: #ffc68c;
+	-fx-font-weight: bold;
+}
+#console-area .content .info {
+	-fx-fill: #82c0ff;
+	-fx-font-weight: bold;
 }
