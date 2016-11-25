@@ -53,7 +53,7 @@ public abstract class VariableNode extends BaseNode {
 	 */
 	protected String generateContent(IType type, String name)
 	{
-		return String.format("%s %s", type, name);
+		return String.format("%s %s", type, name); //$NON-NLS-1$
 	}
 
 	/**

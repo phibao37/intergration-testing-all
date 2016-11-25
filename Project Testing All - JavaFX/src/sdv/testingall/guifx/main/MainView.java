@@ -16,23 +16,26 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import sdv.testingall.cdt.loader.CppLoaderConfig;
 import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.core.logger.BaseLogger;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.IFileNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.guifx.Setting;
 import sdv.testingall.guifx.node.ConsoleView;
 import sdv.testingall.guifx.node.LightTabPane;
 import sdv.testingall.guifx.node.ProjectExplorer;
 import sdv.testingall.guifx.node.SyntaxTextArea;
+import sdv.testingall.util.SDVUtils;
 
 /**
  * Controller for MainView
@@ -51,6 +54,7 @@ public class MainView implements Initializable {
 
 	private Stage				primaryStage;
 	private DirectoryChooser	fileOpenChooser;
+	private Setting				setting;
 
 	@Override
 	public void initialize(URL location, ResourceBundle res)
@@ -80,10 +84,13 @@ public class MainView implements Initializable {
 	 * 
 	 * @param primaryStage
 	 *            main application stage
+	 * @param setting
+	 *            application setting
 	 */
-	public void initData(Stage primaryStage)
+	public void initData(Stage primaryStage, Setting setting)
 	{
 		this.primaryStage = primaryStage;
+		this.setting = setting;
 	}
 
 	/**
@@ -112,8 +119,7 @@ public class MainView implements Initializable {
 			@Override
 			protected ProjectNode call() throws Exception
 			{
-				CppLoaderConfig config = new CppLoaderConfig();
-				config.setLogger(new BaseLogger() {
+				setting.setLogger(new BaseLogger() {
 
 					@Override
 					public @NonNull ILogger log(int type, @NonNull String message, Object @NonNull... args)
@@ -128,9 +134,9 @@ public class MainView implements Initializable {
 
 				});
 				CppProjectLoader loader = new CppProjectLoader(root);
-				loader.setLoaderConfig(config);
+				loader.setLoaderConfig(setting);
 
-				config.getLogger().log(ILogger.INFO, "Loading project %s ...", root.getName());
+				setting.getLogger().log(ILogger.INFO, setting.resString("gui.loadingproject"), root.getName());
 				return loader.loadProject();
 			}
 
@@ -160,6 +166,23 @@ public class MainView implements Initializable {
 					SyntaxTextArea.class.getConstructor(File.class), source);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Save setting to file
+	 */
+	public void saveSetting()
+	{
+		try {
+			setting.save();
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			Alert alert = new Alert(AlertType.ERROR);
+			alert.setTitle(setting.resString("gui.errorhappen"));
+			alert.setContentText(SDVUtils.gxceptionMsg(e));
+			alert.showAndWait();
 		}
 	}
 

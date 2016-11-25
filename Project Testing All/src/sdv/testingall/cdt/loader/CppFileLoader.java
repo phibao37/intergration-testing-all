@@ -62,7 +62,7 @@ public class CppFileLoader {
 	 *            configuration to load file
 	 * @return a file node contains the full-tree loaded component inside
 	 */
-	public @Nullable INode loadFile(@Nullable CppLoaderConfig config)
+	public @Nullable INode loadFile(@Nullable ICppLoaderConfig config)
 	{
 		if (config == null) {
 			return null;
@@ -103,7 +103,7 @@ public class CppFileLoader {
 	 * @throws Exception
 	 *             error during load source code
 	 */
-	public static IASTTranslationUnit getTranslationUnit(File source, CppLoaderConfig config, boolean isCpp)
+	public static IASTTranslationUnit getTranslationUnit(File source, ICppLoaderConfig config, boolean isCpp)
 			throws Exception
 	{
 		AbstractLanguage lang = isCpp ? GPPLanguage.getDefault() : GCCLanguage.getDefault();
@@ -118,7 +118,7 @@ public class CppFileLoader {
 	}
 
 	@Nullable
-	private INode loadSourceCode(CppLoaderConfig config, boolean isCpp)
+	private INode loadSourceCode(ICppLoaderConfig config, boolean isCpp)
 	{
 		try {
 			CppFileNode fileNode = new CppFileNode(source, isCpp);
@@ -135,7 +135,7 @@ public class CppFileLoader {
 			u.accept(new TranslationUnitParser(fileNode, config, commentMap));
 			return fileNode;
 		} catch (Exception e) {
-			config.getLogger().log(ILogger.ERROR, "Error loading file %s: %s", source.getPath(),
+			config.getLogger().log(ILogger.ERROR, config.resString("loader.error.loadfile"), source.getPath(), //$NON-NLS-1$
 					SDVUtils.gxceptionMsg(e));
 			return null;
 		}

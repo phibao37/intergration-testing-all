@@ -11,6 +11,7 @@ import java.nio.charset.Charset;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import sdv.testingall.core.IAppResource;
 import sdv.testingall.core.logger.ILogger;
 
 /**
@@ -21,7 +22,7 @@ import sdv.testingall.core.logger.ILogger;
  * @date 2016-10-25 VuSD created
  */
 @NonNullByDefault
-public interface ILoaderConfig {
+public interface ILoaderConfig extends IAppResource {
 
 	/**
 	 * Get the encoding to read the source file

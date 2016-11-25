@@ -17,6 +17,7 @@ import java.io.PrintStream;
  */
 public class ConsoleLogger extends BaseLogger {
 
+	@SuppressWarnings("nls")
 	@Override
 	public ILogger log(int type, String message, Object... args)
 	{

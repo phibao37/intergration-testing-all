@@ -29,19 +29,19 @@ public class GUIMainFX extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception
 	{
-		// Default locale to EN. Internationalization can be extended
-		Locale appLocale = Locale.ENGLISH;
-		ResourceBundle appRes = ResourceBundle.getBundle("sdv.testingall.guifx.main.MainView", appLocale);
+		Setting setting = Setting.loadSetting();
+		Locale appLocale = setting.APP_LOCALE.get();
+		ResourceBundle mainRes = ResourceBundle.getBundle("sdv.testingall.guifx.main.MainView", appLocale);
 
 		// Load node hierarchy
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("main/MainView.fxml"), appRes);
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("main/MainView.fxml"), mainRes);
 		Parent root = loader.load();
 		Scene scene = new Scene(root);
 		MainView controller = loader.getController();
-		controller.initData(primaryStage);
+		controller.initData(primaryStage, setting);
 
 		// Display main application
-		primaryStage.setTitle(appRes.getString("app.title"));
+		primaryStage.setTitle(mainRes.getString("app.title"));
 		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/guifx/application.png")));
 		primaryStage.setScene(scene);
 		primaryStage.setMaximized(true);

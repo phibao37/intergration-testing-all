@@ -19,7 +19,7 @@ import sdv.testingall.core.node.INode;
  */
 public class NamespaceNode extends BaseNode {
 
-	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/namespace.png"));
+	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/namespace.png")); //$NON-NLS-1$
 
 	private boolean isAnonymous;
 
@@ -34,7 +34,7 @@ public class NamespaceNode extends BaseNode {
 		super(name);
 
 		if (name.isEmpty()) {
-			setContent("<anonymous>");
+			setContent("<anonymous>"); //$NON-NLS-1$
 			isAnonymous = true;
 		}
 	}

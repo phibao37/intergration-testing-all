@@ -20,8 +20,8 @@ import sdv.testingall.core.node.FileNode;
  */
 public class CppFileNode extends FileNode {
 
-	private static final Image	ICON_C		= new Image(FileNode.class.getResourceAsStream("/node/c.png"));
-	private static final Image	ICON_CPP	= new Image(FileNode.class.getResourceAsStream("/node/cpp.png"));
+	private static final Image	ICON_C		= new Image(FileNode.class.getResourceAsStream("/node/c.png"));		//$NON-NLS-1$
+	private static final Image	ICON_CPP	= new Image(FileNode.class.getResourceAsStream("/node/cpp.png"));	//$NON-NLS-1$
 
 	private final Image icon;
 

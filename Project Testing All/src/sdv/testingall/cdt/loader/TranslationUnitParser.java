@@ -68,7 +68,7 @@ public class TranslationUnitParser extends ASTVisitor {
 
 	private final Stack<Pair<INode, @Nullable IASTDeclaration>> stackNode;
 
-	private final CppLoaderConfig	config;
+	private final ICppLoaderConfig	config;
 	private final NodeCommentMap	commentMap;
 
 	/**
@@ -81,7 +81,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	 * @param commentMap
 	 *            map from node to list of comment
 	 */
-	public TranslationUnitParser(CppFileNode rootNode, CppLoaderConfig config, NodeCommentMap commentMap)
+	public TranslationUnitParser(CppFileNode rootNode, ICppLoaderConfig config, NodeCommentMap commentMap)
 	{
 		super(true);
 		this.config = config;
@@ -131,7 +131,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			CppTypeModifier mdf = parseBaseModifier(decType);
 			IType type = parseInlineType(decType, mdf);
 			if (fnDecA instanceof ICASTKnRFunctionDeclarator) {
-				config.getLogger().log(ILogger.ERROR, "%s(): K&R C Function will not be supported!", fnName);
+				config.getLogger().log(ILogger.ERROR, config.resString("loader.kr_support"), fnName); //$NON-NLS-1$
 				return PROCESS_SKIP;
 			}
 			IASTStandardFunctionDeclarator fnDec = (IASTStandardFunctionDeclarator) fnDecA;
@@ -176,7 +176,8 @@ public class TranslationUnitParser extends ASTVisitor {
 				//
 				// }
 				else {
-					throw new RuntimeException("Unsupported type: " + decType.getClass().getName());
+					throw new RuntimeException(
+							config.resString("loader.unsupport.type") + decType.getClass().getName()); //$NON-NLS-1$
 				}
 			}
 

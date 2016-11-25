@@ -23,9 +23,9 @@ import sdv.testingall.util.SDVUtils;
  */
 public class ComplexTypeNode extends BaseNode {
 
-	private static final Image	ICON_STRUCT	= new Image(BaseNode.class.getResourceAsStream("/node/struct.png"));
-	private static final Image	ICON_UNION	= new Image(BaseNode.class.getResourceAsStream("/node/union.png"));
-	private static final Image	ICON_CLASS	= new Image(BaseNode.class.getResourceAsStream("/node/class.png"));
+	private static final Image	ICON_STRUCT	= new Image(BaseNode.class.getResourceAsStream("/node/struct.png"));	//$NON-NLS-1$
+	private static final Image	ICON_UNION	= new Image(BaseNode.class.getResourceAsStream("/node/union.png"));		//$NON-NLS-1$
+	private static final Image	ICON_CLASS	= new Image(BaseNode.class.getResourceAsStream("/node/class.png"));		//$NON-NLS-1$
 
 	private int		type;
 	private Image	icon;
@@ -57,13 +57,13 @@ public class ComplexTypeNode extends BaseNode {
 		if (comType.getName().toCharArray().length == 0) {
 			switch (type) {
 			case CLASS:
-				setContent("<class>");
+				setContent("<class>"); //$NON-NLS-1$
 				break;
 			case STRUCT:
-				setContent("<struct>");
+				setContent("<struct>"); //$NON-NLS-1$
 				break;
 			case UNION:
-				setContent("<union>");
+				setContent("<union>"); //$NON-NLS-1$
 				break;
 			}
 		}

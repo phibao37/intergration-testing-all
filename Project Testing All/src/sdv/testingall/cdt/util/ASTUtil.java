@@ -14,7 +14,8 @@ import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import sdv.testingall.cdt.loader.CppFileLoader;
-import sdv.testingall.cdt.loader.CppLoaderConfig;
+import sdv.testingall.cdt.loader.DefaultCppLoaderConfig;
+import sdv.testingall.cdt.loader.ICppLoaderConfig;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
@@ -38,6 +39,7 @@ public class ASTUtil {
 	 * @param margin
 	 *            margin position to print
 	 */
+	@SuppressWarnings("nls")
 	public static void printTree(IASTNode node, String margin)
 	{
 		// [SAFE_CHECKED] getRawSignature() //
@@ -77,9 +79,10 @@ public class ASTUtil {
 		}
 	}
 
+	@SuppressWarnings("nls")
 	public static void main(String[] args)
 	{
-		CppLoaderConfig config = new CppLoaderConfig();
+		ICppLoaderConfig config = new DefaultCppLoaderConfig();
 		config.setLogger(new ConsoleLogger());
 		config.setLogErrorDirective(true);
 

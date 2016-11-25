@@ -22,7 +22,7 @@ import sdv.testingall.core.type.IType;
 @NonNullByDefault
 public abstract class FunctionNode extends BaseNode {
 
-	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/function.png"));
+	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/function.png")); //$NON-NLS-1$
 
 	private final IType				type;
 	private final String			name;
@@ -66,7 +66,7 @@ public abstract class FunctionNode extends BaseNode {
 		if (params.length > 0) {
 			b.append(params[0]);
 			for (int i = 1; i < params.length; i++) {
-				b.append(", ").append(params[i]);
+				b.append(',').append(' ').append(params[i]);
 			}
 		}
 

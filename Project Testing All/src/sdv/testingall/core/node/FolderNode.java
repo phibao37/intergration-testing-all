@@ -20,7 +20,7 @@ import javafx.scene.image.Image;
  */
 public class FolderNode extends BaseNode implements IFileNode {
 
-	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/folder.png"));
+	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/folder.png")); //$NON-NLS-1$
 
 	private File mFile;
 

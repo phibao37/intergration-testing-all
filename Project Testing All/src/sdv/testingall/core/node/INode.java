@@ -82,6 +82,7 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	 * @param margin
 	 *            left-alignment to print
 	 */
+	@SuppressWarnings("nls")
 	default void printTree(String margin)
 	{
 		System.out.printf("%s%s [%s]%n", margin, this, getClass().getSimpleName());

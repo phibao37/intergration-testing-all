@@ -38,8 +38,8 @@ public class CppProjectLoader extends BaseProjectLoader {
 	}
 
 	@Override
-	public CppLoaderConfig getLoaderConfig()
+	public ICppLoaderConfig getLoaderConfig()
 	{
-		return (CppLoaderConfig) super.getLoaderConfig();
+		return (ICppLoaderConfig) super.getLoaderConfig();
 	}
 }

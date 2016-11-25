@@ -38,6 +38,7 @@ public class SDVUtils {
 	 *            string to be format
 	 * @return formatted comment
 	 */
+	@SuppressWarnings("nls")
 	public static String removeCommentFlag(String comment)
 	{
 		return comment.replaceAll("(?m)(^\\/{2,}[ \\t]?)|(^\\/\\*+)|(^ *\\*(?!\\/) ?)|(\\*+\\/$)", "")

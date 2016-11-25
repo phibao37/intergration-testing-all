@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import sdv.testingall.core.loader.ILoaderConfig;
 import sdv.testingall.core.logger.ILogger;
 
 /**
@@ -20,7 +19,7 @@ import sdv.testingall.core.logger.ILogger;
  *
  * @date 2016-10-27 VuSD created
  */
-public class CppLoaderConfig implements ILoaderConfig {
+public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 
 	private Map<String, String>	marcoMap;
 	private List<String>		includeDirs;
@@ -34,7 +33,8 @@ public class CppLoaderConfig implements ILoaderConfig {
 	/**
 	 * Construct default C/C++ loader configuration
 	 */
-	public CppLoaderConfig()
+	@SuppressWarnings("nls")
+	public DefaultCppLoaderConfig()
 	{
 		listCExt = new ArrayList<>();
 		listCppExt = new ArrayList<>();
@@ -47,73 +47,49 @@ public class CppLoaderConfig implements ILoaderConfig {
 		listCppExt.add(".cp");
 	}
 
-	/**
-	 * @return a map from marco name and its expansion
-	 */
+	@Override
 	public Map<String, String> getMarcoMap()
 	{
 		return marcoMap;
 	}
 
-	/**
-	 * @param marcoMap
-	 *            a map from marco name and its expansion
-	 */
+	@Override
 	public void setMarcoMap(Map<String, String> marcoMap)
 	{
 		this.marcoMap = marcoMap;
 	}
 
-	/**
-	 * Get additional include directories
-	 * 
-	 * @return the list of directory to use "#include"
-	 */
+	@Override
 	public String[] getIncludeDirs()
 	{
 		return includeDirs == null ? null : includeDirs.toArray(new String[includeDirs.size()]);
 	}
 
-	/**
-	 * Set additional include directories
-	 * 
-	 * @param includeDirs
-	 *            the list of directory to use "#include"
-	 */
+	@Override
 	public void setIncludeDirs(List<String> includeDirs)
 	{
 		this.includeDirs = includeDirs;
 	}
 
-	/**
-	 * @return the list of extension for C source file
-	 */
+	@Override
 	public List<String> getListCExt()
 	{
 		return listCExt;
 	}
 
-	/**
-	 * @param listCExt
-	 *            the list of extension for C source file
-	 */
+	@Override
 	public void setListCExt(List<String> listCExt)
 	{
 		this.listCExt = listCExt;
 	}
 
-	/**
-	 * @return the list of extension for C++ source file
-	 */
+	@Override
 	public List<String> getListCppExt()
 	{
 		return listCppExt;
 	}
 
-	/**
-	 * @param listCppExt
-	 *            the list of extension for C++ source file
-	 */
+	@Override
 	public void setListCppExt(List<String> listCppExt)
 	{
 		this.listCppExt = listCppExt;
@@ -131,22 +107,13 @@ public class CppLoaderConfig implements ILoaderConfig {
 		this.logger = logger;
 	}
 
-	/**
-	 * Get whether to log error when C/C++ <code>#error</code> directive is active
-	 * 
-	 * @return log state
-	 */
+	@Override
 	public boolean shouldLogErrorDirective()
 	{
 		return logErrorDrt;
 	}
 
-	/**
-	 * Set whether to log error when C/C++ <code>#error</code> directive is active
-	 * 
-	 * @param logErrorDrt
-	 *            log state
-	 */
+	@Override
 	public void setLogErrorDirective(boolean logErrorDrt)
 	{
 		this.logErrorDrt = logErrorDrt;

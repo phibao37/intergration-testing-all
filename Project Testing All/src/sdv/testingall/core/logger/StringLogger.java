@@ -25,6 +25,7 @@ public class StringLogger extends BaseLogger {
 		build = new StringBuilder();
 	}
 
+	@SuppressWarnings("nls")
 	@Override
 	public ILogger log(int type, String message, Object... args)
 	{

@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public abstract class BaseNode extends ArrayList<INode> implements INode {
 
-	private String				content	= "";
+	private String				content	= "";	//$NON-NLS-1$
 	private @Nullable String	description;
 
 	/**
