@@ -26,7 +26,7 @@
       <menus>
         <Menu mnemonicParsing="false" text="%menu.file">
           <items>
-            <MenuItem mnemonicParsing="false" onAction="#handleMenuOpen" text="%menu.file.open" />
+            <MenuItem fx:id="menu_open_project" mnemonicParsing="false" onAction="#handleMenuOpen" text="%menu.file.open" />
             <Menu fx:id="menu_open_recent" mnemonicParsing="false" text="%menu.file.open.recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" text="%menu.file.preferences" />

@@ -13,12 +13,14 @@ import java.util.ResourceBundle;
 import org.eclipse.jdt.annotation.NonNull;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -47,6 +49,7 @@ import sdv.testingall.util.SDVUtils;
 public class MainView implements Initializable {
 
 	private @FXML Menu				menu_open_recent;
+	private @FXML MenuItem			menu_open_project;
 	private @FXML ProjectExplorer	project_tree;
 	private @FXML LightTabPane		source_view;
 	private @FXML ConsoleView		console_area;
@@ -56,10 +59,11 @@ public class MainView implements Initializable {
 	private DirectoryChooser	fileOpenChooser;
 	private Setting				setting;
 
+	private SimpleBooleanProperty propLoadingProject = new SimpleBooleanProperty(false);
+
 	@Override
 	public void initialize(URL location, ResourceBundle res)
 	{
-		// menu_open_recent.getItems().addAll(new MenuItem("Project 1"), new MenuItem("Project 2"));
 		fileOpenChooser = new DirectoryChooser();
 		fileOpenChooser.setTitle(res.getString("file.openproject"));
 
@@ -75,6 +79,9 @@ public class MainView implements Initializable {
 		});
 
 		btn_console_clear.setGraphic(new ImageView(ImageSet.CLEAR));
+
+		menu_open_project.disableProperty().bind(propLoadingProject);
+		menu_open_recent.disableProperty().bind(propLoadingProject);
 
 		// openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
 	}
@@ -108,12 +115,33 @@ public class MainView implements Initializable {
 			protected void scheduled()
 			{
 				clearOldData();
+				propLoadingProject.set(true);
 			}
 
 			@Override
 			protected void succeeded()
 			{
 				project_tree.setRoot(getValue());
+				finished();
+			}
+
+			protected void finished()
+			{
+				propLoadingProject.set(false);
+			}
+
+			@Override
+			protected void cancelled()
+			{
+				// Own worker
+				finished();
+			}
+
+			@Override
+			protected void failed()
+			{
+				// Own worker
+				finished();
 			}
 
 			@Override
