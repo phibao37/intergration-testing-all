@@ -49,6 +49,9 @@
 #project-tree .tree-cell .tooltip {
     -fx-font-size: 12px;
 }
+#project-stack-view {
+	-fx-background-color: rgba(0, 0, 0, 0.1);
+}
 
 /* Code view */
 .code-area {

@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
@@ -16,7 +17,9 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import sdv.testingall.guifx.node.ConsoleView?>
 <?import sdv.testingall.guifx.node.LightTabPane?>
 <?import sdv.testingall.guifx.node.ProjectExplorer?>
 
@@ -42,7 +45,13 @@
     </MenuBar>
     <SplitPane dividerPositions="0.2506, 0.7" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <items>
-            <sdv.testingall.guifx.node.ProjectExplorer id="project-tree" fx:id="project_tree" prefHeight="200.0" prefWidth="200.0" />
+            <StackPane>
+               <children>
+                  <sdv.testingall.guifx.node.ProjectExplorer id="project-tree" fx:id="project_tree" />
+                  <Pane id="project-stack-view" fx:id="project_mask_view" />
+                  <ProgressIndicator fx:id="project_load_indicator" maxHeight="100.0" maxWidth="100.0" progress="0.0" />
+               </children>
+            </StackPane>
         <ScrollPane prefHeight="-1.0" prefWidth="-1.0">
           <content>
             <AnchorPane minHeight="-1.0" minWidth="-1.0" prefHeight="545.0" prefWidth="430.0" />

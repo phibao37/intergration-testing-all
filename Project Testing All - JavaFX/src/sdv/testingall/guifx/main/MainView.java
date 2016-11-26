@@ -13,6 +13,7 @@ import java.util.ResourceBundle;
 import org.eclipse.jdt.annotation.NonNull;
 
 import javafx.application.Platform;
+import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -21,7 +22,9 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import sdv.testingall.cdt.loader.CppProjectLoader;
@@ -50,6 +53,8 @@ public class MainView implements Initializable {
 
 	private @FXML Menu				menu_open_recent;
 	private @FXML MenuItem			menu_open_project;
+	private @FXML Pane				project_mask_view;
+	private @FXML ProgressIndicator	project_load_indicator;
 	private @FXML ProjectExplorer	project_tree;
 	private @FXML LightTabPane		source_view;
 	private @FXML ConsoleView		console_area;
@@ -82,6 +87,10 @@ public class MainView implements Initializable {
 
 		menu_open_project.disableProperty().bind(propLoadingProject);
 		menu_open_recent.disableProperty().bind(propLoadingProject);
+		project_mask_view.visibleProperty().bind(propLoadingProject);
+		project_load_indicator.visibleProperty().bind(propLoadingProject);
+		project_load_indicator.progressProperty()
+				.bind(new When(propLoadingProject).then(ProgressIndicator.INDETERMINATE_PROGRESS).otherwise(0.0));
 
 		// openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
 	}
