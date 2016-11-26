@@ -13,7 +13,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import sdv.testingall.guifx.main.MainView;
 
@@ -42,7 +41,7 @@ public class GUIMainFX extends Application {
 
 		// Display main application
 		primaryStage.setTitle(mainRes.getString("app.title"));
-		primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/guifx/application.png")));
+		primaryStage.getIcons().add(ImageSet.APPLICATION);
 		primaryStage.setScene(scene);
 		primaryStage.setMaximized(true);
 		primaryStage.show();

@@ -16,7 +16,6 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -30,6 +29,8 @@ import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.IFileNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.guifx.GUIUtil;
+import sdv.testingall.guifx.ImageSet;
 import sdv.testingall.guifx.Setting;
 import sdv.testingall.guifx.node.ConsoleView;
 import sdv.testingall.guifx.node.LightTabPane;
@@ -178,11 +179,8 @@ public class MainView implements Initializable {
 			setting.save();
 		} catch (Exception e) {
 			e.printStackTrace();
-
-			Alert alert = new Alert(AlertType.ERROR);
-			alert.setTitle(setting.resString("gui.errorhappen"));
-			alert.setContentText(SDVUtils.gxceptionMsg(e));
-			alert.showAndWait();
+			GUIUtil.alert(AlertType.ERROR, setting.resString("gui.errorhappen"), null, SDVUtils.gxceptionMsg(e),
+					ImageSet.APPLICATION);
 		}
 	}
 
