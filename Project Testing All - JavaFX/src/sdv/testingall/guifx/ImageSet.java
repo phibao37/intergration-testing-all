@@ -19,4 +19,7 @@ public class ImageSet {
 
 	/** Application icon */
 	public static final Image APPLICATION = new Image(ImageSet.class.getResourceAsStream("/guifx/application.png"));
+
+	/** Clear icon */
+	public static final Image CLEAR = new Image(ImageSet.class.getResourceAsStream("/guifx/clear.png"));
 }

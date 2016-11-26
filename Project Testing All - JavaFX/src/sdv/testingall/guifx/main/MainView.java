@@ -19,7 +19,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -75,7 +74,7 @@ public class MainView implements Initializable {
 			}
 		});
 
-		btn_console_clear.setGraphic(new ImageView(new Image(getClass().getResourceAsStream("/guifx/clear.png"))));
+		btn_console_clear.setGraphic(new ImageView(ImageSet.CLEAR));
 
 		// openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
 	}
