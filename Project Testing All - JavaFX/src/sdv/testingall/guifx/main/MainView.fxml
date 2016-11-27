@@ -32,7 +32,7 @@
             <MenuItem fx:id="menu_open_project" mnemonicParsing="false" onAction="#handleMenuOpen" text="%menu.file.open" />
             <Menu fx:id="menu_open_recent" mnemonicParsing="false" text="%menu.file.open.recent" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="%menu.file.preferences" />
+            <MenuItem mnemonicParsing="false" onAction="#handleMenuPreference" text="%menu.file.preferences" />
             <MenuItem mnemonicParsing="false" onAction="#handleMenuQuit" text="%menu.file.quit" />
           </items>
         </Menu>

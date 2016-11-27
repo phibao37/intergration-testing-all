@@ -22,4 +22,7 @@ public class ImageSet {
 
 	/** Clear icon */
 	public static final Image CLEAR = new Image(ImageSet.class.getResourceAsStream("/guifx/clear.png"));
+
+	/** Setting icon */
+	public static final Image SETTING = new Image(ImageSet.class.getResourceAsStream("/guifx/setting.png"));
 }

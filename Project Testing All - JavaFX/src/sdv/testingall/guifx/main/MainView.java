@@ -40,6 +40,7 @@ import sdv.testingall.guifx.node.ConsoleView;
 import sdv.testingall.guifx.node.LightTabPane;
 import sdv.testingall.guifx.node.ProjectExplorer;
 import sdv.testingall.guifx.node.SyntaxTextArea;
+import sdv.testingall.guifx.setting.SettingDialog;
 import sdv.testingall.util.SDVUtils;
 
 /**
@@ -248,6 +249,13 @@ public class MainView implements Initializable {
 	protected void handleBtnClearConsole()
 	{
 		console_area.clear();
+	}
+
+	@FXML
+	protected void handleMenuPreference()
+	{
+		SettingDialog dialog = new SettingDialog(setting);
+		dialog.showAndWait();
 	}
 
 }
