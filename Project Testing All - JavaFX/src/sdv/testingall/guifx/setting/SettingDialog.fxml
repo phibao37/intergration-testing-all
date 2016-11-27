@@ -1,5 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 
-<DialogPane prefHeight="300.0" prefWidth="480.0" stylesheets="@SettingDialog.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" />
+<DialogPane prefHeight="300.0" prefWidth="480.0" stylesheets="@SettingDialog.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
+   <content>
+      <TabPane tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab text="%tab.general">
+               <content>
+                  <GridPane alignment="TOP_CENTER" styleClass="grid-pane">
+                     <columnConstraints>
+                        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
+                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
+                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
+                     </rowConstraints>
+                     <children>
+                        <Label text="%key.language" />
+                        <Label text="%key.charset" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="entry_language" GridPane.columnIndex="1" />
+                        <ComboBox fx:id="entry_charset" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                     </children>
+                  </GridPane>
+               </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </content>
+</DialogPane>

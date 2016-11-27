@@ -256,6 +256,7 @@ public class MainView implements Initializable {
 	{
 		SettingDialog dialog = new SettingDialog(setting);
 		dialog.showAndWait();
+		saveSetting();
 	}
 
 }
