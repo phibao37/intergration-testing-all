@@ -9,7 +9,7 @@ package sdv.testingall.guifx.setting;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -74,7 +74,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources)
 	{
-		HashMap<Locale, String> countryMap = new HashMap<>();
+		LinkedHashMap<Locale, String> countryMap = new LinkedHashMap<>();
 		countryMap.put(Locale.ENGLISH, "English");
 		countryMap.put(new Locale("vi"), "Tiếng Việt");
 		entry_language.getItems().addAll(countryMap.keySet());
