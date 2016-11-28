@@ -30,6 +30,7 @@ public class GUIMainFX extends Application {
 	{
 		Setting setting = Setting.loadSetting();
 		Locale appLocale = setting.APP_LOCALE.get();
+		Locale.setDefault(appLocale);
 		ResourceBundle mainRes = ResourceBundle.getBundle("sdv.testingall.guifx.main.MainView", appLocale);
 
 		// Load node hierarchy
