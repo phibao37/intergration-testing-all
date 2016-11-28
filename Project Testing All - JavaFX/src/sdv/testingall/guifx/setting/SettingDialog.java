@@ -20,6 +20,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.stage.Stage;
 import sdv.testingall.guifx.ImageSet;
@@ -39,6 +40,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 
 	private @FXML ComboBox<Locale>	entry_language;
 	private @FXML ComboBox<Charset>	entry_charset;
+	private @FXML Label				toggle_restart;
 
 	/**
 	 * Create new setting dialog instance
@@ -96,6 +98,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 			};
 		});
 		entry_language.setButtonCell(entry_language.getCellFactory().call(null));
+		toggle_restart.visibleProperty().bind(entry_language.valueProperty().isNotEqualTo(entry_language.getValue()));
 
 		entry_charset.getItems().addAll(Charset.availableCharsets().values());
 		entry_charset.valueProperty().bindBidirectional(setting.APP_CHARSET);

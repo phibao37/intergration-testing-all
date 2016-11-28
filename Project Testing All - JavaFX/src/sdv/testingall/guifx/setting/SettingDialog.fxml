@@ -24,12 +24,15 @@
                         <RowConstraints minHeight="10.0" prefHeight="25.0" />
                         <RowConstraints minHeight="10.0" prefHeight="25.0" />
                         <RowConstraints minHeight="10.0" prefHeight="25.0" />
+                        <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
                      </rowConstraints>
                      <children>
                         <Label text="%key.language" />
                         <Label text="%key.charset" GridPane.rowIndex="1" />
                         <ComboBox fx:id="entry_language" GridPane.columnIndex="1" />
                         <ComboBox fx:id="entry_charset" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label fx:id="toggle_restart" styleClass="fill-red" text="%label.restart_required" visible="false" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
                      </children>
                   </GridPane>
                </content>
