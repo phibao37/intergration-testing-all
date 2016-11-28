@@ -8,6 +8,7 @@ package sdv.testingall.guifx.main;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -201,7 +202,7 @@ public class MainView implements Initializable {
 	{
 		try {
 			source_view.openTab(source.getName(), source.getAbsolutePath(),
-					SyntaxTextArea.class.getConstructor(File.class), source);
+					SyntaxTextArea.class.getConstructor(File.class, Charset.class), source, setting.APP_CHARSET.get());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

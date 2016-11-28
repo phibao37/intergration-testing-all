@@ -56,13 +56,14 @@ public class SyntaxTextArea extends VirtualizedScrollPane<CodeArea> implements E
 	private CodeArea	contentArea;
 
 	/**
-	 * Create new syntax view from file, default char-set will be used.<br/>
-	 * Default language format is C/C++
+	 * Create new syntax view from file Default language format is C/C++
 	 * 
 	 * @param source
 	 *            source code file
+	 * @param charset
+	 *            file encoding to be used to open
 	 */
-	public SyntaxTextArea(File source)
+	public SyntaxTextArea(File source, Charset charset)
 	{
 		super(new CodeArea());
 		sourceFile = source;
@@ -79,7 +80,7 @@ public class SyntaxTextArea extends VirtualizedScrollPane<CodeArea> implements E
 		// Get the file content
 		String content = null;
 		try {
-			content = FileUtils.readFileToString(source, Charset.defaultCharset());
+			content = FileUtils.readFileToString(source, charset);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
