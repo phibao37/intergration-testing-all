@@ -132,8 +132,8 @@ public class MainView implements Initializable {
 			@Override
 			protected void succeeded()
 			{
-				project_tree.setRoot(getValue());
 				finished();
+				project_tree.setRoot(getValue());
 			}
 
 			protected void finished()
@@ -144,14 +144,15 @@ public class MainView implements Initializable {
 			@Override
 			protected void cancelled()
 			{
-				// Own worker
+				setting.getLogger().log(ILogger.INFO, setting.resString("loader.canceled"));
 				finished();
 			}
 
 			@Override
 			protected void failed()
 			{
-				// Own worker
+				setting.getLogger().log(ILogger.ERROR, setting.resString("loader.error.loadproject"),
+						SDVUtils.gxceptionMsg(getException()));
 				finished();
 			}
 

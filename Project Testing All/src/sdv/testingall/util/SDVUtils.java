@@ -25,7 +25,7 @@ public class SDVUtils {
 	 *            exception object
 	 * @return exception message
 	 */
-	public static String gxceptionMsg(Exception e)
+	public static String gxceptionMsg(Throwable e)
 	{
 		String msg = e.getMessage();
 		return msg == null || msg.isEmpty() ? e.getClass().getSimpleName() : msg;
