@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +24,9 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.Nullable;
 
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -42,10 +45,23 @@ public class Setting implements Serializable, ICppLoaderConfig {
 
 	private static final long	serialVersionUID	= 9092250455045821743L;
 	private static final File	PATH				= new File("configuration.dat");
-	private static final int	SETTING_VERSION		= 1;
 
-	public transient SimpleObjectProperty<Charset>		APP_CHARSET				= new SimpleObjectProperty<>();
-	public transient SimpleObjectProperty<Locale>		APP_LOCALE				= new SimpleObjectProperty<>();
+	private static final int SETTING_VERSION;
+	static {
+		int count = 0;
+		for (Field field : Setting.class.getDeclaredFields()) {
+			if (Property.class.isAssignableFrom(field.getType())) {
+				count++;
+			}
+		}
+		SETTING_VERSION = count;
+	}
+
+	public transient SimpleObjectProperty<Charset>	APP_CHARSET				= new SimpleObjectProperty<>();
+	public transient SimpleObjectProperty<Locale>	APP_LOCALE				= new SimpleObjectProperty<>();
+	public transient SimpleListProperty<File>		RECENT_PROJECT			= new SimpleListProperty<>();
+	public transient SimpleIntegerProperty			RECENT_PROJECT_MAXSIZE	= new SimpleIntegerProperty();
+
 	public transient SimpleBooleanProperty				CPP_LOG_ERROR_DIRECTIVE	= new SimpleBooleanProperty();
 	public transient SimpleListProperty<String>			CPP_CEXTENSION			= new SimpleListProperty<>();
 	public transient SimpleListProperty<String>			CPP_CPPEXTENSION		= new SimpleListProperty<>();
@@ -64,6 +80,9 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	{
 		APP_CHARSET.set(Charset.defaultCharset());
 		APP_LOCALE.set(Locale.ENGLISH);
+		RECENT_PROJECT.set(FXCollections.observableArrayList());
+		RECENT_PROJECT_MAXSIZE.set(5);
+
 		CPP_LOG_ERROR_DIRECTIVE.set(true);
 		CPP_CEXTENSION.set(FXCollections.observableArrayList(".c"));
 		CPP_CPPEXTENSION.set(FXCollections.observableArrayList(".cpp", ".cc", ".cxx", ".c++", ".cp"));
@@ -198,6 +217,9 @@ public class Setting implements Serializable, ICppLoaderConfig {
 		s.defaultWriteObject();
 		s.writeObject(APP_CHARSET.get().name());
 		s.writeObject(APP_LOCALE.get());
+		s.writeObject(new ArrayList<>(RECENT_PROJECT));
+		s.writeInt(RECENT_PROJECT_MAXSIZE.get());
+
 		s.writeBoolean(CPP_LOG_ERROR_DIRECTIVE.get());
 		s.writeObject(new ArrayList<>(CPP_CEXTENSION));
 		s.writeObject(new ArrayList<>(CPP_CPPEXTENSION));
@@ -215,6 +237,9 @@ public class Setting implements Serializable, ICppLoaderConfig {
 
 		APP_CHARSET = new SimpleObjectProperty<>(Charset.forName((String) s.readObject()));
 		APP_LOCALE = new SimpleObjectProperty<>((Locale) s.readObject());
+		RECENT_PROJECT = new SimpleListProperty<>(FXCollections.observableArrayList((List<File>) s.readObject()));
+		RECENT_PROJECT_MAXSIZE = new SimpleIntegerProperty(s.readInt());
+
 		CPP_LOG_ERROR_DIRECTIVE = new SimpleBooleanProperty(s.readBoolean());
 		CPP_CEXTENSION = new SimpleListProperty<>(FXCollections.observableArrayList((List<String>) s.readObject()));
 		CPP_CPPEXTENSION = new SimpleListProperty<>(FXCollections.observableArrayList((List<String>) s.readObject()));

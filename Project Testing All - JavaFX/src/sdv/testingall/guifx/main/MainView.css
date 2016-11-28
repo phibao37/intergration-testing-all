@@ -89,3 +89,7 @@
 	-fx-fill: #82c0ff;
 	-fx-font-weight: bold;
 }
+
+#menu-item-empty .label {
+	-fx-text-fill: lightgray;
+}

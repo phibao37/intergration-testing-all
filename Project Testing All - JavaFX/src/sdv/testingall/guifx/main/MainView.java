@@ -9,6 +9,7 @@ package sdv.testingall.guifx.main;
 import java.io.File;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -24,6 +25,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
@@ -55,6 +58,7 @@ public class MainView implements Initializable {
 
 	private @FXML Menu				menu_open_recent;
 	private @FXML MenuItem			menu_open_project;
+	private @FXML MenuItem			menu_open_recent_empty;
 	private @FXML Pane				project_mask_view;
 	private @FXML ProgressIndicator	project_load_indicator;
 	private @FXML ProjectExplorer	project_tree;
@@ -65,6 +69,7 @@ public class MainView implements Initializable {
 	private Stage				primaryStage;
 	private DirectoryChooser	fileOpenChooser;
 	private Setting				setting;
+	private ToggleGroup			menu_open_recent_group;
 
 	private SimpleBooleanProperty propLoadingProject = new SimpleBooleanProperty(false);
 
@@ -86,6 +91,7 @@ public class MainView implements Initializable {
 		});
 
 		btn_console_clear.setGraphic(new ImageView(ImageSet.CLEAR));
+		menu_open_recent_group = new ToggleGroup();
 
 		menu_open_project.disableProperty().bind(propLoadingProject);
 		menu_open_recent.disableProperty().bind(propLoadingProject);
@@ -109,6 +115,15 @@ public class MainView implements Initializable {
 	{
 		this.primaryStage = primaryStage;
 		this.setting = setting;
+
+		// Add recent projects to menu
+		if (setting.RECENT_PROJECT.size() > 0) {
+			List<MenuItem> list_recent = menu_open_recent.getItems();
+			list_recent.clear();
+			for (File root : setting.RECENT_PROJECT) {
+				list_recent.add(createRecentProjectItem(root));
+			}
+		}
 	}
 
 	/**
@@ -134,6 +149,7 @@ public class MainView implements Initializable {
 			{
 				finished();
 				project_tree.setRoot(getValue());
+				addLoadedProjectToRecent(getValue().getFile());
 			}
 
 			protected void finished()
@@ -221,6 +237,117 @@ public class MainView implements Initializable {
 			GUIUtil.alert(AlertType.ERROR, setting.resString("gui.errorhappen"), null, SDVUtils.gxceptionMsg(e),
 					ImageSet.APPLICATION);
 		}
+	}
+
+	/**
+	 * Create new recent project entry
+	 * 
+	 * @param root
+	 *            project root file
+	 * @return corresponding menu item
+	 */
+	protected RadioMenuItem createRecentProjectItem(File root)
+	{
+		RadioMenuItem item = new RadioMenuItem(root.getName());
+		item.setToggleGroup(menu_open_recent_group);
+		item.setUserData(root);
+		item.setOnAction(e -> {
+			RadioMenuItem menuItem = (RadioMenuItem) e.getSource();
+			File rootData = (File) menuItem.getUserData();
+
+			if (!rootData.exists()) {
+				GUIUtil.alert(AlertType.ERROR, setting.resString("gui.errorhappen"), null,
+						setting.resString("gui.project_not_exist"), ImageSet.APPLICATION);
+				removeErrorProjectFromRecent(rootData);
+			} else {
+				openProject(rootData);
+			}
+		});
+		return item;
+	}
+
+	/**
+	 * Add opened project to project recent
+	 * 
+	 * @param root
+	 *            project root file
+	 */
+	protected void addLoadedProjectToRecent(File root)
+	{
+		RadioMenuItem item = null;
+		int index;
+		List<MenuItem> list_recent = menu_open_recent.getItems();
+
+		// Check if recent entry is blank or not
+		if (setting.RECENT_PROJECT.size() == 0) {
+			list_recent.clear();
+		} else {
+			index = setting.RECENT_PROJECT.indexOf(root);
+
+			// Check if recent entry contains opened project
+			if (index >= 0) {
+				item = findMenuItemByData(root);
+
+				// Move entry to first
+				if (index > 0) {
+					setting.RECENT_PROJECT.remove(index);
+					setting.RECENT_PROJECT.add(0, root);
+				}
+			}
+		}
+
+		// Opened project not in recent entry, create a new one
+		if (item == null) {
+			item = createRecentProjectItem(root);
+			list_recent.add(0, item);
+			setting.RECENT_PROJECT.add(0, root);
+
+			// Remove if exceed maximum
+			if (setting.RECENT_PROJECT.size() > setting.RECENT_PROJECT_MAXSIZE.get()) {
+				index = setting.RECENT_PROJECT.size() - 1;
+				File removed = setting.RECENT_PROJECT.remove(index);
+				list_recent.remove(findMenuItemByData(removed));
+			}
+		}
+
+		item.setSelected(true);
+		saveSetting();
+	}
+
+	/**
+	 * Find the menu item associated with given data
+	 * 
+	 * @param data
+	 *            project root file
+	 * @return menu item
+	 */
+	protected RadioMenuItem findMenuItemByData(File data)
+	{
+		for (MenuItem item : menu_open_recent.getItems()) {
+			if (item.getUserData().equals(data)) {
+				return (RadioMenuItem) item;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Remove the project from project recent
+	 * 
+	 * @param root
+	 *            project root file
+	 */
+	protected void removeErrorProjectFromRecent(File root)
+	{
+		List<MenuItem> list_recent = menu_open_recent.getItems();
+		setting.RECENT_PROJECT.remove(root);
+		list_recent.remove(findMenuItemByData(root));
+
+		if (list_recent.size() == 0) {
+			list_recent.add(menu_open_recent_empty);
+		}
+
+		saveSetting();
 	}
 
 	/**

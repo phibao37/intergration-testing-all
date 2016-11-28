@@ -30,7 +30,10 @@
         <Menu mnemonicParsing="false" text="%menu.file">
           <items>
             <MenuItem fx:id="menu_open_project" mnemonicParsing="false" onAction="#handleMenuOpen" text="%menu.file.open" />
-            <Menu fx:id="menu_open_recent" mnemonicParsing="false" text="%menu.file.open.recent" />
+            <Menu fx:id="menu_open_recent" mnemonicParsing="false" text="%menu.file.open.recent">
+                     <items>
+                        <MenuItem id="menu-item-empty" fx:id="menu_open_recent_empty" mnemonicParsing="false" text="%menu.file.open.recent.empty" />
+                     </items></Menu>
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem mnemonicParsing="false" onAction="#handleMenuPreference" text="%menu.file.preferences" />
             <MenuItem mnemonicParsing="false" onAction="#handleMenuQuit" text="%menu.file.quit" />
