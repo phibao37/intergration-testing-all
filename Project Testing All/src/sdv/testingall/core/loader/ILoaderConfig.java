@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
-import sdv.testingall.core.IAppResource;
+import sdv.testingall.core.element.IAppResource;
 import sdv.testingall.core.logger.ILogger;
 
 /**

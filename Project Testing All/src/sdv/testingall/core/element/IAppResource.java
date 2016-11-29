@@ -4,7 +4,7 @@
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.core;
+package sdv.testingall.core.element;
 
 /**
  * Interface to manage application resource like international string

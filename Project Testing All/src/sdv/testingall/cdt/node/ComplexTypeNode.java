@@ -10,6 +10,7 @@ import org.eclipse.cdt.core.dom.ast.IASTCompositeTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTCompositeTypeSpecifier;
 
 import javafx.scene.image.Image;
+import sdv.testingall.core.node.BaseInsideFileNode;
 import sdv.testingall.core.node.BaseNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.util.SDVUtils;
@@ -21,7 +22,7 @@ import sdv.testingall.util.SDVUtils;
  *
  * @date 2016-11-07 VuSD created
  */
-public class ComplexTypeNode extends BaseNode {
+public class ComplexTypeNode extends BaseInsideFileNode {
 
 	private static final Image	ICON_STRUCT	= new Image(BaseNode.class.getResourceAsStream("/node/struct.png"));	//$NON-NLS-1$
 	private static final Image	ICON_UNION	= new Image(BaseNode.class.getResourceAsStream("/node/union.png"));		//$NON-NLS-1$

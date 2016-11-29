@@ -40,6 +40,22 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	String toString();
 
 	/**
+	 * Get the parent node that this node belongs to. This can be <code>null</code> if this is a root node
+	 * 
+	 * @return parent node
+	 */
+	@Nullable
+	INode getParent();
+
+	/**
+	 * Set the parent node that this node belongs to. This can be <code>null</code> if this is a root node
+	 * 
+	 * @param parent
+	 *            parent node
+	 */
+	void setParent(@Nullable INode parent);
+
+	/**
 	 * Get the image icon to be display in the left of node content
 	 * 
 	 * @return image icon

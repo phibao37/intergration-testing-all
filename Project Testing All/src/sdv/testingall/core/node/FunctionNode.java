@@ -20,7 +20,7 @@ import sdv.testingall.core.type.IType;
  * @date 2016-11-02 VuSD created
  */
 @NonNullByDefault
-public abstract class FunctionNode extends BaseNode {
+public abstract class FunctionNode extends BaseInsideFileNode {
 
 	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/function.png")); //$NON-NLS-1$
 
