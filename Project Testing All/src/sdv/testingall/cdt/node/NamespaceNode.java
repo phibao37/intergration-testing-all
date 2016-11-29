@@ -7,6 +7,7 @@
 package sdv.testingall.cdt.node;
 
 import javafx.scene.image.Image;
+import sdv.testingall.core.node.BaseInsideFileNode;
 import sdv.testingall.core.node.BaseNode;
 import sdv.testingall.core.node.INode;
 
@@ -17,7 +18,7 @@ import sdv.testingall.core.node.INode;
  *
  * @date 2016-11-01 VuSD created
  */
-public class NamespaceNode extends BaseNode {
+public class NamespaceNode extends BaseInsideFileNode {
 
 	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/namespace.png")); //$NON-NLS-1$
 

@@ -17,6 +17,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
 import org.eclipse.cdt.core.dom.ast.IASTInitializer;
@@ -49,6 +50,7 @@ import sdv.testingall.cdt.type.CppNamedType;
 import sdv.testingall.cdt.type.CppTypeModifier;
 import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.logger.ILogger;
+import sdv.testingall.core.node.IInsideFileNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.VariableNode;
 import sdv.testingall.core.type.IType;
@@ -152,6 +154,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
 					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
 			addToCurrentStack(fnNode, fnDef);
+			applyFileLocation(fnNode, decType.getFileLocation(), fnDec.getFileLocation());
 
 			return PROCESS_SKIP;
 		}
@@ -160,7 +163,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			IASTSimpleDeclaration smpDec = (IASTSimpleDeclaration) declaration;
 			IASTDeclSpecifier decType = smpDec.getDeclSpecifier();
 			ITypeModifier mdf = parseBaseModifier(decType);
-			INode complex = null;
+			IInsideFileNode complex = null;
 			boolean isTypedef = decType.getStorageClass() == IASTDeclSpecifier.sc_typedef;
 			boolean isExtern = decType.getStorageClass() == IASTDeclSpecifier.sc_extern;
 
@@ -171,6 +174,7 @@ public class TranslationUnitParser extends ASTVisitor {
 					type = new CppNamedType(comType.getName(), mdf);
 					complex = new ComplexTypeNode(comType);
 					type.setBind(complex);
+					applyFileLocation(complex, comType.getFileLocation(), comType.getName().getFileLocation());
 				}
 				// else if (decType instanceof IASTEnumerationSpecifier) {
 				//
@@ -246,6 +250,23 @@ public class TranslationUnitParser extends ASTVisitor {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Set the location information to the node
+	 * 
+	 * @param node
+	 *            node that is inside the file
+	 * @param locBegin
+	 *            location to get the first position
+	 * @param locEnd
+	 *            location to get the last position
+	 */
+	static void applyFileLocation(IInsideFileNode node, IASTFileLocation locBegin, IASTFileLocation locEnd)
+	{
+		int offset = locBegin.getNodeOffset();
+		int offsetEnd = locEnd.getNodeOffset() + locEnd.getNodeLength();
+		node.setFileLocation(offset, offsetEnd - offset);
 	}
 
 	/**
@@ -339,9 +360,10 @@ public class TranslationUnitParser extends ASTVisitor {
 	{
 		assert (namespaceDefinition != null);
 
-		INode ns = new NamespaceNode(namespaceDefinition.getName().toString());
+		NamespaceNode ns = new NamespaceNode(namespaceDefinition.getName().toString());
 		stackNode.peek().getKey().add(ns);
 		stackNode.push(new Pair<>(ns, namespaceDefinition));
+		applyFileLocation(ns, namespaceDefinition.getFileLocation(), namespaceDefinition.getName().getFileLocation());
 		return PROCESS_CONTINUE;
 	}
 
