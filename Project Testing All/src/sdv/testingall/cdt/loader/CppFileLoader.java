@@ -134,6 +134,7 @@ public class CppFileLoader {
 			u.accept(new TranslationUnitParser(fileNode, config, commentMap));
 			return fileNode;
 		} catch (Exception e) {
+			e.printStackTrace();
 			config.getLogger().log(ILogger.ERROR, config.resString("loader.error.loadfile"), source.getPath(), //$NON-NLS-1$
 					SDVUtils.gxceptionMsg(e));
 			return null;

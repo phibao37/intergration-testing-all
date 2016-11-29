@@ -30,6 +30,7 @@ public class ComplexTypeNode extends BaseInsideFileNode {
 
 	private int		type;
 	private Image	icon;
+	private String	keyString;
 
 	/**
 	 * Create new complex type node
@@ -37,6 +38,7 @@ public class ComplexTypeNode extends BaseInsideFileNode {
 	 * @param comType
 	 *            AST type node
 	 */
+	@SuppressWarnings("nls")
 	public ComplexTypeNode(IASTCompositeTypeSpecifier comType)
 	{
 		super(comType.getName().toString());
@@ -45,29 +47,32 @@ public class ComplexTypeNode extends BaseInsideFileNode {
 		switch (type) {
 		case CLASS:
 			icon = ICON_CLASS;
+			keyString = "class";
 			break;
 		case STRUCT:
 			icon = ICON_STRUCT;
+			keyString = "struct";
 			break;
 		case UNION:
 			icon = ICON_UNION;
+			keyString = "union";
 			break;
 		}
 
 		// Anonymouse type
 		if (comType.getName().toCharArray().length == 0) {
-			switch (type) {
-			case CLASS:
-				setContent("<class>"); //$NON-NLS-1$
-				break;
-			case STRUCT:
-				setContent("<struct>"); //$NON-NLS-1$
-				break;
-			case UNION:
-				setContent("<union>"); //$NON-NLS-1$
-				break;
-			}
+			setContent("<" + keyString + ">");
 		}
+	}
+
+	/**
+	 * Get the string representation of complex type
+	 * 
+	 * @return key in string
+	 */
+	public String getKeyString()
+	{
+		return keyString;
 	}
 
 	/**

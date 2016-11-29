@@ -154,7 +154,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
 					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
 			addToCurrentStack(fnNode, fnDef);
-			applyFileLocation(fnNode, decType.getFileLocation(), fnDec.getFileLocation());
+			applyFileLocation(fnNode, decType.getFileLocation(), fnDec.getFileLocation(), 0);
 
 			return PROCESS_SKIP;
 		}
@@ -172,9 +172,11 @@ public class TranslationUnitParser extends ASTVisitor {
 				if (decType instanceof IASTCompositeTypeSpecifier) {
 					IASTCompositeTypeSpecifier comType = (IASTCompositeTypeSpecifier) decType;
 					type = new CppNamedType(comType.getName(), mdf);
-					complex = new ComplexTypeNode(comType);
+					ComplexTypeNode complexNode = new ComplexTypeNode(comType);
+					complex = complexNode;
 					type.setBind(complex);
-					applyFileLocation(complex, comType.getFileLocation(), comType.getName().getFileLocation());
+					applyFileLocation(complex, comType.getFileLocation(), comType.getName().getFileLocation(),
+							complexNode.getKeyString().length());
 				}
 				// else if (decType instanceof IASTEnumerationSpecifier) {
 				//
@@ -261,11 +263,19 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            location to get the first position
 	 * @param locEnd
 	 *            location to get the last position
+	 * @param fallbackLen
+	 *            the content length if the <code>locEnd</code> is null
 	 */
-	static void applyFileLocation(IInsideFileNode node, IASTFileLocation locBegin, IASTFileLocation locEnd)
+	static void applyFileLocation(IInsideFileNode node, IASTFileLocation locBegin, @Nullable IASTFileLocation locEnd,
+			int fallbackLen)
 	{
 		int offset = locBegin.getNodeOffset();
-		int offsetEnd = locEnd.getNodeOffset() + locEnd.getNodeLength();
+		int offsetEnd;
+		if (locEnd != null) {
+			offsetEnd = locEnd.getNodeOffset() + locEnd.getNodeLength();
+		} else {
+			offsetEnd = offset + fallbackLen;
+		}
 		node.setFileLocation(offset, offsetEnd - offset);
 	}
 
@@ -363,7 +373,8 @@ public class TranslationUnitParser extends ASTVisitor {
 		NamespaceNode ns = new NamespaceNode(namespaceDefinition.getName().toString());
 		stackNode.peek().getKey().add(ns);
 		stackNode.push(new Pair<>(ns, namespaceDefinition));
-		applyFileLocation(ns, namespaceDefinition.getFileLocation(), namespaceDefinition.getName().getFileLocation());
+		applyFileLocation(ns, namespaceDefinition.getFileLocation(), namespaceDefinition.getName().getFileLocation(),
+				9);
 		return PROCESS_CONTINUE;
 	}
 
