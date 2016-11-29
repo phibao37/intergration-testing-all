@@ -81,6 +81,9 @@ public class MainView implements Initializable {
 		fileOpenChooser.setTitle(res.getString("file.openproject"));
 
 		project_tree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+			if (newValue == null) {
+				return;
+			}
 			INode selected = newValue.getValue();
 			if (selected instanceof IFileNode) {
 				File source = ((IFileNode) selected).getFile();

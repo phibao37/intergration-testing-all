@@ -6,7 +6,13 @@
  */
 package sdv.testingall.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Utility method used in project
@@ -43,6 +49,24 @@ public class SDVUtils {
 	{
 		return comment.replaceAll("(?m)(^\\/{2,}[ \\t]?)|(^\\/\\*+)|(^ *\\*(?!\\/) ?)|(\\*+\\/$)", "")
 				.replaceAll("(?m)(^[\\n\\x0B\\f\\r]+)", "");
+	}
+
+	/**
+	 * Reads the contents of a file into a String. The file is always closed.
+	 *
+	 * @param file
+	 *            the file to read
+	 * @param encoding
+	 *            the encoding to use
+	 * @return the file contents
+	 * @throws IOException
+	 *             in case of an I/O error
+	 * @since 2.3
+	 */
+	@SuppressWarnings("nls")
+	public static String readFileToString(File file, @Nullable Charset encoding) throws IOException
+	{
+		return FileUtils.readFileToString(file, encoding).replace("\r\n", "\n");
 	}
 
 }

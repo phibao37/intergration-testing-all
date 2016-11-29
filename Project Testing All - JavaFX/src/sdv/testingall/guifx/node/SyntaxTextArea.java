@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.FileUtils;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
@@ -23,6 +22,7 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import sdv.testingall.core.element.IFileLocation;
 import sdv.testingall.guifx.node.LightTabPane.EqualsTabConstruct;
+import sdv.testingall.util.SDVUtils;
 
 /**
  * Code syntax highlight view
@@ -81,7 +81,7 @@ public class SyntaxTextArea extends VirtualizedScrollPane<CodeArea> implements E
 		// Get the file content
 		String content = null;
 		try {
-			content = FileUtils.readFileToString(source, charset);
+			content = SDVUtils.readFileToString(source, charset);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

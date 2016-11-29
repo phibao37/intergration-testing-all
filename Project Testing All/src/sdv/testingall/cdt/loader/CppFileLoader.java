@@ -9,7 +9,6 @@ package sdv.testingall.cdt.loader;
 import java.io.File;
 import java.util.Locale;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.cdt.core.dom.ast.IASTProblem;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
 import org.eclipse.cdt.core.dom.ast.gnu.c.GCCLanguage;
@@ -107,7 +106,7 @@ public class CppFileLoader {
 			throws Exception
 	{
 		AbstractLanguage lang = isCpp ? GPPLanguage.getDefault() : GCCLanguage.getDefault();
-		char[] chars = FileUtils.readFileToString(source, config.getFileCharset()).toCharArray();
+		char[] chars = SDVUtils.readFileToString(source, config.getFileCharset()).toCharArray();
 		FileContent content = FileContent.create(source.getAbsolutePath(), chars);
 		IScannerInfo scanInfo = new ScannerInfo(config.getMarcoMap(), config.getIncludeDirs());
 		IncludeFileContentProvider fileCreator = IncludeFileContentProvider.getSavedFilesProvider();
