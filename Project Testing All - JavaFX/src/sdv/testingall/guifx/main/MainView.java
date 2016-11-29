@@ -35,6 +35,7 @@ import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.core.logger.BaseLogger;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.IFileNode;
+import sdv.testingall.core.node.IInsideFileNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
 import sdv.testingall.guifx.GUIUtil;
@@ -87,6 +88,9 @@ public class MainView implements Initializable {
 				if (source.isFile()) {
 					openSourceFile(source);
 				}
+			} else if (selected instanceof IInsideFileNode) {
+				IInsideFileNode node = (IInsideFileNode) selected;
+				openSourceFile(node.getFile()).setSelected(node);
 			}
 		});
 
@@ -214,14 +218,16 @@ public class MainView implements Initializable {
 	 * 
 	 * @param source
 	 *            source file to open
+	 * @return opened tab content
 	 */
-	public void openSourceFile(File source)
+	public SyntaxTextArea openSourceFile(File source)
 	{
 		try {
-			source_view.openTab(source.getName(), source.getAbsolutePath(),
+			return source_view.openTab(source.getName(), source.getAbsolutePath(),
 					SyntaxTextArea.class.getConstructor(File.class, Charset.class), source, setting.APP_CHARSET.get());
 		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
 	}
 

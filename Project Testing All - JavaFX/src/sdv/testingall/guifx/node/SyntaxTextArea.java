@@ -21,6 +21,7 @@ import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
+import sdv.testingall.core.element.IFileLocation;
 import sdv.testingall.guifx.node.LightTabPane.EqualsTabConstruct;
 
 /**
@@ -91,6 +92,17 @@ public class SyntaxTextArea extends VirtualizedScrollPane<CodeArea> implements E
 		});
 		contentArea.replaceText(0, contentArea.getLength(), content);
 		contentArea.moveTo(0);
+	}
+
+	/**
+	 * Select the text in the given location
+	 * 
+	 * @param loc
+	 *            location to select, contains starting point and text length
+	 */
+	public void setSelected(IFileLocation loc)
+	{
+		contentArea.selectRange(loc.fileOffset(), loc.fileEndOffset());
 	}
 
 	/**

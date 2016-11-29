@@ -36,7 +36,8 @@ public class LightTabPane extends TabPane {
 	 *            data to be passed to construct new tab content
 	 * @return opened tab content
 	 */
-	public Node openTab(String title, String tip, Constructor<? extends Node> constructor, Object... constructData)
+	@SuppressWarnings("unchecked")
+	public <T extends Node> T openTab(String title, String tip, Constructor<T> constructor, Object... constructData)
 	{
 		Node content = null;
 		int selected = -1, index = 0;
@@ -61,7 +62,7 @@ public class LightTabPane extends TabPane {
 
 			Tab tab = null;
 			try {
-				tab = new Tab(title, constructor.newInstance(constructData));
+				tab = new Tab(title, content = constructor.newInstance(constructData));
 				if (tip != null) {
 					tab.setTooltip(new Tooltip(tip));
 				}
@@ -72,7 +73,7 @@ public class LightTabPane extends TabPane {
 		}
 
 		getSelectionModel().select(selected);
-		return content;
+		return (T) content;
 	}
 
 	/**

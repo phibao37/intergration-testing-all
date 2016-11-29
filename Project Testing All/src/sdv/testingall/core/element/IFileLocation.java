@@ -37,4 +37,14 @@ public interface IFileLocation {
 	 * @return element content length
 	 */
 	int fileLength();
+
+	/**
+	 * Get the ending position of element inside the file
+	 * 
+	 * @return ending offset
+	 */
+	default int fileEndOffset()
+	{
+		return fileOffset() + fileLength();
+	}
 }
