@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -22,6 +23,52 @@ import javafx.stage.Stage;
  * @date 2016-11-26 phibao37 created
  */
 public class GUIUtil {
+
+	/** Redefine "Apply" button with localization */
+	public static ButtonType BUTTON_APPLY = ButtonType.APPLY;
+
+	/** Redefine "OK" button with localization */
+	public static ButtonType BUTTON_OK = ButtonType.OK;
+
+	/** Redefine "Cancel" button with localization */
+	public static ButtonType BUTTON_CANCEL = ButtonType.CANCEL;
+
+	/** Redefine "Close" button with localization */
+	public static ButtonType BUTTON_CLOSE = ButtonType.CLOSE;
+
+	/** Redefine "Yes" button with localization */
+	public static ButtonType BUTTON_YES = ButtonType.YES;
+
+	/** Redefine "No" button with localization */
+	public static ButtonType BUTTON_NO = ButtonType.NO;
+
+	/** Redefine "Finish" button with localization */
+	public static ButtonType BUTTON_FINISH = ButtonType.FINISH;
+
+	/** Redefine "Next" button with localization */
+	public static ButtonType BUTTON_NEXT = ButtonType.NEXT;
+
+	/** Redefine "Previous" button with localization */
+	public static ButtonType BUTTON_PREVIOUS = ButtonType.PREVIOUS;
+
+	/**
+	 * Set up static field, data based on setting
+	 * 
+	 * @param setting
+	 *            setting data
+	 */
+	static void setupGUIUtil(Setting setting)
+	{
+		BUTTON_APPLY = new ButtonType(setting.resString("btn.apply"), ButtonData.APPLY);
+		BUTTON_OK = new ButtonType(setting.resString("btn.ok"), ButtonData.OK_DONE);
+		BUTTON_CANCEL = new ButtonType(setting.resString("btn.cancel"), ButtonData.CANCEL_CLOSE);
+		BUTTON_CLOSE = new ButtonType(setting.resString("btn.close"), ButtonData.CANCEL_CLOSE);
+		BUTTON_YES = new ButtonType(setting.resString("btn.yes"), ButtonData.YES);
+		BUTTON_NO = new ButtonType(setting.resString("btn.no"), ButtonData.NO);
+		BUTTON_FINISH = new ButtonType(setting.resString("btn.finish"), ButtonData.FINISH);
+		BUTTON_NEXT = new ButtonType(setting.resString("btn.next"), ButtonData.NEXT_FORWARD);
+		BUTTON_PREVIOUS = new ButtonType(setting.resString("btn.previous"), ButtonData.BACK_PREVIOUS);
+	}
 
 	/**
 	 * Create new alert box and show in current windows
@@ -47,6 +94,17 @@ public class GUIUtil {
 		if (icon != null) {
 			((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(icon);
 		}
+
+		switch (type) {
+		case CONFIRMATION:
+			alert.getButtonTypes().setAll(BUTTON_OK, BUTTON_CANCEL);
+			break;
+		case NONE:
+			break;
+		default:
+			alert.getButtonTypes().setAll(BUTTON_OK);
+		}
+
 		return alert.showAndWait();
 	}
 }

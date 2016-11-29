@@ -23,6 +23,7 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.stage.Stage;
+import sdv.testingall.guifx.GUIUtil;
 import sdv.testingall.guifx.ImageSet;
 import sdv.testingall.guifx.Setting;
 
@@ -70,7 +71,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		dialogStage.getIcons().add(ImageSet.SETTING);
 
 		// Set button control
-		dialog.getButtonTypes().add(ButtonType.CLOSE);
+		dialog.getButtonTypes().add(GUIUtil.BUTTON_CLOSE);
 	}
 
 	@Override
