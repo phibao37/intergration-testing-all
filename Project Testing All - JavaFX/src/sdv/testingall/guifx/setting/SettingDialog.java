@@ -22,6 +22,9 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.stage.Stage;
 import sdv.testingall.guifx.GUIUtil;
 import sdv.testingall.guifx.ImageSet;
@@ -41,7 +44,9 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 
 	private @FXML ComboBox<Locale>	entry_language;
 	private @FXML ComboBox<Charset>	entry_charset;
-	private @FXML Label				toggle_restart;
+	private @FXML Spinner<Integer>	entry_graphic_maxrecent;
+
+	private @FXML Label toggle_restart;
 
 	/**
 	 * Create new setting dialog instance
@@ -103,6 +108,10 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 
 		entry_charset.getItems().addAll(Charset.availableCharsets().values());
 		entry_charset.valueProperty().bindBidirectional(setting.APP_CHARSET);
+
+		IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 20);
+		entry_graphic_maxrecent.setValueFactory(valueFactory);
+		valueFactory.valueProperty().bindBidirectional(setting.RECENT_PROJECT_MAXSIZE.asObject());
 	}
 
 }
