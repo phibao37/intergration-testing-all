@@ -156,7 +156,10 @@ public class MainView implements Initializable {
 			{
 				finished();
 				project_tree.setRoot(getValue());
-				addLoadedProjectToRecent(getValue().getFile());
+
+				File root = getValue().getFile();
+				addLoadedProjectToRecent(root);
+				fileOpenChooser.setInitialDirectory(root);
 			}
 
 			protected void finished()
