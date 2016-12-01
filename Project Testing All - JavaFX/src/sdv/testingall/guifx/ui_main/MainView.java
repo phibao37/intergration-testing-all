@@ -261,6 +261,7 @@ public class MainView implements Initializable {
 	protected RadioMenuItem createRecentProjectItem(File root)
 	{
 		RadioMenuItem item = new RadioMenuItem(root.getName());
+		item.setMnemonicParsing(false);
 		item.setToggleGroup(menu_open_recent_group);
 		item.setUserData(root);
 		item.setOnAction(e -> {
