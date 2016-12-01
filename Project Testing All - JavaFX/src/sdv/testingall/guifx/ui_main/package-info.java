@@ -11,4 +11,4 @@
  *
  * @date 2016-11-22 VuSD created
  */
-package sdv.testingall.guifx.main;
+package sdv.testingall.guifx.ui_main;

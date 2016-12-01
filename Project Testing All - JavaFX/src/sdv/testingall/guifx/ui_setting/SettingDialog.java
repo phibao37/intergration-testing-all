@@ -4,7 +4,7 @@
  * @author (SDV)[phibao37]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.guifx.setting;
+package sdv.testingall.guifx.ui_setting;
 
 import java.io.IOException;
 import java.net.URL;
@@ -59,7 +59,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		// Load resource
 		this.setting = setting;
 		Locale appLocale = setting.APP_LOCALE.get();
-		ResourceBundle mainRes = ResourceBundle.getBundle("sdv.testingall.guifx.setting.SettingDialog", appLocale);
+		ResourceBundle mainRes = ResourceBundle.getBundle("sdv.testingall.guifx.ui_setting.SettingDialog", appLocale);
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("SettingDialog.fxml"), mainRes);
 		loader.setController(this);
 		try {

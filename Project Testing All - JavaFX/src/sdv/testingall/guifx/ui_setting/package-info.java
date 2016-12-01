@@ -11,4 +11,4 @@
  *
  * @date 2016-11-27 phibao37 created
  */
-package sdv.testingall.guifx.setting;
+package sdv.testingall.guifx.ui_setting;

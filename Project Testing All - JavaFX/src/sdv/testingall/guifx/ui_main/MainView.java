@@ -4,7 +4,7 @@
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.guifx.main;
+package sdv.testingall.guifx.ui_main;
 
 import java.io.File;
 import java.net.URL;
@@ -45,7 +45,7 @@ import sdv.testingall.guifx.node.ConsoleView;
 import sdv.testingall.guifx.node.LightTabPane;
 import sdv.testingall.guifx.node.ProjectExplorer;
 import sdv.testingall.guifx.node.SyntaxTextArea;
-import sdv.testingall.guifx.setting.SettingDialog;
+import sdv.testingall.guifx.ui_setting.SettingDialog;
 import sdv.testingall.util.SDVUtils;
 
 /**

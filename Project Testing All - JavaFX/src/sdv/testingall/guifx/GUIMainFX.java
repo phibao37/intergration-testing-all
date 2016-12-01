@@ -14,7 +14,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import sdv.testingall.guifx.main.MainView;
+import sdv.testingall.guifx.ui_main.MainView;
 
 /**
  * Main JavaFX application
@@ -32,10 +32,10 @@ public class GUIMainFX extends Application {
 		Locale appLocale = setting.APP_LOCALE.get();
 		Locale.setDefault(appLocale);
 		GUIUtil.setupGUIUtil(setting);
-		ResourceBundle mainRes = ResourceBundle.getBundle("sdv.testingall.guifx.main.MainView", appLocale);
+		ResourceBundle mainRes = ResourceBundle.getBundle("sdv.testingall.guifx.ui_main.MainView", appLocale);
 
 		// Load node hierarchy
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("main/MainView.fxml"), mainRes);
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("ui_main/MainView.fxml"), mainRes);
 		Parent root = loader.load();
 		Scene scene = new Scene(root);
 		MainView controller = loader.getController();

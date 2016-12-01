@@ -23,7 +23,7 @@
 <?import sdv.testingall.guifx.node.LightTabPane?>
 <?import sdv.testingall.guifx.node.ProjectExplorer?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sdv.testingall.guifx.main.MainView">
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sdv.testingall.guifx.ui_main.MainView">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
