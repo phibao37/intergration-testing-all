@@ -16,7 +16,9 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Accordion;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
@@ -25,6 +27,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import sdv.testingall.guifx.GUIUtil;
 import sdv.testingall.guifx.ImageSet;
@@ -45,8 +48,12 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private @FXML ComboBox<Locale>	entry_language;
 	private @FXML ComboBox<Charset>	entry_charset;
 	private @FXML Spinner<Integer>	entry_graphic_maxrecent;
+	private @FXML TextField			entry_cext;
+	private @FXML TextField			entry_cppext;
+	private @FXML CheckBox			entry_log_errdiv;
 
-	private @FXML Label toggle_restart;
+	private @FXML Label		toggle_restart;
+	private @FXML Accordion	acc_cpp;
 
 	/**
 	 * Create new setting dialog instance
@@ -112,6 +119,23 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 20);
 		entry_graphic_maxrecent.setValueFactory(valueFactory);
 		valueFactory.valueProperty().bindBidirectional(setting.RECENT_PROJECT_MAXSIZE.asObject());
+
+		acc_cpp.setExpandedPane(acc_cpp.getPanes().get(0));
+		entry_cext.setText(String.join(" ", setting.CPP_CEXTENSION));
+		entry_cppext.setText(String.join(" ", setting.CPP_CPPEXTENSION));
+		entry_cext.textProperty().addListener((obs, oldValue, newValue) -> {
+			if (newValue == null || newValue.isEmpty()) {
+				return;
+			}
+			setting.CPP_CEXTENSION.setAll(newValue.split(" "));
+		});
+		entry_cppext.textProperty().addListener((obs, oldValue, newValue) -> {
+			if (newValue == null || newValue.isEmpty()) {
+				return;
+			}
+			setting.CPP_CPPEXTENSION.setAll(newValue.split(" "));
+		});
+		entry_log_errdiv.selectedProperty().bindBidirectional(setting.CPP_LOG_ERROR_DIRECTIVE);
 	}
 
 }

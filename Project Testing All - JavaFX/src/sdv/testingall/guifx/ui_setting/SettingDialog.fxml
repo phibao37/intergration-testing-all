@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -40,19 +44,35 @@
           </Tab>
           <Tab text="%tab.c_cpp">
                <content>
-                  <GridPane alignment="TOP_CENTER" styleClass="grid-pane">
-                  	<columnConstraints>
-                        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                     </rowConstraints>
-                     <children>
-                     </children>
-                  </GridPane>
+                  <Accordion fx:id="acc_cpp">
+                    <panes>
+                      <TitledPane text="%titled.general">
+                      	<content>
+		                  <GridPane alignment="TOP_CENTER" styleClass="grid-pane">
+		                  	<columnConstraints>
+		                        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+		                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+		                     </columnConstraints>
+		                     <rowConstraints>
+		                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
+		                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
+		                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
+		                     </rowConstraints>
+		                     <children>
+		                        <Label text="%key.ccpp.cext" />
+                                    <Label text="%key.ccpp.cppext" GridPane.rowIndex="1" />
+                                    <Label text="%key.ccpp.logerrordiv" GridPane.rowIndex="2" />
+                                    <TextField fx:id="entry_cext" promptText="%prompt.extension" GridPane.columnIndex="1" />
+                                    <TextField fx:id="entry_cppext" promptText="%prompt.extension" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <CheckBox fx:id="entry_log_errdiv" mnemonicParsing="false" text="%prompt.ccpp.logerrordiv" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+		                     </children>
+		                  </GridPane>
+		               	</content>
+                      </TitledPane>
+                      <TitledPane text="%titled.includedir" />
+                      <TitledPane text="%titled.marco" />
+                    </panes>
+                  </Accordion>
                </content>
           </Tab>
           <Tab text="%tab.graphic">
