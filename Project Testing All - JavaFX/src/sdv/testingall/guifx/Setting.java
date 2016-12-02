@@ -6,14 +6,12 @@
  */
 package sdv.testingall.guifx;
 
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -229,9 +227,10 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException
 	{
 		initDefaultValue();
-		s.defaultReadObject();
 
 		try {
+			s.defaultReadObject();
+
 			APP_CHARSET.set(Charset.forName((String) s.readObject()));
 			APP_LOCALE.set((Locale) s.readObject());
 			RECENT_PROJECT.setAll((List<File>) s.readObject());
@@ -242,12 +241,8 @@ public class Setting implements Serializable, ICppLoaderConfig {
 			CPP_CPPEXTENSION.setAll((List<String>) s.readObject());
 			CPP_INCLUDE_DIR.setAll((List<String>) s.readObject());
 			CPP_MARCO_MAP.putAll((Map<String, String>) s.readObject());
-		} catch (EOFException e) {
+		} catch (Exception e) {
 			// No throw later
-		} catch (OptionalDataException e) {
-			if (!e.eof) {
-				throw e; // Re throw if not end of file
-			}
 		}
 
 	}
