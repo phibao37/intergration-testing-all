@@ -6,17 +6,19 @@
  */
 package sdv.testingall.guifx;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OptionalDataException;
 import java.io.Serializable;
-import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,7 +26,6 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.Nullable;
 
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -46,48 +47,44 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	private static final long	serialVersionUID	= 9092250455045821743L;
 	private static final File	PATH				= new File("configuration.dat");
 
-	private static final int SETTING_VERSION;
-	static {
-		int count = 0;
-		for (Field field : Setting.class.getDeclaredFields()) {
-			if (Property.class.isAssignableFrom(field.getType())) {
-				count++;
-			}
-		}
-		SETTING_VERSION = count;
-	}
+	public transient SimpleObjectProperty<Charset>	APP_CHARSET;
+	public transient SimpleObjectProperty<Locale>	APP_LOCALE;
+	public transient SimpleListProperty<File>		RECENT_PROJECT;
+	public transient SimpleIntegerProperty			RECENT_PROJECT_MAXSIZE;
 
-	public transient SimpleObjectProperty<Charset>	APP_CHARSET				= new SimpleObjectProperty<>();
-	public transient SimpleObjectProperty<Locale>	APP_LOCALE				= new SimpleObjectProperty<>();
-	public transient SimpleListProperty<File>		RECENT_PROJECT			= new SimpleListProperty<>();
-	public transient SimpleIntegerProperty			RECENT_PROJECT_MAXSIZE	= new SimpleIntegerProperty();
-
-	public transient SimpleBooleanProperty				CPP_LOG_ERROR_DIRECTIVE	= new SimpleBooleanProperty();
-	public transient SimpleListProperty<String>			CPP_CEXTENSION			= new SimpleListProperty<>();
-	public transient SimpleListProperty<String>			CPP_CPPEXTENSION		= new SimpleListProperty<>();
-	public transient SimpleListProperty<String>			CPP_INCLUDE_DIR			= new SimpleListProperty<>();
-	public transient SimpleMapProperty<String, String>	CPP_MARCO_MAP			= new SimpleMapProperty<>();
+	public transient SimpleBooleanProperty				CPP_LOG_ERROR_DIRECTIVE;
+	public transient SimpleListProperty<String>			CPP_CEXTENSION;
+	public transient SimpleListProperty<String>			CPP_CPPEXTENSION;
+	public transient SimpleListProperty<String>			CPP_INCLUDE_DIR;
+	public transient SimpleMapProperty<String, String>	CPP_MARCO_MAP;
 
 	private transient ResourceBundle	appRes;
 	private transient ILogger			logger;
-
-	private int setting_version = SETTING_VERSION;
 
 	/**
 	 * Initialize default value if no configuration file found
 	 */
 	private Setting()
 	{
-		APP_CHARSET.set(Charset.defaultCharset());
-		APP_LOCALE.set(Locale.ENGLISH);
-		RECENT_PROJECT.set(FXCollections.observableArrayList());
-		RECENT_PROJECT_MAXSIZE.set(5);
+		initDefaultValue();
+	}
 
-		CPP_LOG_ERROR_DIRECTIVE.set(true);
-		CPP_CEXTENSION.set(FXCollections.observableArrayList(".c"));
-		CPP_CPPEXTENSION.set(FXCollections.observableArrayList(".cpp", ".cc", ".cxx", ".c++", ".cp"));
-		CPP_INCLUDE_DIR.set(FXCollections.observableArrayList());
-		CPP_MARCO_MAP.set(FXCollections.observableHashMap());
+	/**
+	 * Instance field and assign default value
+	 */
+	private void initDefaultValue()
+	{
+		APP_CHARSET = new SimpleObjectProperty<>(Charset.defaultCharset());
+		APP_LOCALE = new SimpleObjectProperty<>(Locale.ENGLISH);
+		RECENT_PROJECT = new SimpleListProperty<>(FXCollections.observableArrayList());
+		RECENT_PROJECT_MAXSIZE = new SimpleIntegerProperty(5);
+
+		CPP_LOG_ERROR_DIRECTIVE = new SimpleBooleanProperty(true);
+		CPP_CEXTENSION = new SimpleListProperty<>(FXCollections.observableArrayList(".c"));
+		CPP_CPPEXTENSION = new SimpleListProperty<>(
+				FXCollections.observableArrayList(".cpp", ".cc", ".cxx", ".c++", ".cp"));
+		CPP_INCLUDE_DIR = new SimpleListProperty<>(FXCollections.observableList(new LinkedList<>()));
+		CPP_MARCO_MAP = new SimpleMapProperty<>(FXCollections.observableMap(new LinkedHashMap<>()));
 	}
 
 	@Override
@@ -215,6 +212,7 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	private void writeObject(ObjectOutputStream s) throws IOException
 	{
 		s.defaultWriteObject();
+
 		s.writeObject(APP_CHARSET.get().name());
 		s.writeObject(APP_LOCALE.get());
 		s.writeObject(new ArrayList<>(RECENT_PROJECT));
@@ -224,27 +222,33 @@ public class Setting implements Serializable, ICppLoaderConfig {
 		s.writeObject(new ArrayList<>(CPP_CEXTENSION));
 		s.writeObject(new ArrayList<>(CPP_CPPEXTENSION));
 		s.writeObject(new ArrayList<>(CPP_INCLUDE_DIR));
-		s.writeObject(new HashMap<>(CPP_MARCO_MAP));
+		s.writeObject(new LinkedHashMap<>(CPP_MARCO_MAP));
 	}
 
 	@SuppressWarnings("unchecked")
 	private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException
 	{
+		initDefaultValue();
 		s.defaultReadObject();
-		if (setting_version != SETTING_VERSION) {
-			throw new IOException("Version mismatch");
+
+		try {
+			APP_CHARSET.set(Charset.forName((String) s.readObject()));
+			APP_LOCALE.set((Locale) s.readObject());
+			RECENT_PROJECT.setAll((List<File>) s.readObject());
+			RECENT_PROJECT_MAXSIZE.set(s.readInt());
+
+			CPP_LOG_ERROR_DIRECTIVE.set(s.readBoolean());
+			CPP_CEXTENSION.setAll((List<String>) s.readObject());
+			CPP_CPPEXTENSION.setAll((List<String>) s.readObject());
+			CPP_INCLUDE_DIR.setAll((List<String>) s.readObject());
+			CPP_MARCO_MAP.putAll((Map<String, String>) s.readObject());
+		} catch (EOFException e) {
+			// No throw later
+		} catch (OptionalDataException e) {
+			if (!e.eof) {
+				throw e; // Re throw if not end of file
+			}
 		}
-
-		APP_CHARSET = new SimpleObjectProperty<>(Charset.forName((String) s.readObject()));
-		APP_LOCALE = new SimpleObjectProperty<>((Locale) s.readObject());
-		RECENT_PROJECT = new SimpleListProperty<>(FXCollections.observableArrayList((List<File>) s.readObject()));
-		RECENT_PROJECT_MAXSIZE = new SimpleIntegerProperty(s.readInt());
-
-		CPP_LOG_ERROR_DIRECTIVE = new SimpleBooleanProperty(s.readBoolean());
-		CPP_CEXTENSION = new SimpleListProperty<>(FXCollections.observableArrayList((List<String>) s.readObject()));
-		CPP_CPPEXTENSION = new SimpleListProperty<>(FXCollections.observableArrayList((List<String>) s.readObject()));
-		CPP_INCLUDE_DIR = new SimpleListProperty<>(FXCollections.observableArrayList((List<String>) s.readObject()));
-		CPP_MARCO_MAP = new SimpleMapProperty<>(FXCollections.observableMap((Map<String, String>) s.readObject()));
 
 	}
 }

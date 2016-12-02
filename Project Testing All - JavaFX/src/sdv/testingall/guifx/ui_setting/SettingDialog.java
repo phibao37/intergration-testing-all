@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -188,7 +187,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 
 	protected static Map<String, String> convertStringToMapMarco(String text)
 	{
-		Map<String, String> marcoMap = new HashMap<>();
+		Map<String, String> marcoMap = new LinkedHashMap<>();
 		for (String line : text.split("\n")) {
 			line = line.trim();
 			if (line.isEmpty()) {
