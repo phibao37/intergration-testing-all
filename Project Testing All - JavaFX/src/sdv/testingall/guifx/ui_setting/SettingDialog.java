@@ -6,10 +6,12 @@
  */
 package sdv.testingall.guifx.ui_setting;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -24,10 +26,13 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import sdv.testingall.guifx.GUIUtil;
 import sdv.testingall.guifx.ImageSet;
@@ -51,9 +56,12 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private @FXML TextField			entry_cext;
 	private @FXML TextField			entry_cppext;
 	private @FXML CheckBox			entry_log_errdiv;
+	private @FXML ListView<String>	entry_ccpp_includedir;
 
 	private @FXML Label		toggle_restart;
 	private @FXML Accordion	acc_cpp;
+
+	private DirectoryChooser cppHeaderChooser;
 
 	/**
 	 * Create new setting dialog instance
@@ -87,7 +95,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	}
 
 	@Override
-	public void initialize(URL location, ResourceBundle resources)
+	public void initialize(URL location, ResourceBundle res)
 	{
 		LinkedHashMap<Locale, String> countryMap = new LinkedHashMap<>();
 		countryMap.put(Locale.ENGLISH, "English");
@@ -136,6 +144,29 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 			setting.CPP_CPPEXTENSION.setAll(newValue.split(" "));
 		});
 		entry_log_errdiv.selectedProperty().bindBidirectional(setting.CPP_LOG_ERROR_DIRECTIVE);
+
+		entry_ccpp_includedir.itemsProperty().bindBidirectional(setting.CPP_INCLUDE_DIR);
+		entry_ccpp_includedir.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		cppHeaderChooser = new DirectoryChooser();
+		cppHeaderChooser.setTitle(res.getString("browse.cppheader"));
+	}
+
+	protected @FXML void handleIncludeDirAdd()
+	{
+		File dir = cppHeaderChooser.showDialog(getOwner());
+		if (dir == null) {
+			return;
+		}
+		String dirPath = dir.getAbsolutePath();
+		List<String> items = entry_ccpp_includedir.getItems();
+		int index = items.indexOf(dirPath);
+
+		if (index == -1) {
+			index = items.size();
+			items.add(dirPath);
+		}
+		entry_ccpp_includedir.getSelectionModel().clearAndSelect(index);
+		entry_ccpp_includedir.scrollTo(index);
 	}
 
 }

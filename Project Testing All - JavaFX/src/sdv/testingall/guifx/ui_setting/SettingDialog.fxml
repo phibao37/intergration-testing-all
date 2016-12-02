@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -12,9 +15,11 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<DialogPane prefHeight="300.0" prefWidth="480.0" stylesheets="@SettingDialog.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
+<DialogPane prefHeight="350.0" prefWidth="480.0" stylesheets="@SettingDialog.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <TabPane tabClosingPolicy="UNAVAILABLE">
         <tabs>
@@ -69,7 +74,24 @@
 		                  </GridPane>
 		               	</content>
                       </TitledPane>
-                      <TitledPane text="%titled.includedir" />
+                      <TitledPane text="%titled.includedir">
+                           <content>
+                              <HBox>
+                                 <children>
+                                    <ListView fx:id="entry_ccpp_includedir" HBox.hgrow="ALWAYS" />
+                                    <VBox prefWidth="80.0" spacing="10.0">
+                                       <children>
+                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirAdd" text="%btn.add" />
+                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%btn.edit" />
+                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%btn.delete" />
+                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%btn.deleteinvalid" />
+                                       </children>
+                                       <HBox.margin>
+                                          <Insets left="10.0" />
+                                       </HBox.margin></VBox>
+                                 </children>
+                              </HBox>
+                           </content></TitledPane>
                       <TitledPane text="%titled.marco" />
                     </panes>
                   </Accordion>
