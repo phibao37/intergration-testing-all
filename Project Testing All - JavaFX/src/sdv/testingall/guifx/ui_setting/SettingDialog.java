@@ -10,9 +10,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -35,6 +37,7 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -62,6 +65,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private @FXML TextField			entry_cppext;
 	private @FXML CheckBox			entry_log_errdiv;
 	private @FXML ListView<String>	entry_ccpp_includedir;
+	private @FXML TextArea			entry_ccpp_marco;
 
 	private @FXML Label		toggle_restart;
 	private @FXML Accordion	acc_cpp;
@@ -156,6 +160,54 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		entry_ccpp_includedir.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		cppHeaderChooser = new DirectoryChooser();
 		cppHeaderChooser.setTitle(res.getString("browse.cppheader"));
+
+		entry_ccpp_marco.setText(convertMarcoToString(setting.CPP_MARCO_MAP));
+		entry_ccpp_marco.focusedProperty().addListener((obs, oldValue, newValue) -> {
+			if (!newValue) {
+				setting.CPP_MARCO_MAP.clear();
+				setting.CPP_MARCO_MAP.putAll(convertStringToMapMarco(entry_ccpp_marco.getText()));
+			}
+		});
+	}
+
+	protected static String convertMarcoToString(Map<String, String> marcoMap)
+	{
+		if (marcoMap.isEmpty()) {
+			return "";
+		}
+		StringBuilder b = new StringBuilder();
+		for (Map.Entry<String, String> entry : marcoMap.entrySet()) {
+			b.append(entry.getKey());
+			if (!entry.getValue().isEmpty()) {
+				b.append(" = ").append(entry.getValue());
+			}
+			b.append('\n');
+		}
+		return b.toString();
+	}
+
+	protected static Map<String, String> convertStringToMapMarco(String text)
+	{
+		Map<String, String> marcoMap = new HashMap<>();
+		for (String line : text.split("\n")) {
+			line = line.trim();
+			if (line.isEmpty()) {
+				continue;
+			}
+			int index = line.indexOf('=');
+
+			if (index == -1) {
+				marcoMap.put(line, "");
+			} else {
+				String key = line.substring(0, index).trim();
+				String val = line.substring(index + 1).trim();
+				if (key.isEmpty()) {
+					continue;
+				}
+				marcoMap.put(key, val);
+			}
+		}
+		return marcoMap;
 	}
 
 	protected @FXML void handleIncludeDirAdd()
