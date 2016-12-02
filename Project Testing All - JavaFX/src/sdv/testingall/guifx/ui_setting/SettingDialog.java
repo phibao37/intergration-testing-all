@@ -13,12 +13,15 @@ import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -27,6 +30,7 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
@@ -47,8 +51,9 @@ import sdv.testingall.guifx.Setting;
  */
 public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 
-	private DialogPane	dialog;
-	private Setting		setting;
+	private DialogPane		dialog;
+	private Setting			setting;
+	private ResourceBundle	appRes;
 
 	private @FXML ComboBox<Locale>	entry_language;
 	private @FXML ComboBox<Charset>	entry_charset;
@@ -97,6 +102,8 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle res)
 	{
+		appRes = res;
+
 		LinkedHashMap<Locale, String> countryMap = new LinkedHashMap<>();
 		countryMap.put(Locale.ENGLISH, "English");
 		countryMap.put(new Locale("vi"), "Tiếng Việt");
@@ -153,6 +160,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 
 	protected @FXML void handleIncludeDirAdd()
 	{
+		cppHeaderChooser.setInitialDirectory(null);
 		File dir = cppHeaderChooser.showDialog(getOwner());
 		if (dir == null) {
 			return;
@@ -167,6 +175,61 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		}
 		entry_ccpp_includedir.getSelectionModel().clearAndSelect(index);
 		entry_ccpp_includedir.scrollTo(index);
+	}
+
+	protected @FXML void handleIncludeDirEdit()
+	{
+		MultipleSelectionModel<String> models = entry_ccpp_includedir.getSelectionModel();
+		List<String> items = entry_ccpp_includedir.getItems();
+		List<String> selectedItem = models.getSelectedItems();
+		if (selectedItem.size() != 1) {
+			return;
+		}
+
+		{
+			File initial = new File(selectedItem.get(0));
+			cppHeaderChooser.setInitialDirectory(GUIUtil.isFolderReadable(initial) ? initial : null);
+		}
+		File dir = cppHeaderChooser.showDialog(getOwner());
+		if (dir == null) {
+			return;
+		}
+
+		String dirPath = dir.getAbsolutePath();
+		int index = items.indexOf(selectedItem.get(0)), index2 = items.indexOf(dirPath);
+
+		// New directory exist in current list
+		if (index2 != -1) {
+			if (index2 == index) {
+				return;
+			}
+			items.remove(index2);
+			if (index2 < index) {
+				index--;
+			}
+		}
+
+		items.set(index, dirPath);
+	}
+
+	protected @FXML void handleIncludeDirDelete()
+	{
+		List<String> selectedItems = entry_ccpp_includedir.getSelectionModel().getSelectedItems();
+		List<String> items = entry_ccpp_includedir.getItems();
+		if (selectedItems.isEmpty()) {
+			return;
+		}
+
+		Optional<ButtonType> result = GUIUtil.alert(AlertType.CONFIRMATION, setting.resString("gui.confirmation"), null,
+				appRes.getString("prompt.deleteheaderconfirm"), ImageSet.SETTING);
+		if (result.isPresent() && result.get().getButtonData() == ButtonData.OK_DONE) {
+			items.removeAll(selectedItems);
+		}
+	}
+
+	protected @FXML void handleIncludeDirKeepValid()
+	{
+		setting.CPP_INCLUDE_DIR.removeIf(dir -> !GUIUtil.isFolderReadable(new File(dir)));
 	}
 
 }

@@ -6,6 +6,7 @@
  */
 package sdv.testingall.guifx;
 
+import java.io.File;
 import java.util.Optional;
 
 import javafx.scene.control.Alert;
@@ -106,5 +107,17 @@ public class GUIUtil {
 		}
 
 		return alert.showAndWait();
+	}
+
+	/**
+	 * Check if a folder is readable, which include: <code>folder != null</code>, existed, is folder, readable
+	 * 
+	 * @param folder
+	 *            folder object to check
+	 * @return readable state
+	 */
+	public static boolean isFolderReadable(File folder)
+	{
+		return folder != null && folder.isDirectory() && folder.canRead();
 	}
 }

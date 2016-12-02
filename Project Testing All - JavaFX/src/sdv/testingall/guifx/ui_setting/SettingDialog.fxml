@@ -82,9 +82,9 @@
                                     <VBox prefWidth="80.0" spacing="10.0">
                                        <children>
                                           <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirAdd" text="%btn.add" />
-                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%btn.edit" />
-                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%btn.delete" />
-                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="%btn.deleteinvalid" />
+                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirEdit" text="%btn.edit" />
+                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirDelete" text="%btn.delete" />
+                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirKeepValid" text="%btn.deleteinvalid" />
                                        </children>
                                        <HBox.margin>
                                           <Insets left="10.0" />
