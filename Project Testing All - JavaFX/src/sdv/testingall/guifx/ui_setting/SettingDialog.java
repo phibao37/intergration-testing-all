@@ -211,7 +211,15 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 
 	protected @FXML void handleIncludeDirAdd()
 	{
+		MultipleSelectionModel<String> models = entry_ccpp_includedir.getSelectionModel();
 		cppHeaderChooser.setInitialDirectory(null);
+		if (!models.isEmpty()) {
+			File initial = new File(models.getSelectedItem());
+			if (GUIUtil.isFolderReadable(initial)) {
+				cppHeaderChooser.setInitialDirectory(initial);
+			}
+		}
+
 		File dir = cppHeaderChooser.showDialog(getOwner());
 		if (dir == null) {
 			return;
