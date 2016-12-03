@@ -15,8 +15,9 @@ package sdv.testingall.core.node;
  */
 public abstract class BaseInsideFileNode extends BaseNode implements IInsideFileNode {
 
-	private int	fileOffset;
-	private int	fileLength;
+	private int		fileOffset;
+	private int		fileLength;
+	private boolean	isInside;
 
 	/**
 	 * Create empty new node
@@ -54,6 +55,18 @@ public abstract class BaseInsideFileNode extends BaseNode implements IInsideFile
 	{
 		fileOffset = offset;
 		fileLength = length;
+	}
+
+	@Override
+	public void setIsPartOfSource(boolean inSource)
+	{
+		isInside = inSource;
+	}
+
+	@Override
+	public boolean isPartOfSource()
+	{
+		return isInside;
 	}
 
 }

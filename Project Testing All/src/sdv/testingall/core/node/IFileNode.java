@@ -26,4 +26,11 @@ public interface IFileNode extends INode {
 	 * @return file object
 	 */
 	File getFile();
+
+	@Override
+	default boolean shouldDisplay()
+	{
+		return true;
+	}
+
 }

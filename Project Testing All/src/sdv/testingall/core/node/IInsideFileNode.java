@@ -49,4 +49,28 @@ public interface IInsideFileNode extends INode, IFileLocation {
 	{
 		return getFileNode().getFile();
 	}
+
+	/**
+	 * Set this node content is actually a part of source code or being included.<br/>
+	 * Example: C/C++ header <code>#include</code>
+	 * 
+	 * @param inSource
+	 *            part of source state
+	 */
+	void setIsPartOfSource(boolean inSource);
+
+	/**
+	 * Check whether this node content is actually a part of source code or being included.<br/>
+	 * Example: C/C++ header <code>#include</code>
+	 * 
+	 * @return part of source state
+	 */
+	boolean isPartOfSource();
+
+	@Override
+	default boolean shouldDisplay()
+	{
+		return isPartOfSource();
+	}
+
 }

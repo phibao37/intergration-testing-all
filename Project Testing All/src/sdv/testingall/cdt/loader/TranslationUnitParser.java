@@ -17,6 +17,7 @@ import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTEnumerationSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTFileLocation;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTFunctionDefinition;
@@ -98,17 +99,20 @@ public class TranslationUnitParser extends ASTVisitor {
 	 * 
 	 * @param node
 	 *            node to be add
-	 * @param commentNode
-	 *            AST node to find the comment
+	 * @param astNode
+	 *            corresponding AST node
+	 * @param findComment
+	 *            looking up for comment assigned with AST node
 	 */
-	private void addToCurrentStack(INode node, @Nullable IASTNode commentNode)
+	private void addToCurrentStack(IInsideFileNode node, IASTNode astNode, boolean findComment)
 	{
 		stackNode.peek().getKey().add(node);
-		if (commentNode == null) {
+		node.setIsPartOfSource(astNode.isPartOfTranslationUnitFile());
+		if (!findComment) {
 			return;
 		}
 
-		List<IASTComment> list = commentMap.getLeadingCommentsForNode(commentNode);
+		List<IASTComment> list = commentMap.getLeadingCommentsForNode(astNode);
 		if (list.isEmpty()) {
 			return;
 		}
@@ -153,7 +157,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			assert (type != null);
 			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
 					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
-			addToCurrentStack(fnNode, fnDef);
+			addToCurrentStack(fnNode, fnDef, true);
 			applyFileLocation(fnNode, decType.getFileLocation(), fnDec.getFileLocation(), 0);
 
 			return PROCESS_SKIP;
@@ -177,11 +181,9 @@ public class TranslationUnitParser extends ASTVisitor {
 					type.setBind(complex);
 					applyFileLocation(complex, comType.getFileLocation(), comType.getName().getFileLocation(),
 							complexNode.getKeyString().length());
-				}
-				// else if (decType instanceof IASTEnumerationSpecifier) {
-				//
-				// }
-				else {
+				} else if (decType instanceof IASTEnumerationSpecifier) {
+					return PROCESS_SKIP;
+				} else {
 					throw new RuntimeException(
 							config.resString("loader.unsupport.type") + decType.getClass().getName()); //$NON-NLS-1$
 				}
@@ -218,7 +220,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			}
 
 			if (complex != null) {
-				addToCurrentStack(complex, smpDec);
+				addToCurrentStack(complex, smpDec, true);
 				stackNode.push(new Pair<>(complex, smpDec));
 			}
 		}
@@ -371,7 +373,7 @@ public class TranslationUnitParser extends ASTVisitor {
 		assert (namespaceDefinition != null);
 
 		NamespaceNode ns = new NamespaceNode(namespaceDefinition.getName().toString());
-		stackNode.peek().getKey().add(ns);
+		addToCurrentStack(ns, namespaceDefinition, false);
 		stackNode.push(new Pair<>(ns, namespaceDefinition));
 		applyFileLocation(ns, namespaceDefinition.getFileLocation(), namespaceDefinition.getName().getFileLocation(),
 				9);

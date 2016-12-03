@@ -121,4 +121,10 @@ public abstract class VariableNode extends BaseNode {
 		return 0;
 	}
 
+	@Override
+	public boolean shouldDisplay()
+	{
+		return false;
+	}
+
 }

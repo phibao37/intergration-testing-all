@@ -64,6 +64,13 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode> {
 	Image getIcon();
 
 	/**
+	 * Check if this node should be display in project tree
+	 * 
+	 * @return should display state
+	 */
+	boolean shouldDisplay();
+
+	/**
 	 * Get the copy of the node
 	 * 
 	 * @return the cloned node

@@ -23,6 +23,9 @@ import org.eclipse.cdt.core.parser.IncludeFileContentProvider;
 import org.eclipse.cdt.core.parser.ScannerInfo;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.ASTCommenter;
 import org.eclipse.cdt.internal.core.dom.rewrite.commenthandler.NodeCommentMap;
+import org.eclipse.cdt.internal.core.parser.IMacroDictionary;
+import org.eclipse.cdt.internal.core.parser.SavedFilesProvider;
+import org.eclipse.cdt.internal.core.parser.scanner.InternalFileContent;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -109,7 +112,7 @@ public class CppFileLoader {
 		char[] chars = SDVUtils.readFileToString(source, config.getFileCharset()).toCharArray();
 		FileContent content = FileContent.create(source.getAbsolutePath(), chars);
 		IScannerInfo scanInfo = new ScannerInfo(config.getMarcoMap(), config.getIncludeDirs());
-		IncludeFileContentProvider fileCreator = IncludeFileContentProvider.getSavedFilesProvider();
+		IncludeFileContentProvider fileCreator = new SystemFilesProvider();
 		int options = ILanguage.OPTION_IS_SOURCE_UNIT;
 		IParserLogService log = new DefaultLogService();
 
@@ -141,4 +144,23 @@ public class CppFileLoader {
 		}
 
 	}
+}
+
+/**
+ * Create include provider that load from system only, ignoring Eclipse workspace
+ *
+ * @date 2016-12-03 phibao37 created
+ */
+class SystemFilesProvider extends SavedFilesProvider {
+
+	@Override
+	public InternalFileContent getContentForInclusion(String path, IMacroDictionary macroDictionary)
+	{
+		if (!getInclusionExists(path)) {
+			return null;
+		}
+
+		return (InternalFileContent) FileContent.createForExternalFileLocation(path);
+	}
+
 }

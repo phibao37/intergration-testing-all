@@ -55,4 +55,10 @@ public class ProjectExplorer extends TreeExplorer<INode> {
 
 	}
 
+	@Override
+	protected boolean shouldDisplayInTree(INode item)
+	{
+		return item.shouldDisplay();
+	}
+
 }
