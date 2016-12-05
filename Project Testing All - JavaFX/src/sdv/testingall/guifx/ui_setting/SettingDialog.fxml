@@ -120,6 +120,7 @@
                      <children>
                         <Label text="%key.graphic.max_recent" />
                         <Spinner fx:id="entry_graphic_maxrecent" editable="true" GridPane.columnIndex="1" />
+                        <CheckBox fx:id="entry_auto_viewsource" mnemonicParsing="false" text="%key.graphic.auto_viewsource" GridPane.columnSpan="2" GridPane.rowIndex="1" />
                      </children>
                   </GridPane>
                </content>

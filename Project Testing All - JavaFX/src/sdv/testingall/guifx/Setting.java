@@ -49,6 +49,7 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	public transient SimpleObjectProperty<Locale>	APP_LOCALE;
 	public transient SimpleListProperty<File>		RECENT_PROJECT;
 	public transient SimpleIntegerProperty			RECENT_PROJECT_MAXSIZE;
+	public transient SimpleBooleanProperty			TREE_AUTO_VIEWSOURCE;
 
 	public transient SimpleBooleanProperty				CPP_LOG_ERROR_DIRECTIVE;
 	public transient SimpleListProperty<String>			CPP_CEXTENSION;
@@ -76,6 +77,7 @@ public class Setting implements Serializable, ICppLoaderConfig {
 		APP_LOCALE = new SimpleObjectProperty<>(Locale.ENGLISH);
 		RECENT_PROJECT = new SimpleListProperty<>(FXCollections.observableArrayList());
 		RECENT_PROJECT_MAXSIZE = new SimpleIntegerProperty(5);
+		TREE_AUTO_VIEWSOURCE = new SimpleBooleanProperty(true);
 
 		CPP_LOG_ERROR_DIRECTIVE = new SimpleBooleanProperty(true);
 		CPP_CEXTENSION = new SimpleListProperty<>(FXCollections.observableArrayList(".c"));
@@ -221,6 +223,8 @@ public class Setting implements Serializable, ICppLoaderConfig {
 		s.writeObject(new ArrayList<>(CPP_CPPEXTENSION));
 		s.writeObject(new ArrayList<>(CPP_INCLUDE_DIR));
 		s.writeObject(new LinkedHashMap<>(CPP_MARCO_MAP));
+
+		s.writeBoolean(TREE_AUTO_VIEWSOURCE.get());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -241,6 +245,8 @@ public class Setting implements Serializable, ICppLoaderConfig {
 			CPP_CPPEXTENSION.setAll((List<String>) s.readObject());
 			CPP_INCLUDE_DIR.setAll((List<String>) s.readObject());
 			CPP_MARCO_MAP.putAll((Map<String, String>) s.readObject());
+
+			TREE_AUTO_VIEWSOURCE.set(s.readBoolean());
 		} catch (Exception e) {
 			// No throw later
 		}

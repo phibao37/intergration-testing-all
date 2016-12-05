@@ -6,9 +6,17 @@
  */
 package sdv.testingall.guifx.node;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNull;
 
 import javafx.collections.ObservableList;
+import javafx.geometry.Side;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
@@ -25,6 +33,8 @@ import javafx.scene.image.ImageView;
  * @date 2016-11-22 VuSD created
  */
 public abstract class TreeExplorer<E> extends TreeView<E> implements Comparator<E> {
+
+	private ContextMenuHandle<E> menuHandle = list -> false;
 
 	/**
 	 * A node that live inside a TreeExplorer
@@ -120,6 +130,50 @@ public abstract class TreeExplorer<E> extends TreeView<E> implements Comparator<
 	public TreeExplorer()
 	{
 		setCellFactory(tree -> new TreeCellImpl());
+		setContextMenu(new ContextMenu() {
+
+			/**
+			 * Process the handle
+			 * 
+			 * @return should display the menu
+			 */
+			protected boolean processMenuHandle()
+			{
+				List<TreeItem<E>> selected = getSelectionModel().getSelectedItems();
+				ArrayList<E> list = new ArrayList<>(selected.size());
+
+				for (TreeItem<E> treeItem : selected) {
+					list.add(treeItem.getValue());
+				}
+				if (menuHandle.handle(list)) {
+					for (MenuItem item : getItems()) {
+						if (item.isVisible()) {
+							return true;
+						}
+					}
+					return false;
+				} else {
+					return false;
+				}
+			}
+
+			@Override
+			public void show(Node anchor, double screenX, double screenY)
+			{
+				if (processMenuHandle()) {
+					super.show(anchor, screenX, screenY);
+				}
+			}
+
+			@Override
+			public void show(Node anchor, Side side, double dx, double dy)
+			{
+				if (processMenuHandle()) {
+					super.show(anchor, side, dx, dy);
+				}
+			}
+
+		});
 	}
 
 	/**
@@ -261,6 +315,36 @@ public abstract class TreeExplorer<E> extends TreeView<E> implements Comparator<
 	public int compare(E o1, E o2)
 	{
 		return 0;
+	}
+
+	/**
+	 * Set the handle for context menu
+	 * 
+	 * @param menuHandle
+	 *            the handle object
+	 */
+	public void setMenuHandle(@NonNull ContextMenuHandle<E> menuHandle)
+	{
+		this.menuHandle = menuHandle;
+	}
+
+	/**
+	 * Interface to handle with TreeExplorer context menu
+	 *
+	 * @param <T>
+	 *            item type in tree explorer
+	 * @date 2016-12-05 VuSD created
+	 */
+	public static interface ContextMenuHandle<T> {
+
+		/**
+		 * Called when context menu has been requested
+		 * 
+		 * @param item
+		 *            list of selected item
+		 * @return should display context menu
+		 */
+		boolean handle(List<T> item);
 	}
 
 }

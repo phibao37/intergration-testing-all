@@ -25,4 +25,15 @@ public class ImageSet {
 
 	/** Setting icon */
 	public static final Image SETTING = new Image(ImageSet.class.getResourceAsStream("/guifx/setting.png"));
+
+	/** Menu CFG icon */
+	public static final Image MENU_CFG = new Image(ImageSet.class.getResourceAsStream("/guifx/menu.cfg.png"));
+
+	/** Menu generate test icon */
+	public static final Image MENU_GENTEST = new Image(ImageSet.class.getResourceAsStream("/guifx/menu.gentest.png"));
+
+	/** Menu view source icon */
+	public static final Image MENU_VIEWSOURCE = new Image(
+			ImageSet.class.getResourceAsStream("/guifx/menu.viewsource.png"));
+
 }

@@ -65,6 +65,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private @FXML CheckBox			entry_log_errdiv;
 	private @FXML ListView<String>	entry_ccpp_includedir;
 	private @FXML TextArea			entry_ccpp_marco;
+	private @FXML CheckBox			entry_auto_viewsource;
 
 	private @FXML Label		toggle_restart;
 	private @FXML Accordion	acc_cpp;
@@ -137,6 +138,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 20);
 		entry_graphic_maxrecent.setValueFactory(valueFactory);
 		valueFactory.valueProperty().bindBidirectional(setting.RECENT_PROJECT_MAXSIZE.asObject());
+		entry_auto_viewsource.selectedProperty().bindBidirectional(setting.TREE_AUTO_VIEWSOURCE);
 
 		acc_cpp.setExpandedPane(acc_cpp.getPanes().get(0));
 		entry_cext.setText(String.join(" ", setting.CPP_CEXTENSION));

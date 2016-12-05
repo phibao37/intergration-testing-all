@@ -34,6 +34,7 @@ import javafx.stage.Stage;
 import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.core.logger.BaseLogger;
 import sdv.testingall.core.logger.ILogger;
+import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.IFileNode;
 import sdv.testingall.core.node.IInsideFileNode;
 import sdv.testingall.core.node.INode;
@@ -70,6 +71,7 @@ public class MainView implements Initializable {
 	private Stage				primaryStage;
 	private DirectoryChooser	fileOpenChooser;
 	private Setting				setting;
+	private ResourceBundle		appRes;
 	private ToggleGroup			menu_open_recent_group;
 
 	private SimpleBooleanProperty propLoadingProject = new SimpleBooleanProperty(false);
@@ -80,22 +82,8 @@ public class MainView implements Initializable {
 		fileOpenChooser = new DirectoryChooser();
 		fileOpenChooser.setTitle(res.getString("file.openproject"));
 
-		project_tree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-			if (newValue == null) {
-				return;
-			}
-			INode selected = newValue.getValue();
-			if (selected instanceof IFileNode) {
-				File source = ((IFileNode) selected).getFile();
-
-				if (source.isFile()) {
-					openSourceFile(source);
-				}
-			} else if (selected instanceof IInsideFileNode) {
-				IInsideFileNode node = (IInsideFileNode) selected;
-				openSourceFile(node.getFile()).setSelected(node);
-			}
-		});
+		appRes = res;
+		setupProjectTreeContextMenu();
 
 		btn_console_clear.setGraphic(new ImageView(ImageSet.CLEAR));
 		menu_open_recent_group = new ToggleGroup();
@@ -106,8 +94,6 @@ public class MainView implements Initializable {
 		project_load_indicator.visibleProperty().bind(propLoadingProject);
 		project_load_indicator.progressProperty()
 				.bind(new When(propLoadingProject).then(ProgressIndicator.INDETERMINATE_PROGRESS).otherwise(0.0));
-
-		// openProject(new File("D:/QC/trunk/other/fromTSDV/TestingForVNUProducts/Testing-R1/SampleSource"));
 	}
 
 	/**
@@ -249,6 +235,73 @@ public class MainView implements Initializable {
 			GUIUtil.alert(AlertType.ERROR, setting.resString("gui.errorhappen"), null, SDVUtils.gxceptionMsg(e),
 					ImageSet.APPLICATION);
 		}
+	}
+
+	/**
+	 * Handle when open source view requested
+	 * 
+	 * @param node
+	 *            node item to view source
+	 */
+	protected void handleOpenSourceView(INode node)
+	{
+		if (node instanceof IFileNode) {
+			File source = ((IFileNode) node).getFile();
+
+			if (source.isFile()) {
+				openSourceFile(source);
+			}
+		} else if (node instanceof IInsideFileNode) {
+			IInsideFileNode insideNode = (IInsideFileNode) node;
+			openSourceFile(insideNode.getFile()).setSelected(insideNode);
+		}
+	}
+
+	/**
+	 * Setup project tree context menu handle
+	 */
+	protected void setupProjectTreeContextMenu()
+	{
+		// Select listener
+		project_tree.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
+			if (newValue == null || !setting.TREE_AUTO_VIEWSOURCE.get()) {
+				return;
+			}
+			handleOpenSourceView(newValue.getValue());
+		});
+
+		// Context menu
+		MenuItem itemOpenCFG = new MenuItem(appRes.getString("mitem.opencfg"), new ImageView(ImageSet.MENU_CFG));
+		MenuItem itemGenTest = new MenuItem(appRes.getString("mitem.gentest"), new ImageView(ImageSet.MENU_GENTEST));
+		MenuItem itemViewsource = new MenuItem(appRes.getString("mitem.viewsource"),
+				new ImageView(ImageSet.MENU_VIEWSOURCE));
+
+		itemViewsource
+				.setOnAction(e -> handleOpenSourceView(project_tree.getSelectionModel().getSelectedItem().getValue()));
+
+		// project_tree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		project_tree.getContextMenu().getItems().addAll(itemOpenCFG, itemGenTest, itemViewsource);
+		project_tree.setMenuHandle(listNode -> {
+			if (listNode.isEmpty()) {
+				return false;
+			}
+			// Currently work with single selection
+			INode node = listNode.get(0);
+			boolean hasSource = false;
+			boolean isFunction = node instanceof FunctionNode;
+
+			if (node instanceof IFileNode) {
+				File source = ((IFileNode) node).getFile();
+				hasSource = source.isFile();
+			} else if (node instanceof IInsideFileNode) {
+				hasSource = true;
+			}
+
+			itemOpenCFG.setVisible(isFunction);
+			itemGenTest.setVisible(isFunction);
+			itemViewsource.setVisible(hasSource && !setting.TREE_AUTO_VIEWSOURCE.get());
+			return true;
+		});
 	}
 
 	/**
