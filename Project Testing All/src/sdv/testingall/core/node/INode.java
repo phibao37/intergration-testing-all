@@ -12,6 +12,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import javafx.scene.image.Image;
+import sdv.testingall.core.element.IDisplayable;
 
 /**
  * Base for all node in a project structure
@@ -21,23 +22,7 @@ import javafx.scene.image.Image;
  * @date 2016-10-25 VuSD created
  */
 @NonNullByDefault
-public interface INode extends List<INode>, Cloneable, Comparable<INode> {
-
-	/**
-	 * Set the node content to be display in the project tree
-	 * 
-	 * @param content
-	 *            node content
-	 */
-	void setContent(String content);
-
-	/**
-	 * Return the node content
-	 * 
-	 * @return the content of the node to be display in the project tree
-	 */
-	@Override
-	String toString();
+public interface INode extends List<INode>, Cloneable, Comparable<INode>, IDisplayable {
 
 	/**
 	 * Get the parent node that this node belongs to. This can be <code>null</code> if this is a root node

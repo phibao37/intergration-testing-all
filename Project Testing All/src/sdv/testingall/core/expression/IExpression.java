@@ -9,6 +9,7 @@ package sdv.testingall.core.expression;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import sdv.testingall.core.element.IDisplayable;
 import sdv.testingall.core.type.IType;
 
 /**
@@ -19,23 +20,7 @@ import sdv.testingall.core.type.IType;
  * @date 2016-11-10 VuSD created
  */
 @NonNullByDefault
-public interface IExpression extends Cloneable {
-
-	/**
-	 * Set the content to be display
-	 * 
-	 * @param content
-	 *            expression content
-	 */
-	void setContent(String content);
-
-	/**
-	 * Return the expression content
-	 * 
-	 * @return the content of the expression to be display
-	 */
-	@Override
-	String toString();
+public interface IExpression extends Cloneable, IDisplayable {
 
 	/**
 	 * Get the copy of the expression
