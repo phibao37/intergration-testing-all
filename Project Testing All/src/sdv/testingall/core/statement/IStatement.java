@@ -32,4 +32,14 @@ public interface IStatement extends IDisplayable, IFileLocation {
 	 * @return condition state
 	 */
 	boolean isCondition();
+
+	/**
+	 * Should this statement be list in test path
+	 * 
+	 * @return display state
+	 */
+	default boolean sholdDisplayInTestPath()
+	{
+		return true;
+	}
 }
