@@ -61,4 +61,36 @@ public class CFG implements ICFG {
 		return 0;
 	}
 
+	/** Configuration set to obtain normal CFG */
+	public static final ICFGType TYPE_NORMAL = new CFGType(false);
+
+	/** Configuration set to obtain CFG with complex condition expanded */
+	public static final ICFGType TYPE_SUBCONDITION = new CFGType(true);
+
+	/**
+	 * Implementation for ICFGType
+	 */
+	static class CFGType implements ICFGType {
+
+		boolean expandSubCondition;
+
+		/**
+		 * Create new CFG parameter set
+		 * 
+		 * @param expandSubCondition
+		 *            should complex condition be expanding
+		 */
+		CFGType(boolean expandSubCondition)
+		{
+			this.expandSubCondition = expandSubCondition;
+		}
+
+		@Override
+		public boolean isExpandSubCondition()
+		{
+			return expandSubCondition;
+		}
+
+	}
+
 }

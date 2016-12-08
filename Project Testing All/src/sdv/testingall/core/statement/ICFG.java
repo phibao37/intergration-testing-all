@@ -48,4 +48,20 @@ public interface ICFG {
 	 * @return branch coverage in percent [0, 100]
 	 */
 	int computeBranchCoverage(List<ITestPath> listTestPath);
+
+	/**
+	 * Parameter storing to get specific CFG in the given function
+	 *
+	 * @date 2016-12-08 VuSD created
+	 */
+	public interface ICFGType {
+
+		/**
+		 * Should complex condition statement to be expanded into each sub-condition
+		 * 
+		 * @return sub-condition expanding state
+		 */
+		boolean isExpandSubCondition();
+	}
+
 }

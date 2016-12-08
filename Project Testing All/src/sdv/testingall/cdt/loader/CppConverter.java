@@ -8,6 +8,7 @@ package sdv.testingall.cdt.loader;
 
 import org.eclipse.cdt.core.dom.ast.IASTInitializerClause;
 
+import sdv.testingall.core.expression.Expression;
 import sdv.testingall.core.expression.IExpression;
 
 /**
@@ -28,6 +29,14 @@ public class CppConverter {
 	 */
 	public static IExpression convert(IASTInitializerClause expression)
 	{
-		return null;
+		return new StubExpression(expression.getRawSignature());
+	}
+
+	private static class StubExpression extends Expression {
+
+		StubExpression(String content)
+		{
+			setContent(content);
+		}
 	}
 }

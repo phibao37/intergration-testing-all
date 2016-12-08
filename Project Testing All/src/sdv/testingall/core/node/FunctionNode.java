@@ -10,6 +10,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import javafx.scene.image.Image;
+import sdv.testingall.core.statement.ICFG;
+import sdv.testingall.core.statement.ICFG.ICFGType;
 import sdv.testingall.core.type.IType;
 
 /**
@@ -102,6 +104,15 @@ public abstract class FunctionNode extends BaseInsideFileNode {
 	{
 		return params;
 	}
+
+	/**
+	 * Get CFG object corresponding to this function
+	 * 
+	 * @param type
+	 *            option to determine CFG
+	 * @return corresponding CFG
+	 */
+	public abstract ICFG getCFG(ICFGType type);
 
 	@Override
 	public @Nullable Image getIcon()

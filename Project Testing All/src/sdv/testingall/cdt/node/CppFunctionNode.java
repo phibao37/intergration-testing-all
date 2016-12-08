@@ -7,11 +7,13 @@
 package sdv.testingall.cdt.node;
 
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
-import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
+import sdv.testingall.cdt.gencfg.CFGGeneration;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.VariableNode;
+import sdv.testingall.core.statement.ICFG;
+import sdv.testingall.core.statement.ICFG.ICFGType;
 import sdv.testingall.core.type.IType;
 import sdv.testingall.util.SDVUtils;
 
@@ -22,12 +24,13 @@ import sdv.testingall.util.SDVUtils;
  *
  * @date 2016-11-03 VuSD created
  */
-@NonNullByDefault
 public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 
-	private final @Nullable IASTStatement body;
+	private final @Nullable IASTStatement	body;
+	private final IType						nameType;
 
-	private final IType nameType;
+	private ICFG	cfgNormal;
+	private ICFG	cfgSubCond;
 
 	/**
 	 * Create new C/C++ function node
@@ -68,6 +71,28 @@ public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 	public void setDescription(String description)
 	{
 		super.setDescription(SDVUtils.removeCommentFlag(description));
+	}
+
+	@Override
+	public boolean shouldDisplay()
+	{
+		return !isDeclare();
+	}
+
+	@Override
+	public ICFG getCFG(ICFGType type) throws NullPointerException
+	{
+		if (type.isExpandSubCondition()) {
+			if (cfgNormal == null) {
+				cfgNormal = new CFGGeneration(this, type).getCFG();
+			}
+			return cfgNormal;
+		} else {
+			if (cfgSubCond == null) {
+				cfgSubCond = new CFGGeneration(this, type).getCFG();
+			}
+			return cfgSubCond;
+		}
 	}
 
 }
