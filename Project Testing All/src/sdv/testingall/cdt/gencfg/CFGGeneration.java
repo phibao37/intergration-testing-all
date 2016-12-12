@@ -7,9 +7,8 @@
 package sdv.testingall.cdt.gencfg;
 
 import sdv.testingall.cdt.node.CppFunctionNode;
-import sdv.testingall.core.statement.ICFG;
+import sdv.testingall.core.cfggen.BaseCFGGeneration;
 import sdv.testingall.core.statement.ICFG.ICFGType;
-import sdv.testingall.core.statement.IFlagStatement;
 
 /**
  * CFG Generation for C/C++ function
@@ -18,25 +17,31 @@ import sdv.testingall.core.statement.IFlagStatement;
  *
  * @date 2016-12-08 VuSD created
  */
-public class CFGGeneration {
+public class CFGGeneration extends BaseCFGGeneration {
 
-	private CppFunctionNode	function;
-	private ICFGType		option;
-	private ICFG			cfg;
-
-	private IFlagStatement	BEGIN;
-	private IFlagStatement	END;
-
+	/**
+	 * Generate CFG for given function
+	 * 
+	 * @param function
+	 *            function node contains body to generate CFG
+	 * @param option
+	 *            parameter to specify CFG
+	 */
 	public CFGGeneration(CppFunctionNode function, ICFGType option)
 	{
-		this.function = function;
-		this.option = option;
-		BEGIN = IFlagStatement.newBegin();
-		END = IFlagStatement.newEnd();
+		super(function, option);
 	}
 
-	public ICFG getCFG()
+	@Override
+	public CppFunctionNode getFunction()
 	{
-		return cfg;
+		return (CppFunctionNode) super.getFunction();
 	}
+
+	@Override
+	protected void buildCFG()
+	{
+
+	}
+
 }

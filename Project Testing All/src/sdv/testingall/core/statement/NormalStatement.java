@@ -31,11 +31,14 @@ public class NormalStatement extends BaseStatement implements INormalStatement {
 	}
 
 	/**
-	 * Set the next statement to be execute
-	 * 
-	 * @param next
-	 *            next statement
+	 * Create blank statement, should be used internal only
 	 */
+	protected NormalStatement()
+	{
+		super(null);
+	}
+
+	@Override
 	public void setNextStatement(IStatement next)
 	{
 		this.next = next;

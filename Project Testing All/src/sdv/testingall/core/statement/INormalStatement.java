@@ -31,4 +31,12 @@ public interface INormalStatement extends IStatement {
 	@Nullable
 	IStatement nextStatement();
 
+	/**
+	 * Set the next statement to be execute
+	 * 
+	 * @param next
+	 *            next statement
+	 */
+	void setNextStatement(IStatement next);
+
 }

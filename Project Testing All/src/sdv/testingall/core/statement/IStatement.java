@@ -42,4 +42,20 @@ public interface IStatement extends IDisplayable, IFileLocation {
 	{
 		return true;
 	}
+
+	/**
+	 * Set the visit state for this statement
+	 * 
+	 * @param visit
+	 *            visit state
+	 */
+	void setVisit(boolean visit);
+
+	/**
+	 * Get the visit state for this statement<br/>
+	 * Default value is <code>false</code>
+	 * 
+	 * @return visit state
+	 */
+	boolean isVisited();
 }

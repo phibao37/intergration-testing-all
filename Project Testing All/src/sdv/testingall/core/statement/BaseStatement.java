@@ -23,6 +23,7 @@ public abstract class BaseStatement implements IStatement {
 
 	private IExpression	root;
 	private String		content;
+	private boolean		visited;
 
 	private File	sourceFile;
 	private int		sourceOffset;
@@ -94,6 +95,18 @@ public abstract class BaseStatement implements IStatement {
 	public int fileLength()
 	{
 		return sourceLength;
+	}
+
+	@Override
+	public boolean isVisited()
+	{
+		return visited;
+	}
+
+	@Override
+	public void setVisit(boolean visited)
+	{
+		this.visited = visited;
 	}
 
 }

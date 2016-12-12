@@ -31,14 +31,7 @@ public class ConditionStatement extends BaseStatement implements IConditionState
 		super(root);
 	}
 
-	/**
-	 * Set branch statement
-	 * 
-	 * @param trueBranch
-	 *            statement in TRUE branch
-	 * @param falseBranch
-	 *            statement in FALSE branch
-	 */
+	@Override
 	public void setBranch(IStatement trueBranch, IStatement falseBranch)
 	{
 		this.trueBranch = trueBranch;

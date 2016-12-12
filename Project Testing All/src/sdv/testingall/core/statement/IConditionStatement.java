@@ -35,4 +35,14 @@ public interface IConditionStatement extends IStatement {
 	 * @return statement in FALSE branch
 	 */
 	IStatement falseBranch();
+
+	/**
+	 * Set branch statement
+	 * 
+	 * @param trueBranch
+	 *            statement in TRUE branch
+	 * @param falseBranch
+	 *            statement in FALSE branch
+	 */
+	void setBranch(IStatement trueBranch, IStatement falseBranch);
 }

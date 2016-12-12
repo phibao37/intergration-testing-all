@@ -63,7 +63,6 @@ class FlagStatement extends NormalStatement implements IFlagStatement {
 
 	public FlagStatement(int flag)
 	{
-		super(null);
 		this.flag = flag;
 	}
 
