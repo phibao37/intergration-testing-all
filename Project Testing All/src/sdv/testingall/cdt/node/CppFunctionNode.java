@@ -67,6 +67,16 @@ public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 		return nameType;
 	}
 
+	/**
+	 * Get the body implement of this function
+	 * 
+	 * @return AST node corresponding to function body
+	 */
+	public IASTStatement getBody()
+	{
+		return body;
+	}
+
 	@Override
 	public void setDescription(String description)
 	{

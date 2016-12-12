@@ -6,7 +6,7 @@
  */
 package sdv.testingall.cdt.loader;
 
-import org.eclipse.cdt.core.dom.ast.IASTInitializerClause;
+import org.eclipse.cdt.core.dom.ast.IASTNode;
 
 import sdv.testingall.core.expression.Expression;
 import sdv.testingall.core.expression.IExpression;
@@ -27,7 +27,7 @@ public class CppConverter {
 	 *            AST expression
 	 * @return converted expression
 	 */
-	public static IExpression convert(IASTInitializerClause expression)
+	public static IExpression convert(IASTNode expression)
 	{
 		return new StubExpression(expression.getRawSignature());
 	}

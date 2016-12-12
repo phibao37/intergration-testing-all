@@ -86,15 +86,7 @@ public abstract class BaseCFGGeneration implements ICFGGeneration {
 		root.setVisit(true);
 		buildListStm.add(root);
 
-		if (root instanceof INormalStatement) {
-			INormalStatement normalStm = (INormalStatement) root;
-			IStatement next = skipTemporary(normalStm.nextStatement());
-
-			normalStm.setNextStatement(next);
-			linkStatement(next, buildListStm);
-		}
-
-		else if (root instanceof IConditionStatement) {
+		if (root.isCondition()) {
 			IConditionStatement conStm = (IConditionStatement) root;
 			IStatement onTrue = skipTemporary(conStm.trueBranch());
 			IStatement onFalse = skipTemporary(conStm.falseBranch());
@@ -102,6 +94,14 @@ public abstract class BaseCFGGeneration implements ICFGGeneration {
 			conStm.setBranch(onTrue, onFalse);
 			linkStatement(onTrue, buildListStm);
 			linkStatement(onFalse, buildListStm);
+		}
+
+		else {
+			INormalStatement normalStm = (INormalStatement) root;
+			IStatement next = skipTemporary(normalStm.nextStatement());
+
+			normalStm.setNextStatement(next);
+			linkStatement(next, buildListStm);
 		}
 	}
 
