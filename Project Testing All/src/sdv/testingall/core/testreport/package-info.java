@@ -5,10 +5,10 @@
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
 /**
- * Basic generating CFG
+ * Modeling for report after testing
  * 
  * @author VuSD
  *
- * @date 2016-12-12 VuSD created
+ * @date 2016-12-13 VuSD created
  */
-package sdv.testingall.core.cfggen;
+package sdv.testingall.core.testreport;

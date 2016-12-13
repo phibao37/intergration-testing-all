@@ -4,7 +4,7 @@
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.core.cfggen;
+package sdv.testingall.core.gencfg;
 
 import java.util.ArrayList;
 import java.util.List;
