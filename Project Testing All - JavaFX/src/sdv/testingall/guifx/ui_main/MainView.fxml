@@ -90,11 +90,12 @@
             </SplitPane>
       </items>
     </SplitPane>
-    <HBox id="status-view" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+    <HBox id="status-view" alignment="CENTER_LEFT" spacing="15.0" VBox.vgrow="NEVER">
       <children>
-        <Label maxWidth="-1.0" text="Left Status" HBox.hgrow="ALWAYS" />
+        <Label maxWidth="-1.0" HBox.hgrow="ALWAYS" />
         <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
-        <Label maxWidth="-1.0" text="Right Status" HBox.hgrow="NEVER" />
+        <Label maxWidth="-1.0" HBox.hgrow="NEVER" fx:id="status_encoding" />
+        <Label maxWidth="-1.0" HBox.hgrow="NEVER" fx:id="status_keylock" />
       </children>
     </HBox>
   </children>

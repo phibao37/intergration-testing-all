@@ -22,12 +22,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -67,6 +70,9 @@ public class MainView implements Initializable {
 	private @FXML LightTabPane		source_view;
 	private @FXML ConsoleView		console_area;
 	private @FXML Button			btn_console_clear;
+
+	private @FXML Label	status_encoding;
+	private @FXML Label	status_keylock;
 
 	private Stage				primaryStage;
 	private DirectoryChooser	fileOpenChooser;
@@ -117,6 +123,15 @@ public class MainView implements Initializable {
 				list_recent.add(createRecentProjectItem(root));
 			}
 		}
+
+		// Update status bar
+		status_encoding.textProperty().bind(setting.APP_CHARSET.asString());
+		status_keylock.setText(computeKeyLock());
+		primaryStage.addEventHandler(KeyEvent.KEY_RELEASED, e -> {
+			if (e.getCode() == KeyCode.CAPS || e.getCode() == KeyCode.NUM_LOCK) {
+				status_keylock.setText(computeKeyLock());
+			}
+		});
 	}
 
 	/**
@@ -452,6 +467,20 @@ public class MainView implements Initializable {
 		SettingDialog dialog = new SettingDialog(setting);
 		dialog.showAndWait();
 		saveSetting();
+	}
+
+	/**
+	 * Computing key lock status
+	 * 
+	 * @return [CAPS] [NUMS]
+	 */
+	static String computeKeyLock()
+	{
+		// TODO Change to JavaFX
+		java.awt.Toolkit kit = java.awt.Toolkit.getDefaultToolkit();
+		String cap = kit.getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK) ? "CAPS " : "     ";
+		String num = kit.getLockingKeyState(java.awt.event.KeyEvent.VK_NUM_LOCK) ? "NUMS" : "    ";
+		return cap + num;
 	}
 
 }
