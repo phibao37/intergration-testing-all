@@ -26,6 +26,39 @@ import sdv.testingall.core.statement.ITestPath;
 public interface ITestPathReport {
 
 	/**
+	 * Output state after testing function is executed
+	 */
+	public interface IOutputValue {
+
+		/**
+		 * Get type of result for this test path
+		 * 
+		 * @return type of result
+		 */
+		int getResultType();
+
+		/** This test path is not feasible (may be proved by solver) */
+		int RESULT_UNSAT = 0;
+
+		/** This test path is executed complete and return value to function caller (can be <code>void</code>) */
+		int RESULT_RETURN_VALUE = 1;
+
+		/** Executing this test path will lead to an exception to be throw */
+		int RESULT_EXCEPTION = 2;
+
+		/** A fatal error occur during executing, example in C++: division by 0, call <code>exit()</code> */
+		int RESULT_ERROR = -1;
+
+		/**
+		 * Get the returned value after executing this test path
+		 * 
+		 * @return return value as expression or <code>null</code> if result type is {@link #RESULT_UNSAT}
+		 */
+		@Nullable
+		IExpression getReturnValue();
+	}
+
+	/**
 	 * Get the test path for this report
 	 * 
 	 * @return executed test path
@@ -33,39 +66,53 @@ public interface ITestPathReport {
 	ITestPath getPath();
 
 	/**
-	 * Get type of result for this test path
-	 * 
-	 * @return type of result
-	 */
-	int getResultType();
-
-	/** This test path is not feasible (may be proved by solver) */
-	int RESULT_UNSAT = 0;
-
-	/** This test path is executed complete and return value to function caller (can be <code>void</code>) */
-	int RESULT_RETURN_VALUE = 1;
-
-	/** Executing this test path will lead to an exception to be throw */
-	int RESULT_EXCEPTION = 2;
-
-	/** A fatal error occur during executing, example in C++: division by 0, call <code>exit()</code> */
-	int RESULT_ERROR = -1;
-
-	/**
 	 * Get list of input variable to execute following this test path, including function parameter and global
 	 * variable.<br/>
 	 * This list can be empty if the function does not has any parameter or access global variable
 	 * 
-	 * @return list of input variable or <code>null</code> if result type is {@link #RESULT_UNSAT}
+	 * @return list of input variable or <code>null</code> if symbolic result type is {@link IOutputValue#RESULT_UNSAT}
 	 */
 	@Nullable
 	List<VariableNode> getInputData();
 
 	/**
-	 * Get the returned value after executing this test path
+	 * Get the result that is proved by this application.<br/>
+	 * This result may be differ with expected output or actual output
 	 * 
-	 * @return return value as expression or <code>null</code> if result type is {@link #RESULT_UNSAT}
+	 * @return symbolic output data
+	 */
+	IOutputValue getSymblicOutput();
+
+	/**
+	 * Get the result that is user-expected value
+	 * 
+	 * @return expected output data
 	 */
 	@Nullable
-	IExpression getReturnValue();
+	IOutputValue getExpectedOutput();
+
+	/**
+	 * Get the result after test execution
+	 * 
+	 * @return actual output data
+	 */
+	@Nullable
+	IOutputValue getActualOutput();
+
+	/**
+	 * Set the result that is user-expected value
+	 * 
+	 * @param output
+	 *            expected output data
+	 */
+	void setExpectedOutput(IOutputValue output);
+
+	/**
+	 * Set the result after test execution
+	 * 
+	 * @param output
+	 *            actual output data
+	 */
+	void setActualOutput(IOutputValue output);
+
 }
