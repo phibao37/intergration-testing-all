@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -40,6 +42,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import sdv.testingall.core.testreport.Coverage;
 import sdv.testingall.guifx.GUIUtil;
 import sdv.testingall.guifx.ImageSet;
 import sdv.testingall.guifx.Setting;
@@ -56,6 +59,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private DialogPane		dialog;
 	private Setting			setting;
 	private ResourceBundle	appRes;
+	private Stage			dialogStage;
 
 	private @FXML ComboBox<Locale>	entry_language;
 	private @FXML ComboBox<Charset>	entry_charset;
@@ -67,6 +71,9 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private @FXML TextArea			entry_ccpp_marco;
 	private @FXML CheckBox			entry_auto_viewsource;
 
+	private @FXML CheckBox	cover_statement;
+	private @FXML CheckBox	cover_branch;
+	private @FXML CheckBox	cover_subcondition;
 	private @FXML Label		toggle_restart;
 	private @FXML Accordion	acc_cpp;
 
@@ -96,7 +103,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		setDialogPane(dialog);
 		setTitle(mainRes.getString("app.title"));
 		setResizable(true);
-		Stage dialogStage = (Stage) dialog.getScene().getWindow();
+		dialogStage = (Stage) dialog.getScene().getWindow();
 		dialogStage.getIcons().add(ImageSet.SETTING);
 
 		// Set button control
@@ -169,6 +176,31 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 				setting.CPP_MARCO_MAP.putAll(convertStringToMapMarco(entry_ccpp_marco.getText()));
 			}
 		});
+
+		cover_statement.setUserData(Coverage.STATEMENT);
+		cover_branch.setUserData(Coverage.BRANCH);
+		cover_subcondition.setUserData(Coverage.SUBCONDITION);
+		EventHandler<ActionEvent> changeCoverage = event -> {
+			CheckBox target = (CheckBox) event.getTarget();
+			Coverage data = (Coverage) target.getUserData();
+			if (target.isSelected()) {
+				setting.GEN_COVERAGE_LIST.add(data);
+			} else {
+				if (setting.GEN_COVERAGE_LIST.size() == 1) {
+					target.setSelected(true);
+					GUIUtil.alert(AlertType.WARNING, setting.resString("gui.warning"), null,
+							appRes.getString("cover.warn.atleastone"), ImageSet.SETTING);
+				} else {
+					setting.GEN_COVERAGE_LIST.remove(data);
+				}
+			}
+		};
+		CheckBox[] coverArray = new CheckBox[] { cover_statement, cover_branch, cover_subcondition };
+
+		for (CheckBox cbCover : coverArray) {
+			cbCover.setOnAction(changeCoverage);
+			cbCover.setSelected(setting.GEN_COVERAGE_LIST.contains(cbCover.getUserData()));
+		}
 	}
 
 	protected static String convertMarcoToString(Map<String, String> marcoMap)
@@ -222,7 +254,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 			}
 		}
 
-		File dir = cppHeaderChooser.showDialog(getOwner());
+		File dir = cppHeaderChooser.showDialog(dialogStage);
 		if (dir == null) {
 			return;
 		}
@@ -251,7 +283,7 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 			File initial = new File(selectedItem.get(0));
 			cppHeaderChooser.setInitialDirectory(GUIUtil.isFolderReadable(initial) ? initial : null);
 		}
-		File dir = cppHeaderChooser.showDialog(getOwner());
+		File dir = cppHeaderChooser.showDialog(dialogStage);
 		if (dir == null) {
 			return;
 		}

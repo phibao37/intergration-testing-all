@@ -53,7 +53,6 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 		return marcoMap;
 	}
 
-	@Override
 	public void setMarcoMap(Map<String, String> marcoMap)
 	{
 		this.marcoMap = marcoMap;
@@ -65,7 +64,6 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 		return includeDirs == null ? null : includeDirs.toArray(new String[includeDirs.size()]);
 	}
 
-	@Override
 	public void setIncludeDirs(List<String> includeDirs)
 	{
 		this.includeDirs = includeDirs;
@@ -77,7 +75,6 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 		return listCExt;
 	}
 
-	@Override
 	public void setListCExt(List<String> listCExt)
 	{
 		this.listCExt = listCExt;
@@ -89,7 +86,6 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 		return listCppExt;
 	}
 
-	@Override
 	public void setListCppExt(List<String> listCppExt)
 	{
 		this.listCppExt = listCppExt;
@@ -113,7 +109,6 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 		return logErrorDrt;
 	}
 
-	@Override
 	public void setLogErrorDirective(boolean logErrorDrt)
 	{
 		this.logErrorDrt = logErrorDrt;

@@ -31,7 +31,9 @@ import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import sdv.testingall.cdt.loader.ICppLoaderConfig;
+import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.logger.ILogger;
+import sdv.testingall.core.testreport.Coverage;
 
 /**
  * Application configuration
@@ -40,7 +42,7 @@ import sdv.testingall.core.logger.ILogger;
  *
  * @date 2016-11-25 VuSD created
  */
-public class Setting implements Serializable, ICppLoaderConfig {
+public class Setting implements Serializable, ICppLoaderConfig, IGenTestConfig {
 
 	private static final long	serialVersionUID	= 9092250455045821743L;
 	private static final File	PATH				= new File("configuration.dat");
@@ -56,6 +58,8 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	public transient SimpleListProperty<String>			CPP_CPPEXTENSION;
 	public transient SimpleListProperty<String>			CPP_INCLUDE_DIR;
 	public transient SimpleMapProperty<String, String>	CPP_MARCO_MAP;
+
+	public transient SimpleListProperty<Coverage> GEN_COVERAGE_LIST;
 
 	private transient ResourceBundle	appRes;
 	private transient ILogger			logger;
@@ -85,6 +89,9 @@ public class Setting implements Serializable, ICppLoaderConfig {
 				FXCollections.observableArrayList(".cpp", ".cc", ".cxx", ".c++", ".cp"));
 		CPP_INCLUDE_DIR = new SimpleListProperty<>(FXCollections.observableList(new LinkedList<>()));
 		CPP_MARCO_MAP = new SimpleMapProperty<>(FXCollections.observableMap(new LinkedHashMap<>()));
+
+		GEN_COVERAGE_LIST = new SimpleListProperty<>(FXCollections.observableList(new LinkedList<>()));
+		GEN_COVERAGE_LIST.addAll(Coverage.STATEMENT, Coverage.BRANCH, Coverage.SUBCONDITION);
 	}
 
 	@Override
@@ -118,23 +125,9 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	}
 
 	@Override
-	public void setMarcoMap(Map<String, String> marcoMap)
-	{
-		CPP_MARCO_MAP.clear();
-		CPP_MARCO_MAP.putAll(marcoMap);
-	}
-
-	@Override
 	public String[] getIncludeDirs()
 	{
 		return CPP_INCLUDE_DIR.toArray(new String[CPP_INCLUDE_DIR.size()]);
-	}
-
-	@Override
-	public void setIncludeDirs(List<String> includeDirs)
-	{
-		CPP_INCLUDE_DIR.clear();
-		CPP_INCLUDE_DIR.addAll(includeDirs);
 	}
 
 	@Override
@@ -144,23 +137,9 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	}
 
 	@Override
-	public void setListCExt(List<String> listCExt)
-	{
-		CPP_CEXTENSION.clear();
-		CPP_CEXTENSION.addAll(listCExt);
-	}
-
-	@Override
 	public List<String> getListCppExt()
 	{
 		return CPP_CPPEXTENSION;
-	}
-
-	@Override
-	public void setListCppExt(List<String> listCppExt)
-	{
-		CPP_CPPEXTENSION.clear();
-		CPP_CPPEXTENSION.addAll(listCppExt);
 	}
 
 	@Override
@@ -170,9 +149,9 @@ public class Setting implements Serializable, ICppLoaderConfig {
 	}
 
 	@Override
-	public void setLogErrorDirective(boolean logErrorDrt)
+	public List<Coverage> genCoverage()
 	{
-		CPP_LOG_ERROR_DIRECTIVE.set(logErrorDrt);
+		return GEN_COVERAGE_LIST;
 	}
 
 	/**
@@ -225,6 +204,7 @@ public class Setting implements Serializable, ICppLoaderConfig {
 		s.writeObject(new LinkedHashMap<>(CPP_MARCO_MAP));
 
 		s.writeBoolean(TREE_AUTO_VIEWSOURCE.get());
+		s.writeObject(new ArrayList<>(GEN_COVERAGE_LIST));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -247,9 +227,11 @@ public class Setting implements Serializable, ICppLoaderConfig {
 			CPP_MARCO_MAP.putAll((Map<String, String>) s.readObject());
 
 			TREE_AUTO_VIEWSOURCE.set(s.readBoolean());
+			GEN_COVERAGE_LIST.setAll((List<Coverage>) s.readObject());
 		} catch (Exception e) {
 			// No throw later
 		}
 
 	}
+
 }

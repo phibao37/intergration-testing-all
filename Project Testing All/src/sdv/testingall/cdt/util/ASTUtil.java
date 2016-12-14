@@ -15,7 +15,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.DefaultCppLoaderConfig;
-import sdv.testingall.cdt.loader.ICppLoaderConfig;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.INode;
@@ -82,7 +81,7 @@ public class ASTUtil {
 	@SuppressWarnings("nls")
 	public static void main(String[] args)
 	{
-		ICppLoaderConfig config = new DefaultCppLoaderConfig();
+		DefaultCppLoaderConfig config = new DefaultCppLoaderConfig();
 		config.setLogger(new ConsoleLogger());
 		config.setLogErrorDirective(true);
 

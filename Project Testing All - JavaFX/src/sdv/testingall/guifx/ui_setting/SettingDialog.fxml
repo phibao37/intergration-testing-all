@@ -15,6 +15,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
@@ -34,7 +35,7 @@
                      <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="25.0" />
                         <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
+                        <RowConstraints minHeight="25.0" />
                         <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
                         <RowConstraints minHeight="10.0" prefHeight="25.0" />
                      </rowConstraints>
@@ -44,6 +45,14 @@
                         <ComboBox fx:id="entry_language" GridPane.columnIndex="1" />
                         <ComboBox fx:id="entry_charset" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label fx:id="toggle_restart" styleClass="fill-red" text="%label.restart_required" visible="false" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+                        <Label text="%key.coverage" GridPane.rowIndex="2" GridPane.valignment="BASELINE" />
+                        <FlowPane hgap="10.0" vgap="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <children>
+                              <CheckBox fx:id="cover_statement" mnemonicParsing="false" text="%cover.statement" />
+                              <CheckBox fx:id="cover_branch" mnemonicParsing="false" text="%cover.branch" />
+                              <CheckBox fx:id="cover_subcondition" mnemonicParsing="false" text="%cover.subcondition" />
+                           </children>
+                        </FlowPane>
                      </children>
                   </GridPane>
                </content>
