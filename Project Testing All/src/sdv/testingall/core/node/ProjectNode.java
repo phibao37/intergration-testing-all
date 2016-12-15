@@ -22,7 +22,8 @@ public class ProjectNode extends BaseNode implements IFileNode {
 
 	private static final Image ICON = new Image(BaseNode.class.getResourceAsStream("/node/project.png")); //$NON-NLS-1$
 
-	private File mFile;
+	private File		mFile;
+	private ProjectNode	logicalRoot;
 
 	/**
 	 * Create new project node (root of project)
@@ -52,6 +53,22 @@ public class ProjectNode extends BaseNode implements IFileNode {
 	public File getFile()
 	{
 		return mFile;
+	}
+
+	/**
+	 * Get the logical data node from the root. <br/>
+	 * All physical node such as file, folder will be skipped and all data node inside will be merged together
+	 * 
+	 * @return root node of logical data
+	 */
+	public ProjectNode getLogicalRoot()
+	{
+		if (logicalRoot == null) {
+			// TODO Begin merge logical data node
+			logicalRoot = this;
+			logicalRoot.logicalRoot = logicalRoot;
+		}
+		return logicalRoot;
 	}
 
 }
