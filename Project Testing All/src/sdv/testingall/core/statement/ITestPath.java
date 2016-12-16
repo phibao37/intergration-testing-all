@@ -33,4 +33,11 @@ public interface ITestPath extends List<IStatement> {
 	 * @return cloned test path
 	 */
 	ITestPath cloneAt(int index);
+
+	/**
+	 * Get a copy of test path
+	 * 
+	 * @return cloned test path
+	 */
+	ITestPath clone();
 }

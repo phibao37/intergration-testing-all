@@ -8,6 +8,8 @@ package sdv.testingall.core.testreport;
 
 import java.util.List;
 
+import sdv.testingall.core.node.FunctionNode;
+
 /**
  * Test report for a function, include some list of test path report and provide test result information
  * 
@@ -43,4 +45,11 @@ public interface IFunctionReport extends List<IFunctionReport.ICoverageReport> {
 		 */
 		int computePercent();
 	}
+
+	/**
+	 * Get the function that this report belongs to
+	 * 
+	 * @return function node
+	 */
+	FunctionNode getFunction();
 }

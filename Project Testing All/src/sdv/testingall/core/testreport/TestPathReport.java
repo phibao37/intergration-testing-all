@@ -27,6 +27,7 @@ public class TestPathReport implements ITestPathReport {
 
 	private ITestPath		testpath;
 	private IOutputValue	symbolicOutput;
+	private int				id;
 
 	private @Nullable List<VariableNode>	inputData;
 	private @Nullable IOutputValue			expectOutput;
@@ -42,11 +43,19 @@ public class TestPathReport implements ITestPathReport {
 	 * @param symbolicOutput
 	 *            predict the output based on symbolic execution
 	 */
-	public TestPathReport(ITestPath testpath, @Nullable List<VariableNode> inputData, IOutputValue symbolicOutput)
+	public TestPathReport(int id, ITestPath testpath, @Nullable List<VariableNode> inputData,
+			IOutputValue symbolicOutput)
 	{
+		this.id = id;
 		this.testpath = testpath;
 		this.inputData = inputData;
 		this.symbolicOutput = symbolicOutput;
+	}
+
+	@Override
+	public int getId()
+	{
+		return id;
 	}
 
 	@Override
@@ -89,6 +98,18 @@ public class TestPathReport implements ITestPathReport {
 	public void setActualOutput(IOutputValue output)
 	{
 		this.actualOutput = output;
+	}
+
+	@Override
+	public boolean equals(@Nullable Object obj)
+	{
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null || !(obj instanceof ITestPathReport)) {
+			return false;
+		}
+		return getId() == ((ITestPathReport) obj).getId();
 	}
 
 	/**

@@ -59,6 +59,13 @@ public interface ITestPathReport {
 	}
 
 	/**
+	 * Get the unique identify for each test path report
+	 * 
+	 * @return report id
+	 */
+	int getId();
+
+	/**
 	 * Get the test path for this report
 	 * 
 	 * @return executed test path
@@ -115,4 +122,13 @@ public interface ITestPathReport {
 	 */
 	void setActualOutput(IOutputValue output);
 
+	/**
+	 * Check for two report is same based on their id
+	 * 
+	 * @param obj
+	 *            object to check
+	 * @return two report are the same
+	 */
+	@Override
+	boolean equals(@Nullable Object obj);
 }

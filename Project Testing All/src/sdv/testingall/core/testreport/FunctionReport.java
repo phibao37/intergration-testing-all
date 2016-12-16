@@ -9,6 +9,8 @@ package sdv.testingall.core.testreport;
 import java.util.ArrayList;
 import java.util.List;
 
+import sdv.testingall.core.node.FunctionNode;
+
 /**
  * Implement for function report
  * 
@@ -17,6 +19,25 @@ import java.util.List;
  * @date 2016-12-15 VuSD created
  */
 public class FunctionReport extends ArrayList<IFunctionReport.ICoverageReport> implements IFunctionReport {
+
+	private FunctionNode function;
+
+	/**
+	 * Create new function report
+	 * 
+	 * @param function
+	 *            function node that this report belongs to
+	 */
+	public FunctionReport(FunctionNode function)
+	{
+		this.function = function;
+	}
+
+	@Override
+	public FunctionNode getFunction()
+	{
+		return function;
+	}
 
 	/**
 	 * Report for each coverage scenario

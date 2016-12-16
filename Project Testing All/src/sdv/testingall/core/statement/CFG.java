@@ -6,6 +6,7 @@
  */
 package sdv.testingall.core.statement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,9 +43,62 @@ public class CFG implements ICFG {
 	public List<ITestPath> getAllBasisPath()
 	{
 		if (basisPaths == null) {
-			// TODO Auto-generated method stub
+			scanBasisPath(new TestPath(), basisPaths = new ArrayList<>(), statements[0]);
 		}
 		return basisPaths;
+	}
+
+	/**
+	 * Scan all basis path and push to result list
+	 * 
+	 * @param scanner
+	 *            a test path act as a scanner, should be an empty + temporary path
+	 * @param result
+	 *            list of test path to put result into
+	 * @param current
+	 *            current statement to analyze, should be the beginning of CFG
+	 */
+	protected void scanBasisPath(ITestPath scanner, List<ITestPath> result, IStatement current)
+	{
+		// Scan to end of CFG, add the test path to result
+		if (current == null) {
+			result.add(scanner.clone());
+		}
+
+		// Check if this statement is valid to add to scanner
+		else if (checkValidNextStatement(scanner, current)) {
+			scanner.add(current);
+
+			if (current.isCondition()) {
+				IConditionStatement condStm = (IConditionStatement) current;
+				scanBasisPath(scanner, result, condStm.falseBranch());
+				scanBasisPath(scanner, result, condStm.trueBranch());
+			} else {
+				scanBasisPath(scanner, result, ((INormalStatement) current).nextStatement());
+			}
+
+			scanner.remove(scanner.size() - 1);
+		}
+	}
+
+	/**
+	 * Check if the statement occur in the test path not more than once time
+	 * 
+	 * @param path
+	 *            test path to check
+	 * @param stm
+	 *            statement to check
+	 * @return valid statement to add to path
+	 */
+	protected static boolean checkValidNextStatement(ITestPath path, IStatement stm)
+	{
+		int count = 0;
+		for (IStatement statement : path) {
+			if (statement == stm) {
+				count++;
+			}
+		}
+		return count <= 1;
 	}
 
 	@Override
