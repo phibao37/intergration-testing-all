@@ -122,23 +122,31 @@ public class TestPathReport implements ITestPathReport {
 		private @Nullable IExpression	returnValue;
 
 		/**
-		 * Create new output value describe that the test path is infeasible
+		 * Create new default output value with unknown solution
 		 */
 		public OutputValue()
 		{
-			this.resultType = RESULT_UNSAT;
+			resultType = RESULT_UNKNOWN;
 		}
 
 		/**
-		 * Create new output value that the test path return a value
-		 * 
-		 * @param returnValue
-		 *            returned value as an expression
+		 * Mark this output solution is infeasible
 		 */
-		public OutputValue(IExpression returnValue)
+		public void setUnsat()
 		{
-			this.returnValue = returnValue;
-			this.resultType = RESULT_RETURN_VALUE;
+			resultType = RESULT_UNSAT;
+		}
+
+		/**
+		 * Mark this output to return a value
+		 * 
+		 * @param value
+		 *            returned value as expression
+		 */
+		public void setReturnValue(IExpression value)
+		{
+			resultType = RESULT_RETURN_VALUE;
+			returnValue = value;
 		}
 
 		@Override

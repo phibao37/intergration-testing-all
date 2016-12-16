@@ -8,7 +8,10 @@ package sdv.testingall.core.node;
 
 import java.io.File;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import javafx.scene.image.Image;
+import sdv.testingall.core.type.IType;
 
 /**
  * A node to represent a root of project
@@ -61,7 +64,7 @@ public class ProjectNode extends BaseNode implements IFileNode {
 	 * 
 	 * @return root node of logical data
 	 */
-	public ProjectNode getLogicalRoot()
+	protected ProjectNode getLogicalRoot()
 	{
 		if (logicalRoot == null) {
 			// TODO Begin merge logical data node
@@ -69,6 +72,21 @@ public class ProjectNode extends BaseNode implements IFileNode {
 			logicalRoot.logicalRoot = logicalRoot;
 		}
 		return logicalRoot;
+	}
+
+	/**
+	 * Resolve type to data node
+	 * 
+	 * @param type
+	 *            type to find target binding
+	 * @param loc
+	 *            location that this type occur, use to find with relative location
+	 * @return corresponding data node or <code>null</code> if this type does not bind to a data node, or data node not
+	 *         found
+	 */
+	public @Nullable INode resolve(IType type, INode loc)
+	{
+		return null;
 	}
 
 }

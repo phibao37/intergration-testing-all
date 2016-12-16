@@ -46,9 +46,21 @@ public abstract class BaseProjectLoader {
 	 */
 	public ProjectNode loadProject()
 	{
-		ProjectNode rootNode = new ProjectNode(root);
+		ProjectNode rootNode = createRootProject(root);
 		recurseLoadProject(root, rootNode);
 		return rootNode;
+	}
+
+	/**
+	 * Create new project root to keep track all sub-node
+	 * 
+	 * @param root
+	 *            root file object
+	 * @return root project node
+	 */
+	protected ProjectNode createRootProject(File root)
+	{
+		return new ProjectNode(root);
 	}
 
 	/**

@@ -37,8 +37,11 @@ public interface ITestPathReport {
 		 */
 		int getResultType();
 
-		/** This test path is not feasible (may be proved by solver) */
-		int RESULT_UNSAT = 0;
+		/** (Symbolic only) No solver can prove this test path is feasible or not */
+		int RESULT_UNKNOWN = 0;
+
+		/** (Symbolic only) This test path is not feasible (may be proved by solver) */
+		int RESULT_UNSAT = -1;
 
 		/** This test path is executed complete and return value to function caller (can be <code>void</code>) */
 		int RESULT_RETURN_VALUE = 1;
@@ -47,12 +50,12 @@ public interface ITestPathReport {
 		int RESULT_EXCEPTION = 2;
 
 		/** A fatal error occur during executing, example in C++: division by 0, call <code>exit()</code> */
-		int RESULT_ERROR = -1;
+		int RESULT_ERROR = 3;
 
 		/**
 		 * Get the returned value after executing this test path
 		 * 
-		 * @return return value as expression or <code>null</code> if result type is {@link #RESULT_UNSAT}
+		 * @return return value as expression or <code>null</code> if result type is not {@link #RESULT_RETURN_VALUE}
 		 */
 		@Nullable
 		IExpression getReturnValue();
@@ -78,6 +81,7 @@ public interface ITestPathReport {
 	 * This list can be empty if the function does not has any parameter or access global variable
 	 * 
 	 * @return list of input variable or <code>null</code> if symbolic result type is {@link IOutputValue#RESULT_UNSAT}
+	 *         or {@link IOutputValue#RESULT_UNKNOWN}
 	 */
 	@Nullable
 	List<VariableNode> getInputData();

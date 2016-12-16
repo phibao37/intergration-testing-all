@@ -6,10 +6,12 @@
  */
 package sdv.testingall.core.gentestdata;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.core.node.VariableNode;
 import sdv.testingall.core.statement.CFG;
 import sdv.testingall.core.statement.ICFG;
 import sdv.testingall.core.statement.ITestPath;
@@ -18,6 +20,8 @@ import sdv.testingall.core.testreport.FunctionReport;
 import sdv.testingall.core.testreport.IFunctionReport;
 import sdv.testingall.core.testreport.IFunctionReport.ICoverageReport;
 import sdv.testingall.core.testreport.ITestPathReport;
+import sdv.testingall.core.testreport.TestPathReport;
+import sdv.testingall.core.testreport.TestPathReport.OutputValue;
 
 /**
  * Generate test data that do not need to invoke real execution in testing function.<br/>
@@ -28,7 +32,7 @@ import sdv.testingall.core.testreport.ITestPathReport;
  * <li>For each test path, using symbolic execution to obtains all path constrains</li>
  * <li>Using solver to solve path constrains and get back the solution as input value</li>
  * <li>For each type of coverage, choose list of test path that best satisfy coverage</li>
- * <ol>
+ * </ol>
  * 
  * @author VuSD
  *
@@ -125,10 +129,19 @@ public class StaticTestDataGeneration extends BaseTestDataGeneration {
 	 */
 	protected List<ITestPathReport> generateDataAllPath(ICFG cfg)
 	{
+		// Discover all path from given CFG
 		List<ITestPath> allPath = cfg.getAllBasisPath();
-		// TODO
-		allPath.size();
-		return null;
+		List<ITestPathReport> listReport = new ArrayList<>(allPath.size());
+		int id = 0;
+
+		for (ITestPath testpath : allPath) {
+			OutputValue symbolicOutput = new OutputValue();
+			List<VariableNode> inputData = null;
+
+			listReport.add(new TestPathReport(id++, testpath, inputData, symbolicOutput));
+		}
+
+		return listReport;
 	}
 
 	/**
