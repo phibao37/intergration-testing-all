@@ -6,8 +6,12 @@
  */
 package sdv.testingall.core.gentestdata;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.core.testreport.FunctionReport;
 import sdv.testingall.core.testreport.IFunctionReport;
 
 /**
@@ -18,6 +22,8 @@ import sdv.testingall.core.testreport.IFunctionReport;
  * @date 2016-12-19 VuSD created
  */
 public class GenerationController extends BaseTestDataGeneration {
+
+	private List<ITestDataGeneration> listStrategy;
 
 	/**
 	 * Create new test generation controller
@@ -32,6 +38,18 @@ public class GenerationController extends BaseTestDataGeneration {
 	public GenerationController(ProjectNode project, FunctionNode function, IGenTestConfig config)
 	{
 		super(project, function, config);
+		listStrategy = new ArrayList<>();
+	}
+
+	/**
+	 * Add strategy to generate test data together
+	 * 
+	 * @param strategy
+	 *            strategy to generate test data
+	 */
+	public void addStraitgy(ITestDataGeneration strategy)
+	{
+		listStrategy.add(strategy);
 	}
 
 	@Override
@@ -43,8 +61,12 @@ public class GenerationController extends BaseTestDataGeneration {
 	@Override
 	public IFunctionReport generateData()
 	{
-		// Merge all report together
-		return null;
+		// Currently support static solution only
+		if (listStrategy.size() == 1 && listStrategy.get(0).isAvailable()) {
+			return listStrategy.get(0).generateData();
+		}
+
+		return new FunctionReport(getFunction());
 	}
 
 }
