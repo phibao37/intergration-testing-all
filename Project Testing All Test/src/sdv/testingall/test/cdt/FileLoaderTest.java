@@ -17,7 +17,6 @@ import org.junit.Test;
 
 import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.DefaultCppLoaderConfig;
-import sdv.testingall.cdt.loader.ICppLoaderConfig;
 import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.CppFunctionNode;
@@ -40,7 +39,7 @@ import sdv.testingall.core.node.VariableNode;
  */
 public class FileLoaderTest {
 
-	static final ICppLoaderConfig CONFIG = new DefaultCppLoaderConfig();
+	static final DefaultCppLoaderConfig CONFIG = new DefaultCppLoaderConfig();
 
 	/**
 	 * @CHECKPOINT Load an error syntax file
