@@ -6,8 +6,10 @@
  */
 package sdv.testingall.core.gentestdata;
 
+import sdv.testingall.core.gentestdata.symbolicexec.ISymbolicExecution;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.core.statement.ITestPath;
 import sdv.testingall.core.testreport.IFunctionReport;
 
 /**
@@ -46,6 +48,15 @@ public interface ITestDataGeneration {
 	 * @return available state
 	 */
 	boolean isAvailable();
+
+	/**
+	 * Create new symbolic execution object for given test path
+	 * 
+	 * @param testpath
+	 *            test path to symbolic execute
+	 * @return symbolic execution controller
+	 */
+	ISymbolicExecution createSymbolicExecution(ITestPath testpath);
 
 	/**
 	 * Generate test data for given function

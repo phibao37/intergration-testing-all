@@ -69,6 +69,14 @@ public interface ITestPathReport {
 	int getId();
 
 	/**
+	 * Set the unique identify for each test path report
+	 * 
+	 * @param id
+	 *            report id
+	 */
+	void setId(int id);
+
+	/**
 	 * Get the test path for this report
 	 * 
 	 * @return executed test path

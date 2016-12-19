@@ -6,8 +6,11 @@
  */
 package sdv.testingall.core.gentestdata;
 
+import sdv.testingall.core.gentestdata.symbolicexec.ISymbolicExecution;
+import sdv.testingall.core.gentestdata.symbolicexec.SymbolicExecution;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.core.statement.ITestPath;
 
 /**
  * Basic implement for generate test data
@@ -57,4 +60,9 @@ public abstract class BaseTestDataGeneration implements ITestDataGeneration {
 		return config;
 	}
 
+	@Override
+	public ISymbolicExecution createSymbolicExecution(ITestPath testpath)
+	{
+		return new SymbolicExecution(project, function, config, testpath);
+	}
 }

@@ -43,10 +43,8 @@ public class TestPathReport implements ITestPathReport {
 	 * @param symbolicOutput
 	 *            predict the output based on symbolic execution
 	 */
-	public TestPathReport(int id, ITestPath testpath, @Nullable List<VariableNode> inputData,
-			IOutputValue symbolicOutput)
+	public TestPathReport(ITestPath testpath, @Nullable List<VariableNode> inputData, IOutputValue symbolicOutput)
 	{
-		this.id = id;
 		this.testpath = testpath;
 		this.inputData = inputData;
 		this.symbolicOutput = symbolicOutput;
@@ -56,6 +54,12 @@ public class TestPathReport implements ITestPathReport {
 	public int getId()
 	{
 		return id;
+	}
+
+	@Override
+	public void setId(int id)
+	{
+		this.id = id;
 	}
 
 	@Override

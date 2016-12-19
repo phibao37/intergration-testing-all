@@ -138,7 +138,9 @@ public class StaticTestDataGeneration extends BaseTestDataGeneration {
 			OutputValue symbolicOutput = new OutputValue();
 			List<VariableNode> inputData = null;
 
-			listReport.add(new TestPathReport(id++, testpath, inputData, symbolicOutput));
+			TestPathReport pathReport = new TestPathReport(testpath, inputData, symbolicOutput);
+			pathReport.setId(id++);
+			listReport.add(pathReport);
 		}
 
 		return listReport;
