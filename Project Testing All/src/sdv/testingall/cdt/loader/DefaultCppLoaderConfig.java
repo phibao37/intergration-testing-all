@@ -97,7 +97,6 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 		return logger;
 	}
 
-	@Override
 	public void setLogger(ILogger logger)
 	{
 		this.logger = logger;

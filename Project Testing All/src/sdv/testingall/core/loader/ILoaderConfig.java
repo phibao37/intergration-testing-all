@@ -42,11 +42,4 @@ public interface ILoaderConfig extends IAppResource {
 	 */
 	ILogger getLogger();
 
-	/**
-	 * Set the logger
-	 * 
-	 * @param logger
-	 *            the logger object to set
-	 */
-	void setLogger(ILogger logger);
 }

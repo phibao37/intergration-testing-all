@@ -6,8 +6,6 @@
  */
 package sdv.testingall.core.expression;
 
-import sdv.testingall.core.type.IType;
-
 /**
  * Abstract for all expression
  * 
@@ -17,7 +15,18 @@ import sdv.testingall.core.type.IType;
  */
 public abstract class Expression implements IExpression {
 
-	private String content;
+	protected String		content;
+	protected IExpression	source;
+
+	private boolean replaceable;
+
+	/**
+	 * Create new expression
+	 */
+	protected Expression()
+	{
+		source = this;
+	}
 
 	@Override
 	public void setContent(String content)
@@ -42,9 +51,48 @@ public abstract class Expression implements IExpression {
 	}
 
 	@Override
-	public IType bind()
+	public IExpression getSource()
 	{
-		return null;
+		return source;
+	}
+
+	@Override
+	public void setReplaceable(boolean replace)
+	{
+		this.replaceable = replace;
+	}
+
+	@Override
+	public boolean isReplaceable()
+	{
+		return replaceable;
+	}
+
+	@Override
+	public int accept(IExpressionVisitor visitor)
+	{
+		int state = PROCESS_SKIP;
+
+		if (visitor.preVisit(this)) {
+			state = handleVisit(visitor);
+
+			if (state == PROCESS_CONTINUE && this instanceof IExpressionGroup) {
+				IExpression[] childs = ((IExpressionGroup) this).getChilds();
+
+				for (IExpression child : childs) {
+					int child_state = child.accept(visitor);
+
+					if (child_state == PROCESS_ABORT) {
+						state = child_state;
+						break;
+					}
+				}
+			}
+			handleLeave(visitor);
+		}
+
+		visitor.postVisit(this);
+		return state;
 	}
 
 }

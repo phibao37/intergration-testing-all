@@ -9,6 +9,7 @@ package sdv.testingall.core.gentestdata;
 import java.util.List;
 
 import sdv.testingall.core.element.IAppResource;
+import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.testreport.Coverage;
 
 /**
@@ -26,4 +27,11 @@ public interface IGenTestConfig extends IAppResource {
 	 * @return coverage list
 	 */
 	List<Coverage> genCoverage();
+
+	/**
+	 * Get the logger
+	 * 
+	 * @return the logger to log event
+	 */
+	ILogger getLogger();
 }

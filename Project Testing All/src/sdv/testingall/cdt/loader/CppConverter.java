@@ -10,6 +10,8 @@ import org.eclipse.cdt.core.dom.ast.IASTNode;
 
 import sdv.testingall.core.expression.Expression;
 import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.expression.IExpressionVisitor;
+import sdv.testingall.core.type.IType;
 
 /**
  * Convert AST expression to core expression
@@ -37,6 +39,24 @@ public class CppConverter {
 		StubExpression(String content)
 		{
 			setContent(content);
+		}
+
+		@Override
+		public IType getType()
+		{
+			return null;
+		}
+
+		@Override
+		public int handleVisit(IExpressionVisitor visitor)
+		{
+			return 0;
+		}
+
+		@Override
+		public void handleLeave(IExpressionVisitor visitor)
+		{
+			//
 		}
 	}
 }

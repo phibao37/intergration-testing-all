@@ -106,7 +106,6 @@ public class Setting implements Serializable, ICppLoaderConfig, IGenTestConfig {
 		return logger;
 	}
 
-	@Override
 	public void setLogger(ILogger logger)
 	{
 		this.logger = logger;
