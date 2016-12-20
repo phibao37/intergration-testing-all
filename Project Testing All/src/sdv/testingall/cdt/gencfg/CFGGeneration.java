@@ -26,7 +26,7 @@ import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTWhileStatement;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTTryBlockStatement;
 
-import sdv.testingall.cdt.loader.CppConverter;
+import sdv.testingall.cdt.expression.CppConverter;
 import sdv.testingall.cdt.node.CppFunctionNode;
 import sdv.testingall.core.gencfg.BaseCFGGeneration;
 import sdv.testingall.core.gencfg.TemporaryStatement;

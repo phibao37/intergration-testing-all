@@ -7,6 +7,8 @@
 package sdv.testingall.cdt.type;
 
 import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.IBasicType;
+import org.eclipse.cdt.core.dom.ast.IBasicType.Kind;
 
 import sdv.testingall.core.type.BaseType;
 import sdv.testingall.core.type.ITypeModifier;
@@ -49,6 +51,57 @@ public class CppBasicType extends BaseType {
 		}
 
 		this.typeFlag = typeFlag;
+	}
+
+	/**
+	 * Create new basic data type from AST binding
+	 * 
+	 * @param simpleType
+	 *            AST type binding
+	 * @param mdf
+	 *            extra type modifier
+	 */
+	public CppBasicType(IBasicType simpleType, ITypeModifier mdf)
+	{
+		super(null, null, mdf);
+
+		isSigned = simpleType.isSigned();
+		isUnsigned = simpleType.isUnsigned();
+		isShort = simpleType.isShort();
+		isLong = simpleType.isLong();
+		isLongLong = simpleType.isLongLong();
+		int typeFlag = convertKind(simpleType.getKind());
+
+		// Re-sync type "int" if omitted
+		if (typeFlag == UNSPECIFIED && (isSigned || isUnsigned || isShort || isLong || isLongLong)) {
+			typeFlag = INT;
+		}
+
+		this.typeFlag = typeFlag;
+	}
+
+	static int convertKind(Kind kind)
+	{
+		switch (kind) {
+		case eBoolean:
+			return BOOL;
+		case eChar:
+		case eWChar:
+		case eChar16:
+		case eChar32:
+			return CHAR;
+		case eDouble:
+			return DOUBLE;
+		case eFloat:
+		case eFloat128:
+			return FLOAT;
+		case eInt:
+			return INT;
+		case eVoid:
+			return VOID;
+		default:
+			return UNSPECIFIED;
+		}
 	}
 
 	/**

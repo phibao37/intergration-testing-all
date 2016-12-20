@@ -48,4 +48,8 @@ public interface IExpressionVisitor {
 	 *            expression has finish visit
 	 */
 	void postVisit(IExpression expression);
+
+	int visit(INumberExpression number);
+
+	void leave(INumberExpression number);
 }
