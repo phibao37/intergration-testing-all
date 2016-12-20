@@ -22,11 +22,17 @@ public interface ICppNumberExpression extends INumberExpression {
 	/**
 	 * Returns the value of the specified number expression as an {@code char} in C/C++
 	 * 
-	 * @return
-	 *         <ul>
-	 *         <li>{@code signed char} value: [-128, 127]</li>
-	 *         <li>{@code unsigned char} value: [0, 255]</li>
-	 *         </ul>
+	 * @return {@code signed char} value: [-128, 127]
+	 */
+	default byte signedCharValue()
+	{
+		return byteValue();
+	}
+
+	/**
+	 * Returns the value of the specified number expression as an {@code unsigned char} in C/C++
+	 * 
+	 * @return {@code unsigned char} value: [0, 255]
 	 */
 	@Override
 	char charValue();

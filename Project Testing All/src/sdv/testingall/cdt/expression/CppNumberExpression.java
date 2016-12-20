@@ -9,6 +9,8 @@ package sdv.testingall.cdt.expression;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
 
+import com.ibm.icu.impl.Utility;
+
 import sdv.testingall.cdt.type.CppBasicType;
 import sdv.testingall.cdt.type.CppTypeModifier;
 import sdv.testingall.core.expression.Expression;
@@ -38,9 +40,31 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 	 */
 	public CppNumberExpression(IASTLiteralExpression literal)
 	{
-		setContent(literal.toString());
+		String value = literal.toString();
+		setContent(value);
 		IBasicType type = (IBasicType) literal.getExpressionType();
 		this.type = new CppBasicType(type, DEFAULT_MODIFIER);
+
+		switch (literal.getKind()) {
+		case IASTLiteralExpression.lk_integer_constant:
+			doubleValue = longValue = Long.parseLong(value);
+			boolValue = longValue != 0;
+		case IASTLiteralExpression.lk_float_constant:
+			doubleValue = Double.parseDouble(value);
+			longValue = (long) doubleValue;
+			boolValue = doubleValue != 0.0;
+		case IASTLiteralExpression.lk_true:
+			boolValue = true;
+			doubleValue = longValue = 1;
+			break;
+		case IASTLiteralExpression.lk_false:
+			// Same as default field value
+			break;
+		case IASTLiteralExpression.lk_char_constant:
+			value = Utility.unescape(value);
+			doubleValue = longValue = value.charAt(1); // Get second position: 'x'
+			boolValue = longValue != 0;
+		}
 	}
 
 	@Override
