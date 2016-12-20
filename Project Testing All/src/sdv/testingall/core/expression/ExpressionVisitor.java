@@ -41,4 +41,16 @@ public class ExpressionVisitor implements IExpressionVisitor, IVisitorState {
 		// do nothing
 	}
 
+	@Override
+	public int visit(INameExpression name)
+	{
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(INameExpression name)
+	{
+		// do nothing
+	}
+
 }

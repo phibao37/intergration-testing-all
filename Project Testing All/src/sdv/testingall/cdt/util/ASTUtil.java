@@ -9,9 +9,13 @@ package sdv.testingall.cdt.util;
 import java.io.File;
 
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
+import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTTranslationUnit;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNameSpecifier;
+import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.DefaultCppLoaderConfig;
@@ -29,6 +33,27 @@ import sdv.testingall.util.SDVUtils;
  */
 @NonNullByDefault
 public class ASTUtil {
+
+	/**
+	 * Parse the name-part of this type name
+	 * 
+	 * @param name
+	 *            AST name node
+	 * @return list of name part or <code>null</code> if this is simple name
+	 */
+	public static String @Nullable [] parseNamePart(IASTName name)
+	{
+		if (name instanceof ICPPASTQualifiedName) {
+			ICPPASTNameSpecifier[] listQualified = ((ICPPASTQualifiedName) name).getQualifier();
+			String[] listPart = new String[listQualified.length];
+
+			for (int i = 0; i < listPart.length; i++) {
+				listPart[i] = new String(listQualified[i].toCharArray());
+			}
+			return listPart;
+		}
+		return null;
+	}
 
 	/**
 	 * Print the node structure on the console

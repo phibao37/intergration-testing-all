@@ -9,9 +9,9 @@ package sdv.testingall.cdt.type;
 import org.eclipse.cdt.core.dom.ast.IASTElaboratedTypeSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTElaboratedTypeSpecifier;
-import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTNameSpecifier;
 import org.eclipse.cdt.core.dom.ast.cpp.ICPPASTQualifiedName;
 
+import sdv.testingall.cdt.util.ASTUtil;
 import sdv.testingall.core.type.BaseType;
 import sdv.testingall.core.type.ITypeModifier;
 
@@ -37,7 +37,7 @@ public class CppNamedType extends BaseType {
 	 */
 	public CppNamedType(IASTName name, ITypeModifier mdf)
 	{
-		super(name.getLastName().toString(), parseNamePart(name), mdf);
+		super(name.getLastName().toString(), ASTUtil.parseNamePart(name), mdf);
 
 		if (name instanceof ICPPASTQualifiedName) {
 			isFullQualified = ((ICPPASTQualifiedName) name).isFullyQualified();
@@ -58,27 +58,6 @@ public class CppNamedType extends BaseType {
 	{
 		this(name, mdf);
 		this.elaborated = elaborated;
-	}
-
-	/**
-	 * Parse the name-part of this type name
-	 * 
-	 * @param name
-	 *            AST name node
-	 * @return list of name part or <code>null</code> if this is simple name
-	 */
-	static String[] parseNamePart(IASTName name)
-	{
-		if (name instanceof ICPPASTQualifiedName) {
-			ICPPASTNameSpecifier[] listQualified = ((ICPPASTQualifiedName) name).getQualifier();
-			String[] listPart = new String[listQualified.length];
-
-			for (int i = 0; i < listPart.length; i++) {
-				listPart[i] = new String(listQualified[i].toCharArray());
-			}
-			return listPart;
-		}
-		return null;
 	}
 
 	/**

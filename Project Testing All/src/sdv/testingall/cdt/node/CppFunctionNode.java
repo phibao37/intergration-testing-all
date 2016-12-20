@@ -9,6 +9,7 @@ package sdv.testingall.cdt.node;
 import org.eclipse.cdt.core.dom.ast.IASTStatement;
 import org.eclipse.jdt.annotation.Nullable;
 
+import sdv.testingall.cdt.element.ICppName;
 import sdv.testingall.cdt.gencfg.CFGGeneration;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.VariableNode;
@@ -27,7 +28,7 @@ import sdv.testingall.util.SDVUtils;
 public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 
 	private final @Nullable IASTStatement	body;
-	private final IType						nameType;
+	private final ICppName					name;
 
 	private ICFG	cfgNormal;
 	private ICFG	cfgSubCond;
@@ -37,18 +38,18 @@ public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 	 * 
 	 * @param type
 	 *            function return type
-	 * @param nameType
-	 *            function name (full-qualified as a type)
+	 * @param name
+	 *            function name (full-qualified)
 	 * @param params
 	 *            list of function parameter
 	 * @param body
 	 *            the root statement of function body, can be <code>null</code> if this is a declaration
 	 */
-	public CppFunctionNode(IType type, IType nameType, VariableNode[] params, @Nullable IASTStatement body)
+	public CppFunctionNode(IType type, ICppName name, VariableNode[] params, @Nullable IASTStatement body)
 	{
-		super(type, nameType.getName(), params);
+		super(type, name.getName(), params);
 		this.body = body;
-		this.nameType = nameType;
+		this.name = name;
 	}
 
 	@Override
@@ -58,13 +59,13 @@ public class CppFunctionNode extends FunctionNode implements ICppDeclarable {
 	}
 
 	/**
-	 * Get the full-qualified function name (same as a type)
+	 * Get the full-qualified function name
 	 * 
 	 * @return function name
 	 */
-	public IType getNameType()
+	public ICppName getFullName()
 	{
-		return nameType;
+		return name;
 	}
 
 	/**

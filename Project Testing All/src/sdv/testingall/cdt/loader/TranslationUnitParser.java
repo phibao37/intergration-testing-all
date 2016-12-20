@@ -41,6 +41,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import javafx.util.Pair;
+import sdv.testingall.cdt.expression.CppNameExpression;
 import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.CppFunctionNode;
@@ -155,7 +156,7 @@ public class TranslationUnitParser extends ASTVisitor {
 			}
 
 			assert (type != null);
-			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNamedType(fnName, mdf),
+			CppFunctionNode fnNode = new CppFunctionNode(type, new CppNameExpression(fnName),
 					listParam.toArray(new VariableNode[listParam.size()]), fnDef.getBody());
 			addToCurrentStack(fnNode, fnDef, true);
 			applyFileLocation(fnNode, decType.getFileLocation(), fnDec.getFileLocation(), 0);
