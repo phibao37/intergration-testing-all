@@ -43,7 +43,7 @@ public abstract class ExpressionGroup extends Expression implements IExpressionG
 			IExpression child = childs[i];
 
 			// Skip replace on non-replaceable child
-			if (!child.isReplaceable()) {
+			if (child == null || !child.isReplaceable()) {
 				continue;
 			}
 
@@ -73,7 +73,9 @@ public abstract class ExpressionGroup extends Expression implements IExpressionG
 
 		// Deep clone child expression
 		for (int i = 0; i < childs.length; i++) {
-			cloned.childs[i] = childs[i].clone();
+			if (childs[i] != null) {
+				cloned.childs[i] = childs[i].clone();
+			}
 		}
 
 		return cloned;

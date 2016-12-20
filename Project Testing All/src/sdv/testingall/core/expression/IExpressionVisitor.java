@@ -51,9 +51,22 @@ public interface IExpressionVisitor {
 
 	int visit(INumberExpression number);
 
-	int visit(INameExpression name);
-
 	void leave(INumberExpression number);
 
+	int visit(INameExpression name);
+
 	void leave(INameExpression name);
+
+	int visit(IBinaryExpression bin);
+
+	void leave(IBinaryExpression bin);
+
+	int visit(IUnaryExpression unary);
+
+	void leave(IUnaryExpression unary);
+
+	int visit(IReturnExpression returnEx);
+
+	void leave(IReturnExpression returnEx);
+
 }

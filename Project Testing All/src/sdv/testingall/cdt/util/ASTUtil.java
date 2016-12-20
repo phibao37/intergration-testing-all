@@ -103,6 +103,21 @@ public class ASTUtil {
 		}
 	}
 
+	/**
+	 * Print the node structure
+	 * 
+	 * @param margin
+	 *            left-alignment to print
+	 */
+	@SuppressWarnings("nls")
+	public static void printTreeNode(INode node, String margin)
+	{
+		System.out.printf("%s%s [%s]%n", margin, node, node.getClass().getSimpleName());
+		node.forEach((child) -> {
+			printTreeNode(child, margin + "   ");
+		});
+	}
+
 	@SuppressWarnings("nls")
 	public static void main(String[] args)
 	{
@@ -117,7 +132,7 @@ public class ASTUtil {
 
 			INode root = new CppFileLoader(source).loadFile(config);
 			assert (root != null);
-			root.printTree("*");
+			printTreeNode(root, "*");
 		} catch (Exception e) {
 			e.printStackTrace();
 			config.getLogger().log(ILogger.ERROR, SDVUtils.gxceptionMsg(e));

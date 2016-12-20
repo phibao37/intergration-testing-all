@@ -84,18 +84,4 @@ public interface INode extends List<INode>, Cloneable, Comparable<INode>, IDispl
 	@Nullable
 	String getDescription();
 
-	/**
-	 * Print the node structure
-	 * 
-	 * @param margin
-	 *            left-alignment to print
-	 */
-	@SuppressWarnings("nls")
-	default void printTree(String margin)
-	{
-		System.out.printf("%s%s [%s]%n", margin, this, getClass().getSimpleName());
-		this.forEach((child) -> {
-			child.printTree(margin + "   ");
-		});
-	}
 }

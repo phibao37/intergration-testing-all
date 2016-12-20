@@ -80,6 +80,9 @@ public abstract class Expression implements IExpression {
 				IExpression[] childs = ((IExpressionGroup) this).getChilds();
 
 				for (IExpression child : childs) {
+					if (child == null) {
+						continue;
+					}
 					int child_state = child.accept(visitor);
 
 					if (child_state == PROCESS_ABORT) {

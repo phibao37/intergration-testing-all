@@ -53,4 +53,40 @@ public class ExpressionVisitor implements IExpressionVisitor, IVisitorState {
 		// do nothing
 	}
 
+	@Override
+	public int visit(IBinaryExpression bin)
+	{
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(IBinaryExpression bin)
+	{
+		// do nothing
+	}
+
+	@Override
+	public int visit(IUnaryExpression unary)
+	{
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(IUnaryExpression unary)
+	{
+		// do nothing
+	}
+
+	@Override
+	public int visit(IReturnExpression returnEx)
+	{
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(IReturnExpression returnEx)
+	{
+		// do nothing
+	}
+
 }
