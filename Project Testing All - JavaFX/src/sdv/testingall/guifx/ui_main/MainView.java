@@ -12,8 +12,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 import javafx.application.Platform;
 import javafx.beans.binding.When;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -37,6 +35,7 @@ import javafx.stage.Stage;
 import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.core.logger.BaseLogger;
 import sdv.testingall.core.logger.ILogger;
+import sdv.testingall.core.node.FolderNode;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.IFileNode;
 import sdv.testingall.core.node.IInsideFileNode;
@@ -189,7 +188,7 @@ public class MainView implements Initializable {
 				setting.setLogger(new BaseLogger() {
 
 					@Override
-					public @NonNull ILogger log(int type, @NonNull String message, Object @NonNull... args)
+					public ILogger log(int type, String message, Object... args)
 					{
 						StringBuilder b = new StringBuilder(type == ILogger.ERROR ? "[ERROR] " : "[INFO] ");
 						b.append(String.format(message, args)).append('\n');
@@ -290,12 +289,29 @@ public class MainView implements Initializable {
 		MenuItem itemGenTest = new MenuItem(appRes.getString("mitem.gentest"), new ImageView(ImageSet.MENU_GENTEST));
 		MenuItem itemViewsource = new MenuItem(appRes.getString("mitem.viewsource"),
 				new ImageView(ImageSet.MENU_VIEWSOURCE));
+		MenuItem itemPrFolder = new MenuItem(appRes.getString("mitem.project.folder"),
+				new ImageView(ImageSet.MENU_PR_FOLDER));
+		MenuItem itemPrConfig = new MenuItem(appRes.getString("mitem.project.config"),
+				new ImageView(ImageSet.MENU_PR_CONFIG));
 
-		itemViewsource
-				.setOnAction(e -> handleOpenSourceView(project_tree.getSelectionModel().getSelectedItem().getValue()));
+		itemViewsource.setOnAction(e -> handleOpenSourceView(getProjectSelectedItem()));
+		itemPrFolder.setOnAction(e -> {
+			try {
+				File root = ((IFileNode) getProjectSelectedItem()).getFile();
+				if (root.isFile()) {
+					root = root.getParentFile();
+				}
+				java.awt.Desktop.getDesktop().open(root);
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				GUIUtil.alert(AlertType.ERROR, setting.resString("gui.errorhappen"), null,
+						setting.resString("gui.unsupportoperator"), ImageSet.APPLICATION);
+			}
+		});
 
 		// project_tree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		project_tree.getContextMenu().getItems().addAll(itemOpenCFG, itemGenTest, itemViewsource);
+		project_tree.getContextMenu().getItems().addAll(itemOpenCFG, itemGenTest, itemViewsource, itemPrFolder,
+				itemPrConfig);
 		project_tree.setMenuHandle(listNode -> {
 			if (listNode.isEmpty()) {
 				return false;
@@ -304,6 +320,8 @@ public class MainView implements Initializable {
 			INode node = listNode.get(0);
 			boolean hasSource = false;
 			boolean isFunction = node instanceof FunctionNode;
+			boolean isProject = node instanceof ProjectNode;
+			boolean isFolder = node instanceof FolderNode;
 
 			if (node instanceof IFileNode) {
 				File source = ((IFileNode) node).getFile();
@@ -315,8 +333,21 @@ public class MainView implements Initializable {
 			itemOpenCFG.setVisible(isFunction);
 			itemGenTest.setVisible(isFunction);
 			itemViewsource.setVisible(hasSource && !setting.TREE_AUTO_VIEWSOURCE.get());
+			itemPrFolder.setVisible(isProject || isFolder);
+			itemPrConfig.setVisible(isProject);
 			return true;
 		});
+	}
+
+	/**
+	 * Get the selecting item in project view.<br/>
+	 * Project view must selecting one or more item when calling this method
+	 * 
+	 * @return selecting item
+	 */
+	protected INode getProjectSelectedItem()
+	{
+		return project_tree.getSelectionModel().getSelectedItem().getValue();
 	}
 
 	/**

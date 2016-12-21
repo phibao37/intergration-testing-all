@@ -36,4 +36,12 @@ public class ImageSet {
 	public static final Image MENU_VIEWSOURCE = new Image(
 			ImageSet.class.getResourceAsStream("/guifx/menu.viewsource.png"));
 
+	/** Menu open project folder icon */
+	public static final Image MENU_PR_FOLDER = new Image(
+			ImageSet.class.getResourceAsStream("/guifx/menu.project.folder.png"));
+
+	/** Menu open project configuration icon */
+	public static final Image MENU_PR_CONFIG = new Image(
+			ImageSet.class.getResourceAsStream("/guifx/menu.project.config.png"));
+
 }
