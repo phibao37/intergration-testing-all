@@ -11,6 +11,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.Nullable;
 
 import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
 
 /**
  * Constraint for test path can be execute
@@ -22,11 +23,18 @@ import sdv.testingall.core.expression.IExpression;
 public interface IPathConstraint {
 
 	/**
+	 * Get the list of input variable need to be generate value
+	 * 
+	 * @return list of input variable, include function parameter and global variable
+	 */
+	List<IVariable> getInputs();
+
+	/**
 	 * Get the list of constraint that make test path can be execute
 	 * 
 	 * @return path constraint
 	 */
-	List<IExpression> getConstraint();
+	List<IExpression> getConstraints();
 
 	/**
 	 * Get the return expression that this test path procedure

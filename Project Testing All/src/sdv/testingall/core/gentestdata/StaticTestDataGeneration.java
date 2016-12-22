@@ -141,7 +141,7 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 
 			System.out.printf("#### Gen for path: [%s]%n", testpath); //$NON-NLS-1$
 			IPathConstraint constraint = createSymbolicExecution(testpath).getConstraint();
-			System.out.printf("Constraint: %s%n", constraint); //$NON-NLS-1$
+			System.out.printf("Constraint: list=%s%n", constraint.getConstraints()); //$NON-NLS-1$
 			System.out.println();
 
 			TestPathReport pathReport = new TestPathReport(testpath, inputData, symbolicOutput);

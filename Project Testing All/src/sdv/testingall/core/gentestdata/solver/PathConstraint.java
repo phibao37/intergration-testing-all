@@ -6,9 +6,11 @@
  */
 package sdv.testingall.core.gentestdata.solver;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
 
 /**
  * Implementation for path constraint
@@ -19,6 +21,7 @@ import sdv.testingall.core.expression.IExpression;
  */
 public class PathConstraint implements IPathConstraint {
 
+	private List<IVariable>		inputs;
 	private List<IExpression>	constraint;
 	private IExpression			returnValue;
 
@@ -27,10 +30,12 @@ public class PathConstraint implements IPathConstraint {
 	 */
 	public PathConstraint()
 	{
+		inputs = new ArrayList<>();
+		constraint = new ArrayList<>();
 	}
 
 	@Override
-	public List<IExpression> getConstraint()
+	public List<IExpression> getConstraints()
 	{
 		return constraint;
 	}
@@ -50,6 +55,12 @@ public class PathConstraint implements IPathConstraint {
 	public IExpression getPathReturnValue()
 	{
 		return returnValue;
+	}
+
+	@Override
+	public List<IVariable> getInputs()
+	{
+		return inputs;
 	}
 
 }

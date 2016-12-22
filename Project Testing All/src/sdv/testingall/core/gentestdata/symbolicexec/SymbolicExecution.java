@@ -6,8 +6,10 @@
  */
 package sdv.testingall.core.gentestdata.symbolicexec;
 
+import sdv.testingall.core.expression.ExpressionVisitor;
 import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.gentestdata.solver.IPathConstraint;
+import sdv.testingall.core.gentestdata.solver.PathConstraint;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
 import sdv.testingall.core.statement.ITestPath;
@@ -20,14 +22,14 @@ import sdv.testingall.core.statement.ITestPath;
  *
  * @date 2016-12-19 VuSD created
  */
-public abstract class SymbolicExecution implements ISymbolicExecution {
+public abstract class SymbolicExecution extends ExpressionVisitor implements ISymbolicExecution {
 
 	private ProjectNode		project;
 	private FunctionNode	function;
 	private IGenTestConfig	config;
 	private ITestPath		testpath;
 
-	private IPathConstraint constraint;
+	protected IPathConstraint constraint;
 
 	/**
 	 * Create new symbolic execution controller
@@ -47,6 +49,15 @@ public abstract class SymbolicExecution implements ISymbolicExecution {
 		this.function = function;
 		this.config = config;
 		this.testpath = testpath;
+	}
+
+	/**
+	 * Generate constraint for given test path
+	 * 
+	 */
+	protected void generateConstraint()
+	{
+		constraint = new PathConstraint();
 	}
 
 	@Override
@@ -76,6 +87,9 @@ public abstract class SymbolicExecution implements ISymbolicExecution {
 	@Override
 	public IPathConstraint getConstraint()
 	{
+		if (constraint == null) {
+			generateConstraint();
+		}
 		return constraint;
 	}
 
