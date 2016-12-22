@@ -138,6 +138,8 @@ public class StaticTestDataGeneration extends BaseTestDataGeneration {
 			OutputValue symbolicOutput = new OutputValue();
 			List<VariableNode> inputData = null;
 
+			System.out.printf("Gen for path: [%s]\n", testpath); //$NON-NLS-1$
+
 			TestPathReport pathReport = new TestPathReport(testpath, inputData, symbolicOutput);
 			pathReport.setId(id++);
 			listReport.add(pathReport);

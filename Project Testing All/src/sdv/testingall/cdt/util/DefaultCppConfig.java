@@ -1,25 +1,28 @@
 /**
- * Configuration during load C/C++ project
+ * Default configuration for C/C++ environment
  * @file CppLoaderConfig.java
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.cdt.loader;
+package sdv.testingall.cdt.util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import sdv.testingall.cdt.loader.ICppLoaderConfig;
+import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.logger.ILogger;
+import sdv.testingall.core.testreport.Coverage;
 
 /**
- * Configuration during load C/C++ project
+ * Default configuration for C/C++ environment
  * 
  * @author VuSD
  *
  * @date 2016-10-27 VuSD created
  */
-public class DefaultCppLoaderConfig implements ICppLoaderConfig {
+public class DefaultCppConfig implements ICppLoaderConfig, IGenTestConfig {
 
 	private Map<String, String>	marcoMap;
 	private List<String>		includeDirs;
@@ -27,14 +30,16 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 	private List<String>	listCExt;
 	private List<String>	listCppExt;
 
+	private List<Coverage> listCoverage;
+
 	private boolean	logErrorDrt;
 	private ILogger	logger;
 
 	/**
-	 * Construct default C/C++ loader configuration
+	 * Construct default C/C++ configuration
 	 */
 	@SuppressWarnings("nls")
-	public DefaultCppLoaderConfig()
+	public DefaultCppConfig()
 	{
 		listCExt = new ArrayList<>();
 		listCppExt = new ArrayList<>();
@@ -45,6 +50,11 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 		listCppExt.add(".cxx");
 		listCppExt.add(".c++");
 		listCppExt.add(".cp");
+
+		listCoverage = new ArrayList<>();
+		listCoverage.add(Coverage.STATEMENT);
+		listCoverage.add(Coverage.BRANCH);
+		listCoverage.add(Coverage.SUBCONDITION);
 	}
 
 	@Override
@@ -111,5 +121,11 @@ public class DefaultCppLoaderConfig implements ICppLoaderConfig {
 	public void setLogErrorDirective(boolean logErrorDrt)
 	{
 		this.logErrorDrt = logErrorDrt;
+	}
+
+	@Override
+	public List<Coverage> genCoverage()
+	{
+		return listCoverage;
 	}
 }

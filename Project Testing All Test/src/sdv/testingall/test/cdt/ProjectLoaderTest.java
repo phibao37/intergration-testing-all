@@ -15,7 +15,7 @@ import java.util.Comparator;
 import org.junit.Test;
 
 import sdv.testingall.cdt.loader.CppProjectLoader;
-import sdv.testingall.cdt.loader.DefaultCppLoaderConfig;
+import sdv.testingall.cdt.util.DefaultCppConfig;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.node.FileNode;
 import sdv.testingall.core.node.FolderNode;
@@ -31,7 +31,7 @@ import sdv.testingall.core.node.ProjectNode;
  */
 public class ProjectLoaderTest {
 
-	static final DefaultCppLoaderConfig	CONFIG			= new DefaultCppLoaderConfig();
+	static final DefaultCppConfig	CONFIG			= new DefaultCppConfig();
 	static final Comparator<INode>		NODE_COMPARE	= (o1, o2) -> o1.compareTo(o2);
 
 	static {

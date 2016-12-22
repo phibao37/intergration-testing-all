@@ -40,6 +40,13 @@ public interface IScopeStatement extends INormalStatement {
 	{
 		return new ScopeStatement(isOpening);
 	}
+
+	@Override
+	default boolean sholdDisplayInTestPath()
+	{
+		return false;
+	}
+
 }
 
 class ScopeStatement extends NormalStatement implements IScopeStatement {

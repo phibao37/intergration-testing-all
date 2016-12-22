@@ -26,12 +26,19 @@ public class TestPath extends ArrayList<IStatement> implements ITestPath {
 			StringBuilder b = new StringBuilder();
 			String separator = " -> "; //$NON-NLS-1$
 
-			for (IStatement stm : this) {
+			for (int i = 0; i < size(); i++) {
+				IStatement stm = get(i);
+
 				if (stm.sholdDisplayInTestPath()) {
-					b.append(stm);
+					b.append(separator).append(stm);
+
+					if (stm instanceof IConditionStatement) {
+						IStatement trueBranch = ((IConditionStatement) stm).trueBranch();
+						b.append(' ').append('(').append(trueBranch == get(i + 1) ? 'T' : 'F').append(')');
+					}
 				}
 			}
-			toString = b.substring(0, b.length() - separator.length());
+			toString = b.substring(separator.length());
 		}
 		return toString;
 	}
