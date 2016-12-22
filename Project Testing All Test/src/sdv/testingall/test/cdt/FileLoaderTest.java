@@ -15,6 +15,7 @@ import java.io.File;
 
 import org.junit.Test;
 
+import sdv.testingall.cdt.element.ICppName;
 import sdv.testingall.cdt.loader.CppFileLoader;
 import sdv.testingall.cdt.loader.DefaultCppLoaderConfig;
 import sdv.testingall.cdt.node.ComplexTypeNode;
@@ -426,8 +427,8 @@ public class FileLoaderTest {
 			assertEquals(0, fn.size());
 			assertFalse(fn.isDeclare());
 			assertEquals("fn1", fn.getName());
-			assertEquals("fn1", fn.getNameType().getName());
-			assertFalse(fn.getNameType().isMultipleNamePart());
+			assertEquals("fn1", fn.getFullName().getName());
+			assertFalse(fn.getFullName().isMultipleNamePart());
 
 			assertTrue(fn.getType() instanceof CppBasicType);
 			CppBasicType type = (CppBasicType) fn.getType();
@@ -456,8 +457,8 @@ public class FileLoaderTest {
 				assertEquals(0, fn.size());
 				assertFalse(fn.isDeclare());
 				assertEquals("fn2", fn.getName());
-				assertEquals("fn2", fn.getNameType().getName());
-				assertFalse(fn.getNameType().isMultipleNamePart());
+				assertEquals("fn2", fn.getFullName().getName());
+				assertFalse(fn.getFullName().isMultipleNamePart());
 
 				assertTrue(fn.getType() instanceof CppBasicType);
 				CppBasicType type = (CppBasicType) fn.getType();
@@ -531,12 +532,11 @@ public class FileLoaderTest {
 			assertEquals(0, fn.size());
 			assertFalse(fn.isDeclare());
 			assertEquals("getX", fn.getName());
-			assertEquals("getX", fn.getNameType().getName());
+			assertEquals("getX", fn.getFullName().getName());
 
-			assertTrue(fn.getNameType() instanceof CppNamedType);
-			CppNamedType nameType = (CppNamedType) fn.getNameType();
+			ICppName nameType = fn.getFullName();
 			assertTrue(nameType.isMultipleNamePart());
-			assertFalse(nameType.isFullQualified());
+			assertFalse(nameType.isFullQualifiedName());
 
 			assertTrue(fn.getType() instanceof CppNamedType);
 			CppNamedType type = (CppNamedType) fn.getType();

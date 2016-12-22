@@ -30,6 +30,16 @@ public interface ICppName {
 	String[] getNameParts();
 
 	/**
+	 * Check whether this name consist of more than one name-part
+	 * 
+	 * @return multiple name-part state
+	 */
+	default boolean isMultipleNamePart()
+	{
+		return getNameParts() != null;
+	}
+
+	/**
 	 * Check if this name is full-qualified, example: <code>::std::cout</code>
 	 * 
 	 * @return full-qualified state
