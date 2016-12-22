@@ -9,6 +9,7 @@ package sdv.testingall.core.gentestdata;
 import java.util.ArrayList;
 import java.util.List;
 
+import sdv.testingall.core.gentestdata.solver.IPathConstraint;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
 import sdv.testingall.core.node.VariableNode;
@@ -38,7 +39,7 @@ import sdv.testingall.core.testreport.TestPathReport.OutputValue;
  *
  * @date 2016-12-15 VuSD created
  */
-public class StaticTestDataGeneration extends BaseTestDataGeneration {
+public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 
 	/**
 	 * Create new test generation object
@@ -138,7 +139,10 @@ public class StaticTestDataGeneration extends BaseTestDataGeneration {
 			OutputValue symbolicOutput = new OutputValue();
 			List<VariableNode> inputData = null;
 
-			System.out.printf("Gen for path: [%s]\n", testpath); //$NON-NLS-1$
+			System.out.printf("#### Gen for path: [%s]%n", testpath); //$NON-NLS-1$
+			IPathConstraint constraint = createSymbolicExecution(testpath).getConstraint();
+			System.out.printf("Constraint: %s%n", constraint); //$NON-NLS-1$
+			System.out.println();
 
 			TestPathReport pathReport = new TestPathReport(testpath, inputData, symbolicOutput);
 			pathReport.setId(id++);

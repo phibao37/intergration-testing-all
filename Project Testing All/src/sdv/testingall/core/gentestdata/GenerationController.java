@@ -9,8 +9,10 @@ package sdv.testingall.core.gentestdata;
 import java.util.ArrayList;
 import java.util.List;
 
+import sdv.testingall.core.gentestdata.symbolicexec.ISymbolicExecution;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.core.statement.ITestPath;
 import sdv.testingall.core.testreport.FunctionReport;
 import sdv.testingall.core.testreport.IFunctionReport;
 
@@ -56,6 +58,13 @@ public class GenerationController extends BaseTestDataGeneration {
 	public boolean isAvailable()
 	{
 		return true;
+	}
+
+	@Override
+	public ISymbolicExecution createSymbolicExecution(ITestPath testpath)
+	{
+		// Will not to be call
+		return null;
 	}
 
 	@Override

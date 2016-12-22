@@ -13,12 +13,12 @@ import java.io.File;
 
 import org.junit.Test;
 
+import sdv.testingall.cdt.gentestdata.CppStaticTestDataGeneration;
 import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.CppFunctionNode;
 import sdv.testingall.cdt.util.DefaultCppConfig;
 import sdv.testingall.core.gentestdata.GenerationController;
-import sdv.testingall.core.gentestdata.StaticTestDataGeneration;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.node.ProjectNode;
 
@@ -51,7 +51,7 @@ public class SimpleTestDataGenerationTest {
 
 		CppFunctionNode fn = (CppFunctionNode) file.get(0);
 		GenerationController testgen = new GenerationController(node, fn, CONFIG);
-		testgen.addStraitgy(new StaticTestDataGeneration(node, fn, CONFIG));
+		testgen.addStraitgy(new CppStaticTestDataGeneration(node, fn, CONFIG));
 
 		testgen.generateData();
 	}

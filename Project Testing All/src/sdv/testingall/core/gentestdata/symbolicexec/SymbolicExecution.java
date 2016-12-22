@@ -20,7 +20,7 @@ import sdv.testingall.core.statement.ITestPath;
  *
  * @date 2016-12-19 VuSD created
  */
-public class SymbolicExecution implements ISymbolicExecution {
+public abstract class SymbolicExecution implements ISymbolicExecution {
 
 	private ProjectNode		project;
 	private FunctionNode	function;
