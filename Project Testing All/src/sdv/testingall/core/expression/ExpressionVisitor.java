@@ -89,4 +89,16 @@ public class ExpressionVisitor implements IExpressionVisitor, IVisitorState {
 		// do nothing
 	}
 
+	@Override
+	public int visit(IUnsupportedTypeException type)
+	{
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(IUnsupportedTypeException type)
+	{
+		// do nothing
+	}
+
 }

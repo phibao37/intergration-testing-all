@@ -42,7 +42,7 @@ public class CppNameExpression extends Expression implements ICppNameExpression 
 			isFullQualified = ((ICPPASTQualifiedName) astName).isFullyQualified();
 		}
 
-		astName.resolveBinding();
+		setContent(astName.toString());
 	}
 
 	@Override

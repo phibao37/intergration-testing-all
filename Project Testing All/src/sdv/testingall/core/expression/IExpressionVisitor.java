@@ -69,4 +69,8 @@ public interface IExpressionVisitor {
 
 	void leave(IReturnExpression returnEx);
 
+	int visit(IUnsupportedTypeException type);
+
+	void leave(IUnsupportedTypeException type);
+
 }
