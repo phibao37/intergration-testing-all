@@ -19,6 +19,7 @@ import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.CppFunctionNode;
 import sdv.testingall.cdt.util.DefaultCppConfig;
 import sdv.testingall.core.gentestdata.GenerationController;
+import sdv.testingall.core.gentestdata.solver.z3.Z3SolverFactory;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.node.ProjectNode;
 
@@ -51,6 +52,8 @@ public class SimpleTestDataGenerationTest {
 
 		CppFunctionNode fn = (CppFunctionNode) file.get(0);
 		GenerationController testgen = new GenerationController(node, fn, CONFIG);
+
+		testgen.addSolver(new Z3SolverFactory());
 		testgen.addStraitgy(new CppStaticTestDataGeneration(node, fn, CONFIG));
 
 		testgen.generateData();

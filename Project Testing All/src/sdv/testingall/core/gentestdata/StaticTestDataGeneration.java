@@ -145,7 +145,6 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 			System.out.printf("#### Gen for path: [%s]%n", testpath);
 			IPathConstraint constraint = createSymbolicExecution(testpath).getConstraint();
 			System.out.printf("Constraint: list=%s%n", constraint.getConstraints());
-			System.out.println();
 
 			for (ISolverFactory factory : getSolvers()) {
 				if (!factory.isAvailable()) {
@@ -156,6 +155,7 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 				int result = solver.getResultType();
 				System.out.println(" -> Result type: " + result);
 			}
+			System.out.println();
 
 			TestPathReport pathReport = new TestPathReport(testpath, inputData, symbolicOutput);
 			pathReport.setId(id++);
