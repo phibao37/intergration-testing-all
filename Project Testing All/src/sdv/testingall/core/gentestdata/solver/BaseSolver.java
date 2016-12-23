@@ -35,6 +35,7 @@ public class BaseSolver implements ISolver {
 	protected BaseSolver(IPathConstraint constraint)
 	{
 		this.constraint = constraint;
+		this.resultType = RESULT_UNKNOWN;
 	}
 
 	@Override

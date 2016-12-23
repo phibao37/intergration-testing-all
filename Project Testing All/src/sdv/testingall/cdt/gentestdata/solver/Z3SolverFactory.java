@@ -4,7 +4,7 @@
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
-package sdv.testingall.core.gentestdata.solver.z3;
+package sdv.testingall.cdt.gentestdata.solver;
 
 import sdv.testingall.core.gentestdata.solver.IPathConstraint;
 import sdv.testingall.core.gentestdata.solver.ISolver;
@@ -42,7 +42,7 @@ public class Z3SolverFactory implements ISolverFactory {
 	@Override
 	public ISolver createSolver(IPathConstraint constraint)
 	{
-		return new Z3Solver(constraint);
+		return new CppZ3Solver(constraint);
 	}
 
 }

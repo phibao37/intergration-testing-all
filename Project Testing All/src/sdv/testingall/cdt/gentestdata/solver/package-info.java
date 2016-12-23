@@ -5,10 +5,10 @@
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
 /**
- * Package for Z3 solver
+ * Solver used for C/C++ environment
  * 
  * @author VuSD
  *
  * @date 2016-12-23 VuSD created
  */
-package sdv.testingall.core.gentestdata.solver.z3;
+package sdv.testingall.cdt.gentestdata.solver;

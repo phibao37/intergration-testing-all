@@ -45,7 +45,17 @@ public interface IBinaryExpression extends IExpressionGroup {
 	 */
 	default boolean isAssignExpression()
 	{
-		return getOperator().indexOf('=') >= 0;
+		switch (getOperator()) {
+		case ASSIGN:
+		case ADD_ASSIGN:
+		case MINUS_ASSIGN:
+		case MUL_ASSIGN:
+		case DIV_ASSIGN:
+		case MOD_ASSIGN:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Assign variable: <code>a = b+1</code> */
@@ -71,6 +81,24 @@ public interface IBinaryExpression extends IExpressionGroup {
 	String	DIV_ASSIGN		= "/=";
 	/** Remainder and assign value: <code>a %= b</code> */
 	String	MOD_ASSIGN		= "%=";
+
+	/** Logic and: <code>x > 0 && y > 0</code> */
+	String	LOGIC_AND	= "&&";
+	/** Logic or: <code>x > 0 || y > 0</code> */
+	String	LOGIC_OR	= "||";
+
+	/** Compare equals: <code>a == b</code> */
+	String	EQUALS			= "==";
+	/** Compare not equals: <code>a != b</code> */
+	String	NOT_EQUALS		= "!=";
+	/** Compare less than: <code>a < b</code> */
+	String	LESS			= "<";
+	/** Compare less than or equals: <code>a <= b</code> */
+	String	LESS_EQUALS		= "<=";
+	/** Compare greater than: <code>a > b</code> */
+	String	GREATER			= ">";
+	/** Compare greater than or equals: <code>a >= b</code> */
+	String	GREATER_EQUALS	= ">=";
 
 	@Override
 	default int handleVisit(IExpressionVisitor visitor)

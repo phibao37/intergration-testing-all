@@ -82,6 +82,7 @@ public abstract class SymbolicExecution extends ExpressionVisitor implements ISy
 		for (VariableNode para : function.getParameter()) {
 			Variable input = new Variable(para.getName(), para.getType());
 			varTable.addVariable(input);
+			constraint.getInputs().add(input);
 		}
 
 		// Visit all statement inside test path

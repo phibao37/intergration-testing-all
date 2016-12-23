@@ -1,0 +1,218 @@
+/**
+ * Implement for Z3 solver
+ * @file Z3Solver.java
+ * @author (SDV)[VuSD]
+ * Copyright (C) 2016 SDV, All Rights Reserved.
+ */
+package sdv.testingall.core.gentestdata.solver;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.microsoft.z3.ArithExpr;
+import com.microsoft.z3.BoolExpr;
+import com.microsoft.z3.Context;
+import com.microsoft.z3.Expr;
+import com.microsoft.z3.FuncDecl;
+import com.microsoft.z3.IntExpr;
+import com.microsoft.z3.Model;
+import com.microsoft.z3.Solver;
+
+import sdv.testingall.core.expression.IBinaryExpression;
+import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.expression.INameExpression;
+import sdv.testingall.core.expression.INumberExpression;
+import sdv.testingall.core.expression.IUnaryExpression;
+import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
+import sdv.testingall.core.type.IType;
+
+/**
+ * Solve path constraint using Z3 solver - a external solver from Microsoft.<br/>
+ * This library will be loaded from PATH environment variable
+ * 
+ * @author VuSD
+ *
+ * @date 2016-12-23 VuSD created
+ */
+@SuppressWarnings("nls")
+public abstract class Z3Solver extends BaseSolver {
+
+	protected Context	ctx;
+	protected Solver	solver;
+
+	protected Map<IVariable, Expr> mapInput;
+
+	/**
+	 * Create new Z3 solver to execute solving constraint
+	 * 
+	 * @param constraint
+	 *            path constraint need to solve
+	 */
+	protected Z3Solver(IPathConstraint constraint)
+	{
+		super(constraint);
+		List<IVariable> params = constraint.getInputs();
+		mapInput = new HashMap<>();
+
+		// Setup Z3 context
+		HashMap<String, String> cfg = new HashMap<>(params.size());
+		cfg.put("model", "true");
+		ctx = new Context(cfg);
+		solver = ctx.mkSolver();
+
+		// Declare variable
+		for (IVariable var : params) {
+			Expr exp = declareInput(var);
+			mapInput.put(var, exp);
+		}
+
+		// Add constraint
+		for (IExpression cstr : constraint.getConstraints()) {
+			solver.add((BoolExpr) convertExpression(cstr));
+		}
+
+		// Check result
+		switch (solver.check()) {
+		case UNSATISFIABLE:
+			resultType = RESULT_UNSAT;
+		case UNKNOWN:
+			return;
+		case SATISFIABLE:
+			resultType = RESULT_SAT;
+		}
+
+		inputData = new ArrayList<>();
+		Model model = solver.getModel();
+		int index = 0;
+
+		// Later: model.eval
+		// Get result value
+		for (FuncDecl func : model.getDecls()) {
+			Expr value = model.getConstInterp(func);
+			IVariable var = params.get(index);
+
+			inputData.add(var);
+			System.out.println(var.getName() + " = " + value + "/" + value.getClass());
+		}
+	}
+
+	/**
+	 * Convert from core expression to Z3 expression
+	 * 
+	 * @param exp
+	 *            core expression
+	 * @return converted Z3 expression
+	 */
+	protected Expr convertExpression(IExpression exp)
+	{
+		if (exp instanceof INameExpression) {
+			String name = ((INameExpression) exp).getName();
+			return findVariable(name);
+		}
+
+		else if (exp instanceof INumberExpression) {
+			return convertNumber((INumberExpression) exp);
+		}
+
+		else if (exp instanceof IBinaryExpression) {
+			IBinaryExpression binExp = (IBinaryExpression) exp;
+			Expr op1 = convertExpression(binExp.getLeft());
+			Expr op2 = convertExpression(binExp.getRight());
+
+			switch (binExp.getOperator()) {
+			case IBinaryExpression.ADD:
+				return ctx.mkAdd((ArithExpr) op1, (ArithExpr) op2);
+			case IBinaryExpression.MINUS:
+				return ctx.mkSub((ArithExpr) op1, (ArithExpr) op2);
+			case IBinaryExpression.MUL:
+				return ctx.mkMul((ArithExpr) op1, (ArithExpr) op2);
+			case IBinaryExpression.DIV:
+				return ctx.mkDiv((ArithExpr) op1, (ArithExpr) op2);
+			case IBinaryExpression.MOD:
+				return ctx.mkRem((IntExpr) op1, (IntExpr) op2);
+			case IBinaryExpression.LOGIC_AND:
+				return ctx.mkAnd((BoolExpr) op1, (BoolExpr) op2);
+			case IBinaryExpression.LOGIC_OR:
+				return ctx.mkOr((BoolExpr) op1, (BoolExpr) op2);
+			case IBinaryExpression.EQUALS:
+				return ctx.mkEq(op1, op2);
+			case IBinaryExpression.NOT_EQUALS:
+				return ctx.mkNot(ctx.mkEq(op1, op2));
+			case IBinaryExpression.LESS:
+				return ctx.mkLt((ArithExpr) op1, (ArithExpr) op2);
+			case IBinaryExpression.LESS_EQUALS:
+				return ctx.mkLe((ArithExpr) op1, (ArithExpr) op2);
+			case IBinaryExpression.GREATER:
+				return ctx.mkGt((ArithExpr) op1, (ArithExpr) op2);
+			case IBinaryExpression.GREATER_EQUALS:
+				return ctx.mkGe((ArithExpr) op1, (ArithExpr) op2);
+			}
+		}
+
+		else if (exp instanceof IUnaryExpression) {
+			IUnaryExpression unaryExp = (IUnaryExpression) exp;
+			Expr op1 = convertExpression(unaryExp.getSubExpression());
+
+			switch (unaryExp.getOperator()) {
+			case IUnaryExpression.LOGIC_NOT:
+				return ctx.mkNot((BoolExpr) op1);
+			case IUnaryExpression.MINUS:
+				return ctx.mkUnaryMinus((ArithExpr) op1);
+			case IUnaryExpression.PLUS:
+				return op1;
+			}
+		}
+
+		System.out.printf("Unsupport: %s\n", exp.getClass());
+		return null;
+	}
+
+	/**
+	 * Find Z3 variable expression by name
+	 * 
+	 * @param name
+	 *            variable name to find
+	 * @return Z3 expression
+	 */
+	protected Expr findVariable(String name)
+	{
+		for (IVariable input : getConstraint().getInputs()) {
+			if (input.getName().equals(name)) {
+				return mapInput.get(input);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Convert from Z3 expression back to core expression
+	 * 
+	 * @param exp
+	 *            Z3 expression
+	 * @param type
+	 *            target expression type
+	 * @return converted core expression
+	 */
+	protected abstract IExpression convertZ3Const(Expr exp, IType type);
+
+	/**
+	 * Add input variable to tell the Z3 solver what need to solve
+	 * 
+	 * @param var
+	 *            input variable
+	 * @return Z3 expression
+	 */
+	protected abstract Expr declareInput(IVariable var);
+
+	/**
+	 * Convert constant number value to Z3 expression
+	 * 
+	 * @param number
+	 *            number expression
+	 * @return Z3 expression
+	 */
+	protected abstract Expr convertNumber(INumberExpression number);
+
+}

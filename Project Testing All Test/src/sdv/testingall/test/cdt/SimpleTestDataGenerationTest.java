@@ -14,12 +14,12 @@ import java.io.File;
 import org.junit.Test;
 
 import sdv.testingall.cdt.gentestdata.CppStaticTestDataGeneration;
+import sdv.testingall.cdt.gentestdata.solver.Z3SolverFactory;
 import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.CppFunctionNode;
 import sdv.testingall.cdt.util.DefaultCppConfig;
 import sdv.testingall.core.gentestdata.GenerationController;
-import sdv.testingall.core.gentestdata.solver.z3.Z3SolverFactory;
 import sdv.testingall.core.logger.ConsoleLogger;
 import sdv.testingall.core.node.ProjectNode;
 
