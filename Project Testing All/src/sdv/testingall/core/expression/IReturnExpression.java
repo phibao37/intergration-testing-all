@@ -27,6 +27,16 @@ public interface IReturnExpression extends IUnaryExpression {
 		return true;
 	}
 
+	/**
+	 * Get the expression to be return
+	 * 
+	 * @return return expression, same as {@link #getSubExpression()}
+	 */
+	default IExpression getReturnValue()
+	{
+		return getSubExpression();
+	}
+
 	@Override
 	default int handleVisit(IExpressionVisitor visitor)
 	{

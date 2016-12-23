@@ -30,14 +30,11 @@ public class Variable implements IVariable {
 	 *            variable name
 	 * @param type
 	 *            variable type
-	 * @param scope
-	 *            variable scope
 	 */
-	public Variable(String name, IType type, int scope)
+	public Variable(String name, IType type)
 	{
 		this.name = name;
 		this.type = type;
-		this.scope = scope;
 	}
 
 	@Override

@@ -407,5 +407,10 @@ class SimpleCppStatement extends NormalStatement {
 	public SimpleCppStatement(IASTNode stm)
 	{
 		super(CppConverter.convert(stm));
+
+		String raw = stm.getRawSignature();
+		if (!raw.isEmpty()) {
+			setContent(raw);
+		}
 	}
 }

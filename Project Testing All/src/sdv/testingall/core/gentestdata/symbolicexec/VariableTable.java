@@ -60,7 +60,7 @@ public class VariableTable extends LinkedList<IVariable> implements IVariableTab
 		GroupWrapper wrap = new GroupWrapper(ex.clone());
 		ArrayList<IExpression> blockReplace = new ArrayList<>();
 
-		ex.accept(new ExpressionVisitor() {
+		wrap.accept(new ExpressionVisitor() {
 
 			@Override
 			public void leave(INameExpression name)
@@ -94,7 +94,7 @@ public class VariableTable extends LinkedList<IVariable> implements IVariableTab
 	/**
 	 * Helper class for expression filling
 	 */
-	class GroupWrapper extends ExpressionGroup {
+	public static class GroupWrapper extends ExpressionGroup {
 
 		/**
 		 * Create new group wrapper that wrap an expression into group
@@ -120,28 +120,25 @@ public class VariableTable extends LinkedList<IVariable> implements IVariableTab
 		@Override
 		public String computeContent()
 		{
-			// No need
-			return null;
+			return getChild().toString();
 		}
 
 		@Override
 		public IType getType()
 		{
-			// No need
-			return null;
+			return getChild().getType();
 		}
 
 		@Override
 		public int handleVisit(IExpressionVisitor visitor)
 		{
-			// No need
-			return 0;
+			return PROCESS_CONTINUE;
 		}
 
 		@Override
 		public void handleLeave(IExpressionVisitor visitor)
 		{
-			// No need
+			// do nothing
 		}
 
 	}

@@ -36,7 +36,7 @@ public abstract class BinaryExpression extends ExpressionGroup implements IBinar
 	@Override
 	public String computeContent()
 	{
-		return getLeft() + getOperator() + getRight();
+		return String.format("(%s %s %s)", getLeft(), getOperator(), getRight()); //$NON-NLS-1$
 	}
 
 	@Override

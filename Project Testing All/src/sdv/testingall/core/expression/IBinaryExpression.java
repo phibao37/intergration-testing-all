@@ -38,6 +38,16 @@ public interface IBinaryExpression extends IExpressionGroup {
 	 */
 	String getOperator();
 
+	/**
+	 * Check if this binary expression contains assignment
+	 * 
+	 * @return is contains assignment
+	 */
+	default boolean isAssignExpression()
+	{
+		return getOperator().indexOf('=') >= 0;
+	}
+
 	/** Assign variable: <code>a = b+1</code> */
 	String	ASSIGN	= "=";
 	/** Add value: <code>a + b</code> */
@@ -50,6 +60,17 @@ public interface IBinaryExpression extends IExpressionGroup {
 	String	DIV		= "/";
 	/** Remainder value: <code>a % b</code> */
 	String	MOD		= "%";
+
+	/** Add and assign value: <code>a += b</code> */
+	String	ADD_ASSIGN		= "+=";
+	/** Subtract and assign value: <code>a -= b</code> */
+	String	MINUS_ASSIGN	= "-=";
+	/** Multiply and assign value: <code>a *= b</code> */
+	String	MUL_ASSIGN		= "*=";
+	/** Divide and assign value: <code>a /= b</code> */
+	String	DIV_ASSIGN		= "/=";
+	/** Remainder and assign value: <code>a %= b</code> */
+	String	MOD_ASSIGN		= "%=";
 
 	@Override
 	default int handleVisit(IExpressionVisitor visitor)

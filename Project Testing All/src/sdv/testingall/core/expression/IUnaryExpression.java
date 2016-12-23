@@ -38,6 +38,16 @@ public interface IUnaryExpression extends IExpressionGroup {
 	 */
 	boolean isLeftSide();
 
+	/**
+	 * Check if this unary expression contains assignment
+	 * 
+	 * @return is contains assignment
+	 */
+	default boolean isAssignExpression()
+	{
+		return getOperator().equals(INCREASE) || getOperator().equals(DECREASE);
+	}
+
 	/** Positive sign value: <code>x = +y;</code> */
 	String	PLUS		= "+";
 	/** Negative sign value: <code>x = -y;</code> */

@@ -6,6 +6,11 @@
  */
 package sdv.testingall.cdt.gentestdata;
 
+import sdv.testingall.cdt.expression.CppBinaryExpression;
+import sdv.testingall.cdt.expression.CppUnaryExpression;
+import sdv.testingall.core.expression.IBinaryExpression;
+import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.expression.IUnaryExpression;
 import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.gentestdata.symbolicexec.SymbolicExecution;
 import sdv.testingall.core.node.FunctionNode;
@@ -36,6 +41,18 @@ public class CppSymbolicExecution extends SymbolicExecution {
 	public CppSymbolicExecution(ProjectNode project, FunctionNode function, IGenTestConfig config, ITestPath testpath)
 	{
 		super(project, function, config, testpath);
+	}
+
+	@Override
+	public IBinaryExpression createBinary(IExpression left, String operator, IExpression right)
+	{
+		return new CppBinaryExpression(left, operator, right);
+	}
+
+	@Override
+	public IUnaryExpression createUnary(IExpression child, String operator, boolean leftSide)
+	{
+		return new CppUnaryExpression(child, operator, leftSide);
 	}
 
 }
