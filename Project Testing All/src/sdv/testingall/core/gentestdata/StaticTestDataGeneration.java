@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sdv.testingall.core.gentestdata.solver.IPathConstraint;
+import sdv.testingall.core.gentestdata.solver.ISolver;
+import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
 import sdv.testingall.core.node.VariableNode;
@@ -128,6 +130,7 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 	 *            graph to find path
 	 * @return list of test path report for each test path discovered
 	 */
+	@SuppressWarnings("nls")
 	protected List<ITestPathReport> generateDataAllPath(ICFG cfg)
 	{
 		// Discover all path from given CFG
@@ -139,10 +142,20 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 			OutputValue symbolicOutput = new OutputValue();
 			List<VariableNode> inputData = null;
 
-			System.out.printf("#### Gen for path: [%s]%n", testpath); //$NON-NLS-1$
+			System.out.printf("#### Gen for path: [%s]%n", testpath);
 			IPathConstraint constraint = createSymbolicExecution(testpath).getConstraint();
-			System.out.printf("Constraint: list=%s%n", constraint.getConstraints()); //$NON-NLS-1$
+			System.out.printf("Constraint: list=%s%n", constraint.getConstraints());
 			System.out.println();
+
+			for (ISolverFactory factory : getSolvers()) {
+				if (!factory.isAvailable()) {
+					continue;
+				}
+
+				ISolver solver = factory.createSolver(constraint);
+				int result = solver.getResultType();
+				System.out.println(" -> Result type: " + result);
+			}
 
 			TestPathReport pathReport = new TestPathReport(testpath, inputData, symbolicOutput);
 			pathReport.setId(id++);

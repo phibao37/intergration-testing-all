@@ -6,6 +6,9 @@
  */
 package sdv.testingall.core.gentestdata;
 
+import java.util.List;
+
+import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
 import sdv.testingall.core.gentestdata.symbolicexec.ISymbolicExecution;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
@@ -57,6 +60,21 @@ public interface ITestDataGeneration {
 	 * @return symbolic execution controller
 	 */
 	ISymbolicExecution createSymbolicExecution(ITestPath testpath);
+
+	/**
+	 * Add a solver factory to solve path constraint
+	 * 
+	 * @param solver
+	 *            solver factory to create solver object
+	 */
+	void addSolver(ISolverFactory solver);
+
+	/**
+	 * Get list of solver factory to solve path constraint
+	 * 
+	 * @return list of solver factory object
+	 */
+	List<ISolverFactory> getSolvers();
 
 	/**
 	 * Generate test data for given function

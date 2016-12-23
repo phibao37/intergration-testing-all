@@ -9,6 +9,7 @@ package sdv.testingall.core.gentestdata;
 import java.util.ArrayList;
 import java.util.List;
 
+import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
 import sdv.testingall.core.gentestdata.symbolicexec.ISymbolicExecution;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
@@ -44,7 +45,8 @@ public class GenerationController extends BaseTestDataGeneration {
 	}
 
 	/**
-	 * Add strategy to generate test data together
+	 * Add strategy to generate test data together<br/>
+	 * All solver factory will be append to this strategy
 	 * 
 	 * @param strategy
 	 *            strategy to generate test data
@@ -52,6 +54,9 @@ public class GenerationController extends BaseTestDataGeneration {
 	public void addStraitgy(ITestDataGeneration strategy)
 	{
 		listStrategy.add(strategy);
+		for (ISolverFactory factory : getSolvers()) {
+			strategy.addSolver(factory);
+		}
 	}
 
 	@Override

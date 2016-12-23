@@ -6,6 +6,10 @@
  */
 package sdv.testingall.core.gentestdata;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
 
@@ -22,6 +26,8 @@ public abstract class BaseTestDataGeneration implements ITestDataGeneration {
 	private FunctionNode	function;
 	private IGenTestConfig	config;
 
+	private List<ISolverFactory> solvers;
+
 	/**
 	 * Create new test generation object
 	 * 
@@ -37,6 +43,8 @@ public abstract class BaseTestDataGeneration implements ITestDataGeneration {
 		this.project = project;
 		this.function = function;
 		this.config = config;
+
+		solvers = new ArrayList<>();
 	}
 
 	@Override
@@ -55,6 +63,18 @@ public abstract class BaseTestDataGeneration implements ITestDataGeneration {
 	public IGenTestConfig getConfig()
 	{
 		return config;
+	}
+
+	@Override
+	public void addSolver(ISolverFactory solver)
+	{
+		solvers.add(solver);
+	}
+
+	@Override
+	public List<ISolverFactory> getSolvers()
+	{
+		return solvers;
 	}
 
 }
