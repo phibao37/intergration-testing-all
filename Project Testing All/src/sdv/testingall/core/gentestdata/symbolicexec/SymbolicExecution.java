@@ -85,6 +85,12 @@ public abstract class SymbolicExecution extends ExpressionVisitor implements ISy
 	}
 
 	@Override
+	public IVariableTable createVariableTable()
+	{
+		return new VariableTable();
+	}
+
+	@Override
 	public IPathConstraint getConstraint()
 	{
 		if (constraint == null) {

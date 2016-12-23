@@ -26,6 +26,7 @@ public abstract class Expression implements IExpression {
 	protected Expression()
 	{
 		source = this;
+		replaceable = true;
 	}
 
 	@Override

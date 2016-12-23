@@ -69,4 +69,12 @@ public interface IVariable {
 	 */
 	int getScope();
 
+	/**
+	 * Set the symbolic scope for the variable
+	 * 
+	 * @param scope
+	 *            see {@link #getScope()}
+	 */
+	void setScope(int scope);
+
 }

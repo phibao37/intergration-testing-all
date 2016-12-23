@@ -50,6 +50,13 @@ public interface ISymbolicExecution {
 	ITestPath getPath();
 
 	/**
+	 * Create new variable table for symbolic execution
+	 * 
+	 * @return variable table object
+	 */
+	IVariableTable createVariableTable();
+
+	/**
 	 * Get the constraint parsed by given test path
 	 * 
 	 * @return test path constraint

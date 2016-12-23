@@ -70,4 +70,10 @@ public class Variable implements IVariable {
 		return scope;
 	}
 
+	@Override
+	public void setScope(int scope)
+	{
+		this.scope = scope;
+	}
+
 }
