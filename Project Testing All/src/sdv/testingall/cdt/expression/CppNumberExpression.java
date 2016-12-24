@@ -6,10 +6,9 @@
  */
 package sdv.testingall.cdt.expression;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.core.dom.ast.IBasicType;
-
-import com.ibm.icu.impl.Utility;
 
 import sdv.testingall.cdt.type.CppBasicType;
 import sdv.testingall.cdt.type.CppTypeModifier;
@@ -61,7 +60,7 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 			// Same as default field value
 			break;
 		case IASTLiteralExpression.lk_char_constant:
-			value = Utility.unescape(value);
+			value = StringEscapeUtils.unescapeJava(value);
 			doubleValue = longValue = value.charAt(1); // Get second position: 'x'
 			boolValue = longValue != 0;
 		}
@@ -96,7 +95,7 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 		// Escape character: 0 -> '\0', 10 -> '\n'
 		if (type.getType() == CppBasicType.CHAR && intValue >= 0) {
 			String str = String.valueOf((char) intValue);
-			str = Utility.escape(str);
+			str = StringEscapeUtils.escapeJava(str);
 			setContent(String.format("'%s'", str)); //$NON-NLS-1$
 		} else {
 			setContent(Long.toString(intValue));

@@ -13,5 +13,6 @@
 	<classpathentry kind="lib" path="lib/cdt/org.eclipse.core.resources_3.11.0.v20160503-1608.jar"/>
 	<classpathentry kind="lib" path="lib/cdt/org.eclipse.osgi_3.11.1.v20160708-1632.jar"/>
 	<classpathentry kind="lib" path="lib/com.microsoft.z3.jar"/>
+	<classpathentry kind="lib" path="lib/apache/commons-lang3-3.5.jar" sourcepath="lib/src/commons-lang3-3.5-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
