@@ -45,6 +45,20 @@ public class CppNameExpression extends Expression implements ICppNameExpression 
 		setContent(astName.toString());
 	}
 
+	/**
+	 * Create new name expression from simple string
+	 * 
+	 * @param name
+	 *            simple string name
+	 */
+	public CppNameExpression(String name)
+	{
+		this.name = name;
+		this.namePart = null;
+		this.isFullQualified = false;
+		setContent(name);
+	}
+
 	@Override
 	public String getName()
 	{

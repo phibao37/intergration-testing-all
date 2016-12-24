@@ -85,16 +85,25 @@ public abstract class Z3Solver extends BaseSolver {
 
 		inputData = new ArrayList<>();
 		Model model = solver.getModel();
-		int index = 0;
 
 		// Later: model.eval
 		// Get result value
-		for (FuncDecl func : model.getDecls()) {
-			Expr value = model.getConstInterp(func);
-			IVariable var = params.get(index);
-
+		FuncDecl[] funcList = model.getDecls();
+		for (IVariable var : params) {
 			inputData.add(var);
-			System.out.println(var.getName() + " = " + value + "/" + value.getClass());
+			FuncDecl func = findFunctionDecl(funcList, var.getName());
+
+			if (func == null) {
+				System.out.printf("%s = not solve\n", var.getName());
+				continue;
+			}
+
+			Expr z3Value = model.getConstInterp(func);
+			System.out.printf("%s = %s", var.getName(), z3Value);
+
+			IExpression value = convertZ3Const(z3Value, var.getType());
+			System.out.printf(" -> Convert = %s\n", value);
+			var.setValue(value);
 		}
 	}
 
@@ -109,7 +118,9 @@ public abstract class Z3Solver extends BaseSolver {
 	{
 		if (exp instanceof INameExpression) {
 			String name = ((INameExpression) exp).getName();
-			return findVariable(name);
+			Expr expr = findVariable(name);
+			assert expr != null;
+			return expr;
 		}
 
 		else if (exp instanceof INumberExpression) {
@@ -181,6 +192,25 @@ public abstract class Z3Solver extends BaseSolver {
 		for (IVariable input : getConstraint().getInputs()) {
 			if (input.getName().equals(name)) {
 				return mapInput.get(input);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Find Z3 function declaration from given list
+	 * 
+	 * @param list
+	 *            Z3 function list
+	 * @param name
+	 *            function name to find
+	 * @return Z3 function
+	 */
+	protected FuncDecl findFunctionDecl(FuncDecl[] list, String name)
+	{
+		for (FuncDecl func : list) {
+			if (func.getName().toString().equals(name)) {
+				return func;
 			}
 		}
 		return null;

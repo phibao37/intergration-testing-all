@@ -67,6 +67,62 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 		}
 	}
 
+	/**
+	 * Create new boolean constant expression
+	 * 
+	 * @param boolValue
+	 *            boolean value
+	 * @param type
+	 *            attached type
+	 */
+	public CppNumberExpression(boolean boolValue, CppBasicType type)
+	{
+		setContent(Boolean.toString(boolValue));
+
+		this.boolValue = boolValue;
+		doubleValue = longValue = boolValue ? 1 : 0;
+	}
+
+	/**
+	 * Create new integer constant expression
+	 * 
+	 * @param intValue
+	 *            integer value
+	 * @param type
+	 *            attached type
+	 */
+	public CppNumberExpression(long intValue, CppBasicType type)
+	{
+		// Escape character: 0 -> '\0', 10 -> '\n'
+		if (type.getType() == CppBasicType.CHAR && intValue >= 0) {
+			String str = String.valueOf((char) intValue);
+			str = Utility.escape(str);
+			setContent(String.format("'%s'", str)); //$NON-NLS-1$
+		} else {
+			setContent(Long.toString(intValue));
+		}
+
+		doubleValue = longValue = intValue;
+		boolValue = intValue != 0;
+	}
+
+	/**
+	 * Create new decimal constant expression
+	 * 
+	 * @param decValue
+	 *            decimal value
+	 * @param type
+	 *            attached type
+	 */
+	public CppNumberExpression(double decValue, CppBasicType type)
+	{
+		setContent(Double.toString(decValue));
+
+		doubleValue = decValue;
+		longValue = (long) doubleValue;
+		boolValue = doubleValue != 0.0;
+	}
+
 	@Override
 	public CppBasicType getType()
 	{

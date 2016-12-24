@@ -6,8 +6,12 @@
  */
 package sdv.testingall.cdt.gentestdata.solver;
 
+import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
+import com.microsoft.z3.IntNum;
+import com.microsoft.z3.RatNum;
 
+import sdv.testingall.cdt.expression.CppNumberExpression;
 import sdv.testingall.cdt.expression.ICppNumberExpression;
 import sdv.testingall.cdt.type.CppBasicType;
 import sdv.testingall.core.expression.IExpression;
@@ -71,11 +75,10 @@ public class CppZ3Solver extends Z3Solver {
 	protected Expr convertNumber(INumberExpression number)
 	{
 		IType type = number.getType();
-		Expr exp = null;
 
 		if (!(type instanceof CppBasicType)) {
 			System.out.printf("Unsupported type: %s\n", type == null ? null : type.getClass()); //$NON-NLS-1$
-			return exp;
+			return null;
 		}
 		CppBasicType basicType = (CppBasicType) type;
 		ICppNumberExpression cppNumber = (ICppNumberExpression) number;
@@ -95,7 +98,24 @@ public class CppZ3Solver extends Z3Solver {
 	@Override
 	protected IExpression convertZ3Const(Expr exp, IType type)
 	{
-		// TODO Auto-generated method stub
+		if (!(type instanceof CppBasicType)) {
+			System.out.printf("Unsupported type: %s\n", type == null ? null : type.getClass()); //$NON-NLS-1$
+			return null;
+		}
+		CppBasicType basicType = (CppBasicType) type;
+
+		if (exp instanceof BoolExpr) {
+			return new CppNumberExpression(exp.isTrue(), basicType);
+		} else if (exp instanceof IntNum) {
+			// Hoho: exp.getBigInteger() --> long long int
+			return new CppNumberExpression(((IntNum) exp).getInt64(), basicType);
+		} else if (exp instanceof RatNum) {
+			RatNum ratNum = (RatNum) exp;
+			// Later: Create fraction constant
+			double numer = ratNum.getNumerator().getInt64();
+			double denom = ratNum.getDenominator().getInt64();
+			return new CppNumberExpression(numer / denom, basicType);
+		}
 		return null;
 	}
 
