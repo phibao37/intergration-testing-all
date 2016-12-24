@@ -14,7 +14,7 @@ import java.io.File;
 import org.junit.Test;
 
 import sdv.testingall.cdt.gentestdata.CppStaticTestDataGeneration;
-import sdv.testingall.cdt.gentestdata.solver.Z3SolverFactory;
+import sdv.testingall.cdt.gentestdata.solver.CppZ3SolverFactory;
 import sdv.testingall.cdt.loader.CppProjectLoader;
 import sdv.testingall.cdt.node.CppFileNode;
 import sdv.testingall.cdt.node.CppFunctionNode;
@@ -53,7 +53,7 @@ public class SimpleTestDataGenerationTest {
 		CppFunctionNode fn = (CppFunctionNode) file.get(0);
 		GenerationController testgen = new GenerationController(node, fn, CONFIG);
 
-		testgen.addSolver(new Z3SolverFactory());
+		testgen.addSolver(new CppZ3SolverFactory());
 		testgen.addStraitgy(new CppStaticTestDataGeneration(node, fn, CONFIG));
 
 		testgen.generateData();

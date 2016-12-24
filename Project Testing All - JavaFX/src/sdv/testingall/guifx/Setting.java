@@ -30,8 +30,8 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import sdv.testingall.cdt.gentestdata.ICppGenTestConfig;
 import sdv.testingall.cdt.loader.ICppLoaderConfig;
-import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.testreport.Coverage;
 
@@ -42,7 +42,7 @@ import sdv.testingall.core.testreport.Coverage;
  *
  * @date 2016-11-25 VuSD created
  */
-public class Setting implements Serializable, ICppLoaderConfig, IGenTestConfig {
+public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfig {
 
 	private static final long	serialVersionUID	= 9092250455045821743L;
 	private static final File	PATH				= new File("configuration.dat");

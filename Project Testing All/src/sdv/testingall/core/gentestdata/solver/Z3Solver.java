@@ -25,6 +25,7 @@ import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.expression.INameExpression;
 import sdv.testingall.core.expression.INumberExpression;
 import sdv.testingall.core.expression.IUnaryExpression;
+import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
 import sdv.testingall.core.type.IType;
 
@@ -49,10 +50,12 @@ public abstract class Z3Solver extends BaseSolver {
 	 * 
 	 * @param constraint
 	 *            path constraint need to solve
+	 * @param config
+	 *            configuration for test data generation
 	 */
-	protected Z3Solver(IPathConstraint constraint)
+	protected Z3Solver(IPathConstraint constraint, IGenTestConfig config)
 	{
-		super(constraint);
+		super(constraint, config);
 		List<IVariable> params = constraint.getInputs();
 		mapInput = new HashMap<>();
 

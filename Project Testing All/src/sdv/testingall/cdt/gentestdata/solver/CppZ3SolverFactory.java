@@ -1,13 +1,14 @@
 /**
  * Factory to create new Z3 solver
- * @file Z3SolverFactory.java
+ * @file CppZ3SolverFactory.java
  * @author (SDV)[VuSD]
  * Copyright (C) 2016 SDV, All Rights Reserved.
  */
 package sdv.testingall.cdt.gentestdata.solver;
 
+import sdv.testingall.cdt.gentestdata.ICppGenTestConfig;
+import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.gentestdata.solver.IPathConstraint;
-import sdv.testingall.core.gentestdata.solver.ISolver;
 import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
 
 /**
@@ -17,7 +18,7 @@ import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
  *
  * @date 2016-12-23 VuSD created
  */
-public class Z3SolverFactory implements ISolverFactory {
+public class CppZ3SolverFactory implements ISolverFactory {
 
 	private static boolean Z3_AVAILABE;
 
@@ -40,9 +41,9 @@ public class Z3SolverFactory implements ISolverFactory {
 	}
 
 	@Override
-	public ISolver createSolver(IPathConstraint constraint)
+	public CppZ3Solver createSolver(IPathConstraint constraint, IGenTestConfig config)
 	{
-		return new CppZ3Solver(constraint);
+		return new CppZ3Solver(constraint, (ICppGenTestConfig) config);
 	}
 
 }

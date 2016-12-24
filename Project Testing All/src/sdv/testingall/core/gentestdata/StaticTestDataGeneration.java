@@ -151,7 +151,7 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 					continue;
 				}
 
-				ISolver solver = factory.createSolver(constraint);
+				ISolver solver = factory.createSolver(constraint, getConfig());
 				int result = solver.getResultType();
 				System.out.println("=> Result type: " + result);
 			}

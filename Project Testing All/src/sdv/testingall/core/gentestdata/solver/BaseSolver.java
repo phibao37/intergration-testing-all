@@ -9,6 +9,7 @@ package sdv.testingall.core.gentestdata.solver;
 import java.util.List;
 
 import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
 
 /**
@@ -20,7 +21,8 @@ import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
  */
 public class BaseSolver implements ISolver {
 
-	private IPathConstraint constraint;
+	private IPathConstraint	constraint;
+	private IGenTestConfig	config;
 
 	protected int				resultType;
 	protected List<IVariable>	inputData;
@@ -31,10 +33,13 @@ public class BaseSolver implements ISolver {
 	 * 
 	 * @param constraint
 	 *            path constraint need to solve
+	 * @param config
+	 *            configuration for test data generation
 	 */
-	protected BaseSolver(IPathConstraint constraint)
+	protected BaseSolver(IPathConstraint constraint, IGenTestConfig config)
 	{
 		this.constraint = constraint;
+		this.config = config;
 		this.resultType = RESULT_UNKNOWN;
 	}
 
@@ -60,6 +65,12 @@ public class BaseSolver implements ISolver {
 	public IExpression getPathReturnData()
 	{
 		return returnData;
+	}
+
+	@Override
+	public IGenTestConfig getConfig()
+	{
+		return config;
 	}
 
 }

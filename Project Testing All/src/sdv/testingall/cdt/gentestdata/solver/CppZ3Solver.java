@@ -13,6 +13,7 @@ import com.microsoft.z3.RatNum;
 
 import sdv.testingall.cdt.expression.CppNumberExpression;
 import sdv.testingall.cdt.expression.ICppNumberExpression;
+import sdv.testingall.cdt.gentestdata.ICppGenTestConfig;
 import sdv.testingall.cdt.type.CppBasicType;
 import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.expression.INumberExpression;
@@ -35,10 +36,18 @@ public class CppZ3Solver extends Z3Solver {
 	 * 
 	 * @param constraint
 	 *            path constraint need to solve
+	 * @param config
+	 *            configuration for test data generation
 	 */
-	CppZ3Solver(IPathConstraint constraint)
+	CppZ3Solver(IPathConstraint constraint, ICppGenTestConfig config)
 	{
-		super(constraint);
+		super(constraint, config);
+	}
+
+	@Override
+	public ICppGenTestConfig getConfig()
+	{
+		return (ICppGenTestConfig) super.getConfig();
 	}
 
 	@Override

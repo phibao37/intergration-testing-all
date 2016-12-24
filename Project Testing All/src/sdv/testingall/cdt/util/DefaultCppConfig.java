@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import sdv.testingall.cdt.gentestdata.ICppGenTestConfig;
 import sdv.testingall.cdt.loader.ICppLoaderConfig;
-import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.testreport.Coverage;
 
@@ -22,7 +22,7 @@ import sdv.testingall.core.testreport.Coverage;
  *
  * @date 2016-10-27 VuSD created
  */
-public class DefaultCppConfig implements ICppLoaderConfig, IGenTestConfig {
+public class DefaultCppConfig implements ICppLoaderConfig, ICppGenTestConfig {
 
 	private Map<String, String>	marcoMap;
 	private List<String>		includeDirs;

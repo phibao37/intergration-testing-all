@@ -9,6 +9,7 @@ package sdv.testingall.core.gentestdata.solver;
 import java.util.List;
 
 import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.gentestdata.IGenTestConfig;
 import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
 
 /**
@@ -37,9 +38,11 @@ public interface ISolver {
 		 * 
 		 * @param constraint
 		 *            path constraint need to solve
+		 * @param config
+		 *            configuration for test data generation
 		 * @return solver object
 		 */
-		ISolver createSolver(IPathConstraint constraint);
+		ISolver createSolver(IPathConstraint constraint, IGenTestConfig config);
 	}
 
 	/**
@@ -48,6 +51,13 @@ public interface ISolver {
 	 * @return path constraint object
 	 */
 	IPathConstraint getConstraint();
+
+	/**
+	 * Get the configuration for generating test data
+	 * 
+	 * @return setting object
+	 */
+	IGenTestConfig getConfig();
 
 	/**
 	 * Get type of result after solving
