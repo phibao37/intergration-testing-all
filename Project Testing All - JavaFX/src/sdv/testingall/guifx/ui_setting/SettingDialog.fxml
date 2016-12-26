@@ -21,120 +21,152 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<DialogPane prefHeight="350.0" prefWidth="480.0" stylesheets="@SettingDialog.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
-   <content>
-      <TabPane tabClosingPolicy="UNAVAILABLE">
-        <tabs>
-          <Tab text="%tab.general">
-               <content>
-                  <GridPane alignment="TOP_CENTER" styleClass="grid-pane">
-                     <columnConstraints>
-                        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                        <RowConstraints minHeight="25.0" />
-                        <RowConstraints minHeight="10.0" vgrow="ALWAYS" />
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                     </rowConstraints>
-                     <children>
-                        <Label text="%key.language" />
-                        <Label text="%key.charset" GridPane.rowIndex="1" />
-                        <ComboBox fx:id="entry_language" GridPane.columnIndex="1" />
-                        <ComboBox fx:id="entry_charset" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                        <Label fx:id="toggle_restart" styleClass="fill-red" text="%label.restart_required" visible="false" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
-                        <Label text="%key.coverage" GridPane.rowIndex="2" GridPane.valignment="BASELINE" />
-                        <FlowPane hgap="10.0" vgap="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
-                           <children>
-                              <CheckBox fx:id="cover_statement" mnemonicParsing="false" text="%cover.statement" />
-                              <CheckBox fx:id="cover_branch" mnemonicParsing="false" text="%cover.branch" />
-                              <CheckBox fx:id="cover_subcondition" mnemonicParsing="false" text="%cover.subcondition" />
-                           </children>
-                        </FlowPane>
-                     </children>
-                  </GridPane>
-               </content>
-          </Tab>
-          <Tab text="%tab.c_cpp">
-               <content>
-                  <Accordion fx:id="acc_cpp">
-                    <panes>
-                      <TitledPane text="%titled.general">
-                      	<content>
-		                  <GridPane alignment="TOP_CENTER" styleClass="grid-pane">
-		                  	<columnConstraints>
-		                        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
-		                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-		                     </columnConstraints>
-		                     <rowConstraints>
-		                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-		                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-		                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-		                     </rowConstraints>
-		                     <children>
-		                        <Label text="%key.ccpp.cext" />
-                                    <Label text="%key.ccpp.cppext" GridPane.rowIndex="1" />
-                                    <Label text="%key.ccpp.logerrordiv" GridPane.rowIndex="2" />
-                                    <TextField fx:id="entry_cext" promptText="%prompt.extension" GridPane.columnIndex="1" />
-                                    <TextField fx:id="entry_cppext" promptText="%prompt.extension" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                    <CheckBox fx:id="entry_log_errdiv" mnemonicParsing="false" text="%prompt.ccpp.logerrordiv" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-		                     </children>
-		                  </GridPane>
-		               	</content>
-                      </TitledPane>
-                      <TitledPane text="%titled.includedir">
-                           <content>
-                              <HBox>
+<DialogPane prefHeight="380.0" prefWidth="550.0" stylesheets="@SettingDialog.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
+	<content>
+		<TabPane tabClosingPolicy="UNAVAILABLE">
+			<tabs>
+				<Tab text="%tab.general">
+					<content>
+						<GridPane alignment="TOP_CENTER" styleClass="grid-pane">
+							<columnConstraints>
+								<ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+								<ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+							</columnConstraints>
+							<rowConstraints>
+								<RowConstraints minHeight="10.0" prefHeight="25.0" />
+								<RowConstraints minHeight="10.0" prefHeight="25.0" />
+								<RowConstraints minHeight="25.0" />
+								<RowConstraints minHeight="10.0" vgrow="ALWAYS" />
+								<RowConstraints minHeight="10.0" prefHeight="25.0" />
+							</rowConstraints>
+							<children>
+								<Label text="%key.language" />
+								<Label text="%key.charset" GridPane.rowIndex="1" />
+								<ComboBox fx:id="entry_language" GridPane.columnIndex="1" />
+								<ComboBox fx:id="entry_charset" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+								<Label fx:id="toggle_restart" styleClass="fill-red" text="%label.restart_required" visible="false" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
+								<Label text="%key.coverage" GridPane.rowIndex="2" GridPane.valignment="BASELINE" />
+								<FlowPane hgap="10.0" vgap="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+									<children>
+										<CheckBox fx:id="cover_statement" mnemonicParsing="false" text="%cover.statement" />
+										<CheckBox fx:id="cover_branch" mnemonicParsing="false" text="%cover.branch" />
+										<CheckBox fx:id="cover_subcondition" mnemonicParsing="false" text="%cover.subcondition" />
+									</children>
+								</FlowPane>
+							</children>
+						</GridPane>
+					</content>
+				</Tab>
+				<Tab text="%tab.c_cpp">
+					<content>
+						<Accordion fx:id="acc_cpp">
+							<panes>
+								<TitledPane text="%titled.general">
+									<content>
+										<GridPane alignment="TOP_CENTER" styleClass="grid-pane">
+											<columnConstraints>
+												<ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+												<ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="10.0" prefHeight="25.0" />
+												<RowConstraints minHeight="10.0" prefHeight="25.0" />
+												<RowConstraints minHeight="10.0" prefHeight="25.0" />
+											</rowConstraints>
+											<children>
+												<Label text="%key.ccpp.cext" />
+												<Label text="%key.ccpp.cppext" GridPane.rowIndex="1" />
+												<Label text="%key.ccpp.logerrordiv" GridPane.rowIndex="2" />
+												<TextField fx:id="entry_cext" promptText="%prompt.extension" GridPane.columnIndex="1" />
+												<TextField fx:id="entry_cppext" promptText="%prompt.extension" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+												<CheckBox fx:id="entry_log_errdiv" mnemonicParsing="false" text="%prompt.ccpp.logerrordiv" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+											</children>
+										</GridPane>
+									</content>
+								</TitledPane>
+								<TitledPane text="%titled.includedir">
+									<content>
+										<HBox>
+											<children>
+												<ListView fx:id="entry_ccpp_includedir" HBox.hgrow="ALWAYS" />
+												<VBox prefWidth="80.0" spacing="10.0">
+													<children>
+														<Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirAdd" text="%btn.add" />
+														<Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirEdit" text="%btn.edit" />
+														<Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirDelete" text="%btn.delete" />
+														<Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirKeepValid" text="%btn.deleteinvalid" />
+													</children>
+													<HBox.margin>
+														<Insets left="10.0" />
+													</HBox.margin>
+												</VBox>
+											</children>
+										</HBox>
+									</content>
+								</TitledPane>
+								<TitledPane text="%titled.marco">
+									<content>
+										<TextArea fx:id="entry_ccpp_marco" promptText="%prompt.marcodefine">
+											<padding>
+												<Insets bottom="5.0" left="10.0" right="10.0" top="10.0" />
+											</padding>
+										</TextArea>
+									</content>
+								</TitledPane>
+								<TitledPane text="%titled.basictypesize">
+									<content>
+										<GridPane alignment="TOP_CENTER" styleClass="grid-pane">
+											<columnConstraints>
+												<ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+												<ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+											</columnConstraints>
+											<rowConstraints>
+												<RowConstraints minHeight="10.0" prefHeight="25.0" />
+												<RowConstraints minHeight="10.0" prefHeight="25.0" />
+												<RowConstraints minHeight="10.0" prefHeight="25.0" />
+                                    <RowConstraints minHeight="10.0" prefHeight="25.0" />
+                                    <RowConstraints minHeight="10.0" prefHeight="25.0" />
+											</rowConstraints>
                                  <children>
-                                    <ListView fx:id="entry_ccpp_includedir" HBox.hgrow="ALWAYS" />
-                                    <VBox prefWidth="80.0" spacing="10.0">
-                                       <children>
-                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirAdd" text="%btn.add" />
-                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirEdit" text="%btn.edit" />
-                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirDelete" text="%btn.delete" />
-                                          <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleIncludeDirKeepValid" text="%btn.deleteinvalid" />
-                                       </children>
-                                       <HBox.margin>
-                                          <Insets left="10.0" />
-                                       </HBox.margin></VBox>
+                                    <Label text="char" />
+                                    <Label text="short" GridPane.rowIndex="1" />
+                                    <Label text="int" GridPane.rowIndex="2" />
+                                    <Label text="long" GridPane.rowIndex="3" />
+                                    <Label text="long long" GridPane.rowIndex="4" />
+                                    <Spinner fx:id="entry_cpp_size_char" GridPane.columnIndex="1" />
+                                    <Spinner fx:id="entry_cpp_size_short" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                    <Spinner fx:id="entry_cpp_size_int" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    <Spinner fx:id="entry_cpp_size_long" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                    <Spinner fx:id="entry_cpp_size_longlong" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                  </children>
-                              </HBox>
-                           </content></TitledPane>
-                      <TitledPane text="%titled.marco">
-                           <content>
-                              <TextArea fx:id="entry_ccpp_marco" promptText="%prompt.marcodefine">
-                                 <padding>
-                                    <Insets bottom="5.0" left="10.0" right="10.0" top="10.0" />
-                                 </padding>
-                              </TextArea>
-                           </content></TitledPane>
-                    </panes>
-                  </Accordion>
-               </content>
-          </Tab>
-          <Tab text="%tab.graphic">
-               <content>
-                  <GridPane alignment="TOP_CENTER" styleClass="grid-pane">
-                  	<columnConstraints>
-                        <ColumnConstraints minWidth="10.0" prefWidth="100.0" />
-                        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
-                     </columnConstraints>
-                     <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                        <RowConstraints minHeight="10.0" prefHeight="25.0" />
-                     </rowConstraints>
-                     <children>
-                        <Label text="%key.graphic.max_recent" />
-                        <Spinner fx:id="entry_graphic_maxrecent" editable="true" GridPane.columnIndex="1" />
-                        <CheckBox fx:id="entry_auto_viewsource" mnemonicParsing="false" text="%key.graphic.auto_viewsource" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-                     </children>
-                  </GridPane>
-               </content>
-          </Tab>
-        </tabs>
-      </TabPane>
-   </content>
+										</GridPane>
+									</content>
+								</TitledPane>
+							</panes>
+						</Accordion>
+					</content>
+				</Tab>
+				<Tab text="%tab.graphic">
+					<content>
+						<GridPane alignment="TOP_CENTER" styleClass="grid-pane">
+							<columnConstraints>
+								<ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+								<ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+							</columnConstraints>
+							<rowConstraints>
+								<RowConstraints minHeight="10.0" prefHeight="25.0" />
+								<RowConstraints minHeight="10.0" prefHeight="25.0" />
+								<RowConstraints minHeight="10.0" prefHeight="25.0" />
+							</rowConstraints>
+							<children>
+								<Label text="%key.graphic.max_recent" />
+								<Spinner fx:id="entry_graphic_maxrecent" editable="true" GridPane.columnIndex="1" />
+								<CheckBox fx:id="entry_auto_viewsource" mnemonicParsing="false" text="%key.graphic.auto_viewsource" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+							</children>
+						</GridPane>
+					</content>
+				</Tab>
+			</tabs>
+		</TabPane>
+	</content>
 </DialogPane>

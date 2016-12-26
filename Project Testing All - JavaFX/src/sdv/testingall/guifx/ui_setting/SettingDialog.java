@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+import javafx.beans.property.IntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -36,7 +38,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MultipleSelectionModel;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -70,6 +71,11 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private @FXML ListView<String>	entry_ccpp_includedir;
 	private @FXML TextArea			entry_ccpp_marco;
 	private @FXML CheckBox			entry_auto_viewsource;
+	private @FXML Spinner<Integer>	entry_cpp_size_char;
+	private @FXML Spinner<Integer>	entry_cpp_size_short;
+	private @FXML Spinner<Integer>	entry_cpp_size_int;
+	private @FXML Spinner<Integer>	entry_cpp_size_long;
+	private @FXML Spinner<Integer>	entry_cpp_size_longlong;
 
 	private @FXML CheckBox	cover_statement;
 	private @FXML CheckBox	cover_branch;
@@ -142,9 +148,13 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		entry_charset.getItems().addAll(Charset.availableCharsets().values());
 		entry_charset.valueProperty().bindBidirectional(setting.APP_CHARSET);
 
-		IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(2, 20);
+		IntegerSpinnerValueFactory valueFactory = new IntegerSpinnerValueFactory(2, 20,
+				setting.RECENT_PROJECT_MAXSIZE.get());
 		entry_graphic_maxrecent.setValueFactory(valueFactory);
-		valueFactory.valueProperty().bindBidirectional(setting.RECENT_PROJECT_MAXSIZE.asObject());
+		// valueFactory.valueProperty().bindBidirectional(setting.RECENT_PROJECT_MAXSIZE.asObject());
+		entry_graphic_maxrecent.valueProperty().addListener((obv, oldValue, newValue) -> {
+			setting.RECENT_PROJECT_MAXSIZE.set(newValue);
+		});
 		entry_auto_viewsource.selectedProperty().bindBidirectional(setting.TREE_AUTO_VIEWSOURCE);
 
 		acc_cpp.setExpandedPane(acc_cpp.getPanes().get(0));
@@ -200,6 +210,25 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 		for (CheckBox cbCover : coverArray) {
 			cbCover.setOnAction(changeCoverage);
 			cbCover.setSelected(setting.GEN_COVERAGE_LIST.contains(cbCover.getUserData()));
+		}
+
+		List<Spinner<Integer>> cppSizeList = Arrays.asList(entry_cpp_size_char, entry_cpp_size_short,
+				entry_cpp_size_int, entry_cpp_size_long, entry_cpp_size_longlong);
+		IntegerProperty[] cppSizePropArray = new IntegerProperty[] { setting.CPP_SIZE_CHAR, setting.CPP_SIZE_SHORT,
+				setting.CPP_SIZE_INT, setting.CPP_SIZE_LONG, setting.CPP_SIZE_LONGLONG };
+		int iter = 0;
+		for (Spinner<Integer> spinner : cppSizeList) {
+			IntegerProperty prop = cppSizePropArray[iter++];
+			IntegerSpinnerValueFactory sizevalueFactory = new IntegerSpinnerValueFactory(1, 32, prop.get());
+			spinner.setValueFactory(sizevalueFactory);
+			spinner.getStyleClass().add(Spinner.STYLE_CLASS_SPLIT_ARROWS_HORIZONTAL);
+
+			spinner.valueProperty().addListener((obv, oldValue, newValue) -> {
+				prop.set(newValue);
+				if (!setting.checkValidCppSize()) {
+					sizevalueFactory.setValue(oldValue);
+				}
+			});
 		}
 	}
 
