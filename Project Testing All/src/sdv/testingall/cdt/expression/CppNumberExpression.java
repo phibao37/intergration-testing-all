@@ -46,12 +46,14 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 
 		switch (literal.getKind()) {
 		case IASTLiteralExpression.lk_integer_constant:
-			doubleValue = longValue = Long.parseLong(value);
+			doubleValue = longValue = convertCppIntegerLiteral(value);
 			boolValue = longValue != 0;
+			break;
 		case IASTLiteralExpression.lk_float_constant:
 			doubleValue = Double.parseDouble(value);
 			longValue = (long) doubleValue;
 			boolValue = doubleValue != 0.0;
+			break;
 		case IASTLiteralExpression.lk_true:
 			boolValue = true;
 			doubleValue = longValue = 1;
@@ -63,6 +65,7 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 			value = StringEscapeUtils.unescapeJava(value);
 			doubleValue = longValue = value.charAt(1); // Get second position: 'x'
 			boolValue = longValue != 0;
+			break;
 		}
 	}
 
@@ -92,14 +95,7 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 	 */
 	public CppNumberExpression(long intValue, CppBasicType type)
 	{
-		// Escape character: 0 -> '\0', 10 -> '\n'
-		if (type.getType() == CppBasicType.CHAR && intValue >= 0) {
-			String str = String.valueOf((char) intValue);
-			str = StringEscapeUtils.escapeJava(str);
-			setContent(String.format("'%s'", str)); //$NON-NLS-1$
-		} else {
-			setContent(Long.toString(intValue));
-		}
+		setContent(convertString(intValue, type));
 
 		doubleValue = longValue = intValue;
 		boolValue = intValue != 0;
@@ -120,6 +116,98 @@ public class CppNumberExpression extends Expression implements ICppNumberExpress
 		doubleValue = decValue;
 		longValue = (long) doubleValue;
 		boolValue = doubleValue != 0.0;
+	}
+
+	/**
+	 * Convert an integer literal in C/C++ format to corresponding value
+	 * 
+	 * @param value
+	 *            C/C++ integer token as string
+	 *
+	 * @return integer value
+	 * @see http://en.cppreference.com/w/cpp/language/integer_literal
+	 */
+	@SuppressWarnings("nls")
+	static long convertCppIntegerLiteral(String value)
+	{
+		int radix = 10;
+		int index = 0;
+		boolean negative = false;
+		Long result;
+
+		// if (value.length() == 0) {
+		// throw new NumberFormatException("Zero length string");
+		// }
+		char firstChar = value.charAt(0);
+		// Handle sign, if present
+		if (firstChar == '-') {
+			negative = true;
+			index++;
+		} else if (firstChar == '+') {
+			index++;
+		}
+
+		// Normalize lower-case
+		value = value.toLowerCase();
+		// C++ 14: 18'446'744 --> 18446774
+		// Replace 3u, 3l, 3llu as well
+		value = value.replaceAll("['lu]", "");
+
+		// Handle radix specifier, if present
+		if (value.startsWith("0x", index)) {
+			index += 2;
+			radix = 16;
+		} else if (value.startsWith("0b", index)) {
+			index += 2;
+			radix = 2;
+		} else if (value.startsWith("0", index) && value.length() > 1 + index) {
+			index++;
+			radix = 8;
+		}
+
+		try {
+			result = Long.valueOf(value.substring(index), radix);
+			result = negative ? Long.valueOf(-result.longValue()) : result;
+		} catch (NumberFormatException e) {
+			// If number is Long.MIN_VALUE, we'll end up here. The next line
+			// handles this case, and causes any genuine format error to be re-thrown.
+			String constant = negative ? ("-" + value.substring(index)) : value.substring(index);
+			result = Long.valueOf(constant, radix);
+		}
+		return result;
+	}
+
+	/**
+	 * Convert integer value to C/C++ literal string representation
+	 * 
+	 * @param value
+	 *            integer value
+	 * @param type
+	 *            target literal type
+	 * @return C/C++ integer literal
+	 */
+	static String convertString(long value, CppBasicType type)
+	{
+		// Escape character: 0 -> '\0', 10 -> '\n'
+		if (type.getType() == CppBasicType.CHAR && value >= 0) {
+			String str = String.valueOf((char) value);
+			str = StringEscapeUtils.escapeJava(str);
+			return String.format("'%s'", str); //$NON-NLS-1$
+		}
+
+		StringBuilder b = new StringBuilder(Long.toString(value));
+
+		// Check for long/long long, unsigned
+		if (type.isLong()) {
+			b.append('l');
+		} else if (type.isLongLong()) {
+			b.append('l').append('l');
+		}
+		if (type.isUnsigned()) {
+			b.append('u');
+		}
+
+		return b.toString();
 	}
 
 	@Override
