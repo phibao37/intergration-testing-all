@@ -158,4 +158,10 @@ public class DefaultCppConfig implements ICppLoaderConfig, ICppGenTestConfig {
 	{
 		return 8;
 	}
+
+	@Override
+	public int getZ3SolveTimeout()
+	{
+		return 30000;
+	}
 }

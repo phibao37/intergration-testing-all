@@ -19,6 +19,7 @@ import com.microsoft.z3.Expr;
 import com.microsoft.z3.FuncDecl;
 import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.Model;
+import com.microsoft.z3.Params;
 import com.microsoft.z3.Solver;
 
 import sdv.testingall.core.expression.IBinaryExpression;
@@ -65,6 +66,9 @@ public abstract class Z3Solver extends BaseSolver {
 		cfg.put("model", "true");
 		ctx = new Context(cfg);
 		solver = ctx.mkSolver();
+		Params solver_params = ctx.mkParams();
+		solver_params.add("timeout", config.getZ3SolveTimeout());
+		solver.setParameters(solver_params);
 
 		// Declare variable
 		for (IVariable var : params) {

@@ -34,4 +34,11 @@ public interface IGenTestConfig extends IAppResource {
 	 * @return the logger to log event
 	 */
 	ILogger getLogger();
+
+	/**
+	 * Get maximum timeout for Z3 solver
+	 * 
+	 * @return timeout in milliseconds (>= 0)
+	 */
+	int getZ3SolveTimeout();
 }
