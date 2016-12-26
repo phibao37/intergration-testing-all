@@ -6,8 +6,10 @@
  */
 package sdv.testingall.cdt.gentestdata.solver;
 
+import com.microsoft.z3.ArithExpr;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
+import com.microsoft.z3.IntExpr;
 import com.microsoft.z3.IntNum;
 import com.microsoft.z3.RatNum;
 
@@ -67,6 +69,7 @@ public class CppZ3Solver extends Z3Solver {
 		case CppBasicType.INT:
 		case CppBasicType.CHAR:
 			exp = ctx.mkIntConst(name);
+			addIntegerRange(basicType, (IntExpr) exp);
 			break;
 		case CppBasicType.BOOL:
 			exp = ctx.mkBoolConst(name);
@@ -78,6 +81,48 @@ public class CppZ3Solver extends Z3Solver {
 		}
 
 		return exp;
+	}
+
+	/**
+	 * Add constraint for integer value range
+	 * 
+	 * @param type
+	 *            basic C/C++ type
+	 * @param var
+	 *            declared Z3 variable
+	 */
+	protected void addIntegerRange(CppBasicType type, IntExpr var)
+	{
+		ICppGenTestConfig config = getConfig();
+		int size = config.sizeOfInt();
+
+		if (type.getType() == CppBasicType.CHAR) {
+			size = config.sizeOfChar();
+		} else if (type.isShort()) {
+			size = config.sizeOfShort();
+		} else if (type.isLong()) {
+			size = config.sizeOfLong();
+		} else if (type.isLongLong()) {
+			size = config.sizeOfLongLong();
+		}
+
+		// Byte to bits
+		size = size * 8;
+
+		// Add range constraint
+		if (type.isUnsigned()) {
+			// var >= 0 && var < 2^size
+			solver.add(ctx.mkGe(var, ctx.mkInt(0)));
+			solver.add(ctx.mkLt(var, ctx.mkPower(ctx.mkInt(2), ctx.mkInt(size))));
+		}
+
+		else {
+			size--;
+			// var == 0 || (-2^size <= var < 2^size)
+			ArithExpr max = ctx.mkPower(ctx.mkInt(2), ctx.mkInt(size));
+			solver.add(ctx.mkOr(ctx.mkEq(var, ctx.mkInt(0)),
+					ctx.mkAnd(ctx.mkGe(var, ctx.mkUnaryMinus(max)), ctx.mkLt(var, max))));
+		}
 	}
 
 	@Override
