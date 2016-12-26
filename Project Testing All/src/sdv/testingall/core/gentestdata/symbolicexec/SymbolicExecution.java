@@ -138,7 +138,7 @@ public abstract class SymbolicExecution extends ExpressionVisitor implements ISy
 		// This is nested assign and mathematics
 		// Change from a += b to a = a+b
 		if (!operator.equals(IBinaryExpression.ASSIGN)) {
-			operator = operator.substring(0, 1);
+			operator = operator.substring(0, operator.length() - 1);
 			right = createBinary(left, operator, right);
 		}
 
