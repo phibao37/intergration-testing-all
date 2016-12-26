@@ -52,6 +52,31 @@ public interface IBinaryExpression extends IExpressionGroup {
 		case MUL_ASSIGN:
 		case DIV_ASSIGN:
 		case MOD_ASSIGN:
+
+		case BIT_AND_ASSIGN:
+		case BIT_OR_ASSIGN:
+		case BIT_XOR_ASSIGN:
+		case LEFT_SHIFT_ASSIGN:
+		case RIGHT_SHIFT_ASSIGN:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/**
+	 * Check if this unary expression contains bitwise operator
+	 * 
+	 * @return is contains bitwise operator
+	 */
+	default boolean isBitwiseExpression()
+	{
+		switch (getOperator()) {
+		case BIT_AND:
+		case BIT_OR:
+		case BIT_XOR:
+		case LEFT_SHIFT:
+		case RIGHT_SHIFT:
 			return true;
 		default:
 			return false;
@@ -99,6 +124,28 @@ public interface IBinaryExpression extends IExpressionGroup {
 	String	GREATER			= ">";
 	/** Compare greater than or equals: <code>a >= b</code> */
 	String	GREATER_EQUALS	= ">=";
+
+	/** Bitwise AND: <code>a & b</code> */
+	String	BIT_AND		= "&";
+	/** Bitwise OR: <code>a | b</code> */
+	String	BIT_OR		= "|";
+	/** Bitwise XOR: <code>a ^ b</code> */
+	String	BIT_XOR		= "^";
+	/** Left shift: <code>0b11 << 3 --> 0b11000 </code> */
+	String	LEFT_SHIFT	= "<<";
+	/** Right shift: <code>0b11000 >> 3 --> 0b11 </code> */
+	String	RIGHT_SHIFT	= ">>";
+
+	/** Bitwise AND and assign: <code>a &= b</code> */
+	String	BIT_AND_ASSIGN		= "&=";
+	/** Bitwise OR and assign: <code>a |= b</code> */
+	String	BIT_OR_ASSIGN		= "|=";
+	/** Bitwise XOR and assign: <code>a ^= b</code> */
+	String	BIT_XOR_ASSIGN		= "^=";
+	/** Left shift and assign: <code>a <<= 3</code> */
+	String	LEFT_SHIFT_ASSIGN	= "<<=";
+	/** Right shift and assign: <code>a >>= 3</code> */
+	String	RIGHT_SHIFT_ASSIGN	= ">>=";
 
 	@Override
 	default int handleVisit(IExpressionVisitor visitor)

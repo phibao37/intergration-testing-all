@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.microsoft.z3.ArithExpr;
+import com.microsoft.z3.BitVecExpr;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Context;
 import com.microsoft.z3.Expr;
@@ -135,6 +136,14 @@ public abstract class Z3Solver extends BaseSolver {
 			Expr op1 = convertExpression(binExp.getLeft());
 			Expr op2 = convertExpression(binExp.getRight());
 
+			if (binExp.isBitwiseExpression()) {
+				op1 = wrap2Bitvec(op1);
+				op2 = wrap2Bitvec(op2);
+			} else {
+				op1 = unwrap2Bitvec(op1);
+				op2 = unwrap2Bitvec(op2);
+			}
+
 			switch (binExp.getOperator()) {
 			case IBinaryExpression.ADD:
 				return ctx.mkAdd((ArithExpr) op1, (ArithExpr) op2);
@@ -145,11 +154,13 @@ public abstract class Z3Solver extends BaseSolver {
 			case IBinaryExpression.DIV:
 				return ctx.mkDiv((ArithExpr) op1, (ArithExpr) op2);
 			case IBinaryExpression.MOD:
+
 				return ctx.mkRem((IntExpr) op1, (IntExpr) op2);
 			case IBinaryExpression.LOGIC_AND:
 				return ctx.mkAnd((BoolExpr) op1, (BoolExpr) op2);
 			case IBinaryExpression.LOGIC_OR:
 				return ctx.mkOr((BoolExpr) op1, (BoolExpr) op2);
+
 			case IBinaryExpression.EQUALS:
 				return ctx.mkEq(op1, op2);
 			case IBinaryExpression.NOT_EQUALS:
@@ -162,12 +173,29 @@ public abstract class Z3Solver extends BaseSolver {
 				return ctx.mkGt((ArithExpr) op1, (ArithExpr) op2);
 			case IBinaryExpression.GREATER_EQUALS:
 				return ctx.mkGe((ArithExpr) op1, (ArithExpr) op2);
+
+			case IBinaryExpression.BIT_AND:
+				return ctx.mkBVAND((BitVecExpr) op1, (BitVecExpr) op2);
+			case IBinaryExpression.BIT_OR:
+				return ctx.mkBVOR((BitVecExpr) op1, (BitVecExpr) op2);
+			case IBinaryExpression.BIT_XOR:
+				return ctx.mkBVXOR((BitVecExpr) op1, (BitVecExpr) op2);
+			case IBinaryExpression.LEFT_SHIFT:
+				return ctx.mkBVSHL((BitVecExpr) op1, (BitVecExpr) op2);
+			case IBinaryExpression.RIGHT_SHIFT:
+				return ctx.mkBVASHR((BitVecExpr) op1, (BitVecExpr) op2);
 			}
 		}
 
 		else if (exp instanceof IUnaryExpression) {
 			IUnaryExpression unaryExp = (IUnaryExpression) exp;
 			Expr op1 = convertExpression(unaryExp.getSubExpression());
+
+			if (unaryExp.isBitwiseExpression()) {
+				op1 = wrap2Bitvec(op1);
+			} else {
+				op1 = unwrap2Bitvec(op1);
+			}
 
 			switch (unaryExp.getOperator()) {
 			case IUnaryExpression.LOGIC_NOT:
@@ -176,6 +204,8 @@ public abstract class Z3Solver extends BaseSolver {
 				return ctx.mkUnaryMinus((ArithExpr) op1);
 			case IUnaryExpression.PLUS:
 				return op1;
+			case IUnaryExpression.BIT_NOT:
+				return ctx.mkBVNot((BitVecExpr) op1);
 			}
 		}
 
@@ -218,6 +248,24 @@ public abstract class Z3Solver extends BaseSolver {
 		}
 		return null;
 	}
+
+	/**
+	 * Convert bit-vector expression to integer value if found
+	 * 
+	 * @param exp
+	 *            expression to convert
+	 * @return expression that is not a bit-vector
+	 */
+	protected abstract Expr unwrap2Bitvec(Expr exp);
+
+	/**
+	 * Convert expression to bit-vector if needed
+	 * 
+	 * @param exp
+	 *            expression to convert
+	 * @return Z3 bit-vector expression
+	 */
+	protected abstract BitVecExpr wrap2Bitvec(Expr exp);
 
 	/**
 	 * Convert from Z3 expression back to core expression

@@ -48,6 +48,16 @@ public interface IUnaryExpression extends IExpressionGroup {
 		return getOperator().equals(INCREASE) || getOperator().equals(DECREASE);
 	}
 
+	/**
+	 * Check if this unary expression contains bitwise operator
+	 * 
+	 * @return is contains bitwise operator
+	 */
+	default boolean isBitwiseExpression()
+	{
+		return getOperator().equals(BIT_NOT);
+	}
+
 	/** Positive sign value: <code>x = +y;</code> */
 	String	PLUS		= "+";
 	/** Negative sign value: <code>x = -y;</code> */
@@ -58,6 +68,8 @@ public interface IUnaryExpression extends IExpressionGroup {
 	String	INCREASE	= "++";
 	/** Subtract one decrement: <code>x = y--;</code> */
 	String	DECREASE	= "--";
+	/** Bitwise NOT: <code>~0b0010 --> 1101</code> */
+	String	BIT_NOT		= "~";
 
 	@Override
 	default int handleVisit(IExpressionVisitor visitor)

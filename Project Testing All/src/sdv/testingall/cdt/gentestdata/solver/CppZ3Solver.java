@@ -7,6 +7,7 @@
 package sdv.testingall.cdt.gentestdata.solver;
 
 import com.microsoft.z3.ArithExpr;
+import com.microsoft.z3.BitVecExpr;
 import com.microsoft.z3.BoolExpr;
 import com.microsoft.z3.Expr;
 import com.microsoft.z3.IntExpr;
@@ -171,6 +172,27 @@ public class CppZ3Solver extends Z3Solver {
 			return new CppNumberExpression(numer / denom, basicType);
 		}
 		return null;
+	}
+
+	@Override
+	protected Expr unwrap2Bitvec(Expr exp)
+	{
+		if (exp instanceof BitVecExpr) {
+			// Later: currently support signed integer only
+			return ctx.mkBV2Int((BitVecExpr) exp, true);
+		}
+		return exp;
+	}
+
+	@Override
+	protected BitVecExpr wrap2Bitvec(Expr exp)
+	{
+		if (exp instanceof BitVecExpr) {
+			return (BitVecExpr) exp;
+		} else {
+			// Later: currently support bit-vector for "int" only
+			return ctx.mkInt2BV(getConfig().sizeOfInt() * 8, (IntExpr) exp);
+		}
 	}
 
 }
