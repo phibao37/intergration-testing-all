@@ -52,14 +52,18 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 	public transient SimpleListProperty<File>		RECENT_PROJECT;
 	public transient SimpleIntegerProperty			RECENT_PROJECT_MAXSIZE;
 	public transient SimpleBooleanProperty			TREE_AUTO_VIEWSOURCE;
+	public transient SimpleListProperty<Coverage>	GEN_COVERAGE_LIST;
 
 	public transient SimpleBooleanProperty				CPP_LOG_ERROR_DIRECTIVE;
 	public transient SimpleListProperty<String>			CPP_CEXTENSION;
 	public transient SimpleListProperty<String>			CPP_CPPEXTENSION;
 	public transient SimpleListProperty<String>			CPP_INCLUDE_DIR;
 	public transient SimpleMapProperty<String, String>	CPP_MARCO_MAP;
-
-	public transient SimpleListProperty<Coverage> GEN_COVERAGE_LIST;
+	public transient SimpleIntegerProperty				CPP_SIZE_CHAR;
+	public transient SimpleIntegerProperty				CPP_SIZE_SHORT;
+	public transient SimpleIntegerProperty				CPP_SIZE_INT;
+	public transient SimpleIntegerProperty				CPP_SIZE_LONG;
+	public transient SimpleIntegerProperty				CPP_SIZE_LONGLONG;
 
 	private transient ResourceBundle	appRes;
 	private transient ILogger			logger;
@@ -92,6 +96,12 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 
 		GEN_COVERAGE_LIST = new SimpleListProperty<>(FXCollections.observableList(new LinkedList<>()));
 		GEN_COVERAGE_LIST.addAll(Coverage.STATEMENT, Coverage.BRANCH, Coverage.SUBCONDITION);
+
+		CPP_SIZE_CHAR = new SimpleIntegerProperty(1);
+		CPP_SIZE_SHORT = new SimpleIntegerProperty(2);
+		CPP_SIZE_INT = new SimpleIntegerProperty(4);
+		CPP_SIZE_LONG = new SimpleIntegerProperty(8);
+		CPP_SIZE_LONGLONG = new SimpleIntegerProperty(8);
 	}
 
 	@Override
@@ -153,6 +163,36 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 		return GEN_COVERAGE_LIST;
 	}
 
+	@Override
+	public int sizeOfChar()
+	{
+		return CPP_SIZE_CHAR.get();
+	}
+
+	@Override
+	public int sizeOfShort()
+	{
+		return CPP_SIZE_SHORT.get();
+	}
+
+	@Override
+	public int sizeOfInt()
+	{
+		return CPP_SIZE_INT.get();
+	}
+
+	@Override
+	public int sizeOfLong()
+	{
+		return CPP_SIZE_LONG.get();
+	}
+
+	@Override
+	public int sizeOfLongLong()
+	{
+		return CPP_SIZE_LONGLONG.get();
+	}
+
 	/**
 	 * Save setting data to file
 	 * 
@@ -204,6 +244,12 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 
 		s.writeBoolean(TREE_AUTO_VIEWSOURCE.get());
 		s.writeObject(new ArrayList<>(GEN_COVERAGE_LIST));
+
+		s.writeInt(CPP_SIZE_CHAR.get());
+		s.writeInt(CPP_SIZE_SHORT.get());
+		s.writeInt(CPP_SIZE_INT.get());
+		s.writeInt(CPP_SIZE_LONG.get());
+		s.writeInt(CPP_SIZE_LONGLONG.get());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -227,6 +273,12 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 
 			TREE_AUTO_VIEWSOURCE.set(s.readBoolean());
 			GEN_COVERAGE_LIST.setAll((List<Coverage>) s.readObject());
+
+			CPP_SIZE_CHAR.set(s.readInt());
+			CPP_SIZE_SHORT.set(s.readInt());
+			CPP_SIZE_INT.set(s.readInt());
+			CPP_SIZE_LONG.set(s.readInt());
+			CPP_SIZE_LONGLONG.set(s.readInt());
 		} catch (Exception e) {
 			// No throw later
 		}

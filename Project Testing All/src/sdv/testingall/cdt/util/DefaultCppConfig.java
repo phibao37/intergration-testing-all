@@ -128,4 +128,34 @@ public class DefaultCppConfig implements ICppLoaderConfig, ICppGenTestConfig {
 	{
 		return listCoverage;
 	}
+
+	@Override
+	public int sizeOfChar()
+	{
+		return 1;
+	}
+
+	@Override
+	public int sizeOfShort()
+	{
+		return 2;
+	}
+
+	@Override
+	public int sizeOfInt()
+	{
+		return 4;
+	}
+
+	@Override
+	public int sizeOfLong()
+	{
+		return 8;
+	}
+
+	@Override
+	public int sizeOfLongLong()
+	{
+		return 8;
+	}
 }
