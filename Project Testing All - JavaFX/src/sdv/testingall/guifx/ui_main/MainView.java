@@ -32,7 +32,10 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import sdv.testingall.cdt.gentestdata.CppStaticTestDataGeneration;
+import sdv.testingall.cdt.gentestdata.solver.CppZ3SolverFactory;
 import sdv.testingall.cdt.loader.CppProjectLoader;
+import sdv.testingall.core.gentestdata.GenerationController;
 import sdv.testingall.core.logger.BaseLogger;
 import sdv.testingall.core.logger.ILogger;
 import sdv.testingall.core.node.FolderNode;
@@ -41,6 +44,7 @@ import sdv.testingall.core.node.IFileNode;
 import sdv.testingall.core.node.IInsideFileNode;
 import sdv.testingall.core.node.INode;
 import sdv.testingall.core.node.ProjectNode;
+import sdv.testingall.core.testreport.IFunctionReport;
 import sdv.testingall.guifx.GUIUtil;
 import sdv.testingall.guifx.ImageSet;
 import sdv.testingall.guifx.Setting;
@@ -73,13 +77,14 @@ public class MainView implements Initializable {
 	private @FXML Label	status_encoding;
 	private @FXML Label	status_keylock;
 
-	private Stage				primaryStage;
-	private DirectoryChooser	fileOpenChooser;
-	private Setting				setting;
-	private ResourceBundle		appRes;
-	private ToggleGroup			menu_open_recent_group;
+	private Stage					primaryStage;
+	private DirectoryChooser		fileOpenChooser;
+	private Setting					setting;
+	private ResourceBundle			appRes;
+	private ToggleGroup				menu_open_recent_group;
+	private SimpleBooleanProperty	propLoadingProject	= new SimpleBooleanProperty(false);
 
-	private SimpleBooleanProperty propLoadingProject = new SimpleBooleanProperty(false);
+	private ProjectNode currentProject;
 
 	@Override
 	public void initialize(URL location, ResourceBundle res)
@@ -155,7 +160,7 @@ public class MainView implements Initializable {
 			protected void succeeded()
 			{
 				finished();
-				project_tree.setRoot(getValue());
+				project_tree.setRoot(currentProject = getValue());
 
 				File root = getValue().getFile();
 				addLoadedProjectToRecent(root);
@@ -215,6 +220,71 @@ public class MainView implements Initializable {
 
 		// Start the worker thread
 		Thread thread = new Thread(loadProjectTask);
+		thread.setDaemon(true);
+		thread.start();
+	}
+
+	/**
+	 * Beginning generate test data for given function
+	 * 
+	 * @param function
+	 *            function to generate test data
+	 */
+	public void generateTestData(FunctionNode function)
+	{
+		// Create generating task
+		Task<IFunctionReport> taskGenTest = new Task<IFunctionReport>() {
+
+			@Override
+			protected void scheduled()
+			{
+				//
+			}
+
+			@Override
+			protected void succeeded()
+			{
+				//
+			}
+
+			@Override
+			protected void cancelled()
+			{
+				//
+			}
+
+			@Override
+			protected void failed()
+			{
+				//
+			}
+
+			@Override
+			protected IFunctionReport call() throws Exception
+			{
+				setting.setLogger(new BaseLogger() {
+					@Override
+					public ILogger log(int type, String message, Object... args)
+					{
+						StringBuilder b = new StringBuilder();
+						b.append(String.format(message, args)).append('\n');
+
+						// Must be update from Application thread
+						updateMessage(b.toString());
+						return super.log(type, message, args);
+					}
+				});
+
+				GenerationController testgen = new GenerationController(currentProject, function, setting);
+				testgen.addSolver(new CppZ3SolverFactory());
+				testgen.addStraitgy(new CppStaticTestDataGeneration(currentProject, function, setting));
+
+				return testgen.generateData();
+			}
+		};
+
+		// Start the worker thread
+		Thread thread = new Thread(taskGenTest);
 		thread.setDaemon(true);
 		thread.start();
 	}
@@ -294,6 +364,7 @@ public class MainView implements Initializable {
 		MenuItem itemPrConfig = new MenuItem(appRes.getString("mitem.project.config"),
 				new ImageView(ImageSet.MENU_PR_CONFIG));
 
+		itemGenTest.setOnAction(e -> generateTestData((FunctionNode) getProjectSelectedItem()));
 		itemViewsource.setOnAction(e -> handleOpenSourceView(getProjectSelectedItem()));
 		itemPrFolder.setOnAction(e -> {
 			try {

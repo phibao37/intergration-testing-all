@@ -125,6 +125,8 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 				System.out.printf("--> Cover %s: %d%%\n", cv.getCoverage(), cv.computePercent()); //$NON-NLS-1$
 			}
 		}
+		System.out.println();
+		System.out.println();
 		return report;
 	}
 
