@@ -7,7 +7,10 @@
 package sdv.testingall.core.statement;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+
+import javafx.util.Pair;
 
 /**
  * Represent a control flow graph
@@ -104,15 +107,61 @@ public class CFG implements ICFG {
 	@Override
 	public int computeStatementCoverage(List<ITestPath> listTestPath)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// Reset visit state
+		int countStatement = 0;
+		for (IStatement stm : statements) {
+			if (stm.sholdDisplayInTestPath()) {
+				stm.setVisit(false);
+				countStatement++;
+			}
+		}
+		if (countStatement == 0) {
+			return 0;
+		}
+
+		// Visit statement in list test path
+		for (ITestPath testpath : listTestPath) {
+			for (IStatement stm : testpath) {
+				stm.setVisit(true);
+			}
+		}
+
+		// Count number of visited
+		int count = 0;
+		for (IStatement stm : statements) {
+			if (stm.isVisited() && stm.sholdDisplayInTestPath()) {
+				count++;
+			}
+		}
+
+		return count * 100 / countStatement;
 	}
 
 	@Override
 	public int computeBranchCoverage(List<ITestPath> listTestPath)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		// Count number of branch
+		int countBranch = 0;
+		for (IStatement stm : statements) {
+			if (stm.isCondition()) {
+				countBranch += 2;
+			}
+		}
+		if (countBranch == 0) {
+			return computeStatementCoverage(listTestPath);
+		}
+
+		// Add set of visited edge
+		HashSet<Pair<IStatement, IStatement>> setEdge = new HashSet<>();
+		for (ITestPath testpath : listTestPath) {
+			for (int i = 0; i < testpath.size(); i++) {
+				if (testpath.get(i).isCondition()) {
+					setEdge.add(new Pair<>(testpath.get(i), testpath.get(i + 1)));
+				}
+			}
+		}
+
+		return setEdge.size() * 100 / countBranch;
 	}
 
 	/** Configuration set to obtain normal CFG */

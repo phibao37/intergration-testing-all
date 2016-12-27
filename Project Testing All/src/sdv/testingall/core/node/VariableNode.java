@@ -127,4 +127,10 @@ public abstract class VariableNode extends BaseNode {
 		return false;
 	}
 
+	@Override
+	public VariableNode clone()
+	{
+		return (VariableNode) super.clone();
+	}
+
 }

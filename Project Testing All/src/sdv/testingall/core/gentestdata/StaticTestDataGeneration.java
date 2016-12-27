@@ -9,9 +9,12 @@ package sdv.testingall.core.gentestdata;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+
 import sdv.testingall.core.gentestdata.solver.IPathConstraint;
 import sdv.testingall.core.gentestdata.solver.ISolver;
 import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
+import sdv.testingall.core.gentestdata.symbolicexec.IVariable;
 import sdv.testingall.core.node.FunctionNode;
 import sdv.testingall.core.node.ProjectNode;
 import sdv.testingall.core.node.VariableNode;
@@ -23,6 +26,7 @@ import sdv.testingall.core.testreport.FunctionReport;
 import sdv.testingall.core.testreport.IFunctionReport;
 import sdv.testingall.core.testreport.IFunctionReport.ICoverageReport;
 import sdv.testingall.core.testreport.ITestPathReport;
+import sdv.testingall.core.testreport.ITestPathReport.IOutputValue;
 import sdv.testingall.core.testreport.TestPathReport;
 import sdv.testingall.core.testreport.TestPathReport.OutputValue;
 
@@ -85,10 +89,10 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 			tpReport_12 = generateDataAllPath(cfg_12);
 
 			if (coverStatement) {
-				cvReport[0] = getStatementCoverage(cfg_12, tpReport_12, Coverage.STATEMENT);
+				cvReport[0] = getCoverageReport(cfg_12, tpReport_12, Coverage.STATEMENT);
 			}
 			if (coverBranch) {
-				cvReport[1] = getBranchCoverage(cfg_12, tpReport_12, Coverage.BRANCH);
+				cvReport[1] = getCoverageReport(cfg_12, tpReport_12, Coverage.BRANCH);
 			}
 		}
 
@@ -105,11 +109,11 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 					cvReport[2] = new FunctionReport.CoverageReport(Coverage.SUBCONDITION, cvReport[1].getPath(),
 							cvReport[1].computePercent());
 				} else {
-					cvReport[2] = getBranchCoverage(cfg_3, tpReport_3, Coverage.SUBCONDITION);
+					cvReport[2] = getCoverageReport(cfg_3, tpReport_3, Coverage.SUBCONDITION);
 				}
 			} else {
 				tpReport_3 = generateDataAllPath(cfg_3);
-				cvReport[2] = getBranchCoverage(cfg_3, tpReport_3, Coverage.SUBCONDITION);
+				cvReport[2] = getCoverageReport(cfg_3, tpReport_3, Coverage.SUBCONDITION);
 			}
 		}
 
@@ -118,6 +122,7 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 		for (ICoverageReport cv : cvReport) {
 			if (cv != null) {
 				report.add(cv);
+				System.out.printf("--> Cover %s: %d%%\n", cv.getCoverage(), cv.computePercent()); //$NON-NLS-1$
 			}
 		}
 		return report;
@@ -140,7 +145,7 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 
 		for (ITestPath testpath : allPath) {
 			OutputValue symbolicOutput = new OutputValue();
-			List<VariableNode> inputData = null;
+			List<@NonNull VariableNode> inputData = null;
 
 			System.out.printf("#### Gen for path: [%s]%n", testpath);
 			IPathConstraint constraint = createSymbolicExecution(testpath).getConstraint();
@@ -154,6 +159,25 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 				ISolver solver = factory.createSolver(constraint, getConfig());
 				int result = solver.getResultType();
 				System.out.println("=> Result type: " + result);
+
+				if (result == ISolver.RESULT_SAT) {
+					symbolicOutput.setReturnValue(solver.getPathReturnData());
+					List<IVariable> inputValue = solver.getInputData();
+					inputData = new ArrayList<>(inputValue.size());
+					int iter = 0;
+
+					for (VariableNode para : getFunction().getParameter()) {
+						VariableNode clone = para.clone();
+
+						clone.setValue(inputValue.get(iter++).getValue());
+						inputData.add(clone);
+						System.out.printf(" - %s = %s\n", clone, clone.getValue());
+					}
+					break;
+				} else if (result == ISolver.RESULT_UNSAT) {
+					symbolicOutput.setUnsat();
+					break;
+				}
 			}
 			System.out.println();
 
@@ -166,7 +190,7 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 	}
 
 	/**
-	 * Compute coverage report to best cover statement
+	 * Compute coverage report to best cover statement/branch
 	 * 
 	 * @param cfg
 	 *            graph to analyze path
@@ -176,25 +200,21 @@ public abstract class StaticTestDataGeneration extends BaseTestDataGeneration {
 	 *            coverage constant
 	 * @return coverage report contains list of test path report
 	 */
-	protected ICoverageReport getStatementCoverage(ICFG cfg, List<ITestPathReport> listReport, Coverage cover)
+	protected ICoverageReport getCoverageReport(ICFG cfg, List<ITestPathReport> listReport, Coverage cover)
 	{
-		return null;
-	}
+		List<ITestPath> listPath = new ArrayList<>(listReport.size());
+		for (ITestPathReport report : listReport) {
+			switch (report.getSymblicOutput().getResultType()) {
+			case IOutputValue.RESULT_RETURN_VALUE:
+			case IOutputValue.RESULT_EXCEPTION:
+				listPath.add(report.getPath());
+				break;
+			}
+		}
+		int percent = cover == Coverage.STATEMENT ? cfg.computeStatementCoverage(listPath)
+				: cfg.computeBranchCoverage(listPath);
 
-	/**
-	 * Compute coverage report to best cover branch
-	 * 
-	 * @param cfg
-	 *            graph to analyze path
-	 * @param listReport
-	 *            list of test path report
-	 * @param cover
-	 *            coverage constant
-	 * @return coverage report contains list of test path report
-	 */
-	protected ICoverageReport getBranchCoverage(ICFG cfg, List<ITestPathReport> listReport, Coverage cover)
-	{
-		return null;
+		return new FunctionReport.CoverageReport(cover, listReport, percent);
 	}
 
 }
