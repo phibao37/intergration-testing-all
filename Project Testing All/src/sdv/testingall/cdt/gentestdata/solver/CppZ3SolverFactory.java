@@ -20,18 +20,23 @@ import sdv.testingall.core.gentestdata.solver.ISolver.ISolverFactory;
  */
 public class CppZ3SolverFactory implements ISolverFactory {
 
-	private static boolean Z3_AVAILABE;
+	/** Check whether Z3 solver is available */
+	public static final boolean Z3_AVAILABE;
 
 	/**
 	 * Load Z3 library from system
 	 */
 	static {
+		boolean avaiable = false;
+
 		try {
 			com.microsoft.z3.Global.ToggleWarningMessages(false);
-			Z3_AVAILABE = true;
+			avaiable = true;
 		} catch (Throwable e) {
-			Z3_AVAILABE = false;
+			//
 		}
+
+		Z3_AVAILABE = avaiable;
 	}
 
 	@Override

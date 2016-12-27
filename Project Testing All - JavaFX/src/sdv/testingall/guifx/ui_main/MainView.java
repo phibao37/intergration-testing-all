@@ -256,7 +256,7 @@ public class MainView implements Initializable {
 			@Override
 			protected void failed()
 			{
-				//
+				getException().printStackTrace();
 			}
 
 			@Override
@@ -276,7 +276,9 @@ public class MainView implements Initializable {
 				});
 
 				GenerationController testgen = new GenerationController(currentProject, function, setting);
-				testgen.addSolver(new CppZ3SolverFactory());
+				if (setting.enableZ3Solver()) {
+					testgen.addSolver(new CppZ3SolverFactory());
+				}
 				testgen.addStraitgy(new CppStaticTestDataGeneration(currentProject, function, setting));
 
 				return testgen.generateData();

@@ -36,6 +36,13 @@ public interface IGenTestConfig extends IAppResource {
 	ILogger getLogger();
 
 	/**
+	 * Should use Z3 solver to solve constraint
+	 * 
+	 * @return use Z3 solver or not
+	 */
+	boolean enableZ3Solver();
+
+	/**
 	 * Get maximum timeout for Z3 solver
 	 * 
 	 * @return timeout in milliseconds (>= 0)

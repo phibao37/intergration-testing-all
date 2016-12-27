@@ -11,3 +11,7 @@
 .fill-red {
 	-fx-text-fill: red;
 }
+
+.font-bold {
+	-fx-font-weight: bold;
+}

@@ -54,6 +54,7 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 	public transient SimpleBooleanProperty			TREE_AUTO_VIEWSOURCE;
 	public transient SimpleListProperty<Coverage>	GEN_COVERAGE_LIST;
 	public transient SimpleIntegerProperty			Z3_SOLVE_TIMEOUT;
+	public transient SimpleBooleanProperty			Z3_SOlVER_ENABLE;
 
 	public transient SimpleBooleanProperty				CPP_LOG_ERROR_DIRECTIVE;
 	public transient SimpleListProperty<String>			CPP_CEXTENSION;
@@ -105,6 +106,7 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 		CPP_SIZE_LONGLONG = new SimpleIntegerProperty(8);
 
 		Z3_SOLVE_TIMEOUT = new SimpleIntegerProperty(30000);
+		Z3_SOlVER_ENABLE = new SimpleBooleanProperty(true);
 	}
 
 	@Override
@@ -202,6 +204,12 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 		return Z3_SOLVE_TIMEOUT.get();
 	}
 
+	@Override
+	public boolean enableZ3Solver()
+	{
+		return Z3_SOlVER_ENABLE.get();
+	}
+
 	/**
 	 * Save setting data to file
 	 * 
@@ -261,6 +269,7 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 		s.writeInt(CPP_SIZE_LONGLONG.get());
 
 		s.writeInt(Z3_SOLVE_TIMEOUT.get());
+		s.writeBoolean(Z3_SOlVER_ENABLE.get());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -292,6 +301,7 @@ public class Setting implements Serializable, ICppLoaderConfig, ICppGenTestConfi
 			CPP_SIZE_LONGLONG.set(s.readInt());
 
 			Z3_SOLVE_TIMEOUT.set(s.readInt());
+			Z3_SOlVER_ENABLE.set(s.readBoolean());
 		} catch (Exception e) {
 			// No throw later
 		}

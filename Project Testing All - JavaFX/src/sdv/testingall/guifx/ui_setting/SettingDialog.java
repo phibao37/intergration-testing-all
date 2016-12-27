@@ -41,8 +41,10 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.StackPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import sdv.testingall.cdt.gentestdata.solver.CppZ3SolverFactory;
 import sdv.testingall.core.testreport.Coverage;
 import sdv.testingall.guifx.GUIUtil;
 import sdv.testingall.guifx.ImageSet;
@@ -76,12 +78,16 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 	private @FXML Spinner<Integer>	entry_cpp_size_int;
 	private @FXML Spinner<Integer>	entry_cpp_size_long;
 	private @FXML Spinner<Integer>	entry_cpp_size_longlong;
+	private @FXML CheckBox			entry_z3solver_enable;
 
 	private @FXML CheckBox	cover_statement;
 	private @FXML CheckBox	cover_branch;
 	private @FXML CheckBox	cover_subcondition;
 	private @FXML Label		toggle_restart;
 	private @FXML Accordion	acc_cpp;
+	private @FXML StackPane	prompt_z3_info;
+	private @FXML Label		prompt_z3_notfound;
+	private @FXML Label		prompt_z3_found;
 
 	private DirectoryChooser cppHeaderChooser;
 
@@ -229,6 +235,15 @@ public class SettingDialog extends Dialog<ButtonType> implements Initializable {
 					sizevalueFactory.setValue(oldValue);
 				}
 			});
+		}
+
+		entry_z3solver_enable.selectedProperty().bindBidirectional(setting.Z3_SOlVER_ENABLE);
+		prompt_z3_info.disableProperty().bind(entry_z3solver_enable.selectedProperty().not());
+		if (CppZ3SolverFactory.Z3_AVAILABE) {
+			prompt_z3_notfound.setVisible(false);
+			prompt_z3_found.setText(prompt_z3_found.getText() + com.microsoft.z3.Version.getString());
+		} else {
+			prompt_z3_found.setVisible(false);
 		}
 	}
 

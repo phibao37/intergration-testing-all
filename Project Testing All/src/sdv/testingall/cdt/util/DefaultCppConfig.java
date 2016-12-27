@@ -164,4 +164,10 @@ public class DefaultCppConfig implements ICppLoaderConfig, ICppGenTestConfig {
 	{
 		return 30000;
 	}
+
+	@Override
+	public boolean enableZ3Solver()
+	{
+		return true;
+	}
 }

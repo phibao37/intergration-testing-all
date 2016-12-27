@@ -19,6 +19,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
 <DialogPane prefHeight="380.0" prefWidth="550.0" stylesheets="@SettingDialog.css" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
@@ -146,6 +147,31 @@
 						</Accordion>
 					</content>
 				</Tab>
+            <Tab text="%tab.solver">
+               <content>
+                  <GridPane alignment="TOP_CENTER" styleClass="grid-pane">
+                    <columnConstraints>
+						<ColumnConstraints minWidth="10.0" prefWidth="100.0" />
+						<ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
+					</columnConstraints>
+					<rowConstraints>
+						<RowConstraints minHeight="10.0" prefHeight="25.0" />
+						<RowConstraints minHeight="10.0" prefHeight="25.0" />
+						<RowConstraints minHeight="10.0" />
+					</rowConstraints>
+                     <children>
+                        <Label styleClass="font-bold" text="%key.solver.z3" GridPane.columnSpan="2" />
+                        <CheckBox fx:id="entry_z3solver_enable" mnemonicParsing="false" text="%key.solver.enable" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                        <StackPane fx:id="prompt_z3_info" alignment="TOP_LEFT" GridPane.columnSpan="2" GridPane.rowIndex="2">
+                           <children>
+                              <Label fx:id="prompt_z3_notfound" text="%prompt.z3solver.notfound" wrapText="true" />
+                              <Label fx:id="prompt_z3_found" text="%prompt.z3solver.found" wrapText="true" />
+                           </children>
+                        </StackPane>
+                     </children>
+                  </GridPane>
+               </content>
+            </Tab>
 				<Tab text="%tab.graphic">
 					<content>
 						<GridPane alignment="TOP_CENTER" styleClass="grid-pane">
