@@ -41,6 +41,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import javafx.util.Pair;
+import sdv.testingall.cdt.expression.CppConverter;
 import sdv.testingall.cdt.expression.CppNameExpression;
 import sdv.testingall.cdt.node.ComplexTypeNode;
 import sdv.testingall.cdt.node.CppFileNode;
@@ -210,7 +211,7 @@ public class TranslationUnitParser extends ASTVisitor {
 						decNode = var;
 
 						if (dector.getInitializer() != null) {
-							// TODO var.setValue(parseInitialer(dector.getInitializer()));
+							var.setValue(parseInitialer(dector.getInitializer()));
 						}
 					}
 				}
@@ -331,9 +332,9 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            the initialer
 	 * @return expression
 	 */
-	static @Nullable IExpression parseInitialer(IASTInitializer init)
+	static IExpression parseInitialer(IASTInitializer init)
 	{
-		return null;
+		return CppConverter.convert(init);
 	}
 
 	@Override
