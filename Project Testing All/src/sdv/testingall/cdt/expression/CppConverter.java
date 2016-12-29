@@ -10,6 +10,7 @@ import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
 import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
+import org.eclipse.cdt.core.dom.ast.IASTEqualsInitializer;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
@@ -76,6 +77,11 @@ public class CppConverter {
 			}
 
 			return new DeclareExpression(type, decList);
+		}
+
+		// Initialize with equals
+		else if (node instanceof IASTEqualsInitializer) {
+			return convert(((IASTEqualsInitializer) node).getInitializerClause());
 		}
 
 		// Convert Id to name

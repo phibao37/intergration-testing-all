@@ -72,7 +72,7 @@ public abstract class ExpressionGroup extends Expression implements IExpressionG
 		ExpressionGroup cloned = (ExpressionGroup) super.clone();
 
 		// Deep clone child expression
-		cloned.childs = new IExpression[childs.length];
+		cloned.childs = cloned.childs.clone();
 		for (int i = 0; i < childs.length; i++) {
 			if (childs[i] != null) {
 				cloned.childs[i] = childs[i].clone();

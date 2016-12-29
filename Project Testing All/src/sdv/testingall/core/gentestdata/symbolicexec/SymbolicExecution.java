@@ -8,6 +8,8 @@ package sdv.testingall.core.gentestdata.symbolicexec;
 
 import sdv.testingall.core.expression.ExpressionVisitor;
 import sdv.testingall.core.expression.IBinaryExpression;
+import sdv.testingall.core.expression.IDeclareExpression;
+import sdv.testingall.core.expression.IDeclareExpression.IDeclarator;
 import sdv.testingall.core.expression.IExpression;
 import sdv.testingall.core.expression.IExpressionFactory;
 import sdv.testingall.core.expression.INameExpression;
@@ -24,6 +26,7 @@ import sdv.testingall.core.statement.IConditionStatement;
 import sdv.testingall.core.statement.IScopeStatement;
 import sdv.testingall.core.statement.IStatement;
 import sdv.testingall.core.statement.ITestPath;
+import sdv.testingall.core.type.IType;
 
 /**
  * Implementation for symbolic execution. The test path obtained from function will be parsed, each statement inside
@@ -151,6 +154,22 @@ public abstract class SymbolicExecution extends ExpressionVisitor implements ISy
 		// Replace in super group
 		// call(a = b + 1) --> call(a)
 		rootGroup.replaceChild(assign, left);
+	}
+
+	@Override
+	public void leave(IDeclareExpression declare)
+	{
+		IType type = declare.getType();
+
+		for (IDeclarator dec : declare.getDeclarators()) {
+			INameExpression name = dec.getName();
+			IVariable var = new Variable(name.getName(), type);
+			varTable.addVariable(var);
+
+			if (dec.getValue() != null) {
+				handleAssignment(createBinary(name, IBinaryExpression.ASSIGN, dec.getValue()));
+			}
+		}
 	}
 
 	@Override
