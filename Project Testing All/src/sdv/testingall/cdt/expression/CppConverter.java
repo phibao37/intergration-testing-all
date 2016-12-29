@@ -7,18 +7,27 @@
 package sdv.testingall.cdt.expression;
 
 import org.eclipse.cdt.core.dom.ast.IASTBinaryExpression;
+import org.eclipse.cdt.core.dom.ast.IASTDeclSpecifier;
 import org.eclipse.cdt.core.dom.ast.IASTDeclarationStatement;
+import org.eclipse.cdt.core.dom.ast.IASTDeclarator;
 import org.eclipse.cdt.core.dom.ast.IASTExpressionStatement;
 import org.eclipse.cdt.core.dom.ast.IASTIdExpression;
 import org.eclipse.cdt.core.dom.ast.IASTLiteralExpression;
 import org.eclipse.cdt.core.dom.ast.IASTName;
 import org.eclipse.cdt.core.dom.ast.IASTNode;
 import org.eclipse.cdt.core.dom.ast.IASTReturnStatement;
+import org.eclipse.cdt.core.dom.ast.IASTSimpleDeclaration;
 import org.eclipse.cdt.core.dom.ast.IASTUnaryExpression;
 import org.eclipse.cdt.internal.core.model.ASTStringUtil;
 
+import sdv.testingall.cdt.loader.TranslationUnitParser;
+import sdv.testingall.cdt.type.CppTypeModifier;
+import sdv.testingall.core.expression.DeclareExpression;
+import sdv.testingall.core.expression.IDeclareExpression.IDeclarator;
 import sdv.testingall.core.expression.IExpression;
+import sdv.testingall.core.expression.INameExpression;
 import sdv.testingall.core.expression.ReturnExpression;
+import sdv.testingall.core.type.IType;
 
 /**
  * Convert AST expression to core expression
@@ -40,7 +49,33 @@ public class CppConverter {
 	{
 		// Declaration statement
 		if (node instanceof IASTDeclarationStatement) {
-			//
+			return convert(((IASTDeclarationStatement) node).getDeclaration());
+		}
+
+		// Variable declaration
+		else if (node instanceof IASTSimpleDeclaration) {
+			IASTSimpleDeclaration astDec = (IASTSimpleDeclaration) node;
+			IASTDeclSpecifier decType = astDec.getDeclSpecifier();
+			CppTypeModifier mdf = TranslationUnitParser.parseBaseModifier(decType);
+			IType type = TranslationUnitParser.parseInlineType(decType, mdf);
+			IASTDeclarator[] astDecList = astDec.getDeclarators();
+			IDeclarator[] decList = new IDeclarator[astDecList.length];
+			int iter = 0;
+
+			for (IASTDeclarator astDector : astDecList) {
+				CppTypeModifier mdfClone = mdf.clone();
+				TranslationUnitParser.parseDeclaratorModifier(mdfClone, astDector);
+				INameExpression decName = (INameExpression) convert(astDector.getName());
+				IExpression decValue = null;
+
+				if (astDector.getInitializer() != null) {
+					decValue = convert(astDector.getInitializer());
+				}
+
+				decList[iter++] = new CppDeclarator(decName, decValue, mdfClone);
+			}
+
+			return new DeclareExpression(type, decList);
 		}
 
 		// Convert Id to name

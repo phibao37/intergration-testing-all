@@ -244,7 +244,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            base modifier attached to the type
 	 * @return parsed type, or <code>null</code> if this is a enum/composite type
 	 */
-	static @Nullable IType parseInlineType(IASTDeclSpecifier decType, ITypeModifier mdf)
+	public static @Nullable IType parseInlineType(IASTDeclSpecifier decType, ITypeModifier mdf)
 	{
 		if (decType instanceof IASTSimpleDeclSpecifier) {
 			return new CppBasicType((IASTSimpleDeclSpecifier) decType, mdf);
@@ -290,7 +290,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            AST type to parse
 	 * @return base modifier
 	 */
-	static CppTypeModifier parseBaseModifier(IASTDeclSpecifier decType)
+	public static CppTypeModifier parseBaseModifier(IASTDeclSpecifier decType)
 	{
 		CppTypeModifier mdf = new CppTypeModifier();
 		mdf.setConst(decType.isConst());
@@ -307,7 +307,7 @@ public class TranslationUnitParser extends ASTVisitor {
 	 *            the declarator node
 	 * @return the modifier (same as <code>mdf</code>)
 	 */
-	static CppTypeModifier parseDeclaratorModifier(CppTypeModifier mdf, IASTDeclarator dec)
+	public static CppTypeModifier parseDeclaratorModifier(CppTypeModifier mdf, IASTDeclarator dec)
 	{
 		int pointerLevel = 0;
 		for (IASTPointerOperator pointer : dec.getPointerOperators()) {
