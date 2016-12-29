@@ -6,6 +6,8 @@
  */
 package sdv.testingall.core.expression;
 
+import sdv.testingall.core.expression.IDeclareExpression.IDeclarator;
+
 /**
  * Visitor interface inside expression. The visitor will travel from outer most expression and go to each child. When an
  * expression is visited or leaved, corresponding handle will be trigger based on expression type
@@ -72,5 +74,13 @@ public interface IExpressionVisitor {
 	int visit(IUnsupportedTypeException type);
 
 	void leave(IUnsupportedTypeException type);
+
+	int visit(IDeclareExpression declare);
+
+	void leave(IDeclareExpression declare);
+
+	int visit(IDeclarator declarator);
+
+	void leave(IDeclarator declarator);
 
 }

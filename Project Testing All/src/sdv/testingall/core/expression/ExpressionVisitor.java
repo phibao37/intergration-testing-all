@@ -6,6 +6,7 @@
  */
 package sdv.testingall.core.expression;
 
+import sdv.testingall.core.expression.IDeclareExpression.IDeclarator;
 import sdv.testingall.core.expression.IExpressionVisitor.IVisitorState;
 
 /**
@@ -97,6 +98,30 @@ public class ExpressionVisitor implements IExpressionVisitor, IVisitorState {
 
 	@Override
 	public void leave(IUnsupportedTypeException type)
+	{
+		// do nothing
+	}
+
+	@Override
+	public int visit(IDeclareExpression declare)
+	{
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(IDeclareExpression declare)
+	{
+		// do nothing
+	}
+
+	@Override
+	public int visit(IDeclarator declarator)
+	{
+		return PROCESS_CONTINUE;
+	}
+
+	@Override
+	public void leave(IDeclarator declarator)
 	{
 		// do nothing
 	}
